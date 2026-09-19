@@ -415,8 +415,11 @@ Public MustInherit Class DocumentTranslateService
     ''' </summary>
     Protected Async Function SendHttpRequestAsync(apiUrl As String, apiKey As String, requestBody As String) As Task(Of String)
         ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-        Dim client = HttpClientPool.GetClient(apiUrl)
-        Using request As New HttpRequestMessage(HttpMethod.Post, apiUrl)
+        ' Пользовательский адрес может быть базовым (например, https://routerai.ru/api/v1);
+        ' приводим его к полному OpenAI-совместимому endpoint, иначе перевод падает с 404/405.
+        Dim chatUrl = HttpClientFactory.ResolveChatCompletionsUrl(apiUrl)
+        Dim client = HttpClientPool.GetClient(chatUrl)
+        Using request As New HttpRequestMessage(HttpMethod.Post, chatUrl)
             request.Headers.Authorization = New System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey)
             request.Content = New StringContent(requestBody, Encoding.UTF8, "application/json")
 

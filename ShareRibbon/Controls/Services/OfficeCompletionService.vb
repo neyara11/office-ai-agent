@@ -175,12 +175,13 @@ Public Class OfficeCompletionService
             messages.Add(New JObject() From {{"role", "user"}, {"content", $"Дополни следующий текст (верни только продолжение, не повторяй исходный текст):{vbCrLf}{inputText}"}})
             requestObj("messages") = messages
             
-            ' 使用按服务商配置的 HttpClient
-            Dim request As New HttpRequestMessage(HttpMethod.Post, cfg.url)
+            ' 使用按服务商配置的 HttpClient; адрес может быть базовым, приводим к endpoint чата
+            Dim chatUrl = HttpClientFactory.ResolveChatCompletionsUrl(cfg.url)
+            Dim request As New HttpRequestMessage(HttpMethod.Post, chatUrl)
             request.Headers.Add("Authorization", "Bearer " & apiKey)
             request.Content = New StringContent(requestObj.ToString(), Encoding.UTF8, "application/json")
             
-            Dim response = Await HttpClientPool.GetClient(cfg.url, TimeSpan.FromSeconds(8)).SendAsync(request, token)
+            Dim response = Await HttpClientPool.GetClient(chatUrl, TimeSpan.FromSeconds(8)).SendAsync(request, token)
             response.EnsureSuccessStatusCode()
             
             Dim responseBody = Await response.Content.ReadAsStringAsync()

@@ -262,6 +262,17 @@ Public Class PowerPointDocumentTranslateService
 
             For Each slideIdx In slideIndices
                 Try
+                    Dim slideItems = slideResults(slideIdx)
+
+                    ' Не создаём копию слайда, если для него нет ни одного успешного перевода:
+                    ' иначе при ошибке API получаются бессмысленные копии без перевода.
+                    Dim hasTranslation = slideItems.Any(Function(pair)
+                        Return pair.Item2 IsNot Nothing AndAlso
+                               pair.Item2.Success AndAlso
+                               Not String.IsNullOrWhiteSpace(pair.Item2.TranslatedText)
+                    End Function)
+                    If Not hasTranslation Then Continue For
+
                     Dim originalSlide = _presentation.Slides(slideIdx)
 
                     ' 使用Duplicate方法完整复制幻灯片（包括所有背景格式）
@@ -315,7 +326,6 @@ Public Class PowerPointDocumentTranslateService
                     If newSlide Is Nothing Then Continue For
 
                     ' 在新幻灯片上替换为译文
-                    Dim slideItems = slideResults(slideIdx)
                     ApplyTranslationToSlide(newSlide, slideItems, settings)
                 Catch ex As Exception
                     Debug.WriteLine($"处理幻灯片 {slideIdx} 时出错: {ex.Message}")
@@ -338,44 +348,62 @@ Public Class PowerPointDocumentTranslateService
             CollectTextItemsFromShape(shape, slide.SlideIndex, shapeIdx, newTextItems)
         Next
 
-        ' 按原始顺序匹配并替换
-        Dim matchIndex = 0
+        ' Сопоставляем блоки копии с оригиналами по тексту (порядок дубликата совпадает,
+        ' но привязка по содержимому надёжнее), с последовательным fallback.
+        Dim used As New HashSet(Of Integer)()
         For Each itemPair In items
             Dim originalItem = itemPair.Item1
             Dim result = itemPair.Item2
 
-            If result.Success AndAlso Not String.IsNullOrWhiteSpace(result.TranslatedText) Then
-                ' 尝试在新幻灯片上找到对应的文本框
-                If matchIndex < newTextItems.Count Then
-                    Dim newItem = newTextItems(matchIndex)
-                    Try
-                        If newItem.Shape IsNot Nothing AndAlso newItem.Shape.HasTextFrame Then
-                            newItem.Shape.TextFrame.TextRange.Text = result.TranslatedText
+            If result Is Nothing OrElse Not result.Success OrElse String.IsNullOrWhiteSpace(result.TranslatedText) Then Continue For
+            If originalItem Is Nothing Then Continue For
 
-                            ' 如果不保持原文格式，设置自定义样式
-                            If Not settings.PreserveFormatting Then
-                                Dim textRange = newItem.Shape.TextFrame.TextRange
-                                Try
-                                    Dim colorHex = settings.ImmersiveTranslationColor.TrimStart("#"c)
-                                    If colorHex.Length >= 6 Then
-                                        Dim r = Convert.ToInt32(colorHex.Substring(0, 2), 16)
-                                        Dim g = Convert.ToInt32(colorHex.Substring(2, 2), 16)
-                                        Dim b = Convert.ToInt32(colorHex.Substring(4, 2), 16)
-                                        textRange.Font.Color.RGB = RGB(r, g, b)
-                                    End If
-                                Catch
-                                End Try
-
-                                If settings.ImmersiveTranslationItalic Then
-                                    textRange.Font.Italic = Microsoft.Office.Core.MsoTriState.msoTrue
-                                End If
-                            End If
-                        End If
-                    Catch
-                    End Try
+            Dim newItem As SlideTextItem = Nothing
+            For i = 0 To newTextItems.Count - 1
+                If used.Contains(i) Then Continue For
+                If String.Equals(newTextItems(i).Text, originalItem.Text, StringComparison.Ordinal) Then
+                    newItem = newTextItems(i)
+                    used.Add(i)
+                    Exit For
                 End If
+            Next
+
+            If newItem Is Nothing Then
+                For i = 0 To newTextItems.Count - 1
+                    If used.Contains(i) Then Continue For
+                    newItem = newTextItems(i)
+                    used.Add(i)
+                    Exit For
+                Next
             End If
-            matchIndex += 1
+
+            If newItem Is Nothing Then Continue For
+
+            Try
+                If newItem.Shape IsNot Nothing AndAlso newItem.Shape.HasTextFrame Then
+                    newItem.Shape.TextFrame.TextRange.Text = result.TranslatedText
+
+                    ' Если не сохраняем формат оригинала, применяем свой стиль перевода
+                    If Not settings.PreserveFormatting Then
+                        Dim textRange = newItem.Shape.TextFrame.TextRange
+                        Try
+                            Dim colorHex = settings.ImmersiveTranslationColor.TrimStart("#"c)
+                            If colorHex.Length >= 6 Then
+                                Dim r = Convert.ToInt32(colorHex.Substring(0, 2), 16)
+                                Dim g = Convert.ToInt32(colorHex.Substring(2, 2), 16)
+                                Dim b = Convert.ToInt32(colorHex.Substring(4, 2), 16)
+                                textRange.Font.Color.RGB = RGB(r, g, b)
+                            End If
+                        Catch
+                        End Try
+
+                        If settings.ImmersiveTranslationItalic Then
+                            textRange.Font.Italic = Microsoft.Office.Core.MsoTriState.msoTrue
+                        End If
+                    End If
+                End If
+            Catch
+            End Try
         Next
     End Sub
 

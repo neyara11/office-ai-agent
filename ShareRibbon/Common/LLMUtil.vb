@@ -91,13 +91,16 @@ Public Class LLMUtil
 
     Public Shared Async Function SendHttpRequest(apiUrl As String, apiKey As String, requestBody As String) As Task(Of String)
         Try
-            Debug.WriteLine($"开始发送HTTP请求到: {apiUrl}")
+            ' Адрес может быть базовым (например, https://routerai.ru/api/v1);
+            ' приводим его к полному OpenAI-совместимому endpoint чата.
+            Dim chatUrl = HttpClientFactory.ResolveChatCompletionsUrl(apiUrl)
+            Debug.WriteLine($"开始发送HTTP请求到: {chatUrl}")
             Debug.WriteLine($"请求头Authorization: Bearer {apiKey.Substring(0, Math.Min(10, apiKey.Length))}...")
             Debug.WriteLine($"请求体长度: {requestBody.Length}")
 
             ' 交由系统策略选择 TLS 版本，并按服务商配置决定是否接受自签名证书
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-            Dim handler = HttpClientFactory.CreateHandler(apiUrl)
+            Dim handler = HttpClientFactory.CreateHandler(chatUrl)
 
             Using client As New HttpClient(handler)
                 client.Timeout = TimeSpan.FromSeconds(120) ' 设置超时时间为 120 秒
@@ -106,7 +109,7 @@ Public Class LLMUtil
                 Dim content As New StringContent(requestBody, Encoding.UTF8, "application/json")
                 Debug.WriteLine("正在发送POST请求...")
 
-                Dim response As HttpResponseMessage = Await client.PostAsync(apiUrl, content)
+                Dim response As HttpResponseMessage = Await client.PostAsync(chatUrl, content)
 
                 Debug.WriteLine($"HTTP响应状态码: {response.StatusCode}")
                 Debug.WriteLine($"HTTP响应原因: {response.ReasonPhrase}")

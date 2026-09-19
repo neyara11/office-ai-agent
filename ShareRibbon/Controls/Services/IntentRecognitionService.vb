@@ -632,7 +632,7 @@ Public Class IntentRecognitionService
             Dim selectedModel = cfg.model.FirstOrDefault(Function(m) m.selected)
             If selectedModel Is Nothing Then selectedModel = cfg.model(0)
 
-            Dim apiUrl = cfg.url
+            Dim apiUrl = HttpClientFactory.ResolveChatCompletionsUrl(cfg.url)
             Dim apiKey = cfg.key
             Dim modelName = selectedModel.modelName
 
@@ -1347,7 +1347,7 @@ Public Class IntentRecognitionService
             Dim selectedModel = cfg.model.FirstOrDefault(Function(m) m.selected)
             If selectedModel Is Nothing Then selectedModel = cfg.model(0)
 
-            Dim apiUrl = cfg.url
+            Dim apiUrl = HttpClientFactory.ResolveChatCompletionsUrl(cfg.url)
             Dim apiKey = cfg.key
             Dim modelName = selectedModel.modelName
 

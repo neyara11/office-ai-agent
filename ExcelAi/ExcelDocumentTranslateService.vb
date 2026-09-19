@@ -335,9 +335,12 @@ Public Class ExcelDocumentTranslateService
     ''' 发送HTTP请求
     ''' </summary>
     Private Async Function SendHttpRequestAsync(apiUrl As String, apiKey As String, requestBody As String) As Task(Of String)
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
-        Dim client = HttpClientPool.GetClient(apiUrl)
-        Using request As New HttpRequestMessage(HttpMethod.Post, apiUrl)
+        ' SystemDefault недопустим на .NET Framework 4.7.2 (Schannel выбирает TLS 1.3 и запрос падает)
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+        ' Пользовательский адрес может быть базовым; приводим его к полному endpoint чата.
+        Dim chatUrl = ShareRibbon.HttpClientFactory.ResolveChatCompletionsUrl(apiUrl)
+        Dim client = HttpClientPool.GetClient(chatUrl)
+        Using request As New HttpRequestMessage(HttpMethod.Post, chatUrl)
             request.Headers.Authorization = New System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey)
             request.Content = New StringContent(requestBody, Encoding.UTF8, "application/json")
 

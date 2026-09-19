@@ -118,7 +118,7 @@ Public Class AutocompleteService
             Dim selectedModel = cfg.model.FirstOrDefault(Function(m) m.selected)
             If selectedModel Is Nothing Then selectedModel = cfg.model(0)
 
-            Dim apiUrl = cfg.url
+            Dim apiUrl = HttpClientFactory.ResolveChatCompletionsUrl(cfg.url)
             Dim apiKey = cfg.key
 
             Dim useFimMode = selectedModel.fimSupported AndAlso Not String.IsNullOrEmpty(selectedModel.fimUrl)
@@ -183,7 +183,7 @@ Public Class AutocompleteService
                                                        apiKey As String) As Task(Of List(Of String))
         Dim completions As New List(Of String)()
         Try
-            Dim apiUrl = cfg.url
+            Dim apiUrl = HttpClientFactory.ResolveChatCompletionsUrl(cfg.url)
             Dim modelName = model.modelName
             Dim appType = If(contextSnapshot("appType")?.ToString(), "Office")
             Dim selectionText = If(contextSnapshot("selection")?.ToString(), "")
