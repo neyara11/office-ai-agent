@@ -92,6 +92,8 @@ Partial Class BaseOfficeRibbon
         Me.GroupDeepseek.Items.Add(Me.DoubaoButton)
         Me.GroupDeepseek.Label = "Бесплатные сервисы"
         Me.GroupDeepseek.Name = "GroupDeepseek"
+        ' Закрытый контур: внешние веб-панели DeepSeek/Doubao недоступны без интернета
+        Me.GroupDeepseek.Visible = False
 
         Me.DeepseekButton.Label = "Deepseek"
         Me.DeepseekButton.Name = "DeepseekButton"
