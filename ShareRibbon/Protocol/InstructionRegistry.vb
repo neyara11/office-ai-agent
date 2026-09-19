@@ -23,8 +23,8 @@ Public Class InstructionRegistry
         Register("setParagraphStyle", New InstructionDefinition With {
             .Operation = "setParagraphStyle",
             .Category = "reformat",
-            .DisplayName = "设置段落样式",
-            .Description = "设置段落的样式名称、字体、对齐方式、行距等",
+            .DisplayName = "Настроить стиль абзаца",
+            .Description = "Задать имя стиля, шрифт, выравнивание, межстрочный интервал и другое для абзаца",
             .RequiredParams = New List(Of String) From {"target"},
             .OptionalParams = New List(Of String) From {"params.styleName", "params.font", "params.alignment", "params.spacing", "params.indent", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -52,8 +52,8 @@ Public Class InstructionRegistry
         Register("setCharacterFormat", New InstructionDefinition With {
             .Operation = "setCharacterFormat",
             .Category = "reformat",
-            .DisplayName = "设置字符格式",
-            .Description = "设置选定文本的字符格式（字体、颜色、粗体等）",
+            .DisplayName = "Настроить формат символов",
+            .Description = "Задать формат символов выделенного текста (шрифт, цвет, полужирный и другое)",
             .RequiredParams = New List(Of String) From {"target"},
             .OptionalParams = New List(Of String) From {"params.font", "params.color", "params.bold", "params.italic", "params.underline", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -73,8 +73,8 @@ Public Class InstructionRegistry
         Register("insertTable", New InstructionDefinition With {
             .Operation = "insertTable",
             .Category = "reformat",
-            .DisplayName = "插入表格",
-            .Description = "在指定位置插入表格",
+            .DisplayName = "Вставить таблицу",
+            .Description = "Вставить таблицу в указанную позицию",
             .RequiredParams = New List(Of String) From {"target", "params.rows", "params.cols"},
             .OptionalParams = New List(Of String) From {"params.style", "params.data", "params.headerRow", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -92,8 +92,8 @@ Public Class InstructionRegistry
         Register("formatTable", New InstructionDefinition With {
             .Operation = "formatTable",
             .Category = "reformat",
-            .DisplayName = "格式化表格",
-            .Description = "格式化已有表格的样式、边框等",
+            .DisplayName = "Форматировать таблицу",
+            .Description = "Форматировать стиль, границы и другое у существующей таблицы",
             .RequiredParams = New List(Of String) From {"target"},
             .OptionalParams = New List(Of String) From {"params.style", "params.borders", "params.headerRow", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -111,8 +111,8 @@ Public Class InstructionRegistry
         Register("setPageSetup", New InstructionDefinition With {
             .Operation = "setPageSetup",
             .Category = "reformat",
-            .DisplayName = "页面设置",
-            .Description = "设置页面边距、方向、纸张大小",
+            .DisplayName = "Параметры страницы",
+            .Description = "Задать поля страницы, ориентацию и размер бумаги",
             .RequiredParams = New List(Of String) From {},
             .OptionalParams = New List(Of String) From {"params.margins", "params.orientation", "params.paperSize", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -130,8 +130,8 @@ Public Class InstructionRegistry
         Register("insertBreak", New InstructionDefinition With {
             .Operation = "insertBreak",
             .Category = "reformat",
-            .DisplayName = "插入分隔符",
-            .Description = "插入分页符、分节符或换行符",
+            .DisplayName = "Вставить разделитель",
+            .Description = "Вставить разрыв страницы, разрыв раздела или разрыв строки",
             .RequiredParams = New List(Of String) From {"params.type"},
             .OptionalParams = New List(Of String) From {"target", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -146,8 +146,8 @@ Public Class InstructionRegistry
         Register("applyListFormat", New InstructionDefinition With {
             .Operation = "applyListFormat",
             .Category = "reformat",
-            .DisplayName = "应用列表格式",
-            .Description = "将段落设置为列表（项目符号或编号）",
+            .DisplayName = "Применить формат списка",
+            .Description = "Преобразовать абзацы в список (маркированный или нумерованный)",
             .RequiredParams = New List(Of String) From {"target"},
             .OptionalParams = New List(Of String) From {"params.listType", "params.numberFormat", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -162,8 +162,8 @@ Public Class InstructionRegistry
         Register("setColumnFormat", New InstructionDefinition With {
             .Operation = "setColumnFormat",
             .Category = "reformat",
-            .DisplayName = "分栏设置",
-            .Description = "设置文档分栏",
+            .DisplayName = "Настройка колонок",
+            .Description = "Настроить колонки документа",
             .RequiredParams = New List(Of String) From {"params.columnCount"},
             .OptionalParams = New List(Of String) From {"params.columnWidth", "params.separator", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -178,8 +178,8 @@ Public Class InstructionRegistry
         Register("insertHeaderFooter", New InstructionDefinition With {
             .Operation = "insertHeaderFooter",
             .Category = "reformat",
-            .DisplayName = "插入页眉页脚",
-            .Description = "插入或修改页眉页脚内容",
+            .DisplayName = "Вставить колонтитулы",
+            .Description = "Вставить или изменить содержимое верхнего либо нижнего колонтитула",
             .RequiredParams = New List(Of String) From {"params.type", "params.content"},
             .OptionalParams = New List(Of String) From {"params.alignment", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -194,8 +194,8 @@ Public Class InstructionRegistry
         Register("generateToc", New InstructionDefinition With {
             .Operation = "generateToc",
             .Category = "reformat",
-            .DisplayName = "生成目录",
-            .Description = "自动生成文档目录",
+            .DisplayName = "Создать оглавление",
+            .Description = "Автоматически создать оглавление документа",
             .RequiredParams = New List(Of String) From {},
             .OptionalParams = New List(Of String) From {"target.position", "params.levels", "params.includePageNumbers", "expected", "rollback"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -212,8 +212,8 @@ Public Class InstructionRegistry
         Register("suggestCorrection", New InstructionDefinition With {
             .Operation = "suggestCorrection",
             .Category = "proofread",
-            .DisplayName = "建议修正",
-            .Description = "建议将原文修正为新的文本",
+            .DisplayName = "Предложить исправление",
+            .Description = "Предложить заменить исходный текст на новый",
             .RequiredParams = New List(Of String) From {"target", "params.original", "params.suggestion"},
             .OptionalParams = New List(Of String) From {"params.issueType", "params.severity", "params.explanation", "expected"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -233,8 +233,8 @@ Public Class InstructionRegistry
         Register("suggestFormatFix", New InstructionDefinition With {
             .Operation = "suggestFormatFix",
             .Category = "proofread",
-            .DisplayName = "建议格式修正",
-            .Description = "建议修正格式问题",
+            .DisplayName = "Предложить исправление формата",
+            .Description = "Предложить исправление проблем форматирования",
             .RequiredParams = New List(Of String) From {"target"},
             .OptionalParams = New List(Of String) From {"params.currentFormat", "params.expectedFormat", "params.explanation", "expected"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -251,8 +251,8 @@ Public Class InstructionRegistry
         Register("suggestStyleUnify", New InstructionDefinition With {
             .Operation = "suggestStyleUnify",
             .Category = "proofread",
-            .DisplayName = "建议样式统一",
-            .Description = "建议将不一致的样式统一",
+            .DisplayName = "Предложить унификацию стилей",
+            .Description = "Предложить унифицировать несогласованные стили",
             .RequiredParams = New List(Of String) From {"params.targetStyle", "params.inconsistentRanges"},
             .OptionalParams = New List(Of String) From {"params.expectedStyle", "expected"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -268,8 +268,8 @@ Public Class InstructionRegistry
         Register("markForReview", New InstructionDefinition With {
             .Operation = "markForReview",
             .Category = "proofread",
-            .DisplayName = "标记待审核",
-            .Description = "标记某处内容供用户审核",
+            .DisplayName = "Пометить для проверки",
+            .Description = "Пометить фрагмент содержимого для проверки пользователем",
             .RequiredParams = New List(Of String) From {"target"},
             .OptionalParams = New List(Of String) From {"params.note", "params.category", "expected"},
             .ParamSchema = New Dictionary(Of String, ParamType) From {
@@ -319,13 +319,13 @@ Public Class InstructionRegistry
 
         Dim key = operation.ToLower()
         If Not _registry.ContainsKey(key) Then
-            Return ParamValidationResult.Failure($"未知操作类型: {operation}")
+            Return ParamValidationResult.Failure($"Неизвестный тип операции: {operation}")
         End If
 
         Dim def = _registry(key)
 
         If params Is Nothing OrElse params.Type <> JTokenType.Object Then
-            Return ParamValidationResult.Failure("params必须是对象类型")
+            Return ParamValidationResult.Failure("params должен быть объектом")
         End If
 
         Dim paramsObj = CType(params, JObject)
@@ -334,7 +334,7 @@ Public Class InstructionRegistry
         For Each required In def.RequiredParams
             Dim token = paramsObj.SelectToken(required)
             If token Is Nothing OrElse token.Type = JTokenType.Null Then
-                Return ParamValidationResult.Failure($"缺少必需参数: {required}")
+                Return ParamValidationResult.Failure($"Отсутствует обязательный параметр: {required}")
             End If
         Next
 
@@ -343,7 +343,7 @@ Public Class InstructionRegistry
             Dim token = paramsObj.SelectToken(kvp.Key)
             If token IsNot Nothing AndAlso token.Type <> JTokenType.Null Then
                 If Not IsTokenTypeMatch(token, kvp.Value) Then
-                    Return ParamValidationResult.Failure($"参数 {kvp.Key} 类型不匹配，期望 {kvp.Value.BaseType}")
+                    Return ParamValidationResult.Failure($"Тип параметра {kvp.Key} не совпадает, ожидается {kvp.Value.BaseType}")
                 End If
             End If
         Next
