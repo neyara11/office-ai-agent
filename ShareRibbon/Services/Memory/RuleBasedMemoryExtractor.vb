@@ -54,12 +54,17 @@ Public Class RuleBasedMemoryExtractor
         Dim combined = (If(userText, "") & " " & If(assistantText, "") & " " & If(responseMode, "")).ToLowerInvariant()
 
         If combined.Contains("我希望") OrElse combined.Contains("以后") OrElse combined.Contains("默认") OrElse
-           combined.Contains("不要") OrElse combined.Contains("请记住") OrElse combined.Contains("偏好") Then
+           combined.Contains("不要") OrElse combined.Contains("请记住") OrElse combined.Contains("偏好") OrElse
+           combined.Contains("я хочу") OrElse combined.Contains("впредь") OrElse combined.Contains("по умолчанию") OrElse
+           combined.Contains("запомни") OrElse combined.Contains("предпочитаю") OrElse combined.Contains("предпочтение") OrElse
+           combined.Contains("не нужно") OrElse combined.Contains("не делай") OrElse combined.Contains("не использ") Then
             Return "preference"
         End If
 
         If combined.Contains("reformat") OrElse combined.Contains("排版") OrElse combined.Contains("格式") OrElse
-           combined.Contains("公文") OrElse combined.Contains("红头") OrElse combined.Contains("gb/t") Then
+           combined.Contains("公文") OrElse combined.Contains("红头") OrElse combined.Contains("gb/t") OrElse
+           combined.Contains("формат") OrElse combined.Contains("оформ") OrElse combined.Contains("стил") OrElse
+           combined.Contains("заголов") OrElse combined.Contains("шрифт") OrElse combined.Contains("стандарт") Then
             Return "format_rule"
         End If
 
@@ -83,13 +88,13 @@ Public Class RuleBasedMemoryExtractor
 
         Select Case memoryType
             Case "preference"
-                Return $"用户偏好/约束: {userPart}"
+                Return $"Предпочтение/ограничение пользователя: {userPart}"
             Case "format_rule"
-                Return $"排版相关上下文: 用户需求={userPart}; 处理结果={assistantPart}"
+                Return $"Контекст форматирования: запрос={userPart}; результат={assistantPart}"
             Case "solution"
-                Return $"问题: {userPart}{vbLf}解决方案: {assistantPart}"
+                Return $"Проблема: {userPart}{vbLf}Решение: {assistantPart}"
             Case Else
-                Return $"对话事实: 用户={userPart}; 助手={assistantPart}"
+                Return $"Факт диалога: пользователь={userPart}; ассистент={assistantPart}"
         End Select
     End Function
 

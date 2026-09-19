@@ -113,7 +113,7 @@ Public Class SemanticPromptBuilder
         End If
 
         ' ===== 7. 标注示例（按文档类型） =====
-        sb.AppendLine("【标注示例】")
+        sb.AppendLine("【Примеры разметки】")
         If scenario IsNot Nothing Then
             ' 使用场景的示例
             Dim examplesText = ScenarioManager.BuildExamplesText(scenario)

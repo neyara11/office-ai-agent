@@ -38,7 +38,7 @@ Namespace Agent.Harness
                     Return New HarnessRunResult With {
                         .RunId = runId,
                         .Status = HarnessRunStatus.Failed,
-                        .UserMessage = "当前会话已有正在执行或等待审批的任务",
+                        .UserMessage = "В текущей сессии уже есть выполняющаяся задача или задача, ожидающая подтверждения",
                         .DebugMessage = "RUN_ALREADY_ACTIVE",
                         .StartedAt = startedAt,
                         .FinishedAt = DateTime.Now
@@ -50,7 +50,7 @@ Namespace Agent.Harness
                 Return New HarnessRunResult With {
                     .RunId = runId,
                     .Status = HarnessRunStatus.Failed,
-                    .UserMessage = "用户请求为空",
+                    .UserMessage = "Запрос пользователя пуст",
                     .DebugMessage = "UserTurn is null",
                     .StartedAt = startedAt,
                     .FinishedAt = DateTime.Now
@@ -116,7 +116,7 @@ Namespace Agent.Harness
 
                 Dim succeeded = agentResult IsNot Nothing AndAlso agentResult.Success
                 Dim status = If(succeeded, HarnessRunStatus.Succeeded, HarnessRunStatus.Failed)
-                Dim message = If(agentResult?.Message, If(succeeded, "执行完成", "执行失败"))
+                Dim message = If(agentResult?.Message, If(succeeded, "Выполнено", "Не выполнено"))
 
                 RaisePhase(runId, If(succeeded, "completed", "failed"), message)
                 SafeCompleteRun(runId, If(succeeded, "succeeded", "failed"), message, If(succeeded, "", ExceptionClassifier.CodeUnknown), DateTime.Now)
@@ -131,11 +131,11 @@ Namespace Agent.Harness
                 }
             Catch ex As OperationCanceledException
                 RaisePhase(runId, "cancelled", "Harness run cancelled")
-                SafeCompleteRun(runId, "cancelled", "已取消", ExceptionClassifier.CodeCancelled, DateTime.Now)
+                SafeCompleteRun(runId, "cancelled", "Отменено", ExceptionClassifier.CodeCancelled, DateTime.Now)
                 Return New HarnessRunResult With {
                     .RunId = runId,
                     .Status = HarnessRunStatus.Cancelled,
-                    .UserMessage = "已取消",
+                    .UserMessage = "Отменено",
                     .DebugMessage = ex.Message,
                     .StartedAt = startedAt,
                     .FinishedAt = DateTime.Now
@@ -177,18 +177,18 @@ Namespace Agent.Harness
                                    -2,
                                    "approval.decision",
                                    If(approved, "approved", "rejected"),
-                                   If(approved, "用户已批准高风险操作", "用户已拒绝高风险操作"),
+                                   If(approved, "Пользователь одобрил операцию высокого риска", "Пользователь отклонил операцию высокого риска"),
                                    If(approved, "", ExceptionClassifier.CodeSafetyBlocked),
                                    New With {.approved = approved},
                                    DateTime.Now)
             callback(approved)
-            SafeSetRunStatus(runId, "running", If(approved, "审批通过，继续执行", "审批拒绝，正在收敛执行结果"), "")
+            SafeSetRunStatus(runId, "running", If(approved, "Согласовано, продолжаю выполнение", "Отклонено, завершаю выполнение"), "")
 
             Dim agentResult = Await pending.AgentTask
             pending.IsCompleted = True
             Dim succeeded = agentResult IsNot Nothing AndAlso agentResult.Success
             Dim status = If(succeeded, HarnessRunStatus.Succeeded, HarnessRunStatus.Failed)
-            Dim message = If(agentResult?.Message, If(succeeded, "执行完成", "执行失败"))
+            Dim message = If(agentResult?.Message, If(succeeded, "Выполнено", "Не выполнено"))
             SafeCompleteRun(runId, If(succeeded, "succeeded", "failed"), message, If(succeeded, "", ExceptionClassifier.CodeUnknown), DateTime.Now)
             RaisePhase(runId, If(succeeded, "completed", "failed"), message)
             RemovePendingRun(runId)
@@ -215,7 +215,7 @@ Namespace Agent.Harness
             Return New HarnessRunResult With {
                 .RunId = runId,
                 .Status = HarnessRunStatus.Failed,
-                .UserMessage = "当前步骤正在执行，尚不能安全中断宿主 COM 操作",
+                .UserMessage = "Текущий шаг выполняется; безопасно прервать операцию COM в хосте пока нельзя",
                 .DebugMessage = "CANCEL_NOT_AT_SAFE_POINT",
                 .StartedAt = pending.StartedAt,
                 .FinishedAt = DateTime.Now
@@ -245,7 +245,7 @@ Namespace Agent.Harness
         Private Sub HandleKernelPlanGenerated(plan As ExecutionPlan)
             If String.IsNullOrWhiteSpace(_currentRunId) Then Return
             Dim count = If(plan?.Steps?.Count, 0)
-            RaisePhase(_currentRunId, "planned", $"生成执行计划：{count} 步")
+            RaisePhase(_currentRunId, "planned", $"Формирование плана: {count} шагов")
         End Sub
 
         Private Sub HandleKernelExecutionExplained(explanation As ExecutionExplanation)
@@ -271,7 +271,7 @@ Namespace Agent.Harness
                 callback(False)
                 Return
             End If
-            pending.ApprovalMessage = If(message, "该操作需要用户确认")
+            pending.ApprovalMessage = If(message, "Эта операция требует подтверждения пользователем")
             pending.ApprovalCallback = callback
             SafeAppendApprovalStep(pending.RunId,
                                    -1,
@@ -326,7 +326,7 @@ Namespace Agent.Harness
             Return New HarnessRunResult With {
                 .RunId = If(runId, ""),
                 .Status = HarnessRunStatus.Failed,
-                .UserMessage = "未找到等待审批的任务",
+                .UserMessage = "Задача, ожидающая подтверждения, не найдена",
                 .DebugMessage = "RUN_NOT_AWAITING_APPROVAL",
                 .FinishedAt = DateTime.Now
             }

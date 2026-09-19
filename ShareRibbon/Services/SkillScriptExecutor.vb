@@ -114,12 +114,12 @@ Public Class SkillScriptExecutor
 
                 Case Else
                     result.Success = False
-                    result.ErrorMessage = $"不支持的脚本类型: {script.ScriptType}"
+                    result.ErrorMessage = $"Неподдерживаемый тип скрипта: {script.ScriptType}"
             End Select
 
         Catch ex As Exception
             result.Success = False
-            result.ErrorMessage = $"脚本执行异常: {ex.Message}"
+            result.ErrorMessage = $"Ошибка выполнения скрипта: {ex.Message}"
             result.StdErr = ex.ToString()
         End Try
 
@@ -143,7 +143,7 @@ Public Class SkillScriptExecutor
         Dim pythonPath = FindPython()
         If String.IsNullOrEmpty(pythonPath) Then
             result.Success = False
-            result.ErrorMessage = "未找到 Python 解释器，请确保已安装 Python 并添加到 PATH"
+            result.ErrorMessage = "Интерпретатор Python не найден; убедитесь, что Python установлен и добавлен в PATH"
             Return result
         End If
 
@@ -187,7 +187,7 @@ Public Class SkillScriptExecutor
                 result.Success = proc.ExitCode = 0
             Catch ex As Exception
                 result.Success = False
-                result.ErrorMessage = $"启动 Python 失败: {ex.Message}"
+                result.ErrorMessage = $"Не удалось запустить Python: {ex.Message}"
             End Try
         End Using
 
@@ -209,7 +209,7 @@ Public Class SkillScriptExecutor
         Dim psPath = FindPowerShell()
         If String.IsNullOrEmpty(psPath) Then
             result.Success = False
-            result.ErrorMessage = "未找到 PowerShell 解释器"
+            result.ErrorMessage = "Интерпретатор PowerShell не найден"
             Return result
         End If
 
@@ -253,7 +253,7 @@ Public Class SkillScriptExecutor
                 result.Success = proc.ExitCode = 0
             Catch ex As Exception
                 result.Success = False
-                result.ErrorMessage = $"启动 PowerShell 失败: {ex.Message}"
+                result.ErrorMessage = $"Не удалось запустить PowerShell: {ex.Message}"
             End Try
         End Using
 
@@ -275,7 +275,7 @@ Public Class SkillScriptExecutor
         Dim bashPath = FindBash()
         If String.IsNullOrEmpty(bashPath) Then
             result.Success = False
-            result.ErrorMessage = "未找到 Bash 解释器，请确保已安装 Git Bash 或 WSL"
+            result.ErrorMessage = "Интерпретатор Bash не найден; убедитесь, что установлен Git Bash или WSL"
             Return result
         End If
 
@@ -318,7 +318,7 @@ Public Class SkillScriptExecutor
                 result.Success = proc.ExitCode = 0
             Catch ex As Exception
                 result.Success = False
-                result.ErrorMessage = $"启动 Bash 失败: {ex.Message}"
+                result.ErrorMessage = $"Не удалось запустить Bash: {ex.Message}"
             End Try
         End Using
 
@@ -373,7 +373,7 @@ Public Class SkillScriptExecutor
                 result.Success = proc.ExitCode = 0
             Catch ex As Exception
                 result.Success = False
-                result.ErrorMessage = $"启动 Batch 失败: {ex.Message}"
+                result.ErrorMessage = $"Не удалось запустить Batch: {ex.Message}"
             End Try
         End Using
 
