@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Справка Office AI Agent</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 32px 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
+  header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  p, li { font-size: 14px; }
+  .apps { display: flex; gap: 16px; flex-wrap: wrap; margin: 20px 0 8px; }
+  .apps a { flex: 1 1 180px; display: block; padding: 18px 20px; border: 1px solid #d0d7de; border-radius: 10px; text-decoration: none; color: inherit; background: #f6f8fa; }
+  .apps a:hover { border-color: #0969da; }
+  .apps strong { display: block; font-size: 16px; margin-bottom: 4px; }
+  .apps span { font-size: 13px; color: #57606a; }
+  .note { background: #fff8c5; border: 1px solid #d4a72c; border-radius: 8px; padding: 12px 16px; font-size: 13px; }
+  code { background: #f0f1f3; padding: 1px 5px; border-radius: 4px; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e1e4e8; font-size: 12px; color: #57606a; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e6edf3; background: #0d1117; }
+    header, footer { border-color: #30363d; }
+    .apps a { background: #161b22; border-color: #30363d; }
+    .apps span, footer { color: #8b949e; }
+    .note { background: #3a2d00; border-color: #9e6a03; color: #f0e6c0; }
+    code { background: #21262d; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Справка Office AI Agent</h1>
+  <p>Локальная справка для работы в закрытом контуре — без обращения к внешним сайтам.</p>
+</header>
+
+<p>Выберите приложение, с которым работаете:</p>
+<div class="apps">
+  <a href="word.html"><strong>Word</strong><span>Документы, продолжение текста, вычитка, форматирование</span></a>
+  <a href="excel.html"><strong>Excel</strong><span>Формулы, диаграммы, анализ данных, пакетная генерация</span></a>
+  <a href="ppt.html"><strong>PowerPoint</strong><span>Презентации, макеты, заметки докладчика</span></a>
+</div>
+
+<h2>С чего начать</h2>
+<ol>
+  <li>Откройте вкладку <strong>AI-ассистент</strong> на ленте приложения.</li>
+  <li>Нажмите <strong>Настройка API</strong> и укажите адрес, ключ и модель вашего внутреннего сервера.</li>
+  <li>Если сервер использует самоподписанный сертификат, включите для провайдера доверие к нему.</li>
+  <li>Откройте <strong>AI-чат</strong> и задайте вопрос обычными словами — например «отформатируй документ по ГОСТ».</li>
+</ol>
+
+<div class="note">
+  Это локальная краткая справка. Полная версия справки переводится отдельно; до её готовности
+  кнопка «Документация» открывает этот файл, а не внешний сайт.
+</div>
+
+<footer>Office AI Agent · локальная справка · работает без доступа в интернет</footer>
+</body>
+</html>

@@ -50,7 +50,7 @@ function settingsSave() {
             autocompleteShortcut: autocompleteShortcut,
         });
     } else {
-        alert('无法执行代码：未检测到支持的通信接口');
+        alert('Не удалось выполнить код: не найден поддерживаемый интерфейс связи');
     }
     
     // 更新前端自动补全状态

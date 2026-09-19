@@ -1523,7 +1523,7 @@ input:checked + .mcp-toggle-slider:before {
 }
 
 #chat-container.drag-over::before {
-    content: '📁 松开以添加文件';
+    content: '📁 Отпустите, чтобы добавить файл';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1937,7 +1937,7 @@ input:checked + .mcp-toggle-slider:before {
 }
 
 #prompt-suggestions::before {
-    content: '# 快捷问题';
+    content: '# Быстрые вопросы';
     display: block;
     padding: 10px 14px;
     background: linear-gradient(135deg, #4a6fa5 0%, #6c8fc4 100%);

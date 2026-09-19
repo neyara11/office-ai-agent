@@ -160,8 +160,8 @@
                     wrapRetry.style.background = '#fff3cd';
                     wrapRetry.innerHTML = `
                         <div style="color:#856404;padding:8px;">
-                            <strong>JSON解析失败</strong>，正在请求重试...<br>
-                            <small>错误: ${parseError.message || '格式不符合规范'}</small>
+                            <strong>Ошибка разбора JSON</strong>, запрашиваем повтор...<br>
+                            <small>Ошибка: ${parseError.message || 'формат не соответствует требованиям'}</small>
                         </div>
                     `;
                     container.appendChild(wrapRetry);
@@ -170,7 +170,7 @@
                     sendMessageToServer({
                         type: 'retryReformat',
                         uuid: uuid,
-                        error: parseError.message || '格式不符合规范'
+                        error: parseError.message || 'формат не соответствует требованиям'
                     });
                     return;
                 }
@@ -182,7 +182,7 @@
                 wrapEmpty.style.padding = '12px';
                 wrapEmpty.style.marginTop = '12px';
                 wrapEmpty.style.background = '#f6f8fa';
-                wrapEmpty.innerHTML = '<div style="color:#666;padding:8px;">无需排版修改或大模型返回格式有问题。</div>';
+                wrapEmpty.innerHTML = '<div style="color:#666;padding:8px;">Изменения форматирования не требуются или модель вернула некорректный формат.</div>';
                 container.appendChild(wrapEmpty);
                 return;
             }
@@ -207,17 +207,17 @@
 
             const title = document.createElement('div');
             title.style.fontWeight = '600';
-            title.textContent = '排版预览';
+            title.textContent = 'Предпросмотр форматирования';
             header.appendChild(title);
 
             const acceptAllBtn = document.createElement('button');
             acceptAllBtn.className = 'code-button';
             acceptAllBtn.style.backgroundColor = '#4CAF50';
-            acceptAllBtn.textContent = '应用全部排版';
+            acceptAllBtn.textContent = 'Применить всё форматирование';
             acceptAllBtn.onclick = function () {
                 wrap.querySelectorAll('.format-accept-btn:not([disabled])').forEach(b => b.click());
                 acceptAllBtn.disabled = true;
-                acceptAllBtn.textContent = '已全部应用';
+                acceptAllBtn.textContent = 'Всё применено';
             };
             header.appendChild(acceptAllBtn);
             wrap.appendChild(header);
@@ -245,14 +245,14 @@
                 const formatting = item.formatting || {};
 
                 const info = document.createElement('div');
-                info.innerHTML = `<strong>[段落${paraIdx}]</strong> ${previewText.substring(0, 50)}${previewText.length > 50 ? '...' : ''}<br><em style="color:#666;font-size:12px;">${changes}</em>`;
+                info.innerHTML = `<strong>[Абзац ${paraIdx}]</strong> ${previewText.substring(0, 50)}${previewText.length > 50 ? '...' : ''}<br><em style="color:#666;font-size:12px;">${changes}</em>`;
 
                 const acceptBtn = document.createElement('button');
                 acceptBtn.className = 'format-accept-btn code-button';
-                acceptBtn.textContent = '应用';
+                acceptBtn.textContent = 'Применить';
                 acceptBtn.onclick = function () {
                     acceptBtn.disabled = true;
-                    acceptBtn.textContent = '已应用';
+                    acceptBtn.textContent = 'Применено';
                     row.style.opacity = '0.6';
                     // Send format apply request
                     sendMessageToServer({
@@ -303,16 +303,16 @@
 
         const title = document.createElement('div');
         title.style.fontWeight = '600';
-        title.textContent = '排版规则预览';
+        title.textContent = 'Предпросмотр правил форматирования';
         header.appendChild(title);
 
         const applyBtn = document.createElement('button');
         applyBtn.className = 'code-button';
         applyBtn.style.backgroundColor = '#4CAF50';
-        applyBtn.textContent = '应用排版规则';
+        applyBtn.textContent = 'Применить правила форматирования';
         applyBtn.onclick = function () {
             applyBtn.disabled = true;
-            applyBtn.textContent = '正在应用...';
+            applyBtn.textContent = 'Применение...';
             // 发送整个rules对象给后端应用
             sendMessageToServer({
                 type: 'applyDocumentPlanItem',
@@ -321,7 +321,7 @@
                 sampleClassification: sampleClassification
             });
             setTimeout(() => {
-                applyBtn.textContent = '已应用';
+                applyBtn.textContent = 'Применено';
             }, 500);
         };
         header.appendChild(applyBtn);
@@ -335,7 +335,7 @@
             summaryDiv.style.background = '#e8f5e9';
             summaryDiv.style.borderRadius = '4px';
             summaryDiv.style.fontSize = '13px';
-            summaryDiv.innerHTML = `<strong>排版策略：</strong>${summary}`;
+            summaryDiv.innerHTML = `<strong>Стратегия форматирования:</strong>${summary}`;
             wrap.appendChild(summaryDiv);
         }
 
@@ -352,23 +352,23 @@
             row.style.border = '1px solid #e6e6e6';
             row.style.borderRadius = '4px';
 
-            const ruleType = rule.type || `规则${idx + 1}`;
+            const ruleType = rule.type || `Правило ${idx + 1}`;
             const matchCondition = rule.matchCondition || '';
             const formatting = rule.formatting || {};
 
             // 格式化formatting为可读文本
             const formatParts = [];
-            if (formatting.fontNameCN) formatParts.push(`中文字体: ${formatting.fontNameCN}`);
-            if (formatting.fontNameEN) formatParts.push(`英文字体: ${formatting.fontNameEN}`);
-            if (formatting.fontSize) formatParts.push(`字号: ${formatting.fontSize}pt`);
-            if (formatting.bold) formatParts.push('加粗');
-            if (formatting.alignment) formatParts.push(`对齐: ${formatting.alignment}`);
-            if (formatting.firstLineIndent) formatParts.push(`首行缩进: ${formatting.firstLineIndent}字符`);
-            if (formatting.lineSpacing) formatParts.push(`行距: ${formatting.lineSpacing}倍`);
+            if (formatting.fontNameCN) formatParts.push(`Шрифт CJK: ${formatting.fontNameCN}`);
+            if (formatting.fontNameEN) formatParts.push(`Латинский шрифт: ${formatting.fontNameEN}`);
+            if (formatting.fontSize) formatParts.push(`Размер: ${formatting.fontSize}pt`);
+            if (formatting.bold) formatParts.push('полужирный');
+            if (formatting.alignment) formatParts.push(`Выравнивание: ${formatting.alignment}`);
+            if (formatting.firstLineIndent) formatParts.push(`Отступ первой строки: ${formatting.firstLineIndent} симв.`);
+            if (formatting.lineSpacing) formatParts.push(`Интервал: ${formatting.lineSpacing}x`);
 
             row.innerHTML = `
                 <div style="font-weight:600;color:#1976d2;margin-bottom:4px;">${ruleType}</div>
-                <div style="font-size:12px;color:#666;margin-bottom:4px;">匹配条件: ${matchCondition}</div>
+                <div style="font-size:12px;color:#666;margin-bottom:4px;">Условие совпадения: ${matchCondition}</div>
                 <div style="font-size:12px;color:#333;">${formatParts.join(' | ')}</div>
             `;
 
@@ -416,7 +416,7 @@
             const btnAcceptAll = document.createElement('button');
             btnAcceptAll.className = 'code-button';
             btnAcceptAll.style.backgroundColor = '#4CAF50';
-            btnAcceptAll.textContent = '接受全部修改';
+            btnAcceptAll.textContent = 'Принять все правки';
             btnAcceptAll.onclick = function () {
                 footerWrapper.querySelectorAll('.rev-accept-btn:not([disabled])').forEach(b => b.click());
             };
@@ -439,12 +439,12 @@
                 const original = item.original || '';
                 const corrected = item.corrected || '';
                 const reason = item.reason || '';
-                summary.innerHTML = `<strong>[段落${paraIdx}]</strong> "${original}" → "${corrected}"` + (reason ? ` <em>(${reason})</em>` : '');
+                summary.innerHTML = `<strong>[Абзац ${paraIdx}]</strong> "${original}" → "${corrected}"` + (reason ? ` <em>(${reason})</em>` : '');
 
                 // Accept button
                 const accept = document.createElement('button');
                 accept.className = 'rev-accept-btn';
-                accept.textContent = '接受';
+                accept.textContent = 'Принять';
                 accept.setAttribute('data-idx', idx);
                 accept.onclick = function () {
                     accept.disabled = true;
@@ -493,7 +493,7 @@
                 const badge = document.createElement('span');
                 badge.className = 'token-count';
                 badge.style.marginLeft = '8px';
-                badge.textContent = status === 'accepted' ? '已接受' : '已拒绝';
+                badge.textContent = status === 'accepted' ? 'Принято' : 'Отклонено';
                 item.appendChild(badge);
                 // Disable buttons
                 item.querySelectorAll('button').forEach(b => b.disabled = true);

@@ -21,7 +21,7 @@ function sendMessageToServer(messagePayload) {
             window.vsto.postMessage(messagePayload);
         }
     } else {
-        alert('无法执行代码：未检测到支持的通信接口');
+        alert('Не удалось выполнить код: не найден поддерживаемый интерфейс связи');
     }
 }
 
@@ -140,7 +140,7 @@ function sendChatMessage() {
             <div class="chat-message-references collapsed" id="msg-ref-sel-${uuid}">
                 <div class="chat-message-reference-header" onclick="toggleChatMessageReference(this)">
                     <span class="chat-message-reference-arrow">&#9658;</span>
-                    <span class="chat-message-reference-label">引用内容 (${selectedSheetContent.length})</span>
+                    <span class="chat-message-reference-label">Цитируемое содержимое (${selectedSheetContent.length})</span>
                 </div>
                 <div class="chat-message-reference-content">
                     ${itemsHtml}
@@ -155,7 +155,7 @@ function sendChatMessage() {
             <div class="chat-message-references collapsed" id="msg-ref-file-${uuid}">
                 <div class="chat-message-reference-header" onclick="toggleChatMessageReference(this)">
                     <span class="chat-message-reference-arrow">&#9658;</span>
-                    <span class="chat-message-reference-label">引用文件 (${attachedFileObjects.length})</span>
+                    <span class="chat-message-reference-label">Прикреплённые файлы (${attachedFileObjects.length})</span>
                 </div>
                 <div class="chat-message-reference-content">
                     ${displayItemsHtml}
@@ -393,7 +393,7 @@ function renderReferences() {
 
             const removeBtn = document.createElement('button');
             removeBtn.className = 'reference-chip-remove';
-            removeBtn.title = '移除此引用';
+            removeBtn.title = 'Убрать цитату';
             removeBtn.innerHTML = `<svg viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="2"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="2"/></svg>`;
             removeBtn.onclick = function () {
                 removeSelectedContentItem(selectedItem.id);
@@ -421,7 +421,7 @@ function renderReferences() {
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'reference-chip-remove';
-        removeBtn.title = '移除此文件';
+        removeBtn.title = 'Убрать файл';
         removeBtn.innerHTML = `<svg viewBox="0 0 20 20"><line x1="5" y1="5" x2="15" y2="15" stroke="currentColor" stroke-width="2"/><line x1="15" y1="5" x2="5" y2="15" stroke="currentColor" stroke-width="2"/></svg>`;
         removeBtn.onclick = function () {
             window.attachedFiles.splice(index, 1);
@@ -454,7 +454,7 @@ function renderReferences() {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             if (!allowedExtensions.exec(file.name)) {
-                alert(`文件类型不支持: ${file.name}`);
+                alert(`Тип файла не поддерживается: ${file.name}`);
                 continue;
             }
             const isDuplicate = window.attachedFiles.some(
@@ -623,9 +623,9 @@ function showContextHints(options) {
         const intent = options.intent || '';
         const trace = options.trace || null;
         const parts = [];
-        if (ragCount > 0) parts.push('已根据当前问题检索 ' + ragCount + ' 条相关记忆');
-        if (intent) parts.push('识别意图：' + intent);
-        if (trace && trace.UserProfileInjected) parts.push('已注入用户画像');
+        if (ragCount > 0) parts.push('Найдено по текущему вопросу: ' + ragCount + ' релевантных записей памяти');
+        if (intent) parts.push('Определено намерение: ' + intent);
+        if (trace && trace.UserProfileInjected) parts.push('Профиль пользователя добавлен');
         if (parts.length === 0 && !trace) return;
 
         const container = document.getElementById('chat-container');
@@ -650,10 +650,10 @@ function showContextHints(options) {
                 const complexity = taskSpec.Complexity || taskSpec.complexity || '';
                 const risk = taskSpec.RiskLevel || taskSpec.riskLevel || '';
                 const criteria = Array.isArray(taskSpec.SuccessCriteria) ? taskSpec.SuccessCriteria : (Array.isArray(taskSpec.successCriteria) ? taskSpec.successCriteria : []);
-                rows.push('<li><strong>任务规格</strong>' +
-                    (goal ? '<div>目标：' + escapeHtml(goal) + '</div>' : '') +
-                    (target ? '<div>对象：' + escapeHtml(target) + '</div>' : '') +
-                    ((complexity || risk) ? '<div>复杂度/风险：' + escapeHtml([complexity, risk].filter(Boolean).join(' / ')) + '</div>' : '') +
+                rows.push('<li><strong>Спецификация задачи</strong>' +
+                    (goal ? '<div>Цель: ' + escapeHtml(goal) + '</div>' : '') +
+                    (target ? '<div>Объект: ' + escapeHtml(target) + '</div>' : '') +
+                    ((complexity || risk) ? '<div>Сложность/риск: ' + escapeHtml([complexity, risk].filter(Boolean).join(' / ')) + '</div>' : '') +
                     (criteria.length ? '<ul class="context-plan-steps">' + criteria.slice(0, 4).map(c => '<li>' + escapeHtml(c) + '</li>').join('') + '</ul>' : '') +
                     '</li>');
             }
@@ -666,7 +666,7 @@ function showContextHints(options) {
                     const desc = step.Description || step.description || '';
                     return '<li>' + escapeHtml((num ? num + '. ' : '') + desc) + '</li>';
                 }).join('');
-                rows.push('<li><strong>执行计划</strong>' +
+                rows.push('<li><strong>План выполнения</strong>' +
                     (summary ? '<div>' + escapeHtml(summary) + '</div>' : '') +
                     (understanding ? '<div>' + escapeHtml(understanding) + '</div>' : '') +
                     (stepItems ? '<ol class="context-plan-steps">' + stepItems + '</ol>' : '') +
@@ -674,7 +674,7 @@ function showContextHints(options) {
             }
             if (officeContext) {
                 const compactOffice = officeContext.length > 600 ? officeContext.substring(0, 600) + '...' : officeContext;
-                rows.push('<li><strong>Office 上下文</strong><pre>' + escapeHtml(compactOffice) + '</pre></li>');
+                rows.push('<li><strong>Контекст Office</strong><pre>' + escapeHtml(compactOffice) + '</pre></li>');
             }
             skills.slice(0, 5).forEach(s => {
                 const name = s.Name || s.name || '';
@@ -694,7 +694,7 @@ function showContextHints(options) {
                 }
             });
             sessions.slice(0, 3).forEach(s => {
-                const title = s.Title || '近期会话';
+                const title = s.Title || 'Недавние сессии';
                 const snippet = s.Snippet || '';
                 rows.push('<li><strong>' + escapeHtml(title) + '</strong> ' + escapeHtml(snippet) + '</li>');
             });
@@ -712,7 +712,7 @@ function showContextHints(options) {
                 }
             });
             if (rows.length > 0) {
-                html += '<details class="context-trace"><summary>查看本轮上下文</summary><ul>' + rows.join('') + '</ul></details>';
+                html += '<details class="context-trace"><summary>Показать контекст этого шага</summary><ul>' + rows.join('') + '</ul></details>';
             }
         }
 
@@ -732,14 +732,14 @@ function showDetectedIntent(intentType) {
     try {
         // 意图类型到中文标签的映射
         const intentLabels = {
-            'DATA_ANALYSIS': '数据分析',
-            'FORMULA_CALC': '公式计算',
-            'CHART_GEN': '图表生成',
-            'DATA_CLEANING': '数据清洗',
-            'REPORT_GEN': '报表生成',
-            'DATA_TRANSFORMATION': '数据转换',
-            'FORMAT_STYLE': '格式调整',
-            'GENERAL_QUERY': '通用查询'
+            'DATA_ANALYSIS': 'Анализ данных',
+            'FORMULA_CALC': 'Вычисление формул',
+            'CHART_GEN': 'Создание диаграмм',
+            'DATA_CLEANING': 'Очистка данных',
+            'REPORT_GEN': 'Создание отчётов',
+            'DATA_TRANSFORMATION': 'Преобразование данных',
+            'FORMAT_STYLE': 'Настройка формата',
+            'GENERAL_QUERY': 'Общий запрос'
         };
 
         // 意图类型到颜色的映射
@@ -781,7 +781,7 @@ function showDetectedIntent(intentType) {
         }
 
         // 设置内容和颜色
-        indicator.textContent = '识别: ' + label;
+        indicator.textContent = 'Определено: ' + label;
         indicator.style.backgroundColor = color;
 
         // 显示动画

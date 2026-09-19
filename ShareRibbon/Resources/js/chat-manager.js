@@ -1,4 +1,4 @@
-﻿﻿/**
+﻿/**
  * chat-manager.js - Chat Section Management
  * Functions for creating and managing chat message sections
  */
@@ -39,7 +39,7 @@ window.createChatSection = function (sender, timestamp, uuid) {
             }
         }
     } else {
-        avatar.innerHTML = 'Me';
+        avatar.innerHTML = 'Я';
         avatar.className = 'avatar-me';
     }
     messageHeader.appendChild(avatar);
@@ -54,9 +54,9 @@ window.createChatSection = function (sender, timestamp, uuid) {
     // 如果是Ralph Loop步骤，添加步骤标记
     if (chatContainer.dataset.loopStep !== undefined && sender !== 'Me') {
         const stepNum = parseInt(chatContainer.dataset.loopStep) + 1;
-        senderName.innerHTML = sender + ' <span class="loop-step-badge">步骤 ' + stepNum + '</span>';
+        senderName.innerHTML = sender + ' <span class="loop-step-badge">Шаг ' + stepNum + '</span>';
     } else {
-        senderName.textContent = sender;
+        senderName.textContent = sender === 'Me' ? 'Я' : sender;
     }
 
     const timestampElem = document.createElement('div');
@@ -128,7 +128,7 @@ window.createReasoningContainer = function (uuid) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
             </svg>
-            思考过程
+            Ход размышлений
         </span>
         <span class="reasoning-toggle">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

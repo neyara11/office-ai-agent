@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Excel — справка Office AI Agent</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 32px 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
+  header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  p, li { font-size: 14px; }
+  a.back { font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #d0d7de; padding: 8px 10px; font-size: 13px; text-align: left; vertical-align: top; }
+  th { background: #f6f8fa; }
+  code { background: #f0f1f3; padding: 1px 5px; border-radius: 4px; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e1e4e8; font-size: 12px; color: #57606a; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e6edf3; background: #0d1117; }
+    header, footer { border-color: #30363d; }
+    th, td { border-color: #30363d; }
+    th { background: #161b22; }
+    footer { color: #8b949e; }
+    code { background: #21262d; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="index.html">← Общая справка</a>
+  <h1>Excel</h1>
+  <p>Возможности AI-ассистента в книгах Excel.</p>
+</header>
+
+<h2>Инструменты на ленте</h2>
+<table>
+  <tr><th>Кнопка</th><th>Что делает</th></tr>
+  <tr><td>AI-чат</td><td>Диалог с AI и выполнение команд над выделенным диапазоном и книгой.</td></tr>
+  <tr><td>Анализ данных</td><td>По выделенным данным и вопросу формирует результат на отдельном листе (сводки, диаграммы).</td></tr>
+  <tr><td>Захват страниц</td><td>Загружает содержимое веб-страницы в книгу. Требует сети; при её отсутствии показывает сообщение и не мешает остальным функциям.</td></tr>
+  <tr><td>Подсветка</td><td>Подсвечивает строку и столбец активной ячейки.</td></tr>
+  <tr><td>Пакетная генерация</td><td>Генерирует данные по описанным полям и связям столбцов.</td></tr>
+  <tr><td>AI-перевод</td><td>Переводит содержимое листа или выделения.</td></tr>
+</table>
+
+<h2>Примеры команд</h2>
+<ul>
+  <li>«Проанализируй выделенные данные и построй диаграмму по месяцам»</li>
+  <li>«Добавь столбец с формулой: цена × количество»</li>
+  <li>«Удали дубликаты и отсортируй по убыванию суммы»</li>
+  <li>«Сделай сводную таблицу по регионам и категориям»</li>
+</ul>
+
+<h2>Полезно знать</h2>
+<ul>
+  <li>Формулы можно вводить как задачу: «в C2 посчитай сумму A2:B2».</li>
+  <li>Перед массовыми изменениями сохраните книгу — откат доступен через <code>Ctrl+Z</code>.</li>
+  <li>Для работы нужен настроенный провайдер: <strong>Настройка API</strong> → адрес, ключ, модель.</li>
+</ul>
+
+<footer>Office AI Agent · локальная справка · Excel</footer>
+</body>
+</html>

@@ -20,7 +20,7 @@ function hideCodeActionButtons(uuid) {
 }
 
 /**
- * 完全隐藏代码块的操作栏（模板渲染模式使用）
+ * Полностью скрыть панель операций блока кода (для режима рендеринга шаблона)
  * @param {string} uuid - 消息的UUID
  */
 function hideAllCodeBlockActions(uuid) {
@@ -39,7 +39,7 @@ function hideAllCodeBlockActions(uuid) {
         block.style.padding = '0';
     });
     
-    // 隐藏代码折叠标签
+    // Скрыть метку сворачивания кода
     const toggleLabels = messageContainer.querySelectorAll('.code-toggle-label');
     toggleLabels.forEach(label => label.style.display = 'none');
     
@@ -73,14 +73,14 @@ function copyCode(button) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            已复制
+            Скопировано
         `;
         setTimeout(() => {
             button.innerHTML = originalText;
         }, 2000);
     } catch (err) {
         console.error('copy failure:', err);
-        alert('copy failure');
+        alert('Не удалось скопировать');
     } finally {
         document.body.removeChild(textarea);
     }
@@ -133,7 +133,7 @@ function executeCode(button) {
         } else if (window.vsto) {
             window.vsto.executeCode(code, language, preview);
         } else {
-            alert('无法执行代码：未检测到支持的通信接口');
+            alert('Не удалось выполнить код: не найден поддерживаемый интерфейс связи');
         }
 
         // UI feedback
@@ -142,13 +142,13 @@ function executeCode(button) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
-            已执行
+            Выполнено
         `;
         setTimeout(() => {
             button.innerHTML = originalText;
         }, 2000);
     } catch (err) {
-        alert('执行失败：' + err.message);
+        alert('Ошибка выполнения: ' + err.message);
     }
 }
 
@@ -172,7 +172,7 @@ function editCode(button) {
 
     const saveButton = document.createElement('button');
     saveButton.className = 'code-button';
-    saveButton.innerHTML = '保存';
+    saveButton.innerHTML = 'Сохранить';
     saveButton.onclick = function () {
         const newCode = textarea.value;
         const newCodeHtml = marked.parse('```' + language + '\n' + newCode + '\n```');
@@ -194,7 +194,7 @@ function editCode(button) {
     const cancelButton = document.createElement('button');
     cancelButton.className = 'code-button';
     cancelButton.style.backgroundColor = '#f44336';
-    cancelButton.innerHTML = '取消';
+    cancelButton.innerHTML = 'Отмена';
     cancelButton.onclick = function () {
         codeBlock.style.display = 'block';
         editorContainer.remove();
@@ -224,7 +224,7 @@ function processStreamComplete(uuid, totalTokens) {
     // Add token display
     const footerDiv = document.getElementById('footer-' + uuid);
     if (footerDiv) {
-        footerDiv.innerHTML = `<span class="token-count">消耗token：${totalTokens}</span>`;
+        footerDiv.innerHTML = `<span class="token-count">Потрачено токенов: ${totalTokens}</span>`;
     }
 
     // Switch back to send button
@@ -253,11 +253,11 @@ function processStreamComplete(uuid, totalTokens) {
 
                     const toggleLabel = document.createElement('div');
                     toggleLabel.className = 'code-toggle-label';
-                    toggleLabel.innerHTML = '点击展开代码';
+                    toggleLabel.innerHTML = 'Показать код';
                     toggleLabel.onclick = function (e) {
                         e.stopPropagation();
                         preElement.classList.toggle('collapsed');
-                        toggleLabel.innerHTML = preElement.classList.contains('collapsed') ? '点击展开代码' : '点击折叠代码';
+                        toggleLabel.innerHTML = preElement.classList.contains('collapsed') ? 'Показать код' : 'Скрыть код';
                     };
 
                     preElement.parentNode.insertBefore(toggleLabel, preElement);
@@ -312,7 +312,7 @@ function acceptAnswer(uuid) {
             footer.querySelectorAll('.accept-btn, .reject-btn').forEach(b => b.disabled = true);
             const statusSpan = document.createElement('span');
             statusSpan.className = 'token-count';
-            statusSpan.textContent = '已接受';
+            statusSpan.textContent = 'Принято';
             footer.appendChild(statusSpan);
         }
     } catch (err) {
@@ -343,7 +343,7 @@ function rejectAnswer(uuid) {
 
         let reason = '';
         try {
-            reason = prompt('请简要说明希望如何改进（可留空）：', '');
+            reason = prompt('Кратко опишите, что улучшить (можно оставить пустым):', '');
             if (reason === null) {
                 // 用户取消了，恢复按钮
                 if (footer) {
@@ -367,7 +367,7 @@ function rejectAnswer(uuid) {
         if (footer) {
             const statusSpan = document.createElement('span');
             statusSpan.className = 'token-count';
-            statusSpan.textContent = '已请求改进，等待新结果…';
+            statusSpan.textContent = 'Запрос на улучшение отправлен, ожидаем новый результат…';
             footer.appendChild(statusSpan);
         }
 
@@ -391,8 +391,8 @@ function showBatchDeleteChat() {
         actionsDiv.id = 'delete-chat-actions';
         actionsDiv.style = 'display:block; position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:999;';
         actionsDiv.innerHTML = `
-            <button id="confirm-delete-chat" style="background:#e9525f;color:white;border:none;padding:6px 16px;border-radius:6px;margin-right:10px;">确定删除</button>
-            <button id="cancel-delete-chat" style="background:#f5f5f5;color:#333;border:none;padding:6px 16px;border-radius:6px;">取消</button>
+            <button id="confirm-delete-chat" style="background:#e9525f;color:white;border:none;padding:6px 16px;border-radius:6px;margin-right:10px;">Удалить</button>
+            <button id="cancel-delete-chat" style="background:#f5f5f5;color:#333;border:none;padding:6px 16px;border-radius:6px;">Отмена</button>
         `;
         document.body.appendChild(actionsDiv);
     } else {
@@ -434,7 +434,7 @@ function showBatchDeleteChat() {
     }
 }
 
-// ========== AI续写功能 ==========
+// ========== Функция AI-продолжения ==========
 
 // 注：triggerContinuation / setContinuationButtonVisible 的真正实现在本文件下方（约 906 行处），
 // 支持 autoTrigger 参数与续写模式状态判断。早期的简化重复实现已删除以避免 JS 函数覆盖混淆。
@@ -472,14 +472,14 @@ function showContinuationPreview(uuid) {
         const isPPT = window.officeAppType === 'PowerPoint';
         
         // 根据应用类型设置按钮文案
-        const insertStartLabel = isPPT ? '插入首页' : '插入开头';
-        const insertCurrentLabel = isPPT ? '插入当前页' : '插入文档';
-        const insertEndLabel = isPPT ? '插入末页' : '插入结尾';
+        const insertStartLabel = isPPT ? 'Вставить первым' : 'Вставить в начало';
+        const insertCurrentLabel = isPPT ? 'Вставить на текущий слайд' : 'Вставить в документ';
+        const insertEndLabel = isPPT ? 'Вставить последним' : 'Вставить в конец';
 
         // 创建续写操作按钮区域
         const actionsHtml = `
             <div class="continuation-actions" id="continuation-actions-${uuid}" style="margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
-                <div style="margin-bottom: 6px; font-size: 12px; color: #666;">续写预览完成：</div>
+                <div style="margin-bottom: 6px; font-size: 12px; color: #666;">Предпросмотр продолжения готов:</div>
                 <div style="margin-bottom: 6px;">
                     <button class="btn-primary continuation-btn" onclick="handleContinuationInsert('${uuid}', 'start')" style="background: #6c757d; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 11px;">
                         ${insertStartLabel}
@@ -493,10 +493,10 @@ function showContinuationPreview(uuid) {
                 </div>
                 <div>
                     <button class="btn-secondary continuation-btn" onclick="handleContinuationRefine('${uuid}')" style="background: #e9ecef; color: #333; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 11px;">
-                        调整提示词
+                        Изменить промпт
                     </button>
                     <button class="btn-secondary continuation-btn" onclick="handleContinuationRegenerate()" style="background: #e9ecef; color: #333; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">
-                        重新生成
+                        Сгенерировать заново
                     </button>
                 </div>
             </div>
@@ -542,7 +542,7 @@ function handleContinuationInsert(uuid, position) {
         // 添加成功提示
         const successMsg = document.createElement('div');
         successMsg.style = 'margin-top: 8px; padding: 8px 12px; background: #d4edda; color: #155724; border-radius: 6px; font-size: 13px;';
-        successMsg.textContent = '续写内容已插入文档';
+        successMsg.textContent = 'Продолжение вставлено в документ';
         contentEl.parentNode.appendChild(successMsg);
         
         // 3秒后移除提示
@@ -558,7 +558,7 @@ function handleContinuationInsert(uuid, position) {
  */
 function handleContinuationRefine(uuid) {
     try {
-        const refinement = prompt('请输入调整方向（如：更正式、更简洁、加长、更详细等）：');
+        const refinement = prompt('Укажите направление правки (например: официальнее, короче, длиннее, подробнее):');
         if (refinement && refinement.trim()) {
             window.chrome.webview.postMessage({
                 type: 'refineContinuation',
@@ -569,7 +569,7 @@ function handleContinuationRefine(uuid) {
             // 更新按钮状态
             const actionsDiv = document.getElementById('continuation-actions-' + uuid);
             if (actionsDiv) {
-                actionsDiv.innerHTML = '<div style="color: #666; font-size: 13px;">正在根据您的要求调整内容...</div>';
+                actionsDiv.innerHTML = '<div style="color: #666; font-size: 13px;">Настраиваем содержимое по вашему запросу...</div>';
             }
         }
     } catch (err) {
@@ -578,7 +578,7 @@ function handleContinuationRefine(uuid) {
 }
 
 /**
- * 处理重新生成续写
+ * Обработка повторной генерации продолжения
  */
 function handleContinuationRegenerate() {
     try {
@@ -624,7 +624,7 @@ function enterContinuationMode() {
     }
 
 /**
- * 退出续写模式
+ * Режим выхода из продолжения
  */
 function exitContinuationMode() {
     window.continuationModeActive = false;
@@ -652,7 +652,7 @@ function updateContinuationModeUI(isActive) {
     if (isActive) {
         // 续写模式：更改placeholder和样式
         if (chatInput) {
-            chatInput.placeholder = '在此输入续写要求（如：更正式、加长、换个角度等），或直接回车继续续写...';
+            chatInput.placeholder = 'Введите требования к продолжению (например: официальнее, длиннее, другой ракурс) или нажмите Enter...';
         }
         if (inputCard) {
             inputCard.style.borderColor = '#4a6fa5';
@@ -674,7 +674,7 @@ function updateContinuationModeUI(isActive) {
     } else {
         // 普通模式：恢复默认
         if (chatInput) {
-            chatInput.placeholder = '请在此输入您的问题... 按Enter键直接发送，Shift+Enter换行';
+            chatInput.placeholder = 'Введите вопрос... Enter — отправить, Shift+Enter — новая строка';
         }
         if (inputCard) {
             inputCard.style.borderColor = '';
@@ -707,10 +707,10 @@ function showContinuationModeIndicator() {
         <div style="background: linear-gradient(135deg, #4a6fa5 0%, #3d5a7c 100%); color: white; 
                     padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: space-between;
                     position: fixed; top: 0; left: 0; right: 0; z-index: 9999; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-            <span>📝 续写模式 - 输入框内容将作为续写要求发送</span>
+            <span>📝 Режим продолжения — текст поля ввода будет отправлен как требование</span>
             <button onclick="exitContinuationMode()" style="background: rgba(255,255,255,0.25); border: none; 
                     color: white; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">
-                退出续写
+                Выйти из продолжения
             </button>
         </div>
     `;
@@ -758,7 +758,7 @@ function stopContinuationHint() {
     
     btn.style.animation = '';
     btn.style.boxShadow = '';
-    btn.title = 'AI续写';
+    btn.title = 'AI-продолжение';
     
 }
 
@@ -772,18 +772,18 @@ function showContinuationDialog(autoTrigger) {
         <div id="continuation-dialog-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
                 background: rgba(0,0,0,0.4); z-index: 9998; display: flex; align-items: center; justify-content: center;">
             <div style="background: white; border-radius: 8px; padding: 16px; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-                <div style="font-size: 14px; font-weight: 500; margin-bottom: 12px; color: #333;">AI续写设置</div>
-                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">可选：输入续写风格要求</div>
-                <input type="text" id="continuation-style-input" placeholder="如：更正式、更简洁、幽默风格..." 
+                <div style="font-size: 14px; font-weight: 500; margin-bottom: 12px; color: #333;">Настройки AI-продолжения</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 8px;">Необязательно: требования к стилю продолжения</div>
+                <input type="text" id="continuation-style-input" placeholder="Например: официальнее, короче, с юмором..." 
                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px; box-sizing: border-box; margin-bottom: 12px;">
                 <div style="display: flex; justify-content: flex-end; gap: 8px;">
                     <button onclick="closeContinuationDialog()" 
                             style="padding: 6px 12px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                        取消
+                        Отмена
                     </button>
                     <button onclick="submitContinuation()" 
                             style="padding: 6px 12px; border: none; background: #4a6fa5; color: white; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                        开始续写
+                        Начать продолжение
                     </button>
                 </div>
             </div>
@@ -836,7 +836,7 @@ function submitContinuation() {
 }
 
 /**
- * 触发AI续写（支持从Ribbon自动触发）
+ * Запуск AI-продолжения (в т.ч. автоматически из Ribbon)
  * @param {boolean} autoTrigger - 是否自动触发（从Ribbon点击过来）
  */
 function triggerContinuation(autoTrigger) {
@@ -861,7 +861,7 @@ function triggerContinuation(autoTrigger) {
 }
 
 /**
- * 显示或隐藏AI续写按钮（由Ribbon续写功能调用）
+ * Показать или скрыть кнопку AI-продолжения (вызывается из Ribbon)
  * @param {boolean} visible - 是否显示
  */
 function setContinuationButtonVisible(visible) {
@@ -888,8 +888,8 @@ function showProofreadModeIndicator() {
         <div style="background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); color: white;
                     padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: center;
                     box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-            <span>🔍 校对模式 - AI正在帮您检查语法、拼写和表达问题</span>
-            <button onclick="proofreadExit()" style="margin-left:12px; background:rgba(255,255,255,0.3); border:none; color:white; padding:2px 10px; border-radius:4px; cursor:pointer; font-size:12px;">退出校对</button>
+            <span>🔍 Режим корректуры — AI проверяет грамматику, орфографию и стиль</span>
+            <button onclick="proofreadExit()" style="margin-left:12px; background:rgba(255,255,255,0.3); border:none; color:white; padding:2px 10px; border-radius:4px; cursor:pointer; font-size:12px;">Выйти из корректуры</button>
         </div>
     `;
 
@@ -932,8 +932,8 @@ function showReformatModeIndicator() {
         <div style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white;
                     padding: 8px 12px; font-size: 12px; display: flex; align-items: center; justify-content: center;
                     box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-            <span>📐 排版模式 - AI正在帮您优化文档结构和格式</span>
-            <button onclick="exitReformatMode()" style="margin-left:12px; background:rgba(255,255,255,0.3); border:none; color:white; padding:2px 10px; border-radius:4px; cursor:pointer; font-size:12px;">退出排版</button>
+            <span>📐 Режим форматирования — AI улучшает структуру и оформление документа</span>
+            <button onclick="exitReformatMode()" style="margin-left:12px; background:rgba(255,255,255,0.3); border:none; color:white; padding:2px 10px; border-radius:4px; cursor:pointer; font-size:12px;">Выйти из форматирования</button>
         </div>
     `;
 
@@ -983,7 +983,7 @@ function hideAllModeIndicators() {
 function enterTemplateMode(templateContext, templateName) {
     window.templateModeActive = true;
     window.currentTemplateContext = templateContext;
-    window.currentTemplateName = templateName || '未命名模板';
+    window.currentTemplateName = templateName || 'Безымянный шаблон';
     
     // 显示模式指示器
     showTemplateModeIndicator(window.currentTemplateName);
@@ -1029,7 +1029,7 @@ function showTemplateModeIndicator(templateName) {
             align-items: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         ">
-            <span>📋 模板模式 - 正在基于 "${templateName}" 生成内容</span>
+            <span>📋 Режим шаблона — генерация по "${templateName}"</span>
             <button onclick="exitTemplateMode()" style="
                 background: rgba(255,255,255,0.2);
                 border: 1px solid rgba(255,255,255,0.4);
@@ -1038,7 +1038,7 @@ function showTemplateModeIndicator(templateName) {
                 border-radius: 4px;
                 cursor: pointer;
                 font-size: 12px;
-            ">退出模板模式</button>
+            ">Выйти из режима шаблона</button>
         </div>
     `;
     
@@ -1089,14 +1089,14 @@ function showTemplatePreview(uuid) {
         const isPPT = window.officeAppType === 'PowerPoint';
         
         // 根据应用类型设置按钮文案
-        const insertStartLabel = isPPT ? '插入首页' : '插入开头';
-        const insertCurrentLabel = isPPT ? '插入当前页' : '插入当前位置';
-        const insertEndLabel = isPPT ? '插入末页' : '插入结尾';
+        const insertStartLabel = isPPT ? 'Вставить первым' : 'Вставить в начало';
+        const insertCurrentLabel = isPPT ? 'Вставить на текущий слайд' : 'Вставить в текущую позицию';
+        const insertEndLabel = isPPT ? 'Вставить последним' : 'Вставить в конец';
 
         // 创建模板操作按钮区域（紫色主题）
         const actionsHtml = `
             <div class="template-actions" id="template-actions-${uuid}" style="margin-top: 8px; padding: 8px; background: #f3e5f5; border-radius: 6px; border: 1px solid #ce93d8;">
-                <div style="margin-bottom: 6px; font-size: 12px; color: #7b1fa2;">模板内容生成完成，选择插入位置：</div>
+                <div style="margin-bottom: 6px; font-size: 12px; color: #7b1fa2;">Содержимое по шаблону готово, выберите место вставки:</div>
                 <div style="margin-bottom: 6px;">
                     <button class="btn-primary template-btn" onclick="handleTemplateInsert('${uuid}', 'start')" style="background: #9c27b0; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 11px;">
                         ${insertStartLabel}
@@ -1110,10 +1110,10 @@ function showTemplatePreview(uuid) {
                 </div>
                 <div>
                     <button class="btn-secondary template-btn" onclick="handleTemplateRefine('${uuid}')" style="background: #e1bee7; color: #4a148c; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 4px; font-size: 11px;">
-                        调整需求
+                        Изменить запрос
                     </button>
                     <button class="btn-secondary template-btn" onclick="handleTemplateRegenerate()" style="background: #e1bee7; color: #4a148c; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;">
-                        重新生成
+                        Сгенерировать заново
                     </button>
                 </div>
             </div>
@@ -1156,7 +1156,7 @@ function handleTemplateInsert(uuid, position) {
         // 添加成功提示
         const successMsg = document.createElement('div');
         successMsg.style = 'margin-top: 8px; padding: 8px 12px; background: #e8f5e9; color: #2e7d32; border-radius: 6px; font-size: 13px;';
-        successMsg.textContent = '模板内容已插入文档';
+        successMsg.textContent = 'Содержимое шаблона вставлено в документ';
         contentEl.parentNode.appendChild(successMsg);
         
         // 3秒后移除提示
@@ -1183,7 +1183,7 @@ function removeTemplateActions(uuid) {
  */
 function handleTemplateRefine(uuid) {
     try {
-        const refinement = prompt('请输入调整需求（如：更详细、添加示例、换个风格等）：');
+        const refinement = prompt('Введите пожелания (например: подробнее, добавить пример, другой стиль):');
         if (refinement && refinement.trim()) {
             window.chrome.webview.postMessage({
                 type: 'refineTemplateContent',
@@ -1194,7 +1194,7 @@ function handleTemplateRefine(uuid) {
             // 更新按钮状态
             const actionsDiv = document.getElementById('template-actions-' + uuid);
             if (actionsDiv) {
-                actionsDiv.innerHTML = '<div style="color: #7b1fa2; font-size: 13px;">正在根据您的要求调整内容...</div>';
+                actionsDiv.innerHTML = '<div style="color: #7b1fa2; font-size: 13px;">Настраиваем содержимое по вашему запросу...</div>';
             }
         }
     } catch (err) {
@@ -1203,7 +1203,7 @@ function handleTemplateRefine(uuid) {
 }
 
 /**
- * 处理重新生成模板内容
+ * Обработка повторной генерации содержимого шаблона
  */
 function handleTemplateRegenerate() {
     try {
@@ -1211,7 +1211,7 @@ function handleTemplateRegenerate() {
             const input = document.getElementById('smart-input');
             if (input) {
                 input.focus();
-                alert('请在输入框中重新描述您的内容需求，然后点击发送。');
+                alert('Опишите требование в поле ввода и нажмите «Отправить».');
             }
         }
     } catch (err) {
@@ -1231,7 +1231,7 @@ function handleTemplateRegenerate() {
 })();
 
 /**
- * Agent模式下自动执行执行计划（仍然弹出预览框让用户确认）
+ * Автовыполнение плана в режиме Agent (с окном подтверждения)
  * @param {string} uuid - 消息 UUID
  */
 function executePlanFromRendererAutoMode(uuid) {
@@ -1266,10 +1266,10 @@ function executePlanFromRendererAutoMode(uuid) {
         // UI反馈
         const btn = container.querySelector('.execute-plan-btn');
         if (btn) {
-            btn.textContent = '等待确认...';
+            btn.textContent = 'Ожидание подтверждения...';
             btn.disabled = true;
             // 保存按钮引用，以便执行结果返回后恢复
-            btn.dataset.originalText = '执行此计划';
+            btn.dataset.originalText = 'Выполнить план';
         }
     } catch (err) {
         console.error('executePlanFromRendererAutoMode error:', err);
@@ -1277,7 +1277,7 @@ function executePlanFromRendererAutoMode(uuid) {
 }
 
 /**
- * Agent模式下自动执行代码（仍然弹出预览框让用户确认）
+ * Автовыполнение кода в режиме Agent (с окном подтверждения)
  * @param {HTMLElement} button - 执行按钮元素
  */
 function executeCodeAutoMode(button) {
@@ -1332,7 +1332,7 @@ function executeCodeAutoMode(button) {
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
             </svg>
-            等待确认...
+            Ожидание подтверждения...
         `;
         button.dataset.originalHtml = originalText;
         button.disabled = true;
@@ -1451,13 +1451,13 @@ function buildExecutionPlanHtml(json, uuid, originalCode) {
 
     return `
         <div class="execution-plan-container" data-uuid="${uuid}" data-plan-id="${planId}">
-            <div class="plan-header">📋 执行计划</div>
+            <div class="plan-header">📋 План выполнения</div>
             <div class="plan-steps">
                 ${stepsHtml}
             </div>
             <div class="plan-actions">
-                <button class="execute-plan-btn" onclick="executePlanFromRenderer('${uuid}', this)">执行此计划</button>
-                <button class="show-code-btn" onclick="toggleCodeViewFromRenderer('${planId}')">查看代码</button>
+                <button class="execute-plan-btn" onclick="executePlanFromRenderer('${uuid}', this)">Выполнить план</button>
+                <button class="show-code-btn" onclick="toggleCodeViewFromRenderer('${planId}')">Показать код</button>
             </div>
             <div class="original-code" id="code-${planId}">
                 <pre><code class="language-json">${escapeHtml(originalCode)}</code></pre>
@@ -1478,14 +1478,14 @@ function parseJsonToPlan(json) {
 
     // 命令描述映射
     const commandDescriptions = {
-        'ApplyFormula': { desc: '应用公式', icon: 'formula' },
-        'WriteData': { desc: '写入数据', icon: 'data' },
-        'FormatRange': { desc: '格式化区域', icon: 'format' },
-        'CreateChart': { desc: '创建图表', icon: 'chart' },
-        'CleanData': { desc: '清洗数据', icon: 'clean' },
-        'DataAnalysis': { desc: '数据分析', icon: 'data' },
-        'TransformData': { desc: '数据转换', icon: 'data' },
-        'GenerateReport': { desc: '生成报表', icon: 'data' }
+        'ApplyFormula': { desc: 'Применить формулу', icon: 'formula' },
+        'WriteData': { desc: 'Записать данные', icon: 'data' },
+        'FormatRange': { desc: 'Форматировать диапазон', icon: 'format' },
+        'CreateChart': { desc: 'Создать диаграмму', icon: 'chart' },
+        'CleanData': { desc: 'Очистить данные', icon: 'clean' },
+        'DataAnalysis': { desc: 'Анализ данных', icon: 'data' },
+        'TransformData': { desc: 'Преобразование данных', icon: 'data' },
+        'GenerateReport': { desc: 'Создать отчёт', icon: 'data' }
     };
 
     const cmdInfo = commandDescriptions[command] || { desc: command, icon: 'default' };
@@ -1495,20 +1495,20 @@ function parseJsonToPlan(json) {
         case 'applyformula':
         case 'formula':
             steps.push({
-                description: `在 ${params.targetRange || '目标区域'} 应用公式`,
+                description: `Применить формулу к ${params.targetRange || 'целевому диапазону'}`,
                 icon: 'formula',
                 willModify: params.targetRange,
-                estimatedTime: '1秒'
+                estimatedTime: '1 сек'
             });
             if (params.formula) {
                 steps.push({
-                    description: `公式: ${getFormulaDescription(params.formula)}`,
+                    description: `Формула: ${getFormulaDescription(params.formula)}`,
                     icon: 'formula'
                 });
             }
             if (params.fillDown) {
                 steps.push({
-                    description: '自动向下填充',
+                    description: 'Автозаполнение вниз',
                     icon: 'formula'
                 });
             }
@@ -1516,20 +1516,20 @@ function parseJsonToPlan(json) {
 
         case 'createchart':
         case 'chart':
-            const chartTypes = { 'Column': '柱状图', 'Line': '折线图', 'Pie': '饼图', 'Bar': '条形图' };
-            const chartType = chartTypes[params.type] || params.type || '图表';
+            const chartTypes = { 'Column': 'Столбчатая', 'Line': 'Линейная', 'Pie': 'Круговая', 'Bar': 'Горизонтальная' };
+            const chartType = chartTypes[params.type] || params.type || 'Диаграмма';
             steps.push({
-                description: `读取 ${params.dataRange || '数据区域'} 作为图表数据`,
+                description: `Чтение ${params.dataRange || 'диапазона данных'} как данных диаграммы`,
                 icon: 'search'
             });
             steps.push({
-                description: `创建 ${chartType}`,
+                description: `Создать ${chartType}`,
                 icon: 'chart',
-                estimatedTime: '2秒'
+                estimatedTime: '2 сек'
             });
             if (params.title) {
                 steps.push({
-                    description: `设置标题: ${params.title}`,
+                    description: `Заголовок: ${params.title}`,
                     icon: 'chart'
                 });
             }
@@ -1537,48 +1537,48 @@ function parseJsonToPlan(json) {
 
         case 'formatrange':
         case 'format':
-            const range = params.range || params.targetRange || '目标区域';
+            const range = params.range || params.targetRange || 'целевой диапазон';
             steps.push({
-                description: `选择 ${range} 区域`,
+                description: `Выбрать диапазон ${range}`,
                 icon: 'search'
             });
-            let formatDesc = '应用格式设置';
+            let formatDesc = 'Применить форматирование';
             if (params.style) {
-                formatDesc = `应用 ${params.style} 样式`;
+                formatDesc = `Применить стиль ${params.style}`;
             }
             steps.push({
                 description: formatDesc,
                 icon: 'format',
                 willModify: range,
-                estimatedTime: '1秒'
+                estimatedTime: '1 сек'
             });
             break;
 
         case 'cleandata':
         case 'clean':
             const operations = {
-                'removeDuplicates': '删除重复项',
-                'fillEmpty': '填充空值',
-                'trim': '去除空格'
+                'removeDuplicates': 'Удалить дубликаты',
+                'fillEmpty': 'Заполнить пустые',
+                'trim': 'Убрать пробелы'
             };
-            const opDesc = operations[params.operation] || params.operation || '清洗';
+            const opDesc = operations[params.operation] || params.operation || 'Очистка';
             steps.push({
-                description: `扫描 ${params.range || '数据区域'}`,
+                description: `Сканировать ${params.range || 'диапазон данных'}`,
                 icon: 'search'
             });
             steps.push({
-                description: `执行: ${opDesc}`,
+                description: `Выполнить: ${opDesc}`,
                 icon: 'clean',
                 willModify: params.range,
-                estimatedTime: '2秒'
+                estimatedTime: '2 сек'
             });
             break;
 
         default:
             steps.push({
-                description: `执行 ${cmdInfo.desc}`,
+                description: `Выполнить: ${cmdInfo.desc}`,
                 icon: cmdInfo.icon,
-                estimatedTime: '1秒'
+                estimatedTime: '1 сек'
             });
     }
 
@@ -1595,17 +1595,17 @@ function getFormulaDescription(formula) {
     formula = formula.replace(/^=/, '');
     const upper = formula.toUpperCase();
 
-    if (upper.startsWith('SUM(')) return '求和';
-    if (upper.startsWith('AVERAGE(')) return '平均值';
-    if (upper.startsWith('COUNT(')) return '计数';
-    if (upper.startsWith('MAX(')) return '最大值';
-    if (upper.startsWith('MIN(')) return '最小值';
-    if (upper.startsWith('VLOOKUP(')) return '垂直查找';
-    if (upper.startsWith('IF(')) return '条件判断';
-    if (formula.includes('+')) return '加法运算';
-    if (formula.includes('-')) return '减法运算';
-    if (formula.includes('*')) return '乘法运算';
-    if (formula.includes('/')) return '除法运算';
+    if (upper.startsWith('SUM(')) return 'Сумма';
+    if (upper.startsWith('AVERAGE(')) return 'Среднее';
+    if (upper.startsWith('COUNT(')) return 'Количество';
+    if (upper.startsWith('MAX(')) return 'Максимум';
+    if (upper.startsWith('MIN(')) return 'Минимум';
+    if (upper.startsWith('VLOOKUP(')) return 'Вертикальный поиск';
+    if (upper.startsWith('IF(')) return 'Условная проверка';
+    if (formula.includes('+')) return 'Сложение';
+    if (formula.includes('-')) return 'Вычитание';
+    if (formula.includes('*')) return 'Умножение';
+    if (formula.includes('/')) return 'Деление';
 
     return formula.length > 25 ? formula.substring(0, 22) + '...' : formula;
 }
@@ -1661,15 +1661,15 @@ function executePlanFromRenderer(uuid, button) {
         }
 
         // UI 反馈
-        button.textContent = '已执行';
+        button.textContent = 'Выполнено';
         button.disabled = true;
         setTimeout(() => {
-            button.textContent = '执行此计划';
+            button.textContent = 'Выполнить план';
             button.disabled = false;
         }, 2000);
     } catch (err) {
         console.error('executePlanFromRenderer error:', err);
-        alert('执行失败：' + err.message);
+        alert('Ошибка выполнения: ' + err.message);
     }
 }
 
@@ -1688,7 +1688,7 @@ function toggleCodeViewFromRenderer(planId) {
             if (container) {
                 const btn = container.querySelector('.show-code-btn');
                 if (btn) {
-                    btn.textContent = codeDiv.classList.contains('visible') ? '隐藏代码' : '查看代码';
+                    btn.textContent = codeDiv.classList.contains('visible') ? 'Скрыть код' : 'Показать код';
                 }
             }
 
@@ -1771,15 +1771,15 @@ function restoreExecuteButtons(uuid, success) {
             const btn = planContainer.querySelector('.execute-plan-btn');
             if (btn) {
                 if (success) {
-                    btn.textContent = '已执行';
+                    btn.textContent = 'Выполнено';
                     btn.disabled = true;
                     // 5秒后恢复可点击状态，允许重复执行
                     setTimeout(() => {
-                        btn.textContent = btn.dataset.originalText || '执行此计划';
+                        btn.textContent = btn.dataset.originalText || 'Выполнить план';
                         btn.disabled = false;
                     }, 5000);
                 } else {
-                    btn.textContent = '重试';
+                    btn.textContent = 'Повторить';
                     btn.disabled = false;
                 }
             }
@@ -1793,7 +1793,7 @@ function restoreExecuteButtons(uuid, success) {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    已执行
+                    Выполнено
                 `;
                 btn.disabled = true;
                 // 5秒后恢复可点击状态，允许重复执行
@@ -1805,7 +1805,7 @@ function restoreExecuteButtons(uuid, success) {
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
                             </svg>
-                            执行
+                            Выполнить
                         `;
                     }
                     btn.disabled = false;
@@ -1816,7 +1816,7 @@ function restoreExecuteButtons(uuid, success) {
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
-                    重试
+                    Повторить
                 `;
                 btn.disabled = false;
             }
@@ -1874,7 +1874,7 @@ function showFileParsingProgress(show) {
                 progressOverlay.innerHTML = `
                     <div class="progress-content">
                         <div class="progress-spinner"></div>
-                        <div class="progress-text">正在解析文件...</div>
+                        <div class="progress-text">Разбор файла...</div>
                         <div class="progress-detail" id="file-parsing-detail"></div>
                     </div>
                 `;
@@ -1951,7 +1951,7 @@ function updateFileParsingProgress(current, total, fileName) {
         const detailEl = document.getElementById('file-parsing-detail');
         
         if (textEl) {
-            textEl.textContent = `正在解析文件 (${current}/${total})`;
+            textEl.textContent = `Разбор файла (${current}/${total})`;
         }
         if (detailEl) {
             detailEl.textContent = fileName || '';
@@ -1988,9 +1988,9 @@ function showReformatResult(result) {
             errorCard.innerHTML = `
                 <div style="background: #fff5f5; border: 1px solid #fed7d7; border-radius: 8px; padding: 12px 16px; margin: 8px 0;">
                     <div style="font-size: 13px; font-weight: 600; color: #c53030; margin-bottom: 6px;">
-                        排版失败
+                        Ошибка форматирования
                     </div>
-                    <div style="font-size: 12px; color: #718096; word-break: break-all;">${result.error || '未知错误'}</div>
+                    <div style="font-size: 12px; color: #718096; word-break: break-all;">${result.error || 'Неизвестная ошибка'}</div>
                 </div>
             `;
             chatContainer.appendChild(errorCard);
@@ -2011,18 +2011,18 @@ function showReformatResult(result) {
         card.innerHTML = `
             <div style="background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin: 8px 0;">
                 <div style="font-size: 13px; font-weight: 600; color: #2d3748; margin-bottom: 6px;">
-                    排版完成：处理 ${result.appliedCount || 0} 个段落${result.skippedCount > 0 ? `，跳过 ${result.skippedCount} 个特殊元素` : ''}
+                    Форматирование завершено: обработано ${result.appliedCount || 0} абзацев${result.skippedCount > 0 ? ` , пропущено ${result.skippedCount} особых элементов` : ''}
                 </div>
                 ${tagStats ? `<div style="font-size: 11px; color: #718096; margin-bottom: 8px; word-break: break-all;">${tagStats}</div>` : ''}
                 <div style="font-size: 11px; color: #718096; margin-bottom: 8px;">
-                    💡 如需调整格式，请直接输入需求（如"标题加大"、"正文对齐"等）
+                    💡 Чтобы изменить формат, введите требование (например, «увеличить заголовок», «выровнять текст»)
                 </div>
                 <div style="display: flex; gap: 8px;">
                     ${hasChanges ? `<button onclick="undoReformat()" style="padding: 5px 14px; font-size: 12px; border: 1px solid #e53e3e; color: #e53e3e; background: white; border-radius: 4px; cursor: pointer;">
-                        撤销排版
+                        Отменить форматирование
                     </button>` : ''}
                     <button onclick="acceptReformat(this)" style="padding: 5px 14px; font-size: 12px; border: 1px solid #38a169; color: white; background: #38a169; border-radius: 4px; cursor: pointer;">
-                        确认
+                        Подтвердить
                     </button>
                 </div>
             </div>
@@ -2036,7 +2036,7 @@ function showReformatResult(result) {
 }
 
 /**
- * 撤销排版（发送消息到VB后端）
+ * Отмена форматирования (отправка сообщения в VB-бэкенд)
  */
 function undoReformat() {
     try {
@@ -2067,7 +2067,7 @@ function acceptReformat(btn) {
         const card = btn ? btn.closest('.reformat-result-card') : null;
         if (card) {
             card.style.opacity = '0.5';
-            card.querySelector('div > div:last-child').innerHTML = '<span style="color: #38a169; font-size: 12px;">已确认</span>';
+            card.querySelector('div > div:last-child').innerHTML = '<span style="color: #38a169; font-size: 12px;">Подтверждено</span>';
         }
     } catch (err) {
         console.error('acceptReformat error:', err);

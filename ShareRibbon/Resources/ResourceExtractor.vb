@@ -7,7 +7,7 @@ Public Class ResourceExtractor
     ''' <summary>
     ''' 资源版本号 — 更新此值可强制刷新所有前端资源文件
     ''' </summary>
-    Private Shared _resourceVersion As String = "2026.07.18.2"
+    Private Shared _resourceVersion As String = "2026.09.19.1"
 
     ''' <summary>
     ''' 获取最后一次错误信息
@@ -115,6 +115,21 @@ Public Class ResourceExtractor
                 End If
             Next
             
+            ' Локальная справка (RU) — работает без интернета
+            Directory.CreateDirectory(Path.Combine(appDataPath, "help", "ru"))
+            Dim helpResources As New Dictionary(Of String, String) From {
+                {"help_ru_index", "index.html"},
+                {"help_ru_word", "word.html"},
+                {"help_ru_excel", "excel.html"},
+                {"help_ru_ppt", "ppt.html"}
+            }
+            For Each kvp In helpResources
+                Dim errMsg As String = ExtractResourceToFileFromManager(kvp.Key, kvp.Value, targetDir:=Path.Combine(appDataPath, "help", "ru"), rm:=rm)
+                If Not String.IsNullOrEmpty(errMsg) Then
+                    extractErrors.Add(errMsg)
+                End If
+            Next
+
             ' 如果有提取错误，记录但仍然返回路径（部分资源可能已成功）
             If extractErrors.Count > 0 Then
                 _lastError = String.Join(Environment.NewLine, extractErrors)

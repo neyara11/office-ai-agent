@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat</title>
+    <title>AI Чат</title>
     <!-- Third-party libraries - using virtual host officeai.local -->
     <script src="http://officeai.local/js/marked.min.js"></script>
     <script src="http://officeai.local/js/highlight.min.js"></script>
@@ -15,11 +15,11 @@
 <body>
     <div id="case-container">
         <div id="case-header" style="position:relative; background: linear-gradient(135deg, #4a6fa5 0%, #3d5a7c 100%); padding: 5px 25px; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); cursor:pointer;">
-            <h3 style="margin:0; font-size:1.3em; font-weight:400; letter-spacing:0.5px;">智能聊天模式说明</h3>
+            <h3 style="margin:0; font-size:1.3em; font-weight:400; letter-spacing:0.5px;">Описание режима интеллектуального чата</h3>
             <!-- 等待动画提示 -->
             <div id="loading-indicator" style="display:none; position:absolute; right:50px; top:50%; transform:translateY(-50%); align-items:center; gap:6px;">
                 <div class="loading-spinner" style="width:16px; height:16px; border:2px solid rgba(255,255,255,0.3); border-top-color:#fff; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
-                <span style="font-size:12px; color:rgba(255,255,255,0.9);">AI思考中...</span>
+                <span style="font-size:12px; color:rgba(255,255,255,0.9);">AI думает...</span>
             </div>
             <style>
                 @keyframes spin {
@@ -37,13 +37,13 @@
         </div>
         <div id="case-content" class="collapsed">
             <div id="case-info">
-                <p>1.试试按#号快速提问</p>
-                <p>2.会话已自动开启上下文，您可通过不断提问纠正AI的回答</p>
-                <p>3.使用前请配置大模型Api，<a href="https://cloud.siliconflow.cn/i/PGhr3knx" target="_blank">点此取免费额度</a></p>
-                <p>4.配置大模型提示词能够更快，更准确的得到你想要的答案</p>
-                <p>5.如果没解决你的痛点，<a href="https://jsj.top/f/OZJDfa" target="_blank">点击此处提出需求</a>，下个版本见</p>
-                <p>6.聊天记录存放在"当前用户/文档/OfficeAiAppData"目录下</p>
-                <p>7.当前版本:<span id="version">2.9.1</span>，<a href="https://www.officeso.cn" target="_blank">每月发布新功能</a></p>
+                <p>1. Быстрый вопрос — начните со знака #</p>
+                <p>2. Контекст диалога включён автоматически; уточняйте ответы AI новыми вопросами</p>
+                <p>3. Перед началом настройте API модели</p>
+                <p>4. Настройка промптов модели помогает быстрее получать нужные ответы</p>
+                <p>5. Если проблема не решена, оставьте пожелание — учтём в следующей версии</p>
+                <p>6. История чатов хранится в каталоге "текущий пользователь/документы/OfficeAiAppData"</p>
+                <p>7. Текущая версия: <span id="version">2.9.1</span> — новые функции выходят ежемесячно</p>
             </div>
         </div>
     </div>
@@ -58,26 +58,26 @@
         <div class="template-mode-header">
             <div class="template-mode-title">
                 <svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" /></svg>
-                <span id="resource-mode-title">选择排版资源</span>
+                <span id="resource-mode-title">Выбор ресурса оформления</span>
             </div>
             <div class="template-mode-actions">
                 <!-- <button class="template-action-btn small-btn" onclick="createNewTemplate()" id="btn-new-template" title="新建排版模板">
                     <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
                     新建
                 </button> -->
-                <button class="template-action-btn small-btn" onclick="saveCurrentDocumentAsTemplate()" id="btn-save-resource" title="保存左侧文档内容为排版模板">
+                <button class="template-action-btn small-btn" onclick="saveCurrentDocumentAsTemplate()" id="btn-save-resource" title="Сохранить содержимое документа слева как шаблон оформления">
                     <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" /></svg>
-                    保存
+                    Сохранить
                 </button>
-                <button class="template-action-btn small-btn" onclick="importTemplate()" id="btn-import-resource" title="从文件导入排版模板">
+                <button class="template-action-btn small-btn" onclick="importTemplate()" id="btn-import-resource" title="Импортировать шаблон оформления из файла">
                     <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" /></svg>
-                    导入
+                    Импорт
                 </button>
                 <button id="manage-templates-btn" class="template-action-btn small-btn manage-btn" onclick="toggleManageMode()">
                     <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" /></svg>
-                    管理
+                    Управление
                 </button>
-                <button id="exit-template-mode-btn" class="template-header-btn exit-btn">退出</button>
+                <button id="exit-template-mode-btn" class="template-header-btn exit-btn">Выход</button>
             </div>
         </div>
 
@@ -85,11 +85,11 @@
         <div class="resource-type-tabs">
             <button class="resource-tab active" data-type="template" onclick="switchResourceTab('template')">
                 <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" /></svg>
-                根据模板排版
+                Оформление по шаблону
             </button>
             <button class="resource-tab" data-type="styleguide" onclick="switchResourceTab('styleguide')">
                 <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" /></svg>
-                根据规范排版
+                Оформление по стандарту
             </button>
         </div>
 
@@ -101,28 +101,28 @@
         </div>
     </div>
 
-    <!-- 模板预览对话框 -->
+    <!-- Диалог предпросмотра шаблона -->
     <div id="template-preview-dialog" class="template-preview-overlay" style="display:none;">
         <div class="template-preview-dialog">
             <div class="template-preview-header">
-                <span>模板预览</span>
+                <span>Предпросмотр шаблона</span>
                 <button id="close-template-preview-btn" class="template-preview-close-btn" onclick="closeTemplatePreview()">&times;</button>
             </div>
             <div id="template-preview-content" class="template-preview-content">
                 <!-- 预览内容将在此处动态生成 -->
             </div>
             <div class="template-preview-footer">
-                <button id="preview-template-in-word-btn" class="template-preview-btn secondary">在Word中预览</button>
-                <button id="use-template-from-preview-btn" class="template-preview-btn primary">使用此模板</button>
+                <button id="preview-template-in-word-btn" class="template-preview-btn secondary">Просмотр в Word</button>
+                <button id="use-template-from-preview-btn" class="template-preview-btn primary">Использовать шаблон</button>
             </div>
         </div>
     </div>
 
-    <!-- 规范预览对话框 -->
+    <!-- Диалог предпросмотра стандарта -->
     <div id="styleguide-preview-dialog" class="styleguide-preview-overlay" style="display:none;">
         <div class="styleguide-preview-dialog" data-mode="view">
             <div class="styleguide-preview-header">
-                <span id="styleguide-preview-title">规范预览</span>
+                <span id="styleguide-preview-title">Предпросмотр стандарта</span>
                 <button class="styleguide-preview-close-btn" onclick="closeStyleGuidePreview()">&times;</button>
             </div>
             <div id="styleguide-preview-content" class="styleguide-preview-content">
@@ -130,20 +130,20 @@
             </div>
             <div id="styleguide-editor-container" class="styleguide-editor-container" style="display:none;">
                 <div class="styleguide-editor-pane">
-                    <label class="styleguide-editor-label">Markdown 源码</label>
+                    <label class="styleguide-editor-label">Исходный код Markdown</label>
                     <textarea id="styleguide-editor-input" class="styleguide-editor-textarea"></textarea>
                 </div>
                 <div class="styleguide-editor-pane">
-                    <label class="styleguide-editor-label">实时预览</label>
+                    <label class="styleguide-editor-label">Предпросмотр</label>
                     <div id="styleguide-editor-preview" class="styleguide-preview-content styleguide-editor-preview-area"></div>
                 </div>
             </div>
             <div class="styleguide-preview-footer">
-                <button id="styleguide-edit-btn" class="styleguide-preview-btn secondary" onclick="enterStyleGuideEditMode()">编辑</button>
-                <button class="styleguide-preview-btn secondary" onclick="closeStyleGuidePreview()">关闭</button>
-                <button id="styleguide-use-btn" class="styleguide-preview-btn primary" onclick="useStyleGuideFromPreview()">使用此规范</button>
-                <button id="styleguide-save-btn" class="styleguide-preview-btn primary" onclick="saveStyleGuideEdit()" style="display:none;">保存</button>
-                <button id="styleguide-cancel-edit-btn" class="styleguide-preview-btn secondary" onclick="cancelStyleGuideEditMode()" style="display:none;">取消编辑</button>
+                <button id="styleguide-edit-btn" class="styleguide-preview-btn secondary" onclick="enterStyleGuideEditMode()">Редактировать</button>
+                <button class="styleguide-preview-btn secondary" onclick="closeStyleGuidePreview()">Закрыть</button>
+                <button id="styleguide-use-btn" class="styleguide-preview-btn primary" onclick="useStyleGuideFromPreview()">Использовать стандарт</button>
+                <button id="styleguide-save-btn" class="styleguide-preview-btn primary" onclick="saveStyleGuideEdit()" style="display:none;">Сохранить</button>
+                <button id="styleguide-cancel-edit-btn" class="styleguide-preview-btn secondary" onclick="cancelStyleGuideEditMode()" style="display:none;">Отмена редактирования</button>
             </div>
         </div>
     </div>
@@ -156,7 +156,7 @@
             <div id="chat-input-inner">
                 <!-- 合并后的引用区域 -->
                 <div id="references-wrapper" style="display:none;">
-                    <span id="references-title" class="reference-section-title">引用:</span>
+                    <span id="references-title" class="reference-section-title">Ссылки:</span>
                     <div id="reference-chips-list" class="reference-chips-container">
                         <!-- 所有引用项（工作表内容和文件）将在此处动态添加 -->
                     </div>
@@ -169,8 +169,8 @@
                 <!-- 自动补全下拉列表 -->
                 <div id="autocomplete-dropdown" class="autocomplete-dropdown hidden">
                     <div class="autocomplete-header">
-                        <span>AI 建议</span>
-                        <span class="autocomplete-hint">Tab 采纳 · ↑↓ 切换 · Esc 关闭</span>
+                        <span>AI-подсказки</span>
+                        <span class="autocomplete-hint">Tab — принять · ↑↓ — выбор · Esc — закрыть</span>
                     </div>
                     <ul id="autocomplete-list"></ul>
                 </div>
@@ -178,14 +178,14 @@
                 <!-- 智能输入框容器 -->
                 <div class="smart-input-container">
                     <div id="smart-input" contenteditable="true" class="smart-input"
-                         data-placeholder="请在此输入您的问题... 按Enter键直接发送，Tab采纳补全"></div>
+                         data-placeholder="Введите вопрос... Enter — отправить, Tab — принять подсказку"></div>
                     <span id="ghost-text" class="ghost-text"></span>
                 </div>
-                <!-- 隐藏的textarea用于兼容现有发送逻辑 -->
-                <textarea id="chat-input" style="display:none;" placeholder="请在此输入您的问题..." rows="2"></textarea>
+                <!-- Скрытая textarea для совместимости с текущей логикой отправки -->
+                <textarea id="chat-input" style="display:none;" placeholder="Введите ваш вопрос..." rows="2"></textarea>
                 <div id="chat-input-actions">
 
-                    <button id="settings-button" title="设置" onclick="settingsButton()">
+                    <button id="settings-button" title="Настройки" onclick="settingsButton()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
@@ -193,43 +193,43 @@
                     </button>
 
                     <!-- 新增：附件按钮 -->
-                    <button id="attach-file-button" title="添加附件" style="padding: 4px;">
+                    <button id="attach-file-button" title="Добавить вложение" style="padding: 4px;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
                         </svg>
                     </button>
                     <input type="file" id="file-input" multiple style="display: none;" accept=".xls,.xlsx,.xlsm,.xlsb,.csv,.doc,.docx,.ppt,.pptx">
 
-                    <!-- 新增：AI续写按钮（默认隐藏，由Ribbon续写功能激活） -->
-                    <button id="continuation-button" title="AI续写" onclick="triggerContinuation(false)" style="padding: 4px; display: none;">
+                    <!-- Кнопка AI-продолжения (скрыта по умолчанию, активируется из Ribbon) -->
+                    <button id="continuation-button" title="AI-продолжение" onclick="triggerContinuation(false)" style="padding: 4px; display: none;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
 
-                    <button id="send-button" title="发送">
+                    <button id="send-button" title="Отправить">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
                             <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                         </svg>
                     </button>
 
-                    <!-- 取消正在发送的消息 -->
-                    <button id="stop-button" title="取消" onclick="stopButton()">
+                    <!-- Отмена отправляемого сообщения -->
+                    <button id="stop-button" title="Отмена" onclick="stopButton()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
                             <rect x="3" y="3" width="10" height="10" fill="white" rx="1"></rect>
                         </svg>
                     </button>
 
                     <!-- MCP 按钮 -->
-                    <button id="mcp-toggle-btn" title="配置MCP工具">
+                    <button id="mcp-toggle-btn" title="Настроить инструменты MCP">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                         </svg>
                     </button>
 
-                    <button id="clear-context-btn" title="清理记忆或聊天记录">
+                    <button id="clear-context-btn" title="Очистить память или историю">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 6h18"></path>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
@@ -239,8 +239,8 @@
                         </svg>
                     </button>
 
-                    <!-- 新增：历史记录按钮，放在取消按钮之后 -->
-                    <button id="history-toggle-btn" title="查看历史聊天记录">
+                    <!-- Кнопка истории размещена после кнопки отмены -->
+                    <button id="history-toggle-btn" title="История чатов">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
                             <polyline points="12,6 12,12 16,14"></polyline>
@@ -255,14 +255,14 @@
     <!-- MCP 配置弹窗 -->
     <div id="mcp-dialog">
         <div class="mcp-dialog-header">
-            <span class="mcp-dialog-title">MCP工具配置</span>
+            <span class="mcp-dialog-title">Настройка инструментов MCP</span>
             <button class="mcp-close-btn" id="mcp-close-btn">&times;</button>
         </div>
         <div id="mcp-list" class="mcp-list">
             <!-- MCP列表将在这里动态生成 -->
         </div>
         <div class="mcp-dialog-footer">
-            <button class="mcp-save-btn" id="mcp-save-btn">保存设置</button>
+            <button class="mcp-save-btn" id="mcp-save-btn">Сохранить настройки</button>
         </div>
     </div>
 
@@ -272,9 +272,9 @@
     <!-- 历史记录侧边栏 -->
     <div id="history-sidebar" class="sidebar-hidden">
         <div class="sidebar-header">
-            <h3>历史会话</h3>
-            <button id="new-session-btn" type="button" title="新会话" style="margin-right:8px; padding:4px 10px; background:#4a6fa5; color:white; border:none; border-radius:4px; cursor:pointer;">新会话</button>
-            <button id="close-sidebar-btn" title="关闭">×</button>
+            <h3>История сессий</h3>
+            <button id="new-session-btn" type="button" title="Новая сессия" style="margin-right:8px; padding:4px 10px; background:#4a6fa5; color:white; border:none; border-radius:4px; cursor:pointer;">Новая сессия</button>
+            <button id="close-sidebar-btn" title="Закрыть">×</button>
         </div>
         <div class="sidebar-content">
             <div id="history-list">
@@ -286,92 +286,92 @@
     <!-- 遮罩层 -->
     <div id="sidebar-overlay" class="overlay-hidden"></div>
 
-    <!-- 添加设置对话框 -->
+    <!-- Диалог добавления настроек -->
     <div class="overlay" id="settings-overlay"></div>
     <div class="settings-dialog" id="settings-dialog">
-        <div class="settings-title">AI对话设置</div>
+        <div class="settings-title">Настройки AI-диалога</div>
 
         <!-- 模型切换 -->
         <div class="setting-item" style="border-bottom: 1px solid #eee;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <label class="setting-label" style="float:left;">当前模型</label>
+                    <label class="setting-label" style="float:left;">Текущая модель</label>
                     <button onclick="openModelConfig()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 2px 10px;margin-left:20px; border-radius: 6px; cursor: pointer; font-size: 13px;">
-                        切换模型
+                        Сменить модель
                     </button>
-                    <div id="current-model-display" style="font-size: 12px; color: #666; margin-top: 4px;">加载中...</div>
+                    <div id="current-model-display" style="font-size: 12px; color: #666; margin-top: 4px;">Загрузка...</div>
                 </div>
             </div>
         </div>
 
         <div class="setting-item checkbox-item">
             <div>
-                <label class="setting-label">实时滚动对话内容</label>
+                <label class="setting-label">Автопрокрутка диалога</label>
                 <input type="checkbox" id="settings-scroll-checked">
             </div>
-            <div class="setting-tip">开启后会自动滚动到最新的对话内容</div>
+            <div class="setting-tip">Автоматически прокручивать к последнему сообщению</div>
         </div>
 
         <div class="setting-item checkbox-item">
             <div>
-                <label class="setting-label">引用选中内容</label>
+                <label class="setting-label">Ссылаться на выделенное</label>
                 <input type="checkbox" id="settings-selected-cell">
             </div>
-            <div class="setting-tip">开启后可以选择并引用工作表内容</div>
+            <div class="setting-tip">Позволяет выбирать и цитировать содержимое листа</div>
         </div>
 
         <div class="setting-item checkbox-item">
             <div>
-                <label class="setting-label">工作表变更预览</label>
+                <label class="setting-label">Предпросмотр изменений листа</label>
                 <input type="checkbox" id="settings-executecode-preview">
             </div>
-            <div class="setting-tip">开启后，Agent模式下可提前预览变更点，对比差异</div>
+            <div class="setting-tip">В режиме Agent показывает изменения до применения</div>
         </div>
 
-        <!-- AI智能补全设置已移至Ribbon区"大模型配置"组的"自动补全"按钮 -->
+        <!-- Настройки автодополнения перенесены в кнопку "Автодополнение" группы "Настройка модели" на Ribbon -->
         <div class="setting-item checkbox-item" style="display:none;">
             <div>
-                <label class="setting-label">AI智能补全</label>
+                <label class="setting-label">Умное автодополнение AI</label>
                 <input type="checkbox" id="settings-autocomplete-enable">
             </div>
-            <div class="setting-tip">开启后，输入时AI会自动识别意图并提供补全建议</div>
+            <div class="setting-tip">AI распознаёт намерение и предлагает дополнения при вводе</div>
         </div>
 
-        <!-- 补全快捷键设置已移至Ribbon区"大模型配置"组的"自动补全"按钮 -->
+        <!-- Настройки горячей клавиши автодополнения перенесены в кнопку "Автодополнение" группы "Настройка модели" на Ribbon -->
         <div class="setting-item" style="display:none;">
-            <label class="setting-label">补全快捷键</label>
+            <label class="setting-label">Горячая клавиша дополнения</label>
             <select id="settings-autocomplete-shortcut" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc;">
                 <option value="Ctrl+.">Ctrl + .</option>
                 <option value="Alt+/">Alt + /</option>
                 <option value="Ctrl+Enter">Ctrl + Enter</option>
                 <option value="Alt+Enter">Alt + Enter</option>
             </select>
-            <div class="setting-tip">选择接受补全建议的快捷键组合</div>
+            <div class="setting-tip">Выберите сочетание клавиш для принятия подсказки</div>
         </div>
 
         <div class="setting-item">
-            <label class="setting-label">话题随机性</label>
+            <label class="setting-label">Вариативность ответов</label>
             <div class="slider-container">
                 <input type="range" class="slider" id="topic-randomness" min="0.1" max="1.6" step="0.1" value="0.8">
                 <span class="slider-value" id="topic-randomness-value">0.8</span>
             </div>
-            <div class="setting-tip">较高的数值会使同问题每次输出的结果更随机</div>
+            <div class="setting-tip">Большие значения делают ответы более случайными</div>
         </div>
 
         <div class="setting-item">
-            <label class="setting-label">上下文数量限制</label>
+            <label class="setting-label">Ограничение контекста</label>
             <div class="slider-container">
                 <input type="range" class="slider" id="context-limit" min="1" max="10" value="5">
                 <span class="slider-value" id="context-limit-value">5</span>
             </div>
-            <div class="setting-tip">单条回复记录对话数，每次想让ai记住历史多少条对话</div>
+            <div class="setting-tip">Сколько последних сообщений учитывать в контексте</div>
         </div>
 
 
 
         <div class="settings-buttons">
-            <button class="settings-button cancel-button" id="settings-cancel" onclick="settingsCancel()">取消</button>
-            <button class="settings-button save-button" id="settings-save" onclick="settingsSave()">保存</button>
+            <button class="settings-button cancel-button" id="settings-cancel" onclick="settingsCancel()">Отмена</button>
+            <button class="settings-button save-button" id="settings-save" onclick="settingsSave()">Сохранить</button>
         </div>
     </div>
 
@@ -380,17 +380,17 @@
     <!-- 2. 修改弹窗内容为三选一 -->
     <div id="clear-or-delete-actions" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:999;">
         <div style="background:white; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,0.12); padding:18px 18px;">
-            <div style="font-size:15px; margin-bottom:16px;">选择你要进行的操作：</div>
-            <button id="action-clear-context" style="background: #4a6fa5; color: white; border: none; padding: 5px 5px; border-radius: 6px; margin-right: 10px; margin-bottom: 2px;">清空聊天上下文记忆</button>
-            <button id="action-delete-chat" style="background: #e9525f; color: white; border: none; padding: 5px 5px; border-radius: 6px; margin-right: 10px; margin-bottom: 2px; ">批量删除聊天记录</button>
-            <button id="action-cancel" style="background:#f5f5f5;color:#333;border:none;padding:5px 10px;border-radius:6px;">我可能点错了</button>
+            <div style="font-size:15px; margin-bottom:16px;">Выберите действие:</div>
+            <button id="action-clear-context" style="background: #4a6fa5; color: white; border: none; padding: 5px 5px; border-radius: 6px; margin-right: 10px; margin-bottom: 2px;">Очистить память контекста чата</button>
+            <button id="action-delete-chat" style="background: #e9525f; color: white; border: none; padding: 5px 5px; border-radius: 6px; margin-right: 10px; margin-bottom: 2px; ">Удалить историю чатов</button>
+            <button id="action-cancel" style="background:#f5f5f5;color:#333;border:none;padding:5px 10px;border-radius:6px;">Я ошибся</button>
         </div>
     </div>
 
     <!-- 删除聊天 -->
     <div id="delete-chat-actions" style="display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%); z-index:999;">
-        <button id="confirm-delete-chat" style="background:#e9525f;color:white;border:none;padding:6px 16px;border-radius:6px;margin-right:10px;">确定删除</button>
-        <button id="cancel-delete-chat" style="background:#f5f5f5;color:#333;border:none;padding:6px 16px;border-radius:6px;">取消</button>
+        <button id="confirm-delete-chat" style="background:#e9525f;color:white;border:none;padding:6px 16px;border-radius:6px;margin-right:10px;">Удалить</button>
+        <button id="cancel-delete-chat" style="background:#f5f5f5;color:#333;border:none;padding:6px 16px;border-radius:6px;">Отмена</button>
     </div>
 
     <!-- Custom JavaScript modules (order matters due to dependencies) - using virtual host officeai.local -->
@@ -415,7 +415,7 @@
 
     <!-- 工具函数 -->
     <script>
-        // 设置输入框文本（由VB.NET调用）
+        // Установка текста в поле ввода (вызывается из VB.NET)
         function setInputText(text) {
             var smartInput = document.getElementById('smart-input');
             if (smartInput) {

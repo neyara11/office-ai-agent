@@ -43,13 +43,13 @@ function renderMcpConnections(connections, enabledList, supported) {
 
     // Show warning if model doesn't support MCP
     if (!mcpSupported) {
-        mcpList.innerHTML = '<div class="mcp-warning">当前选择的模型不支持MCP功能。</div>';
+        mcpList.innerHTML = '<div class="mcp-warning">Выбранная модель не поддерживает MCP.</div>';
         return;
     }
 
     // Show message if no connections available
     if (!connections || connections.length === 0) {
-        mcpList.innerHTML = '<div class="mcp-warning">没有可用的MCP连接。请先配置MCP连接。</div>';
+        mcpList.innerHTML = '<div class="mcp-warning">Нет доступных подключений MCP. Сначала настройте подключение MCP.</div>';
         return;
     }
 
@@ -96,7 +96,7 @@ function renderMcpConnections(connections, enabledList, supported) {
         const typeInfo = document.createElement('div');
         typeInfo.className = 'mcp-item-description';
         const connectionType = connection.command ? "Stdio" : "HTTP";
-        const connectionUrl = connection.baseUrl || (connection.command ? `${connection.command} ${connection.args.join(' ')}` : "未知URL");
+        const connectionUrl = connection.baseUrl || (connection.command ? `${connection.command} ${connection.args.join(' ')}` : "Неизвестный URL");
         typeInfo.textContent = `${connectionType}: ${connectionUrl}`;
 
         // Assemble item

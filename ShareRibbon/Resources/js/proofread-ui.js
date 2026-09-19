@@ -27,11 +27,11 @@ function showProofreadSidePanel() {
     panel.innerHTML = '<div class="proofread-panel-header">' +
         '<div class="proofread-panel-title">' +
         '<span class="proofread-panel-icon">✓</span>' +
-        '<span>AI校对</span>' +
+        '<span>AI-корректура</span>' +
         '</div>' +
         '<div class="proofread-panel-actions">' +
-        '<button class="proofread-panel-action" title="折叠/展开" onclick="toggleProofreadPanelCollapse()">‹</button>' +
-        '<button class="proofread-panel-action" title="退出校对" onclick="proofreadExit()">×</button>' +
+        '<button class="proofread-panel-action" title="Свернуть/развернуть" onclick="toggleProofreadPanelCollapse()">‹</button>' +
+        '<button class="proofread-panel-action" title="Выйти из корректуры" onclick="proofreadExit()">×</button>' +
         '</div>' +
         '</div>' +
         '<div class="proofread-plan-summary" id="proofread-plan-summary"></div>' +
@@ -152,13 +152,13 @@ function proofreadAcceptAll() {
     if (content) {
         content.innerHTML = '<div class="proofread-success">' +
             '<span class="success-icon">🎉</span>' +
-            '<span class="success-text">所有问题已修正！</span>' +
+            '<span class="success-text">Все проблемы исправлены!</span>' +
             '</div>';
     }
 }
 
 /**
- * 退出校对模式
+ * Режим выхода из корректуры
  */
 function proofreadExit() {
     var payload = {
@@ -198,10 +198,10 @@ function updateProofreadSummary(total, high, medium, low) {
     // 查找现有摘要元素
     var existingSummary = document.getElementById('proofread-summary');
     if (existingSummary) {
-        existingSummary.innerHTML = '共 ' + total + ' 处问题（' +
-            '<span class="high">' + high + '处必须修改</span>，' +
-            '<span class="medium">' + medium + '处建议修改</span>，' +
-            '<span class="low">' + low + '处可选优化</span>）';
+        existingSummary.innerHTML = 'Всего ' + total + ' проблем (' +
+            '<span class="high">' + high + ' — к исправлению</span>，' +
+            '<span class="medium">' + medium + ' — рекомендуется исправить</span>，' +
+            '<span class="low">' + low + ' — необязательно</span>)';
     }
 }
 
@@ -213,9 +213,9 @@ function showProofreadNoIssues() {
     if (content) {
         content.innerHTML = '<div class="proofread-success">' +
             '<span class="success-icon">✅</span>' +
-            '<span class="success-text">没有发现问题！</span>' +
-            '<p class="success-hint">您的文档没有需要修改的内容。</p>' +
-            '<button class="proofread-btn secondary" onclick="proofreadExit()">退出校对</button>' +
+            '<span class="success-text">Проблем не найдено!</span>' +
+            '<p class="success-hint">В документе нет изменений, требующих правки.</p>' +
+            '<button class="proofread-btn secondary" onclick="proofreadExit()">Выйти из корректуры</button>' +
             '</div>';
     }
 }
@@ -234,12 +234,12 @@ function updateProofreadPlanSummary(planText) {
     }
 
     summary.style.display = 'block';
-    summary.innerHTML = '<div class="proofread-plan-label">本轮计划</div>' +
+    summary.innerHTML = '<div class="proofread-plan-label">План этого шага</div>' +
         '<div class="proofread-plan-text">' + escapeProofreadHtml(planText).replace(/\n/g, '<br>') + '</div>';
 }
 
 /**
- * 折叠/展开校对面板
+ * Свернуть/развернуть панель корректуры
  */
 function toggleProofreadPanelCollapse() {
     var panel = document.getElementById('proofread-side-panel');
@@ -260,20 +260,20 @@ function showProofreadParseError(payload) {
     if (!content) return;
 
     payload = payload || {};
-    var errorMessage = escapeProofreadHtml(payload.errorMessage || 'AI 返回格式异常，无法生成校对列表。');
+    var errorMessage = escapeProofreadHtml(payload.errorMessage || 'AI вернул неверный формат, не удалось построить список правок.');
     var rawPreview = escapeProofreadHtml(payload.rawPreview || '');
     var rawBlock = rawPreview
         ? '<pre class="proofread-error-raw">' + rawPreview + '</pre>'
-        : '<p class="proofread-error-hint">本次没有可展示的原始响应。</p>';
+        : '<p class="proofread-error-hint">Исходный ответ для показа отсутствует.</p>';
 
     content.innerHTML = '<div class="proofread-error">' +
         '<span class="error-icon">⚠️</span>' +
-        '<span class="error-title">校对结果解析失败</span>' +
+        '<span class="error-title">Не удалось разобрать результат корректуры</span>' +
         '<p class="error-message">' + errorMessage + '</p>' +
-        '<p class="proofread-error-hint">这通常表示 AI 没有按要求返回 JSON。文档尚未被修改。</p>' +
+        '<p class="proofread-error-hint">Обычно это значит, что AI не вернул JSON по требованиям. Документ не изменён.</p>' +
         rawBlock +
         '<div class="proofread-list-actions">' +
-        '<button class="proofread-btn secondary" onclick="proofreadExit()">退出校对</button>' +
+        '<button class="proofread-btn secondary" onclick="proofreadExit()">Выйти из корректуры</button>' +
         '</div>' +
         '</div>';
 }
@@ -295,8 +295,8 @@ function showProofreadAllCorrected() {
     if (content) {
         content.innerHTML = '<div class="proofread-success">' +
             '<span class="success-icon">🎉</span>' +
-            '<span class="success-text">所有问题已修正完成！</span>' +
-            '<p class="success-hint">文档已全部修正，可以关闭校对面板了。</p>' +
+            '<span class="success-text">Все проблемы исправлены!</span>' +
+            '<p class="success-hint">Документ полностью исправлен, панель корректуры можно закрыть.</p>' +
             '</div>';
     }
 }

@@ -15,7 +15,7 @@ function openModelConfig() {
     } else if (window.vsto) {
         window.vsto.openApiConfigForm();
     } else {
-        alert('Unable to open configuration: communication interface not detected');
+        alert('Не удалось открыть настройки: интерфейс связи не найден');
     }
 }
 
@@ -33,7 +33,7 @@ function updateCurrentModelDisplay(platform, modelName) {
         } else if (modelName) {
             displayElement.textContent = modelName;
         } else {
-            displayElement.textContent = 'No model configured';
+            displayElement.textContent = 'Модель не настроена';
         }
     }
 }

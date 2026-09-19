@@ -1,6 +1,6 @@
 /**
  * agent-card.js - 统一 Agent UI 组件
- * 统一展示 Agent 计划、执行步骤、审批和执行解释
+ * Единое отображение плана Agent, шагов выполнения, подтверждений иПояснение выполнения
  * 支持 ReAct 循环展示：Think → Action → Observation
  */
 
@@ -23,7 +23,7 @@ function lockChatInput() {
     if (smartInput) {
         smartInput.contentEditable = 'false';
         smartInput.classList.add('input-locked');
-        smartInput.dataset.placeholder = 'Agent 执行中，请等待完成或点击终止...';
+        smartInput.dataset.placeholder = 'Agent выполняется, дождитесь завершения или нажмите «Стоп»...';
     }
     if (chatInput) chatInput.disabled = true;
     if (sendBtn) sendBtn.disabled = true;
@@ -41,7 +41,7 @@ function unlockChatInput() {
     if (smartInput) {
         smartInput.contentEditable = 'true';
         smartInput.classList.remove('input-locked');
-        smartInput.dataset.placeholder = '请在此输入您的问题... 按Enter键直接发送，Tab采纳补全';
+        smartInput.dataset.placeholder = 'Введите вопрос... Enter — отправить, Tab — принять подсказку';
     }
     if (chatInput) chatInput.disabled = false;
     if (sendBtn) sendBtn.disabled = false;
@@ -124,39 +124,39 @@ function showAgentPlanCard(planData) {
             <div class="message-header">
                 <div class="avatar-ai">AI</div>
                 <div class="sender-info">
-                    <div class="sender-name">Agent <span class="agent-badge">自动执行</span></div>
+                    <div class="sender-name">Agent <span class="agent-badge">Авто-выполнение</span></div>
                     <div class="timestamp">${timestamp}</div>
                 </div>
             </div>
             <div class="message-content agent-plan-content">
                 <div class="agent-understanding">
-                    <strong>📋 理解：</strong>${escapeHtml(planData.understanding || '')}
+                    <strong>📋 Понимание:</strong>${escapeHtml(planData.understanding || '')}
                 </div>
                 <div class="agent-steps-container">
                     <div class="agent-steps-header">
-                        <span>📝 执行计划</span>
-                        <span class="agent-step-count">${planData.steps ? planData.steps.length : 0} 个步骤</span>
+                        <span>📝 План выполнения</span>
+                        <span class="agent-step-count">${planData.steps ? planData.steps.length : 0} шагов</span>
                     </div>
                     <div class="agent-steps-list" id="agent-steps-${uuid}">
                         ${stepsHtml}
                     </div>
                 </div>
                 <div class="agent-summary">
-                    <strong>🎯 预期结果：</strong>${escapeHtml(planData.summary || '')}
+                    <strong>🎯 Ожидаемый результат:</strong>${escapeHtml(planData.summary || '')}
                 </div>
                 <div class="agent-actions" id="agent-actions-${uuid}">
                     <button class="agent-btn agent-btn-execute" onclick="confirmAgentExecution('${uuid}')">
-                        ▶ 开始执行
+                        ▶ Начать выполнение
                     </button>
-                    <button class="agent-btn agent-btn-refine" onclick="refineAgentPlan('${uuid}')">🔄 修改计划</button>
+                    <button class="agent-btn agent-btn-refine" onclick="refineAgentPlan('${uuid}')">🔄 Изменить план</button>
                     <button class="agent-btn agent-btn-abort" onclick="abortAgent('${uuid}')">
-                        ✖ 取消
+                        ✖ Отмена
                     </button>
                 </div>
             </div>
             <div class="agent-status-bar" id="agent-status-${uuid}">
                 <span class="status-icon">⏸</span>
-                <span class="status-text">等待确认执行</span>
+                <span class="status-text">Ожидание подтверждения</span>
             </div>
         `;
 
@@ -172,7 +172,7 @@ function showAgentPlanCard(planData) {
 
         window.agentCardState.session.uuid = uuid;
 
-        // 如果是简单任务（自动执行），自动点击执行
+        // Если задача простая (авто-выполнение), нажать выполнение автоматически
         if (planData.autoExecute) {
             setTimeout(() => confirmAgentExecution(uuid), 500);
         }
@@ -276,22 +276,22 @@ function buildIterationHtml(iteration) {
     return `
         <div class="react-iteration">
             <div class="iteration-thought">
-                <span class="iteration-label">💭 思考</span>
+                <span class="iteration-label">💭 Размышление</span>
                 <div class="iteration-content">${thought}</div>
             </div>
             ${action ? `
             <div class="iteration-action">
-                <span class="iteration-label">🔧 行动</span>
+                <span class="iteration-label">🔧 Действие</span>
                 <div class="iteration-content"><code>${action}</code></div>
             </div>` : ''}
             ${observation ? `
             <div class="iteration-observation">
-                <span class="iteration-label">👁 观察</span>
+                <span class="iteration-label">👁 Наблюдение</span>
                 <div class="iteration-content">${observation}</div>
             </div>` : ''}
             ${explanationText ? `
             <div class="iteration-explanation">
-                <span class="iteration-label">执行解释</span>
+                <span class="iteration-label">Пояснение выполнения</span>
                 <div class="iteration-content">${explanationText}</div>
             </div>` : ''}
         </div>
@@ -299,7 +299,7 @@ function buildIterationHtml(iteration) {
 }
 
 /**
- * 显示单步执行解释
+ * Показать пошаговое пояснение выполнения
  * @param {string} sessionId - 会话 ID
  * @param {Object} explanation - ExecutionExplanation
  */
@@ -338,20 +338,20 @@ function showAgentExecutionExplanation(sessionId, explanation) {
         explanationEl.innerHTML = `
             <summary>${escapeHtml(text)}</summary>
             <div class="step-explanation-meta">
-                ${toolId ? `<div><strong>工具</strong> <code>${escapeHtml(toolId)}</code></div>` : ''}
-                ${category ? `<div><strong>类别</strong> ${escapeHtml(category)}</div>` : ''}
-                ${elapsedMs ? `<div><strong>耗时</strong> ${Number(elapsedMs).toLocaleString()} ms</div>` : ''}
+                ${toolId ? `<div><strong>Инструмент</strong> <code>${escapeHtml(toolId)}</code></div>` : ''}
+                ${category ? `<div><strong>Категория</strong> ${escapeHtml(category)}</div>` : ''}
+                ${elapsedMs ? `<div><strong>Время</strong> ${Number(elapsedMs).toLocaleString()} ms</div>` : ''}
                 ${skillName ? `<div><strong>Skill</strong> ${escapeHtml(skillName)}</div>` : ''}
-                ${scriptFileName ? `<div><strong>脚本</strong> <code>${escapeHtml(scriptFileName)}</code></div>` : ''}
+                ${scriptFileName ? `<div><strong>Скрипт</strong> <code>${escapeHtml(scriptFileName)}</code></div>` : ''}
                 ${mcpToolName ? `<div><strong>MCP</strong> <code>${escapeHtml(mcpToolName)}</code>${mcpStatus ? ' ' + escapeHtml(mcpStatus) : ''}</div>` : ''}
-                ${risk ? `<div><strong>风险</strong> ${escapeHtml(risk)}</div>` : ''}
-                ${beforeSummary ? `<div><strong>执行前</strong> ${escapeHtml(beforeSummary)}</div>` : ''}
-                ${afterSummary ? `<div><strong>执行后</strong> ${escapeHtml(afterSummary)}</div>` : ''}
-                ${fixed ? `<div><strong>自动修复</strong> ${fixed} 次</div>` : ''}
-                ${autoRepairSummary ? `<div><strong>修复结果</strong> ${escapeHtml(autoRepairSummary)}</div>` : ''}
-                ${undoPointName ? `<div><strong>撤销点</strong> ${escapeHtml(undoPointName)}${canUndo === false ? ' <span>(需手动撤销)</span>' : ''}</div>` : ''}
-                ${undoHint ? `<div><strong>撤销提示</strong> ${escapeHtml(undoHint)}</div>` : ''}
-                ${failureReason ? `<div><strong>失败原因</strong> ${escapeHtml(failureReason)}</div>` : ''}
+                ${risk ? `<div><strong>Риск</strong> ${escapeHtml(risk)}</div>` : ''}
+                ${beforeSummary ? `<div><strong>До</strong> ${escapeHtml(beforeSummary)}</div>` : ''}
+                ${afterSummary ? `<div><strong>После</strong> ${escapeHtml(afterSummary)}</div>` : ''}
+                ${fixed ? `<div><strong>Авто-исправление</strong> ${fixed} раз</div>` : ''}
+                ${autoRepairSummary ? `<div><strong>Результат исправления</strong> ${escapeHtml(autoRepairSummary)}</div>` : ''}
+                ${undoPointName ? `<div><strong>Точка отмены</strong> ${escapeHtml(undoPointName)}${canUndo === false ? ' <span>(отменить вручную)</span>' : ''}</div>` : ''}
+                ${undoHint ? `<div><strong>Подсказка отмены</strong> ${escapeHtml(undoHint)}</div>` : ''}
+                ${failureReason ? `<div><strong>Причина сбоя</strong> ${escapeHtml(failureReason)}</div>` : ''}
                 ${paramsJson ? `<pre>${escapeHtml(paramsJson)}</pre>` : ''}
             </div>
         `;
@@ -373,12 +373,12 @@ function showAgentApproval(sessionId, message) {
             actionsEl.innerHTML = `
                 <div class="agent-approval-request">
                     <span class="approval-msg">${escapeHtml(message)}</span>
-                    <button class="agent-btn agent-btn-execute" onclick="agentApprove('${sessionId}')">✅ 确认</button>
-                    <button class="agent-btn agent-btn-abort" onclick="agentReject('${sessionId}')">❌ 跳过</button>
+                    <button class="agent-btn agent-btn-execute" onclick="agentApprove('${sessionId}')">✅ Подтвердить</button>
+                    <button class="agent-btn agent-btn-abort" onclick="agentReject('${sessionId}')">❌ Пропустить</button>
                 </div>
             `;
         }
-        updateAgentStatus(sessionId, 'waitingApproval', '等待用户确认...');
+        updateAgentStatus(sessionId, 'waitingApproval', 'Ожидание подтверждения пользователя...');
     } catch (err) {
         console.error('showAgentApproval error:', err);
     }
@@ -390,19 +390,19 @@ function showAgentApproval(sessionId, message) {
 function confirmAgentExecution(uuid) {
     const executeBtn = document.querySelector(`[onclick="confirmAgentExecution('${uuid}')"]`);
     const abortBtn = document.querySelector(`[onclick="abortAgent('${uuid}')"]`);
-    if (executeBtn) { executeBtn.disabled = true; executeBtn.textContent = '⏳ 执行中...'; }
+    if (executeBtn) { executeBtn.disabled = true; executeBtn.textContent = '⏳ Выполняется...'; }
     if (abortBtn) { abortBtn.disabled = true; }
 
     const actions = document.getElementById('agent-actions-' + uuid);
     if (actions) {
         actions.innerHTML = `
             <button class="agent-btn agent-btn-abort" onclick="abortAgent('${uuid}')">
-                ⏹ 终止执行
+                ⏹ Остановить
             </button>
         `;
     }
 
-    updateAgentStatus(uuid, 'running', '正在执行...');
+    updateAgentStatus(uuid, 'running', 'Выполняется...');
     requestApprove(uuid);
 }
 
@@ -424,7 +424,7 @@ function agentReject(sessionId) {
  * 修改 Agent 计划
  */
 function refineAgentPlan(uuid) {
-    const feedback = prompt('请输入修改意见：');
+    const feedback = prompt('Введите замечания к плану:');
     if (feedback && feedback.trim()) {
         requestRefinePlan(uuid, feedback.trim());
     }
@@ -434,10 +434,10 @@ function refineAgentPlan(uuid) {
  * 终止 Agent
  */
 function abortAgent(uuid) {
-    updateAgentStatus(uuid, 'aborted', '已终止');
+    updateAgentStatus(uuid, 'aborted', 'Остановлено');
     const actions = document.getElementById('agent-actions-' + uuid);
     if (actions) {
-        actions.innerHTML = '<span class="agent-terminated">已终止</span>';
+        actions.innerHTML = '<span class="agent-terminated">Остановлено</span>';
     }
     requestAbortAgent();
     restoreAgentRequestUi();
@@ -479,7 +479,7 @@ function completeAgent(uuid, success, message, thinkingUuid) {
         const statusBar = document.getElementById('agent-status-' + uuid);
         if (statusBar) {
             const icon = success ? '✅' : '❌';
-            const text = success ? '任务完成' : '任务失败';
+            const text = success ? 'Задача выполнена' : 'Задача не выполнена';
             statusBar.innerHTML = `
                 <span class="status-icon">${icon}</span>
                 <span class="status-text">${text}${message ? ': ' + escapeHtml(message) : ''}</span>
@@ -488,7 +488,7 @@ function completeAgent(uuid, success, message, thinkingUuid) {
 
         const actions = document.getElementById('agent-actions-' + uuid);
         if (actions) {
-            actions.innerHTML = `<span class="agent-finished">${success ? '✅ 已完成' : '❌ 已失败'}</span>`;
+            actions.innerHTML = `<span class="agent-finished">${success ? '✅ Готово' : '❌ Ошибка'}</span>`;
         }
 
         // 没有生成 plan card 时，状态仍显示在最初的 thinking 消息中。
@@ -496,7 +496,7 @@ function completeAgent(uuid, success, message, thinkingUuid) {
             const thinkingDiv = document.getElementById('content-' + thinkingUuid);
             if (thinkingDiv) {
                 const icon = success ? '✅' : '❌';
-                const text = success ? '任务完成' : '任务失败';
+                const text = success ? 'Задача выполнена' : 'Задача не выполнена';
                 thinkingDiv.innerHTML = `<div class="agent-terminal-message ${success ? 'success' : 'failed'}">` +
                     `<span class="status-icon">${icon}</span>` +
                     `<span class="status-text">${text}${message ? ': ' + escapeHtml(message) : ''}</span>` +

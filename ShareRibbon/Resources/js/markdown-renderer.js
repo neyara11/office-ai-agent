@@ -114,18 +114,18 @@ class MarkdownStreamRenderer {
         const templateJson = JSON.stringify(template);
         const escapedJson = templateJson.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         
-        // 构建版式元素列表
+        // Построение списка элементов макета
         let layoutElementsHtml = '';
         if (template.Layout && template.Layout.Elements && template.Layout.Elements.length > 0) {
             const elements = template.Layout.Elements.slice(0, 5); // 最多显示5个
             layoutElementsHtml = elements.map(el => 
-                `<span class="template-card-tag">${this._escapeHtml(el.Name || el.ElementType || '元素')}</span>`
+                `<span class="template-card-tag">${this._escapeHtml(el.Name || el.ElementType || 'элемент')}</span>`
             ).join('');
             if (template.Layout.Elements.length > 5) {
                 layoutElementsHtml += `<span class="template-card-tag template-card-tag-more">+${template.Layout.Elements.length - 5}</span>`;
             }
         } else {
-            layoutElementsHtml = '<span class="template-card-tag template-card-tag-empty">无版式元素</span>';
+            layoutElementsHtml = '<span class="template-card-tag template-card-tag-empty">Нет элементов макета</span>';
         }
         
         // 构建样式规则列表
@@ -133,29 +133,29 @@ class MarkdownStreamRenderer {
         if (template.BodyStyles && template.BodyStyles.length > 0) {
             const styles = template.BodyStyles.slice(0, 4); // 最多显示4个
             bodyStylesHtml = styles.map(style => 
-                `<span class="template-card-tag">${this._escapeHtml(style.RuleName || '样式')}</span>`
+                `<span class="template-card-tag">${this._escapeHtml(style.RuleName || 'стиль')}</span>`
             ).join('');
             if (template.BodyStyles.length > 4) {
                 bodyStylesHtml += `<span class="template-card-tag template-card-tag-more">+${template.BodyStyles.length - 4}</span>`;
             }
         } else {
-            bodyStylesHtml = '<span class="template-card-tag template-card-tag-empty">无样式规则</span>';
+            bodyStylesHtml = '<span class="template-card-tag template-card-tag-empty">Нет правил стилей</span>';
         }
         
-        // 构建页面设置摘要
+        // Построение сводки параметров страницы
         let pageSettingsHtml = '';
         if (template.PageSettings) {
             const ps = template.PageSettings;
             const items = [];
             if (ps.Margins) {
-                items.push(`边距: ${ps.Margins.Top || 2.54}/${ps.Margins.Bottom || 2.54}/${ps.Margins.Left || 3.18}/${ps.Margins.Right || 3.18}cm`);
+                items.push(`Поля: ${ps.Margins.Top || 2.54}/${ps.Margins.Bottom || 2.54}/${ps.Margins.Left || 3.18}/${ps.Margins.Right || 3.18}cm`);
             }
             if (ps.PageNumber && ps.PageNumber.Enabled) {
-                items.push('页码: 开启');
+                items.push('Нумерация: вкл.');
             }
             pageSettingsHtml = items.length > 0 
                 ? items.map(item => `<span class="template-card-info">${item}</span>`).join('')
-                : '<span class="template-card-info">默认设置</span>';
+                : '<span class="template-card-info">Настройки по умолчанию</span>';
         }
 
         return `
@@ -171,23 +171,23 @@ class MarkdownStreamRenderer {
                     </svg>
                 </div>
                 <div class="template-card-title-area">
-                    <div class="template-card-title">${this._escapeHtml(template.Name || '未命名模板')}</div>
-                    <div class="template-card-category">${this._escapeHtml(template.Category || '通用')} · ${this._escapeHtml(template.TargetApp || 'Word')}</div>
+                    <div class="template-card-title">${this._escapeHtml(template.Name || 'Безымянный шаблон')}</div>
+                    <div class="template-card-category">${this._escapeHtml(template.Category || 'Общее')} · ${this._escapeHtml(template.TargetApp || 'Word')}</div>
                 </div>
             </div>
             ${template.Description ? `<div class="template-card-desc">${this._escapeHtml(template.Description)}</div>` : ''}
             <div class="template-card-content">
                 <div class="template-card-section">
-                    <div class="template-card-section-title">版式元素</div>
+                    <div class="template-card-section-title">Элементы макета</div>
                     <div class="template-card-tags">${layoutElementsHtml}</div>
                 </div>
                 <div class="template-card-section">
-                    <div class="template-card-section-title">正文样式</div>
+                    <div class="template-card-section-title">Стили текста</div>
                     <div class="template-card-tags">${bodyStylesHtml}</div>
                 </div>
                 ${pageSettingsHtml ? `
                 <div class="template-card-section">
-                    <div class="template-card-section-title">页面设置</div>
+                    <div class="template-card-section-title">Параметры страницы</div>
                     <div class="template-card-infos">${pageSettingsHtml}</div>
                 </div>
                 ` : ''}
@@ -199,21 +199,21 @@ class MarkdownStreamRenderer {
                         <polyline points="17 21 17 13 7 13 7 21"></polyline>
                         <polyline points="7 3 7 8 15 8"></polyline>
                     </svg>
-                    保存模板
+                    Сохранить шаблон
                 </button>
                 <button class="template-card-btn" onclick="TemplateCardActions.preview('${escapedJson}')">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                         <circle cx="12" cy="12" r="3"></circle>
                     </svg>
-                    预览效果
+                    Предпросмотр
                 </button>
                 <button class="template-card-btn" onclick="TemplateCardActions.toggleJson(this)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="16 18 22 12 16 6"></polyline>
                         <polyline points="8 6 2 12 8 18"></polyline>
                     </svg>
-                    查看JSON
+                    Показать JSON
                 </button>
             </div>
             <div class="template-card-json-panel" style="display: none;">
@@ -241,7 +241,7 @@ class MarkdownStreamRenderer {
  */
 const TemplateCardActions = {
     /**
-     * 保存模板
+     * Сохранить шаблон
      */
     save(templateJson) {
         try {
@@ -254,11 +254,11 @@ const TemplateCardActions = {
                 });
             } else {
                 console.warn('[TemplateCardActions.save] WebView2不可用');
-                alert('保存功能需要在Office插件中运行');
+                alert('Сохранение доступно только в надстройке Office');
             }
         } catch (e) {
             console.error('[TemplateCardActions.save] 解析模板失败:', e);
-            alert('模板数据解析失败');
+            alert('Не удалось разобрать данные шаблона');
         }
     },
 
@@ -276,11 +276,11 @@ const TemplateCardActions = {
                 });
             } else {
                 console.warn('[TemplateCardActions.preview] WebView2不可用');
-                alert('预览功能需要在Office插件中运行');
+                alert('Предпросмотр доступен только в надстройке Office');
             }
         } catch (e) {
             console.error('[TemplateCardActions.preview] 解析模板失败:', e);
-            alert('模板数据解析失败');
+            alert('Не удалось разобрать данные шаблона');
         }
     },
 
@@ -298,12 +298,12 @@ const TemplateCardActions = {
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
                </svg>
-               隐藏JSON`
+               Скрыть JSON`
             : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="16 18 22 12 16 6"></polyline>
                 <polyline points="8 6 2 12 8 18"></polyline>
                </svg>
-               查看JSON`;
+               Показать JSON`;
         
         // 应用代码高亮
         if (isHidden) {

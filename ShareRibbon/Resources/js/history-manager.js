@@ -76,7 +76,7 @@ window.historyManager = {
         const historyList = document.getElementById('history-list');
 
         // Show loading state
-        historyList.innerHTML = '<div class="loading-state">正在加载历史记录...</div>';
+        historyList.innerHTML = '<div class="loading-state">Загрузка истории...</div>';
 
         // Request session list from backend (conversation/session_summary)
         this.sendMessageToVB({
@@ -92,7 +92,7 @@ window.historyManager = {
             historyList.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-state-icon">📄</div>
-                    <div class="empty-state-text">您还没有任何历史会话</div>
+                    <div class="empty-state-text">У вас пока нет истории сессий</div>
                 </div>
             `;
             return;
@@ -100,7 +100,7 @@ window.historyManager = {
 
         files.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
         const itemsHtml = files.map(s => {
-            const title = (s.title || '会话').replace(/'/g, "\\'");
+            const title = (s.title || 'Сессия').replace(/'/g, "\\'");
             const sid = (s.sessionId || '').replace(/'/g, "\\'");
             return `<div class="history-item" data-session-id="${s.sessionId}" onclick="historyManager.loadSession('${sid}')">
                 <div class="history-item-title">${this.escapeHtml(title)}</div>
@@ -118,7 +118,7 @@ window.historyManager = {
     },
 
     formatSessionDate: function (createdAt) {
-        if (!createdAt) return '未知时间';
+        if (!createdAt) return 'Неизвестное время';
         return String(createdAt).replace('T', ' ').substring(0, 19);
     },
 

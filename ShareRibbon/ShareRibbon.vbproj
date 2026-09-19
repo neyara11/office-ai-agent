@@ -531,6 +531,12 @@
     <None Include="Resources\chat-template-refactored.html" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\help\ru\index.html" />
+    <None Include="Resources\help\ru\word.html" />
+    <None Include="Resources\help\ru\excel.html" />
+    <None Include="Resources\help\ru\ppt.html" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\doubao_avatar.png" />
   </ItemGroup>
   <ItemGroup>

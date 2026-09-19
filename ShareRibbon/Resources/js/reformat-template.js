@@ -1,5 +1,5 @@
 ﻿/**
- * reformat-template.js - 排版模板选择模块
+ * reformat-template.js - модуль выбора шаблонов оформления
  * 处理模板列表显示、预览、选择和管理
  */
 
@@ -15,7 +15,7 @@ let selectedStyleGuideId = null;
 let currentCategory = '全部';
 // 是否处于管理模式
 let isManageMode = false;
-// 全局状态：是否处于排版模板选择模式（用于防止意外退出）
+// Глобальное состояние: режим выбора шаблонов оформления (защита от случайного выхода)
 window.reformatTemplateActive = false;
 // 当前资源类型 (template | styleguide | all)
 let currentResourceType = 'template';
@@ -48,7 +48,7 @@ window.enterReformatTemplateMode = function() {
     // WebView2 页面会复用 DOM；进入排版页时先清掉可能残留的旧智能排版面板。
     const wrapper = document.getElementById('template-cards-wrapper');
     if (wrapper) {
-        wrapper.innerHTML = '<div class="template-empty-hint">正在加载排版模板...</div>';
+        wrapper.innerHTML = '<div class="template-empty-hint">Загрузка шаблонов оформления...</div>';
     }
 
     // 重置状态
@@ -149,13 +149,13 @@ function updateResourceTabUI() {
     if (titleEl) {
         switch(currentResourceType) {
             case 'template':
-                titleEl.textContent = '选择排版模板';
+                titleEl.textContent = 'Выбор шаблона оформления';
                 break;
             case 'styleguide':
-                titleEl.textContent = '选择排版规范';
+                titleEl.textContent = 'Выбор стандарта оформления';
                 break;
             default:
-                titleEl.textContent = '选择排版资源';
+                titleEl.textContent = 'Выбор ресурса оформления';
         }
     }
     
@@ -179,11 +179,11 @@ function updateResourceTabUI() {
     if (btnImport) btnImport.style.display = '';
     if (btnManage) btnManage.style.display = '';
     if (currentResourceType === 'styleguide') {
-        if (btnSave) btnSave.title = '保存左侧内容为排版规范';
-        if (btnImport) btnImport.title = '从文件导入排版规范';
+        if (btnSave) btnSave.title = 'Сохранить содержимое слева как стандарт оформления';
+        if (btnImport) btnImport.title = 'Импортировать стандарт оформления из файла';
     } else {
-        if (btnSave) btnSave.title = '保存左侧文档内容为排版模板';
-        if (btnImport) btnImport.title = '从文件导入排版模板';
+        if (btnSave) btnSave.title = 'Сохранить содержимое документа слева как шаблон оформления';
+        if (btnImport) btnImport.title = 'Импортировать шаблон оформления из файла';
     }
 }
 
@@ -215,8 +215,8 @@ function renderMixedResources(templates, guides) {
         templateSection.className = 'template-section';
         templateSection.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">排版模板</span>
-                <span class="template-section-count">${templates.length}个</span>
+                <span class="template-section-title">Шаблоны оформления</span>
+                <span class="template-section-count">${templates.length} шт.</span>
             </div>
             <div class="template-section-cards"></div>
         `;
@@ -233,8 +233,8 @@ function renderMixedResources(templates, guides) {
         guideSection.className = 'template-section styleguide-section';
         guideSection.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">排版规范</span>
-                <span class="template-section-count">${guides.length}个</span>
+                <span class="template-section-title">Стандарты оформления</span>
+                <span class="template-section-count">${guides.length} шт.</span>
             </div>
             <div class="template-section-cards"></div>
         `;
@@ -246,7 +246,7 @@ function renderMixedResources(templates, guides) {
     }
     
     if (templates.length === 0 && guides.length === 0) {
-        wrapper.innerHTML = '<div class="template-empty-hint">暂无资源</div>';
+        wrapper.innerHTML = '<div class="template-empty-hint">Нет ресурсов</div>';
     }
 }
 
@@ -261,29 +261,29 @@ function renderStyleGuideCards(guides) {
     wrapper.innerHTML = '';
     
     if (guides.length === 0) {
-        wrapper.innerHTML = '<div class="template-empty-hint">暂无排版规范，点击"上传规范"添加</div>';
+        wrapper.innerHTML = '<div class="template-empty-hint">Стандартов оформления нет, нажмите «Загрузить стандарт»</div>';
         return;
     }
     
-    // 分离预置规范和自定义规范
+    // Разделение предустановленных и пользовательских стандартов
     const presetGuides = guides.filter(g => g.IsPreset);
     const customGuides = guides.filter(g => !g.IsPreset);
     
-    // 自定义规范按创建时间降序排序（新增的排在最上面）
+    // Пользовательские стандарты сортируются по времени создания (новые сверху)
     customGuides.sort((a, b) => {
         const timeA = a.CreatedAt ? new Date(a.CreatedAt).getTime() : 0;
         const timeB = b.CreatedAt ? new Date(b.CreatedAt).getTime() : 0;
         return timeB - timeA;
     });
     
-    // 自定义规范区域（放在前面，新增的排在最上面）
+    // Раздел пользовательских стандартов (впереди, новые сверху)
     if (customGuides.length > 0) {
         const customSection = document.createElement('div');
         customSection.className = 'template-section styleguide-section';
         customSection.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">自定义规范</span>
-                <span class="template-section-count">${customGuides.length}个</span>
+                <span class="template-section-title">Пользовательские стандарты</span>
+                <span class="template-section-count">${customGuides.length} шт.</span>
             </div>
             <div class="template-section-cards"></div>
         `;
@@ -300,8 +300,8 @@ function renderStyleGuideCards(guides) {
         presetSection.className = 'template-section styleguide-section';
         presetSection.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">系统规范</span>
-                <span class="template-section-count">${presetGuides.length}个</span>
+                <span class="template-section-title">Системные стандарты</span>
+                <span class="template-section-count">${presetGuides.length} шт.</span>
             </div>
             <div class="template-section-cards"></div>
         `;
@@ -326,23 +326,23 @@ function createStyleGuideCard(guide) {
     // 管理模式按钮
     const manageBtnsHtml = isManageMode ? `
         <div class="template-manage-btns">
-            <button class="template-manage-btn copy-btn" onclick="duplicateStyleGuide('${guide.Id}')" title="复制">
+            <button class="template-manage-btn copy-btn" onclick="duplicateStyleGuide('${guide.Id}')" title="Копировать">
                 <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             </button>
-            <button class="template-manage-btn delete-btn" onclick="deleteStyleGuide('${guide.Id}')" title="删除" ${guide.IsPreset ? 'disabled' : ''}>
+            <button class="template-manage-btn delete-btn" onclick="deleteStyleGuide('${guide.Id}')" title="Удалить" ${guide.IsPreset ? 'disabled' : ''}>
                 <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             </button>
-            <button class="template-manage-btn export-btn" onclick="exportStyleGuide('${guide.Id}')" title="导出">
+            <button class="template-manage-btn export-btn" onclick="exportStyleGuide('${guide.Id}')" title="Экспорт">
                 <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
             </button>
         </div>
     ` : '';
     
     // 预置标签
-    const presetBadge = guide.IsPreset ? '<span class="template-preset-badge styleguide-badge">预置</span>' : '';
+    const presetBadge = guide.IsPreset ? '<span class="template-preset-badge styleguide-badge">Предустановленный</span>' : '';
     
     // 内容摘要
-    const contentSummary = guide.ContentSummary || (guide.GuideContent ? guide.GuideContent.substring(0, 80) + '...' : '暂无内容');
+    const contentSummary = guide.ContentSummary || (guide.GuideContent ? guide.GuideContent.substring(0, 80) + '...' : 'Нет содержимого');
     
     card.innerHTML = `
         <div class="template-card-content">
@@ -359,11 +359,11 @@ function createStyleGuideCard(guide) {
         <div class="template-actions">
             <button class="template-btn preview-btn" onclick="previewStyleGuide('${guide.Id}')">
                 <svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                预览
+                Предпросмотр
             </button>
             <button class="template-btn use-btn" onclick="useStyleGuide('${guide.Id}')">
                 <svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                使用
+                Использовать
             </button>
         </div>
     `;
@@ -397,7 +397,7 @@ window.previewStyleGuide = function(guideId) {
     
     // 使用marked.js渲染Markdown
     try {
-        const htmlContent = marked.parse(guide.GuideContent || '暂无内容');
+        const htmlContent = marked.parse(guide.GuideContent || 'Нет содержимого');
         previewContent.innerHTML = htmlContent;
         
         // 应用代码高亮
@@ -408,7 +408,7 @@ window.previewStyleGuide = function(guideId) {
         });
     } catch (e) {
         console.error('[ReformatTemplate] Markdown渲染错误:', e);
-        previewContent.innerHTML = `<pre>${escapeHtml(guide.GuideContent || '暂无内容')}</pre>`;
+        previewContent.innerHTML = `<pre>${escapeHtml(guide.GuideContent || 'Нет содержимого')}</pre>`;
     }
     
     // 显示预览对话框
@@ -451,7 +451,7 @@ window.enterStyleGuideEditMode = function() {
     const guide = currentStyleGuides.find(g => g.Id === selectedStyleGuideId);
     if (!guide) return;
     if (guide.IsPreset) {
-        alert('预置规范不可编辑');
+        alert('Предустановленный стандарт нельзя редактировать');
         return;
     }
 
@@ -515,7 +515,7 @@ window.saveStyleGuideEdit = function() {
     const previewContent = document.getElementById('styleguide-preview-content');
     if (previewContent) {
         try {
-            previewContent.innerHTML = marked.parse(newContent || '暂无内容');
+            previewContent.innerHTML = marked.parse(newContent || 'Нет содержимого');
         } catch (e) {
             previewContent.innerHTML = `<pre>${escapeHtml(newContent)}</pre>`;
         }
@@ -626,11 +626,11 @@ window.deleteStyleGuide = function(guideId) {
     if (!guide) return;
     
     if (guide.IsPreset) {
-        alert('预置规范不可删除');
+        alert('Предустановленный стандарт нельзя удалить');
         return;
     }
     
-    if (!confirm(`确定要删除规范"${guide.Name}"吗？此操作不可恢复。`)) {
+    if (!confirm(`Удалить стандарт "${guide.Name}"? Действие необратимо.`)) {
         return;
     }
     
@@ -649,7 +649,7 @@ window.duplicateStyleGuide = function(guideId) {
     const guide = currentStyleGuides.find(g => g.Id === guideId);
     if (!guide) return;
     
-    const newName = prompt('请输入新规范名称:', guide.Name + ' (副本)');
+    const newName = prompt('Введите имя нового стандарта:', guide.Name + ' (копия)');
     if (newName === null) return;
     
     sendMessageToVB({
@@ -672,7 +672,7 @@ window.exportStyleGuide = function(guideId) {
     };
 
 /**
- * 渲染模板卡片 - 分系统模板和自定义模板两组显示
+ * Рендеринг карточек шаблонов: системные и пользовательские
  * @param {Array} templates - 模板数组
  * @param {string} filterCategory - 筛选分类
  */
@@ -688,29 +688,29 @@ function renderTemplateCards(templates, filterCategory = '全部') {
         : templates.filter(t => t.Category === filterCategory);
     
     if (filtered.length === 0) {
-        wrapper.innerHTML = '<div class="template-empty-hint">暂无模板</div>';
+        wrapper.innerHTML = '<div class="template-empty-hint">Нет шаблонов</div>';
         return;
     }
     
-    // 分离系统模板和自定义模板
+    // Разделение системных и пользовательских шаблонов
     const presetTemplates = filtered.filter(t => t.IsPreset);
     const customTemplates = filtered.filter(t => !t.IsPreset);
     
-    // 自定义模板按创建时间降序排序（新增的排在最上面）
+    // Пользовательские шаблоны сортируются по времени создания (новые сверху)
     customTemplates.sort((a, b) => {
         const timeA = a.CreatedAt ? new Date(a.CreatedAt).getTime() : 0;
         const timeB = b.CreatedAt ? new Date(b.CreatedAt).getTime() : 0;
         return timeB - timeA;
     });
     
-    // 自定义模板区域（放在前面，新增的排在最上面）
+    // Раздел пользовательских шаблонов (впереди, новые сверху)
     if (customTemplates.length > 0) {
         const customSection = document.createElement('div');
         customSection.className = 'template-section';
         customSection.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">自定义模板</span>
-                <span class="template-section-count">${customTemplates.length}个</span>
+                <span class="template-section-title">Пользовательские шаблоны</span>
+                <span class="template-section-count">${customTemplates.length} шт.</span>
             </div>
             <div class="template-section-cards"></div>
         `;
@@ -721,14 +721,14 @@ function renderTemplateCards(templates, filterCategory = '全部') {
         wrapper.appendChild(customSection);
     }
     
-    // 系统模板区域
+    // Раздел системных шаблонов
     if (presetTemplates.length > 0) {
         const presetSection = document.createElement('div');
         presetSection.className = 'template-section';
         presetSection.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">系统模板</span>
-                <span class="template-section-count">${presetTemplates.length}个</span>
+                <span class="template-section-title">Системные шаблоны</span>
+                <span class="template-section-count">${presetTemplates.length} шт.</span>
             </div>
             <div class="template-section-cards"></div>
         `;
@@ -738,15 +738,15 @@ function renderTemplateCards(templates, filterCategory = '全部') {
         });
         wrapper.appendChild(presetSection);
     } else if (customTemplates.length > 0) {
-        // 如果只有自定义模板，显示系统模板为空的提示
+        // Если есть только пользовательские шаблоны, показать, что системных нет
         const emptyPreset = document.createElement('div');
         emptyPreset.className = 'template-section';
         emptyPreset.innerHTML = `
             <div class="template-section-header">
-                <span class="template-section-title">系统模板</span>
-                <span class="template-section-count">0个</span>
+                <span class="template-section-title">Системные шаблоны</span>
+                <span class="template-section-count">0 шт.</span>
             </div>
-            <div class="template-empty-hint small">暂无系统模板</div>
+            <div class="template-empty-hint small">Системных шаблонов нет</div>
         `;
         wrapper.appendChild(emptyPreset);
     }
@@ -768,7 +768,7 @@ function createTemplateCard(template) {
         if (template.IsDocxMapping) {
             manageBtnsHtml = `
                 <div class="template-manage-btns">
-                    <button class="template-manage-btn delete-btn" onclick="deleteDocxMapping('${template.Id}')" title="删除">
+                    <button class="template-manage-btn delete-btn" onclick="deleteDocxMapping('${template.Id}')" title="Удалить">
                         <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
                 </div>
@@ -776,10 +776,10 @@ function createTemplateCard(template) {
         } else {
             manageBtnsHtml = `
                 <div class="template-manage-btns">
-                    <button class="template-manage-btn delete-btn" onclick="deleteTemplate('${template.Id}')" title="删除" ${template.IsPreset ? 'disabled' : ''}>
+                    <button class="template-manage-btn delete-btn" onclick="deleteTemplate('${template.Id}')" title="Удалить" ${template.IsPreset ? 'disabled' : ''}>
                         <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                     </button>
-                    <button class="template-manage-btn export-btn" onclick="exportTemplate('${template.Id}')" title="导出">
+                    <button class="template-manage-btn export-btn" onclick="exportTemplate('${template.Id}')" title="Экспорт">
                         <svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     </button>
                 </div>
@@ -787,12 +787,12 @@ function createTemplateCard(template) {
         }
     }
     
-    // 预置标签 / 文档提取标签
+    // Метка предустановленного / метка извлечения из документа
     let badge = '';
     if (template.IsDocxMapping) {
-        badge = '<span class="template-preset-badge" style="background:#38a169;color:#fff;">文档</span>';
+        badge = '<span class="template-preset-badge" style="background:#38a169;color:#fff;">Документ</span>';
     } else if (template.IsPreset) {
-        badge = '<span class="template-preset-badge">预置</span>';
+        badge = '<span class="template-preset-badge">Предустановленный</span>';
     }
     
     card.innerHTML = `
@@ -803,17 +803,17 @@ function createTemplateCard(template) {
                     ${badge}
                 </div>
             </div>
-            <div class="template-description">${escapeHtml(template.Description || '暂无描述')}</div>
+            <div class="template-description">${escapeHtml(template.Description || 'Нет описания')}</div>
             ${manageBtnsHtml}
         </div>
         <div class="template-actions">
             <button class="template-btn preview-btn" onclick="previewTemplate('${template.Id}')">
                 <svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
-                预览
+                Предпросмотр
             </button>
             <button class="template-btn use-btn" onclick="useTemplate('${template.Id}')">
                 <svg viewBox="0 0 24 24" width="12" height="12"><path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                使用
+                Использовать
             </button>
         </div>
     `;
@@ -846,43 +846,43 @@ window.previewTemplate = function(templateId) {
         return;
     }
     
-    // 版式元素HTML
+    // Элементы макетаHTML
     let layoutElementsHtml = '';
     if (template.Layout && template.Layout.Elements) {
         layoutElementsHtml = template.Layout.Elements.map(el => `
             <div class="preview-element">
                 <span class="element-name">${escapeHtml(el.Name)}</span>
-                <span class="element-font">${escapeHtml(el.Font?.FontNameCN || '默认')} ${el.Font?.FontSize || 12}pt${el.Font?.Bold ? ' 加粗' : ''}</span>
+                <span class="element-font">${escapeHtml(el.Font?.FontNameCN || 'по умолчанию')} ${el.Font?.FontSize || 12}pt${el.Font?.Bold ? ' полужирный' : ''}</span>
                 <span class="element-align">${getAlignmentText(el.Paragraph?.Alignment)}</span>
             </div>
         `).join('');
     }
     
-    // 正文样式HTML
+    // Стили текстаHTML
     let bodyStylesHtml = '';
     if (template.BodyStyles) {
         bodyStylesHtml = template.BodyStyles.map(style => `
             <div class="preview-style">
                 <span class="style-name">${escapeHtml(style.RuleName)}</span>
-                <span class="style-condition">${escapeHtml(style.MatchCondition || '默认')}</span>
-                <span class="style-font">${escapeHtml(style.Font?.FontNameCN || '默认')} ${style.Font?.FontSize || 12}pt</span>
+                <span class="style-condition">${escapeHtml(style.MatchCondition || 'по умолчанию')}</span>
+                <span class="style-font">${escapeHtml(style.Font?.FontNameCN || 'по умолчанию')} ${style.Font?.FontSize || 12}pt</span>
             </div>
         `).join('');
     }
     
-    // 页面设置HTML
+    // Параметры страницыHTML
     let pageSettingsHtml = '';
     if (template.PageSettings) {
         const ps = template.PageSettings;
         pageSettingsHtml = `
             <div class="preview-page-settings">
                 <div class="page-setting-item">
-                    <span class="setting-label">页边距:</span>
-                    <span class="setting-value">上${ps.Margins?.Top || 2.54}cm 下${ps.Margins?.Bottom || 2.54}cm 左${ps.Margins?.Left || 3.18}cm 右${ps.Margins?.Right || 3.18}cm</span>
+                    <span class="setting-label">Поля:</span>
+                    <span class="setting-value">Верх ${ps.Margins?.Top || 2.54}cm  Низ ${ps.Margins?.Bottom || 2.54}cm  Лево ${ps.Margins?.Left || 3.18}cm  Право ${ps.Margins?.Right || 3.18}cm</span>
                 </div>
                 <div class="page-setting-item">
-                    <span class="setting-label">页码:</span>
-                    <span class="setting-value">${ps.PageNumber?.Enabled ? ps.PageNumber.Format || '第{page}页' : '不显示'}</span>
+                    <span class="setting-label">Нумерация:</span>
+                    <span class="setting-value">${ps.PageNumber?.Enabled ? ps.PageNumber.Format || 'стр. {page}' : 'скрыта'}</span>
                 </div>
             </div>
         `;
@@ -893,30 +893,30 @@ window.previewTemplate = function(templateId) {
             <h3 class="preview-title">${escapeHtml(template.Name)}</h3>
             <span class="preview-category">${escapeHtml(template.Category)}</span>
         </div>
-        <p class="preview-description">${escapeHtml(template.Description || '暂无描述')}</p>
+        <p class="preview-description">${escapeHtml(template.Description || 'Нет описания')}</p>
         
         <div class="preview-section">
-            <h4>版式配置</h4>
+            <h4>Настройка макета</h4>
             <div class="preview-elements-list">
-                ${layoutElementsHtml || '<div class="preview-empty">未配置版式元素</div>'}
+                ${layoutElementsHtml || '<div class="preview-empty">Элементы макета не настроены</div>'}
             </div>
         </div>
         
         <div class="preview-section">
-            <h4>正文样式</h4>
+            <h4>Стили текста</h4>
             <div class="preview-styles-list">
-                ${bodyStylesHtml || '<div class="preview-empty">未配置正文样式</div>'}
+                ${bodyStylesHtml || '<div class="preview-empty">Стили текста не настроены</div>'}
             </div>
         </div>
         
         <div class="preview-section">
-            <h4>页面设置</h4>
-            ${pageSettingsHtml || '<div class="preview-empty">使用默认页面设置</div>'}
+            <h4>Параметры страницы</h4>
+            ${pageSettingsHtml || '<div class="preview-empty">Используются параметры страницы по умолчанию</div>'}
         </div>
         
         ${template.AiGuidance ? `
         <div class="preview-section">
-            <h4>AI说明</h4>
+            <h4>Пояснение AI</h4>
             <p class="preview-ai-guidance">${escapeHtml(template.AiGuidance)}</p>
         </div>
         ` : ''}
@@ -937,12 +937,12 @@ window.previewTemplate = function(templateId) {
  */
 function getAlignmentText(alignment) {
     const alignMap = {
-        'left': '左对齐',
-        'center': '居中',
-        'right': '右对齐',
-        'justify': '两端对齐'
+        'left': 'По левому краю',
+        'center': 'По центру',
+        'right': 'По правому краю',
+        'justify': 'По ширине'
     };
-    return alignMap[alignment] || '左对齐';
+    return alignMap[alignment] || 'По левому краю';
 }
 
 /**
@@ -994,7 +994,7 @@ window.previewTemplateInWord = function() {
         
         } else {
         // 如果不是Word，显示提示信息
-        alert(`${currentAppName}不支持模板预览功能，此功能仅适用于Word应用。`);
+        alert(`${currentAppName}предпросмотр шаблонов доступен только в Word.`);
         }
 };
 
@@ -1009,7 +1009,7 @@ window.useTemplate = function(templateId) {
         return;
     }
     
-    // 注意：不在此处退出模板模式
+    // Внимание: не выходить из режима шаблона здесь
     // 由VB后端在成功处理后调用 exitReformatTemplateMode()
     
     // 发送模板给后端
@@ -1064,8 +1064,8 @@ window.toggleManageMode = function() {
 function updateManageModeUI() {
     const manageBtn = document.getElementById('manage-templates-btn');
     if (manageBtn) {
-        const label = currentResourceType === 'styleguide' ? '规范' : '模板';
-        manageBtn.textContent = isManageMode ? '完成管理' : `管理${label}`;
+        const label = currentResourceType === 'styleguide' ? 'стандартами' : 'шаблонами';
+        manageBtn.textContent = isManageMode ? 'Завершить управление' : `Управление ${label}`;
         manageBtn.classList.toggle('active', isManageMode);
     }
 }
@@ -1082,7 +1082,7 @@ window.duplicateTemplate = function(templateId) {
     const template = currentTemplates.find(t => t.Id === templateId);
     if (!template) return;
     
-    const newName = prompt('请输入新模板名称:', template.Name + ' (副本)');
+    const newName = prompt('Введите имя нового шаблона:', template.Name + ' (копия)');
     if (newName === null) return; // 用户取消
     
     sendMessageToVB({
@@ -1102,11 +1102,11 @@ window.deleteTemplate = function(templateId) {
     if (!template) return;
     
     if (template.IsPreset) {
-        alert('预置模板不可删除');
+        alert('Предустановленный шаблон нельзя удалить');
         return;
     }
     
-    if (!confirm(`确定要删除模板"${template.Name}"吗？此操作不可恢复。`)) {
+    if (!confirm(`Удалить шаблон "${template.Name}"? Действие необратимо.`)) {
         return;
     }
     
@@ -1125,7 +1125,7 @@ window.deleteDocxMapping = function(cardId) {
     const template = currentTemplates.find(t => t.Id === cardId);
     if (!template) return;
     
-    if (!confirm(`确定要删除文档映射"${template.Name}"吗？此操作不可恢复。`)) {
+    if (!confirm(`Удалить сопоставление документа "${template.Name}"? Действие необратимо.`)) {
         return;
     }
     
@@ -1201,7 +1201,7 @@ function sendMessageToVB(payload) {
 }
 
 /**
- * 折叠/展开模板列表区域
+ * Свернуть/развернуть область списка шаблонов
  */
 // 初始化事件绑定
 document.addEventListener('DOMContentLoaded', function() {
@@ -1241,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 /**
- * 检查是否处于排版模板模式
+ * Проверка режима выбора шаблонов оформления
  * @returns {boolean} 是否处于模板模式
  */
 // ============================================================
@@ -1260,14 +1260,14 @@ function buildDocxMappingPreviewHtml(template) {
         if (tag.Font) {
             if (tag.Font.FontNameCN) fontDesc.push(tag.Font.FontNameCN);
             if (tag.Font.FontSize > 0) fontDesc.push(tag.Font.FontSize + 'pt');
-            if (tag.Font.Bold) fontDesc.push('加粗');
-            if (tag.Font.Italic) fontDesc.push('斜体');
+            if (tag.Font.Bold) fontDesc.push('полужирный');
+            if (tag.Font.Italic) fontDesc.push('курсив');
         }
         const paraDesc = [];
         if (tag.Paragraph) {
             if (tag.Paragraph.Alignment) paraDesc.push(tag.Paragraph.Alignment);
-            if (tag.Paragraph.LineSpacing > 0) paraDesc.push('行距' + tag.Paragraph.LineSpacing);
-            if (tag.Paragraph.FirstLineIndent > 0) paraDesc.push('缩进' + tag.Paragraph.FirstLineIndent + '字符');
+            if (tag.Paragraph.LineSpacing > 0) paraDesc.push('Интервал ' + tag.Paragraph.LineSpacing);
+            if (tag.Paragraph.FirstLineIndent > 0) paraDesc.push('Отступ ' + tag.Paragraph.FirstLineIndent + ' симв.');
         }
         return `
             <div class="preview-element" style="margin-bottom: 4px;">
@@ -1276,7 +1276,7 @@ function buildDocxMappingPreviewHtml(template) {
                 <div style="color:#718096;font-size:11px;margin-top:2px;">
                     ${fontDesc.length ? fontDesc.join(' ') : ''}
                     ${paraDesc.length ? ' | ' + paraDesc.join(' ') : ''}
-                    ${tag.MatchHint ? ' | <span style="color:#a0aec0;">提示: ' + escapeHtml(tag.MatchHint) + '</span>' : ''}
+                    ${tag.MatchHint ? ' | <span style="color:#a0aec0;">Подсказка: ' + escapeHtml(tag.MatchHint) + '</span>' : ''}
                 </div>
             </div>`;
     }).join('');
@@ -1284,24 +1284,24 @@ function buildDocxMappingPreviewHtml(template) {
     return `
         <div class="preview-header">
             <h3 class="preview-title">${escapeHtml(template.Name)}</h3>
-            <span class="preview-category" style="background:#38a169;color:#fff;">文档提取</span>
+            <span class="preview-category" style="background:#38a169;color:#fff;">Извлечено из документа</span>
         </div>
         <p class="preview-description">${escapeHtml(template.Description || '')}</p>
         <div class="preview-section">
-            <h4>语义标签映射（共 ${tags.length} 个）</h4>
+            <h4>Семантические метки (всего ${tags.length})</h4>
             <div class="preview-elements-list">
-                ${tagsHtml || '<div class="preview-empty">无标签</div>'}
+                ${tagsHtml || '<div class="preview-empty">Нет меток</div>'}
             </div>
         </div>
     `;
 }
 
 // ============================================================
-// 语义映射预览弹窗 (.docx模板解析后展示)
+// Окно предпросмотра семантического сопоставления (после разбора .docx)
 // ============================================================
 
 /**
- * 显示语义映射预览弹窗（VB解析.docx后调用）
+ * Показать окно предпросмотра семантического сопоставления (вызывается VB после разбора .docx)
  * @param {Object} mapping - SemanticStyleMapping对象
  */
 function showMappingPreview(mapping) {
@@ -1315,14 +1315,14 @@ function showMappingPreview(mapping) {
             overlay.innerHTML = `
                 <div class="styleguide-preview-dialog" style="max-width: 560px;">
                     <div class="styleguide-preview-header">
-                        <h3 id="mapping-preview-title">语义映射预览</h3>
+                        <h3 id="mapping-preview-title">Предпросмотр семантического сопоставления</h3>
                         <button class="styleguide-preview-close-btn" onclick="closeMappingPreview()">×</button>
                     </div>
                     <div class="styleguide-preview-body" id="mapping-preview-content" style="max-height: 60vh; overflow-y: auto;">
                     </div>
                     <div class="styleguide-preview-footer" style="display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px;">
-                        <button onclick="closeMappingPreview()" style="padding: 6px 16px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 13px;">关闭</button>
-                        <button onclick="useMappingFromPreview()" style="padding: 6px 16px; border: none; background: #4299e1; color: white; border-radius: 4px; cursor: pointer; font-size: 13px;">使用此映射</button>
+                        <button onclick="closeMappingPreview()" style="padding: 6px 16px; border: 1px solid #ccc; background: white; border-radius: 4px; cursor: pointer; font-size: 13px;">Закрыть</button>
+                        <button onclick="useMappingFromPreview()" style="padding: 6px 16px; border: none; background: #4299e1; color: white; border-radius: 4px; cursor: pointer; font-size: 13px;">Использовать сопоставление</button>
                     </div>
                 </div>
             `;
@@ -1340,11 +1340,11 @@ function showMappingPreview(mapping) {
 
         // 映射名称
         const title = document.getElementById('mapping-preview-title');
-        if (title) title.textContent = `语义映射预览 - ${mapping.Name || '未命名'}`;
+        if (title) title.textContent = `Предпросмотр сопоставления — ${mapping.Name || 'без имени'}`;
 
         // 语义标签列表
         const tags = mapping.SemanticTags || [];
-        html += `<div style="margin-bottom: 12px;"><h4 style="font-size: 13px; color: #4a5568; margin: 0 0 8px 0;">语义标签映射（共 ${tags.length} 个）</h4>`;
+        html += `<div style="margin-bottom: 12px;"><h4 style="font-size: 13px; color: #4a5568; margin: 0 0 8px 0;">Семантические метки (всего ${tags.length})</h4>`;
         html += '<div style="display: flex; flex-direction: column; gap: 6px;">';
 
         for (const tag of tags) {
@@ -1352,15 +1352,15 @@ function showMappingPreview(mapping) {
             if (tag.Font) {
                 if (tag.Font.FontNameCN) fontDesc.push(tag.Font.FontNameCN);
                 if (tag.Font.FontSize > 0) fontDesc.push(tag.Font.FontSize + 'pt');
-                if (tag.Font.Bold) fontDesc.push('加粗');
-                if (tag.Font.Italic) fontDesc.push('斜体');
+                if (tag.Font.Bold) fontDesc.push('полужирный');
+                if (tag.Font.Italic) fontDesc.push('курсив');
             }
 
             const paraDesc = [];
             if (tag.Paragraph) {
                 if (tag.Paragraph.Alignment) paraDesc.push(tag.Paragraph.Alignment);
-                if (tag.Paragraph.LineSpacing > 0) paraDesc.push('行距' + tag.Paragraph.LineSpacing);
-                if (tag.Paragraph.FirstLineIndent > 0) paraDesc.push('缩进' + tag.Paragraph.FirstLineIndent + '字符');
+                if (tag.Paragraph.LineSpacing > 0) paraDesc.push('Интервал ' + tag.Paragraph.LineSpacing);
+                if (tag.Paragraph.FirstLineIndent > 0) paraDesc.push('Отступ ' + tag.Paragraph.FirstLineIndent + ' симв.');
             }
 
             html += `
@@ -1372,18 +1372,18 @@ function showMappingPreview(mapping) {
                     <div style="color: #718096; font-size: 11px;">
                         ${fontDesc.length ? '<span>' + fontDesc.join(' ') + '</span>' : ''}
                         ${paraDesc.length ? ' | <span>' + paraDesc.join(' ') + '</span>' : ''}
-                        ${tag.MatchHint ? ' | <span style="color: #a0aec0;">提示: ' + tag.MatchHint + '</span>' : ''}
+                        ${tag.MatchHint ? ' | <span style="color: #a0aec0;">Подсказка: ' + tag.MatchHint + '</span>' : ''}
                     </div>
                 </div>
             `;
         }
         html += '</div></div>';
 
-        // 页面设置
+        // Параметры страницы
         if (mapping.PageConfig && mapping.PageConfig.Margins) {
             const m = mapping.PageConfig.Margins;
-            html += `<div style="margin-bottom: 8px;"><h4 style="font-size: 13px; color: #4a5568; margin: 0 0 6px 0;">页面设置</h4>`;
-            html += `<div style="font-size: 12px; color: #718096;">上 ${(m.Top || 0).toFixed(2)}cm  下 ${(m.Bottom || 0).toFixed(2)}cm  左 ${(m.Left || 0).toFixed(2)}cm  右 ${(m.Right || 0).toFixed(2)}cm</div>`;
+            html += `<div style="margin-bottom: 8px;"><h4 style="font-size: 13px; color: #4a5568; margin: 0 0 6px 0;">Параметры страницы</h4>`;
+            html += `<div style="font-size: 12px; color: #718096;">Верх ${(m.Top || 0).toFixed(2)}cm  Низ ${(m.Bottom || 0).toFixed(2)}cm  Лево ${(m.Left || 0).toFixed(2)}cm  Право ${(m.Right || 0).toFixed(2)}cm</div>`;
             html += '</div>';
         }
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Word — справка Office AI Agent</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 32px 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
+  header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 24px; }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  h3 { font-size: 15px; margin: 20px 0 6px; }
+  p, li { font-size: 14px; }
+  a.back { font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+  th, td { border: 1px solid #d0d7de; padding: 8px 10px; font-size: 13px; text-align: left; vertical-align: top; }
+  th { background: #f6f8fa; }
+  code { background: #f0f1f3; padding: 1px 5px; border-radius: 4px; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e1e4e8; font-size: 12px; color: #57606a; }
+  @media (prefers-color-scheme: dark) {
+    body { color: #e6edf3; background: #0d1117; }
+    header, footer { border-color: #30363d; }
+    th, td { border-color: #30363d; }
+    th { background: #161b22; }
+    footer { color: #8b949e; }
+    code { background: #21262d; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <a class="back" href="index.html">← Общая справка</a>
+  <h1>Word</h1>
+  <p>Возможности AI-ассистента в документах Word.</p>
+</header>
+
+<h2>Основные действия на ленте</h2>
+<table>
+  <tr><th>Кнопка</th><th>Что делает</th></tr>
+  <tr><td>AI-чат</td><td>Открывает панель диалога. Можно задавать задачи обычным текстом, прикладывать ссылки на файлы.</td></tr>
+  <tr><td>Продолжить</td><td>Продолжает текст от позиции курсора с учётом контекста. После генерации можно попросить «сократи», «сделай официальнее».</td></tr>
+  <tr><td>Вычитка</td><td>Проверяет орфографию, пунктуацию и грамматику выделения или всего документа, предлагает правки.</td></tr>
+  <tr><td>Форматирование</td><td>Определяет тип документа и применяет стандарт оформления (например, ГОСТ). Поддерживает правки в диалоге.</td></tr>
+  <tr><td>AI-перевод</td><td>Переводит выделение, весь документ или работает в режиме иммерсивного перевода.</td></tr>
+</table>
+
+<h2>Примеры команд</h2>
+<ul>
+  <li>«Отформатируй документ по ГОСТ, шрифт Times New Roman 14»</li>
+  <li>«Пронумеруй заголовки и собери оглавление»</li>
+  <li>«Проверь орфографию и пунктуацию в выделенном фрагменте»</li>
+  <li>«Продолжи текст в деловом стиле»</li>
+  <li>«Переведи документ на английский, форматирование сохрани»</li>
+</ul>
+
+<h2>Полезно знать</h2>
+<ul>
+  <li>Перед крупными изменениями сохраните документ — часть операций можно откатить через <code>Ctrl+Z</code>.</li>
+  <li>Если результат не тот, опишите правку в диалоге: «сократи на треть», «сделай заголовки полужирными».</li>
+  <li>Для работы нужен настроенный провайдер: <strong>Настройка API</strong> → адрес, ключ, модель.</li>
+</ul>
+
+<footer>Office AI Agent · локальная справка · Word</footer>
+</body>
+</html>

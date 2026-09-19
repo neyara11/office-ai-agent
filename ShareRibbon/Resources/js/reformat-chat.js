@@ -384,7 +384,7 @@ window.appendFormattingCard = function(payload) {
     // 查找或创建Chat消息Section
     var contentDiv = document.getElementById('content-' + uuid);
     if (!contentDiv) {
-        var sender = '排版助手'; // "排版助手"
+        var sender = 'Помощник оформления'; // "Помощник оформления"
         var timestamp = typeof formatDateTime === 'function'
             ? formatDateTime(new Date())
             : new Date().toLocaleString('zh-CN');
@@ -416,8 +416,8 @@ window.appendFormattingCard = function(payload) {
         refineArea.style.display = 'none';
         refineArea.innerHTML =
             '<div class="formatting-refine-input-row">' +
-            '  <input type="text" class="formatting-refine-input" placeholder="输入微调指令，如：标题改为黑体居中..." />' +
-            '  <button class="formatting-btn formatting-refine-send-btn" data-uuid="' + uuid + '">发送</button>' +
+            '  <input type="text" class="formatting-refine-input" placeholder="Введите уточнение, например: заголовок — полужирный по центру..." />' +
+            '  <button class="formatting-btn formatting-refine-send-btn" data-uuid="' + uuid + '">Отправить</button>' +
             '</div>';
         cardBody.appendChild(refineArea);
     }

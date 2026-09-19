@@ -217,6 +217,18 @@
   <data name="chat_template_refactored" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\chat-template-refactored.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="help_ru_index" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\help\ru\index.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="help_ru_word" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\help\ru\word.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="help_ru_excel" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\help\ru\excel.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="help_ru_ppt" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\help\ru\ppt.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="doubao_avatar" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\doubao_avatar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
