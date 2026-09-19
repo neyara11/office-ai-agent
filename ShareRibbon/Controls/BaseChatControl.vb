@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\BaseChatControl.vb
+﻿' ShareRibbon\Controls\BaseChatControl.vb
 Imports System.Diagnostics
 Imports System.Drawing
 Imports System.IO
@@ -278,9 +278,9 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Protected Overridable Function ExecuteJsonCommandWithToolResult(jsonCode As String, preview As Boolean) As Agent.ToolResult
         Return Agent.ToolResult.Failed("",
-                                       "当前应用不支持 JSON 命令执行",
+                                       "Текущее приложение не поддерживает выполнение JSON-команд",
                                        errorCode:=ExceptionClassifier.CodeHostUnsupported,
-                                       userMessage:="当前应用不支持 JSON 命令执行",
+                                       userMessage:="Текущее приложение не поддерживает выполнение JSON-команд",
                                        recoverable:=False)
     End Function
 
@@ -402,17 +402,17 @@ Public MustInherit Class BaseChatControl
             
             ' 检查资源提取是否成功
             If String.IsNullOrEmpty(wwwRoot) Then
-                Dim errMsg As String = "资源提取失败，无法初始化聊天界面。" & Environment.NewLine
+                Dim errMsg As String = "Не удалось извлечь ресурсы, невозможно инициализировать интерфейс чата." & Environment.NewLine
                 If Not String.IsNullOrEmpty(ResourceExtractor.LastError) Then
-                    errMsg &= "错误详情: " & ResourceExtractor.LastError
+                    errMsg &= "Подробности ошибки: " & ResourceExtractor.LastError
                 End If
-                MessageBox.Show(errMsg, "初始化错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show(errMsg, "Ошибка инициализации", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return
             End If
             
             ' 检查目录是否存在
             If Not Directory.Exists(wwwRoot) Then
-                MessageBox.Show($"资源目录不存在: {wwwRoot}", "初始化错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show($"Каталог ресурсов не найден: {wwwRoot}", "Ошибка инициализации", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return
             End If
             
@@ -445,7 +445,7 @@ Public MustInherit Class BaseChatControl
                     Debug.WriteLine($"[WebView2] 虚拟主机映射成功: officeai.local -> {wwwRoot}")
                 Catch ex As Exception
                     Debug.WriteLine($"[WebView2] 虚拟主机映射失败: {ex.Message}")
-                    MessageBox.Show($"虚拟主机映射失败: {ex.Message}", "警告", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                    MessageBox.Show($"Не удалось сопоставить виртуальный хост: {ex.Message}", "Предупреждение", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 End Try
 
                 ' 添加 WebResourceRequested 事件处理作为备用方案
@@ -468,11 +468,11 @@ Public MustInherit Class BaseChatControl
                 Await SetCurrentOfficeAppName()
 
             Else
-                MessageBox.Show("WebView2 初始化失败，CoreWebView2 不可用。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Не удалось инициализировать WebView2: CoreWebView2 недоступен.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Catch ex As Exception
-            Dim errorMessage As String = $"初始化失败: {ex.Message}{Environment.NewLine}类型: {ex.GetType().Name}{Environment.NewLine}堆栈:{ex.StackTrace}"
-            MessageBox.Show(errorMessage, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Dim errorMessage As String = $"Ошибка инициализации: {ex.Message}{Environment.NewLine}Тип: {ex.GetType().Name}{Environment.NewLine}Стек: {ex.StackTrace}"
+            MessageBox.Show(errorMessage, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             _webViewInitSemaphore.Release()
         End Try
@@ -553,7 +553,7 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Protected Overridable Function GetOfficeApplicationName() As String
         ' 默认返回 "当前应用"，子类应重写此方法
-        Return "当前应用"
+        Return "Текущее приложение"
     End Function
     Private Async Function ConfigureMarked() As Task
         If ChatBrowser.CoreWebView2 IsNot Nothing Then
@@ -570,7 +570,7 @@ Public MustInherit Class BaseChatControl
         "
             Await ChatBrowser.CoreWebView2.ExecuteScriptAsync(script)
         Else
-            MessageBox.Show("CoreWebView2 未初始化，无法配置 Marked。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("CoreWebView2 не инициализирован, невозможно настроить Marked.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End If
     End Function
 
@@ -805,7 +805,7 @@ Public MustInherit Class BaseChatControl
     ''' <param name="jsonDoc">包含style参数的JSON对象</param>
     Protected Overridable Sub HandleTriggerContinuation(jsonDoc As JObject)
         Debug.WriteLine("HandleTriggerContinuation 被调用（基类默认不执行）")
-        GlobalStatusStrip.ShowWarning("当前应用不支持续写功能")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает продолжение текста")
     End Sub
 
     ''' <summary>
@@ -824,27 +824,27 @@ Public MustInherit Class BaseChatControl
             Dim refinement As String = If(jsonDoc("refinement") IsNot Nothing, jsonDoc("refinement").ToString(), String.Empty)
 
             If String.IsNullOrWhiteSpace(refinement) Then
-                GlobalStatusStrip.ShowWarning("请输入调整方向")
+                GlobalStatusStrip.ShowWarning("Введите направление правки")
                 Return
             End If
 
             ' 构建调整提示
             Dim refinementPrompt As New StringBuilder()
-            refinementPrompt.AppendLine("请根据以下要求调整之前的续写内容：")
+            refinementPrompt.AppendLine("Скорректируй предыдущее продолжение текста с учётом следующих требований:")
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine($"【调整要求】{refinement}")
+            refinementPrompt.AppendLine($"【Требования к правке】{refinement}")
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine("请直接输出调整后的续写内容，不要添加任何解释：")
+            refinementPrompt.AppendLine("Выведи только скорректированное продолжение текста, без объяснений:")
 
             ' 保持 responseMode = "continuation"，发送调整请求（不使用历史记录）
             Task.Run(Async Function()
                          Await Send(refinementPrompt.ToString(), GetContinuationSystemPrompt(), False, "continuation")
                      End Function)
 
-            GlobalStatusStrip.ShowInfo("正在调整续写内容...")
+            GlobalStatusStrip.ShowInfo("Настраиваю продолжение текста...")
         Catch ex As Exception
             Debug.WriteLine($"HandleRefineContinuation 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("调整续写时出错")
+            GlobalStatusStrip.ShowWarning("Ошибка при настройке продолжения текста")
         End Try
     End Sub
 
@@ -864,12 +864,14 @@ Public MustInherit Class BaseChatControl
     ''' 获取续写的系统提示词
     ''' </summary>
     Protected Function GetContinuationSystemPrompt() As String
-        Return "你是一个专业的写作助手。根据提供的上下文，自然地续写内容。要求：
-1. 保持与原文一致的语言风格、语气和术语
-2. 内容要连贯自然，不要重复上文已有内容
-3. 只输出续写内容，不要添加任何解释、前缀或标记
-4. 如果上下文不足，可以合理推断但保持谨慎
-5. 续写长度适中，约100-300字，除非用户另有要求"
+        Return "Ты профессиональный помощник по письму. На основе предоставленного контекста естественно продолжи текст. Требования:
+1. Сохраняй языковой стиль, тон и терминологию исходного текста
+2. Содержание должно быть связным и естественным, не повторяй уже написанное
+3. Выводи только продолжение текста, без объяснений, префиксов и пометок
+4. При недостатке контекста можешь разумно домыслить, но осторожно
+5. Оптимальная длина продолжения — около 100–300 символов, если пользователь не просил иначе
+
+Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть."
     End Function
 
     ''' <summary>
@@ -878,17 +880,17 @@ Public MustInherit Class BaseChatControl
     Protected Function BuildContinuationUserPrompt(context As ContinuationContext, Optional style As String = "") As String
         Dim sb As New StringBuilder()
 
-        sb.AppendLine("请根据以下上下文续写内容：")
+        sb.AppendLine("Продолжи текст на основе следующего контекста:")
         sb.AppendLine()
         sb.Append(context.BuildPrompt())
 
         If Not String.IsNullOrWhiteSpace(style) Then
             sb.AppendLine()
-            sb.AppendLine($"【风格要求】{style}")
+            sb.AppendLine($"【Требования к стилю】{style}")
         End If
 
         sb.AppendLine()
-        sb.AppendLine("请直接输出续写内容，不要添加任何前缀或说明：")
+        sb.AppendLine("Выведи только продолжение текста, без префиксов и пояснений:")
 
         Return sb.ToString()
     End Function
@@ -902,7 +904,7 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Protected Overridable Sub HandleApplyTemplateContent(jsonDoc As JObject)
         Debug.WriteLine("HandleApplyTemplateContent 被调用（基类默认不执行）")
-        GlobalStatusStrip.ShowWarning("当前应用不支持模板渲染功能")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает рендеринг шаблонов")
     End Sub
 
     ''' <summary>
@@ -914,27 +916,27 @@ Public MustInherit Class BaseChatControl
             Dim refinement As String = If(jsonDoc("refinement") IsNot Nothing, jsonDoc("refinement").ToString(), String.Empty)
 
             If String.IsNullOrWhiteSpace(refinement) Then
-                GlobalStatusStrip.ShowWarning("请输入调整需求")
+                GlobalStatusStrip.ShowWarning("Введите требования к правке")
                 Return
             End If
 
             ' 构建调整提示
             Dim refinementPrompt As New StringBuilder()
-            refinementPrompt.AppendLine("请根据以下要求调整之前生成的模板内容：")
+            refinementPrompt.AppendLine("Скорректируй ранее сгенерированное содержимое шаблона с учётом следующих требований:")
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine($"【调整需求】{refinement}")
+            refinementPrompt.AppendLine($"【Требования к правке】{refinement}")
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine("请直接输出调整后的内容，不要添加任何解释：")
+            refinementPrompt.AppendLine("Выведи только скорректированное содержимое, без объяснений:")
 
             ' 保持 responseMode = "template_render"，发送调整请求（不使用历史记录）
             Task.Run(Async Function()
                          Await Send(refinementPrompt.ToString(), GetTemplateRenderSystemPrompt(""), False, "template_render")
                      End Function)
 
-            GlobalStatusStrip.ShowInfo("正在调整模板内容...")
+            GlobalStatusStrip.ShowInfo("Настраиваю содержимое шаблона...")
         Catch ex As Exception
             Debug.WriteLine($"HandleRefineTemplateContent 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("调整模板内容时出错")
+            GlobalStatusStrip.ShowWarning("Ошибка при настройке содержимого шаблона")
         End Try
     End Sub
 
@@ -943,38 +945,41 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Protected Function GetTemplateRenderSystemPrompt(templateContext As String) As String
         Dim sb As New StringBuilder()
-        sb.AppendLine("你是一个专业的文档内容生成助手。你需要根据用户提供的模板结构（JSON格式）和风格来生成新的内容。")
+        sb.AppendLine("Ты профессиональный помощник по генерации содержимого документов. Тебе нужно создавать новое содержимое на основе предоставленной пользователем структуры шаблона (формат JSON) и стиля.")
         sb.AppendLine()
-        sb.AppendLine("【重要格式要求】")
-        sb.AppendLine("- 严禁使用Markdown代码块格式（禁止使用```符号）")
-        sb.AppendLine("- 严禁使用任何Markdown格式标记（如#、**、-、>等）")
-        sb.AppendLine("- 直接输出纯文本内容，不要包装在任何代码块中")
-        sb.AppendLine("- 不要添加任何前缀、后缀、解释或说明文字")
-        sb.AppendLine("- 不要输出JSON格式，直接输出可以插入文档的纯文本")
+        sb.AppendLine("【Важные требования к формату】")
+        sb.AppendLine("- Строго запрещено использовать формат блоков кода Markdown (символы ```)")
+        sb.AppendLine("- Строго запрещено использовать любые разметки Markdown (например, #, **, -, > и т. п.)")
+        sb.AppendLine("- Выводи содержимое простым текстом, не оборачивай в блоки кода")
+        sb.AppendLine("- Не добавляй префиксы, суффиксы, пояснения или описания")
+        sb.AppendLine("- Не выводи JSON, выводи простой текст, готовый для вставки в документ")
         sb.AppendLine()
-        sb.AppendLine("【模板JSON结构说明】")
-        sb.AppendLine("模板以JSON格式提供，包含以下信息：")
-        sb.AppendLine("- elements: 文档元素数组，每个元素包含type(类型)、text(文本)、styleName(样式名)、formatting(格式详情)")
-        sb.AppendLine("- formatting包含: fontName(字体)、fontSize(字号)、bold(加粗)、italic(斜体)、alignment(对齐)等")
-        sb.AppendLine("- 对于PPT模板：slides数组包含每张幻灯片的布局和元素信息")
+        sb.AppendLine("【Описание структуры JSON шаблона】")
+        sb.AppendLine("Шаблон предоставляется в формате JSON и содержит следующую информацию:")
+        sb.AppendLine("- elements: массив элементов документа; каждый элемент содержит type (тип), text (текст), styleName (имя стиля), formatting (детали форматирования)")
+        sb.AppendLine("- formatting содержит: fontName (шрифт), fontSize (размер шрифта), bold (полужирный), italic (курсив), alignment (выравнивание) и т. д.")
+        sb.AppendLine("- Для шаблонов PPT: массив slides содержит макет и элементы каждого слайда")
         sb.AppendLine()
-        sb.AppendLine("【内容生成要求】")
-        sb.AppendLine("1. 严格遵循模板的层级结构（如：标题、副标题、正文的层次关系）")
-        sb.AppendLine("2. 保持与模板一致的语气、术语规范和风格")
-        sb.AppendLine("3. 参考模板中的字号来判断内容的重要程度（大字号=标题，小字号=正文）")
-        sb.AppendLine("4. 内容要专业、连贯、符合实际使用场景")
-        sb.AppendLine("5. 按照模板中元素的顺序来组织输出内容")
-        sb.AppendLine("6. 每个段落或幻灯片内容之间用空行分隔")
+        sb.AppendLine("【Требования к генерации содержимого】")
+        sb.AppendLine("1. Строго соблюдай иерархическую структуру шаблона (например, соотношение заголовка, подзаголовка и основного текста)")
+        sb.AppendLine("2. Сохраняй тон, терминологию и стиль, соответствующие шаблону")
+        sb.AppendLine("3. Ориентируйся на размер шрифта в шаблоне для оценки важности содержимого (крупный = заголовок, мелкий = основной текст)")
+        sb.AppendLine("4. Содержимое должно быть профессиональным, связным и соответствовать реальному сценарию использования")
+        sb.AppendLine("5. Организуй вывод в порядке элементов шаблона")
+        sb.AppendLine("6. Разделяй содержимое абзацев или слайдов пустой строкой")
 
         If Not String.IsNullOrWhiteSpace(templateContext) Then
             sb.AppendLine()
-            sb.AppendLine("【参考模板结构】")
+            sb.AppendLine("【Структура шаблона для справки】")
             sb.AppendLine("```json")
             sb.AppendLine(templateContext)
             sb.AppendLine("```")
             sb.AppendLine()
-            sb.AppendLine("请根据以上模板结构，按照用户的内容需求生成相应格式的文档内容。直接输出纯文本，不要使用任何Markdown格式。")
+            sb.AppendLine("На основе приведённой структуры шаблона сгенерируй содержимое документа в соответствующем формате согласно запросу пользователя. Выводи простой текст, не используй разметку Markdown.")
         End If
+
+        sb.AppendLine()
+        sb.AppendLine("Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть.")
 
         Return sb.ToString()
     End Function
@@ -985,28 +990,31 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Private Function BuildProofreadFollowUpPrompt(selectedText As String, issueCount As String) As String
         Dim sb As New StringBuilder()
-        sb.AppendLine("你是专业的中文文档校对专家。用户当前正在使用校对模式，已选中一段文本进行校对。")
+        sb.AppendLine("Ты профессиональный корректор документов. Пользователь сейчас работает в режиме вычитки и выделил текст для проверки.")
         sb.AppendLine()
-        sb.AppendLine("【当前校对上下文】")
+        sb.AppendLine("【Текущий контекст вычитки】")
 
         If Not String.IsNullOrWhiteSpace(selectedText) Then
-            sb.AppendLine("用户选中的文本内容（节选）：")
+            sb.AppendLine("Выделенный пользователем текст (фрагмент):")
             sb.AppendLine(selectedText)
             sb.AppendLine()
         End If
 
         Dim count As Integer
         If Integer.TryParse(issueCount, count) AndAlso count > 0 Then
-            sb.AppendLine($"AI已检测出 {count} 处校对问题，问题列表显示在右侧校对面板中。")
+            sb.AppendLine($"ИИ обнаружил {count} проблем вычитки; список проблем отображается на панели вычитки справа.")
             sb.AppendLine()
         End If
 
-        sb.AppendLine("【交互规则】")
-        sb.AppendLine("1. 用户的消息是在校对模式下发送的，可能是对校对结果的追问、请求解释、或要求重新检查")
-        sb.AppendLine("2. 如果用户问的是关于某个具体校对问题，请基于选中内容的上下文给出专业解释")
-        sb.AppendLine("3. 如果用户要求补充检查某些方面（如专有名词、数据一致性），请给出针对性建议")
-        sb.AppendLine("4. 回答要简洁专业，不要重复列出校对面板已显示的问题")
-        sb.AppendLine("5. 严禁使用Markdown代码块格式（禁止使用```符号），直接输出纯文本")
+        sb.AppendLine("【Правила взаимодействия】")
+        sb.AppendLine("1. Сообщение пользователя отправлено в режиме вычитки: это может быть уточнение по результатам, просьба объяснить или повторно проверить")
+        sb.AppendLine("2. Если пользователь спрашивает о конкретной проблеме вычитки, дай профессиональное объяснение на основе контекста выделенного текста")
+        sb.AppendLine("3. Если пользователь просит дополнительно проверить какие-то аспекты (например, имена собственные, согласованность данных), дай конкретные рекомендации")
+        sb.AppendLine("4. Отвечай кратко и профессионально, не повторяй проблемы, уже отображённые на панели вычитки")
+        sb.AppendLine("5. Строго запрещено использовать блоки кода Markdown (символы ```), выводи простой текст")
+
+        sb.AppendLine()
+        sb.AppendLine("Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть.")
 
         Return sb.ToString()
     End Function
@@ -1063,7 +1071,7 @@ Public MustInherit Class BaseChatControl
             Dim content As String = If(jsonDoc("content") IsNot Nothing, jsonDoc("content").ToString(), String.Empty)
 
             Debug.WriteLine($"用户接受回答: UUID={uuid}")
-            GlobalStatusStrip.ShowInfo("用户已接受 AI 回答")
+            GlobalStatusStrip.ShowInfo("Пользователь принял ответ ИИ")
 
             ' 更新 conversation 表收藏状态
             Dim sid = _chatStateService.CurrentSessionId
@@ -1091,22 +1099,22 @@ Public MustInherit Class BaseChatControl
 
             ' 构建用于改进的大模型提示（包含用户理由）
             Dim refinementPrompt As New StringBuilder()
-            refinementPrompt.AppendLine("用户标记之前的回答为不接受，请基于当前会话历史与以下被拒绝的回答进行改进：")
+            refinementPrompt.AppendLine("Пользователь отметил предыдущий ответ как неприемлемый. Улучши его на основе истории текущей сессии и отклонённого ответа ниже:")
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine("【用户改进诉求】")
+            refinementPrompt.AppendLine("【Пожелания пользователя по улучшению】")
             If Not String.IsNullOrWhiteSpace(reason) Then
                 refinementPrompt.AppendLine(reason)
             Else
-                refinementPrompt.AppendLine("[无具体改进诉求，用户仅标记为不接受]")
+                refinementPrompt.AppendLine("[Конкретных пожеланий нет, пользователь просто отметил ответ как неприемлемый]")
             End If
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine("请按以下格式返回：")
-            refinementPrompt.AppendLine("1) 改进点（1-3 行），说明要如何修正；")
-            refinementPrompt.AppendLine("2) Plan：简短列出修正步骤（要点式，最多6条）；")
-            refinementPrompt.AppendLine("3) Answer：给出修正后的、尽可能准确的答案（使用 Markdown，必要时给出示例/代码）；")
-            refinementPrompt.AppendLine("4) Clarifying Questions：如需更多信息，请在最后以简短问题列出并暂停执行；")
+            refinementPrompt.AppendLine("Верни ответ в следующем формате:")
+            refinementPrompt.AppendLine("1) Что улучшено (1–3 строки): как исправлено;")
+            refinementPrompt.AppendLine("2) Plan: кратко перечисли шаги исправления (пунктами, максимум 6);")
+            refinementPrompt.AppendLine("3) Answer: дай исправленный, максимально точный ответ (с разметкой Markdown, при необходимости с примерами/кодом);")
+            refinementPrompt.AppendLine("4) Clarifying Questions: если нужно больше информации, перечисли короткие вопросы в конце и приостанови выполнение;")
             refinementPrompt.AppendLine()
-            refinementPrompt.AppendLine("[注意]：回答要简洁、可验证，优先给出可直接执行的结论与验证方法，不要重复冗长的背景说明。")
+            refinementPrompt.AppendLine("[Внимание]: ответ должен быть кратким и проверяемым; в первую очередь дай готовые к выполнению выводы и способы проверки, не повторяй длинные пояснения.")
 
             ' 管理历史大小，保证不会无限增长
             ManageHistoryMessageSize()
@@ -1114,10 +1122,10 @@ Public MustInherit Class BaseChatControl
             ' 将该改进请求当作新的用户问题发起（会走你已有的 SendChatMessage 流程）
             SendChatMessage(refinementPrompt.ToString())
 
-            GlobalStatusStrip.ShowInfo("已触发改进请求，正在向模型发起新一轮改进")
+            GlobalStatusStrip.ShowInfo("Запрос на улучшение отправлен, начинаю новый раунд улучшения")
         Catch ex As Exception
             Debug.WriteLine($"HandleRejectAnswer 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("触发改进请求时出错")
+            GlobalStatusStrip.ShowWarning("Ошибка при отправке запроса на улучшение")
         End Try
     End Sub
 
@@ -1239,7 +1247,7 @@ Public MustInherit Class BaseChatControl
         End If
 
         ' --- 处理选中的内容 ---
-        question = AppendCurrentSelectedContent("--- 我此次的问题：" & question & " ---")
+        question = AppendCurrentSelectedContent("--- Мой текущий вопрос: " & question & " ---")
 
         ' 检查是否有文件需要解析
         If filePaths IsNot Nothing AndAlso filePaths.Count > 0 Then
@@ -1259,7 +1267,7 @@ Public MustInherit Class BaseChatControl
                                                  selectedContents As List(Of SendMessageReferenceContentItem),
                                                  messageValue As JToken)
         ' 显示进度提示
-        GlobalStatusStrip.ShowInfo($"正在解析 {filePaths.Count} 个文件...")
+        GlobalStatusStrip.ShowInfo($"Разбираю файлов: {filePaths.Count}...")
         ExecuteJavaScriptAsyncJS("showFileParsingProgress(true)")
 
         Task.Run(Sub()
@@ -1269,7 +1277,7 @@ Public MustInherit Class BaseChatControl
                          Dim totalFiles = filePaths.Count
                          Dim processedFiles = 0
 
-                         fileContentBuilder.AppendLine(vbCrLf & "--- 以下是用户引用的其他文件内容 ---")
+                         fileContentBuilder.AppendLine(vbCrLf & "--- Ниже приведено содержимое других файлов, на которые ссылается пользователь ---")
 
                          ' 获取当前工作目录（需要在主线程调用）
                          Dim currentWorkingDir As String = ""
@@ -1283,7 +1291,7 @@ Public MustInherit Class BaseChatControl
 
                                  ' 更新进度
                                  RunUiActionSync(Sub()
-                                               GlobalStatusStrip.ShowInfo($"正在解析文件 ({processedFiles}/{totalFiles}): {Path.GetFileName(filePath)}")
+                                               GlobalStatusStrip.ShowInfo($"Разбор файла ({processedFiles}/{totalFiles}): {Path.GetFileName(filePath)}")
                                                ExecuteJavaScriptAsyncJS($"updateFileParsingProgress({processedFiles}, {totalFiles}, '{EscapeJavaScriptString(Path.GetFileName(filePath))}')")
                                            End Sub)
 
@@ -1328,29 +1336,29 @@ Public MustInherit Class BaseChatControl
                                              fileContentResult = New FileContentResult With {
                                         .FileName = Path.GetFileName(fullFilePath),
                                         .FileType = "Unknown",
-                                        .ParsedContent = $"[不支持的文件类型: {fileExtension}]"
+                                        .ParsedContent = $"[Неподдерживаемый тип файла: {fileExtension}]"
                                     }
                                      End Select
 
                                      If fileContentResult IsNot Nothing Then
                                          parsedFiles.Add(fileContentResult)
-                                         fileContentBuilder.AppendLine($"文件名: {fileContentResult.FileName}")
-                                         fileContentBuilder.AppendLine($"文件内容:")
+                                         fileContentBuilder.AppendLine($"Имя файла: {fileContentResult.FileName}")
+                                         fileContentBuilder.AppendLine($"Содержимое файла:")
                                          fileContentBuilder.AppendLine(fileContentResult.ParsedContent)
                                          fileContentBuilder.AppendLine("---")
                                      End If
                                  Else
-                                     fileContentBuilder.AppendLine($"文件 '{Path.GetFileName(filePath)}' 未找到，尝试路径: {fullFilePath}")
+                                     fileContentBuilder.AppendLine($"Файл '{Path.GetFileName(filePath)}' не найден, проверенный путь: {fullFilePath}")
                                      Debug.WriteLine($"文件未找到: {fullFilePath}")
                                  End If
                              Catch ex As Exception
                                  Debug.WriteLine($"Error processing file '{filePath}': {ex.Message}")
-                                 fileContentBuilder.AppendLine($"处理文件 '{Path.GetFileName(filePath)}' 时出错: {ex.Message}")
+                                 fileContentBuilder.AppendLine($"Ошибка обработки файла '{Path.GetFileName(filePath)}': {ex.Message}")
                                  fileContentBuilder.AppendLine("---")
                              End Try
                          Next
 
-                         fileContentBuilder.AppendLine("--- 文件内容结束 ---" & vbCrLf)
+                         fileContentBuilder.AppendLine("--- Конец содержимого файлов ---" & vbCrLf)
 
                          ' 文件解析完成，先保存到记忆（同步保存确保立即可检索），再在主线程继续处理消息
                          Dim appTypeForMemory = GetOfficeAppType()
@@ -1359,17 +1367,17 @@ Public MustInherit Class BaseChatControl
 
                          ' 文件解析完成，在主线程继续处理消息
                          RunUiActionSync(Sub()
-                                       GlobalStatusStrip.ShowInfo($"文件解析完成，共解析 {parsedFiles.Count} 个文件")
+                                       GlobalStatusStrip.ShowInfo($"Разбор файлов завершён, обработано файлов: {parsedFiles.Count}")
                                        ExecuteJavaScriptAsyncJS("showFileParsingProgress(false)")
 
-                                       Dim questionWithFiles = question & " 用户提问结束，后续引用的文件都在同一目录下所以可以放心读取。 ---"
+                                       Dim questionWithFiles = question & " Конец вопроса пользователя; последующие файлы находятся в том же каталоге, их можно безопасно читать. ---"
                                        HandleSendMessageCore(questionWithFiles, originalQuestion, filePaths, selectedContents, messageValue, fileContentBuilder.ToString())
                                    End Sub)
 
                      Catch ex As Exception
                          Debug.WriteLine($"HandleSendMessageWithFilesAsync 出错: {ex.Message}")
                          RunUiActionSync(Sub()
-                                       GlobalStatusStrip.ShowWarning($"文件解析失败: {ex.Message}")
+                                       GlobalStatusStrip.ShowWarning($"Не удалось разобрать файлы: {ex.Message}")
                                        ExecuteJavaScriptAsyncJS("showFileParsingProgress(false)")
                                        ' 重置发送按钮状态
                                        ExecuteJavaScriptAsyncJS("changeSendButton()")
@@ -1546,7 +1554,7 @@ Public MustInherit Class BaseChatControl
                          Dim goal = If(String.IsNullOrWhiteSpace(intent.OriginalInput), intent.UserFriendlyDescription, intent.OriginalInput)
                          Dim appType = GetApplicationType()
 
-                         GlobalStatusStrip.ShowInfo("正在规划任务...")
+                         GlobalStatusStrip.ShowInfo("Планирую задачу...")
 
                          Dim currentContent = GetCurrentOfficeContent()
                          Dim historyMessages As New List(Of Tuple(Of String, String))()
@@ -1569,11 +1577,11 @@ Public MustInherit Class BaseChatControl
                              ' StartAgentAsync 已通过 Agent 完成事件展示结构化失败。执行型请求在
                              ' 失败后再发起普通聊天会产生第二份、且可能宣称成功的回答。
                              Debug.WriteLine("[StartAgentPlanningFlow] Agent 执行失败，保留失败结果，不回退普通聊天")
-                             GlobalStatusStrip.ShowWarning("任务执行失败，请查看失败步骤")
+                             GlobalStatusStrip.ShowWarning("Не удалось выполнить задачу, посмотрите неудавшиеся шаги")
                          End If
                      Catch ex As Exception
                          Debug.WriteLine($"[StartAgentPlanningFlow] {ex.Message}")
-                         GlobalStatusStrip.ShowWarning($"规划启动失败: {ex.Message}")
+                         GlobalStatusStrip.ShowWarning($"Не удалось запустить планирование: {ex.Message}")
                      End Try
                  End Function)
     End Sub
@@ -1603,7 +1611,7 @@ Public MustInherit Class BaseChatControl
             Dim selectedContentToken = jsonDoc("selectedContent")
 
             If String.IsNullOrEmpty(request) AndAlso (filePathsToken Is Nothing OrElse filePathsToken.Type <> JTokenType.Array) AndAlso (selectedContentToken Is Nothing OrElse selectedContentToken.Type <> JTokenType.Array) Then
-                GlobalStatusStrip.ShowWarning("请输入任务描述或添加文件引用")
+                GlobalStatusStrip.ShowWarning("Введите описание задачи или добавьте файлы")
                 Return
             End If
 
@@ -1630,11 +1638,11 @@ Public MustInherit Class BaseChatControl
             Dim now = DateTime.Now
             Dim timestamp = now.ToString("yyyy-MM-dd HH:mm:ss")
             ExecuteJavaScriptAsyncJS($"createChatSection('AI', '{timestamp}', '{AgentKernelSvc.AgentThinkingUuid}')")
-            ExecuteJavaScriptAsyncJS($"var thinkingDiv = document.getElementById('content-{AgentKernelSvc.AgentThinkingUuid}'); if(thinkingDiv) thinkingDiv.innerHTML = '<div class=""thinking-indicator""><div class=""thinking-dots""><span></span><span></span><span></span></div><span style=""margin-left: 12px; color: #6c757d;"">正在分析您的需求...</span></div>';")
+            ExecuteJavaScriptAsyncJS($"var thinkingDiv = document.getElementById('content-{AgentKernelSvc.AgentThinkingUuid}'); if(thinkingDiv) thinkingDiv.innerHTML = '<div class=""thinking-indicator""><div class=""thinking-dots""><span></span><span></span><span></span></div><span style=""margin-left: 12px; color: #6c757d;"">Анализирую ваш запрос...</span></div>';")
 
             Dim originalQuestion As String = request
             Dim finalMessageToLLM As String = request
-            finalMessageToLLM = AppendCurrentSelectedContent("--- 我此次的问题：" & finalMessageToLLM & " ---")
+            finalMessageToLLM = AppendCurrentSelectedContent("--- Мой текущий вопрос: " & finalMessageToLLM & " ---")
 
             If filePaths IsNot Nothing AndAlso filePaths.Count > 0 Then
                 HandleStartAgentWithFilesAsync(finalMessageToLLM, originalQuestion, filePaths, selectedContents)
@@ -1644,7 +1652,7 @@ Public MustInherit Class BaseChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleStartAgent 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"启动Agent失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось запустить агента: {ex.Message}")
         End Try
     End Sub
 
@@ -1665,7 +1673,7 @@ Public MustInherit Class BaseChatControl
             HandleStartAgent(agentRequest)
         Catch ex As Exception
             Debug.WriteLine($"HandleLegacyStartLoop failed: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"启动Agent失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось запустить агента: {ex.Message}")
         End Try
     End Sub
 
@@ -1673,7 +1681,7 @@ Public MustInherit Class BaseChatControl
                                               filePaths As List(Of String),
                                               selectedContents As List(Of SendMessageReferenceContentItem))
         ' 显示进度提示
-        GlobalStatusStrip.ShowInfo($"正在解析 {filePaths.Count} 个文件...")
+        GlobalStatusStrip.ShowInfo($"Разбираю файлов: {filePaths.Count}...")
         ExecuteJavaScriptAsyncJS("showFileParsingProgress(true)")
 
         Task.Run(Sub()
@@ -1682,7 +1690,7 @@ Public MustInherit Class BaseChatControl
                          Dim totalFiles = filePaths.Count
                          Dim processedFiles = 0
 
-                         fileContentBuilder.AppendLine(vbCrLf & "--- 以下是用户引用的其他文件内容 ---")
+                         fileContentBuilder.AppendLine(vbCrLf & "--- Ниже приведено содержимое других файлов, на которые ссылается пользователь ---")
 
                          ' 获取当前工作目录（需要在主线程调用）
                          Dim currentWorkingDir As String = ""
@@ -1696,7 +1704,7 @@ Public MustInherit Class BaseChatControl
 
                                  ' 更新进度
                                  RunUiActionSync(Sub()
-                                               GlobalStatusStrip.ShowInfo($"正在解析文件 ({processedFiles}/{totalFiles}): {Path.GetFileName(filePath)}")
+                                               GlobalStatusStrip.ShowInfo($"Разбор файла ({processedFiles}/{totalFiles}): {Path.GetFileName(filePath)}")
                                                ExecuteJavaScriptAsyncJS($"updateFileParsingProgress({processedFiles}, {totalFiles}, '{EscapeJavaScriptString(Path.GetFileName(filePath))}')")
                                            End Sub)
 
@@ -1741,28 +1749,28 @@ Public MustInherit Class BaseChatControl
                                              fileContentResult = New FileContentResult With {
                                         .FileName = Path.GetFileName(fullFilePath),
                                         .FileType = "Unknown",
-                                        .ParsedContent = $"[不支持的文件类型: {fileExtension}]"
+                                        .ParsedContent = $"[Неподдерживаемый тип файла: {fileExtension}]"
                                     }
                                      End Select
 
                                      If fileContentResult IsNot Nothing Then
-                                         fileContentBuilder.AppendLine($"文件名: {fileContentResult.FileName}")
-                                         fileContentBuilder.AppendLine($"文件内容:")
+                                         fileContentBuilder.AppendLine($"Имя файла: {fileContentResult.FileName}")
+                                         fileContentBuilder.AppendLine($"Содержимое файла:")
                                          fileContentBuilder.AppendLine(fileContentResult.ParsedContent)
                                          fileContentBuilder.AppendLine("---")
                                      End If
                                  Else
-                                     fileContentBuilder.AppendLine($"文件 '{Path.GetFileName(filePath)}' 未找到，尝试路径: {fullFilePath}")
+                                     fileContentBuilder.AppendLine($"Файл '{Path.GetFileName(filePath)}' не найден, проверенный путь: {fullFilePath}")
                                      Debug.WriteLine($"文件未找到: {fullFilePath}")
                                  End If
                              Catch ex As Exception
                                  Debug.WriteLine($"Error processing file '{filePath}': {ex.Message}")
-                                 fileContentBuilder.AppendLine($"处理文件 '{Path.GetFileName(filePath)}' 时出错: {ex.Message}")
+                                 fileContentBuilder.AppendLine($"Ошибка обработки файла '{Path.GetFileName(filePath)}': {ex.Message}")
                                  fileContentBuilder.AppendLine("---")
                              End Try
                          Next
 
-                         fileContentBuilder.AppendLine("--- 文件内容结束 ---" & vbCrLf)
+                         fileContentBuilder.AppendLine("--- Конец содержимого файлов ---" & vbCrLf)
 
                          ' 文件解析完成，先保存到记忆（同步保存确保立即可检索），再在主线程继续处理消息
                          Dim appTypeForMemory = GetOfficeAppType()
@@ -1770,17 +1778,17 @@ Public MustInherit Class BaseChatControl
                          MemoryService.SaveFileContentToMemory(originalQuestion, fileContentBuilder.ToString(), sessionIdForMemory, appTypeForMemory)
 
                          RunUiActionSync(Sub()
-                                       GlobalStatusStrip.ShowInfo($"文件解析完成，共解析 {processedFiles} 个文件")
+                                       GlobalStatusStrip.ShowInfo($"Разбор файлов завершён, обработано файлов: {processedFiles}")
                                        ExecuteJavaScriptAsyncJS("showFileParsingProgress(false)")
 
-                                       Dim questionWithFiles = question & " 用户提问结束，后续引用的文件都在同一目录下所以可以放心读取。 ---"
+                                       Dim questionWithFiles = question & " Конец вопроса пользователя; последующие файлы находятся в том же каталоге, их можно безопасно читать. ---"
                                        HandleStartAgentCore(questionWithFiles, originalQuestion, fileContentBuilder.ToString())
                                    End Sub)
 
                      Catch ex As Exception
                          Debug.WriteLine($"HandleStartAgentWithFilesAsync 出错: {ex.Message}")
                          RunUiActionSync(Sub()
-                                       GlobalStatusStrip.ShowWarning($"文件解析失败: {ex.Message}")
+                                       GlobalStatusStrip.ShowWarning($"Не удалось разобрать файлы: {ex.Message}")
                                        ExecuteJavaScriptAsyncJS("showFileParsingProgress(false)")
                                    End Sub)
                      End Try
@@ -1815,16 +1823,16 @@ Public MustInherit Class BaseChatControl
                              End If
                          Next
 
-                         GlobalStatusStrip.ShowInfo("正在分析您的需求...")
+                         GlobalStatusStrip.ShowInfo("Анализирую ваш запрос...")
                          Dim success = Await AgentKernelSvc.StartAgentAsync(finalMessageToLLM, appType, currentContent, historyMessages, CaptureOfficeContext(appType))
 
                          If Not success Then
-                             GlobalStatusStrip.ShowWarning("无法分析您的需求，请重试")
+                             GlobalStatusStrip.ShowWarning("Не удалось проанализировать запрос, повторите попытку")
                              AgentKernelSvc.AgentThinkingUuid = Nothing
                          End If
                      Catch ex As Exception
                          Debug.WriteLine($"[AgentKernel] HandleStartAgentCore 出错: {ex.Message}")
-                         GlobalStatusStrip.ShowWarning($"分析需求失败: {ex.Message}")
+                         GlobalStatusStrip.ShowWarning($"Не удалось проанализировать запрос: {ex.Message}")
                          AgentKernelSvc.AgentThinkingUuid = Nothing
                      End Try
                  End Function)
@@ -1835,7 +1843,7 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Protected Overridable Sub HandleRefineAgentPlan(jsonDoc As JObject)
         Debug.WriteLine("[AgentKernel] 收到 refineAgentPlan 请求，当前架构不支持手动重新规划")
-        GlobalStatusStrip.ShowInfo("已收到修改请求，请在下一轮对话中直接描述新需求")
+        GlobalStatusStrip.ShowInfo("Запрос на изменение получен; опишите новое требование в следующем сообщении")
     End Sub
 
     ''' <summary>
@@ -1899,10 +1907,10 @@ Public MustInherit Class BaseChatControl
             End If
             If Not String.IsNullOrEmpty(feedback) Then
                 Debug.WriteLine($"[AgentKernel] 用户请求修改计划: {feedback}")
-                ExecuteJavaScriptAsyncJS("addThinkingMessage('正在根据您的意见重新规划...')")
+                ExecuteJavaScriptAsyncJS("addThinkingMessage('Перепланирую с учётом ваших замечаний...')")
                 Dim request = AgentKernelSvc.AgentOriginalUserRequest
                 If Not String.IsNullOrEmpty(request) Then
-                    Dim refinedRequest = request & vbCrLf & "[用户修改意见] " & feedback
+                    Dim refinedRequest = request & vbCrLf & "[Правки пользователя] " & feedback
                     AgentKernelSvc.AgentThinkingUuid = Guid.NewGuid().ToString()
                     Dim now = DateTime.Now
                     Dim timestamp = now.ToString("yyyy-MM-dd HH:mm:ss")
@@ -1929,7 +1937,7 @@ Public MustInherit Class BaseChatControl
             End If
         Catch
         End Try
-        Return "(无选中内容)"
+        Return "(нет выделенного содержимого)"
     End Function
 
     ''' <summary>
@@ -2092,11 +2100,11 @@ Public MustInherit Class BaseChatControl
             End If
 
             Using dialog As New OpenFileDialog()
-                dialog.Title = "选择要引用的文件"
-                dialog.Filter = "Excel文件|*.xls;*.xlsx;*.xlsm;*.xlsb;*.csv|" &
-                               "Word文件|*.doc;*.docx|" &
-                               "PowerPoint文件|*.ppt;*.pptx|" &
-                               "所有支持的文件|*.xls;*.xlsx;*.xlsm;*.xlsb;*.csv;*.doc;*.docx;*.ppt;*.pptx"
+                dialog.Title = "Выберите файл для ссылки"
+                dialog.Filter = "Файлы Excel|*.xls;*.xlsx;*.xlsm;*.xlsb;*.csv|" &
+                               "Файлы Word|*.doc;*.docx|" &
+                               "Файлы PowerPoint|*.ppt;*.pptx|" &
+                               "Все поддерживаемые файлы|*.xls;*.xlsx;*.xlsm;*.xlsb;*.csv;*.doc;*.docx;*.ppt;*.pptx"
                 dialog.FilterIndex = 4 ' 默认显示所有支持的文件
                 dialog.Multiselect = True
 
@@ -2117,7 +2125,7 @@ Public MustInherit Class BaseChatControl
             End Using
         Catch ex As Exception
             Debug.WriteLine($"HandleOpenFileDialog 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("打开文件对话框时出错")
+            GlobalStatusStrip.ShowWarning("Ошибка при открытии диалога выбора файла")
         End Try
     End Sub
 
@@ -2139,7 +2147,7 @@ Public MustInherit Class BaseChatControl
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleOpenApiConfigForm 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("打开配置窗口时出错")
+            GlobalStatusStrip.ShowWarning("Ошибка при открытии окна конфигурации")
         End Try
     End Sub
 
@@ -2212,7 +2220,7 @@ Public MustInherit Class BaseChatControl
                     ApplyReformatWithMapping(mapping)
                     Return
                 Else
-                    GlobalStatusStrip.ShowWarning("语义映射不存在")
+                    GlobalStatusStrip.ShowWarning("Семантическое сопоставление не найдено")
                     Return
                 End If
             End If
@@ -2220,7 +2228,7 @@ Public MustInherit Class BaseChatControl
             ' 常规模板
             Dim template = ReformatTemplateManager.Instance.GetTemplateById(templateId)
             If template Is Nothing Then
-                GlobalStatusStrip.ShowWarning("模板不存在")
+                GlobalStatusStrip.ShowWarning("Шаблон не найден")
                 Return
             End If
 
@@ -2228,7 +2236,7 @@ Public MustInherit Class BaseChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleUseReformatTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"使用模板失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось использовать шаблон: {ex.Message}")
         End Try
     End Sub
 
@@ -2236,14 +2244,14 @@ Public MustInherit Class BaseChatControl
     ''' 使用模板进行排版（由子类实现）
     ''' </summary>
     Protected Overridable Sub ApplyReformatWithTemplate(template As ReformatTemplate)
-        GlobalStatusStrip.ShowWarning("当前应用不支持模板排版")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает форматирование по шаблону")
     End Sub
 
     ''' <summary>
     ''' 使用SemanticStyleMapping直接排版（由子类实现，用于docx解析的映射）
     ''' </summary>
     Protected Overridable Sub ApplyReformatWithMapping(mapping As SemanticStyleMapping)
-        GlobalStatusStrip.ShowWarning("当前应用不支持文档映射排版")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает форматирование по сопоставлению документа")
     End Sub
 
 #Region "排版规范处理方法"
@@ -2264,7 +2272,7 @@ Public MustInherit Class BaseChatControl
             Dim guide = StyleGuideManager.Instance.GetStyleGuideById(guideId)
 
             If guide Is Nothing Then
-                GlobalStatusStrip.ShowWarning("规范不存在")
+                GlobalStatusStrip.ShowWarning("Стандарт не найден")
                 Return
             End If
 
@@ -2273,7 +2281,7 @@ Public MustInherit Class BaseChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleUseStyleGuide 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"使用规范失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось использовать стандарт: {ex.Message}")
         End Try
     End Sub
 
@@ -2281,7 +2289,7 @@ Public MustInherit Class BaseChatControl
     ''' 使用规范进行排版（由子类实现）
     ''' </summary>
     Protected Overridable Sub ApplyReformatWithStyleGuide(guide As StyleGuideResource)
-        GlobalStatusStrip.ShowWarning("当前应用不支持规范排版")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает форматирование по стандарту")
     End Sub
 
     ''' <summary>
@@ -2325,14 +2333,14 @@ Public MustInherit Class BaseChatControl
     ''' 在Word中预览模板
     ''' </summary>
     Protected Overridable Sub HandlePreviewTemplateInWord(jsonDoc As JObject)
-        GlobalStatusStrip.ShowWarning("当前应用不支持模板预览")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает предпросмотр шаблона")
     End Sub
 
     ''' <summary>
     ''' 保存当前文档为模板
     ''' </summary>
     Protected Overridable Sub HandleSaveCurrentDocumentAsTemplate()
-        GlobalStatusStrip.ShowWarning("当前应用不支持保存文档为模板")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает сохранение документа как шаблона")
     End Sub
 
     ''' <summary>
@@ -2428,7 +2436,7 @@ Public MustInherit Class BaseChatControl
 
             Dim templateJson As String = jsonDoc("templateJson")?.ToString()
             If String.IsNullOrWhiteSpace(templateJson) Then
-                GlobalStatusStrip.ShowWarning("没有可预览的模板数据")
+                GlobalStatusStrip.ShowWarning("Нет данных шаблона для предпросмотра")
                 Return
             End If
 
@@ -2439,7 +2447,7 @@ Public MustInherit Class BaseChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandlePreviewAiTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"预览模板失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось выполнить предпросмотр шаблона: {ex.Message}")
         End Try
     End Sub
 
@@ -2447,7 +2455,7 @@ Public MustInherit Class BaseChatControl
     ''' 在文档中预览模板效果（由子类实现）
     ''' </summary>
     Protected Overridable Sub PreviewTemplateInDocument(template As ReformatTemplate)
-        GlobalStatusStrip.ShowWarning("当前应用不支持模板预览")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает предпросмотр шаблона")
     End Sub
 
 #End Region
@@ -2571,13 +2579,13 @@ Public MustInherit Class BaseChatControl
     Private Function GetSendValidationWarning(failure As ChatSendValidationFailure) As String
         Select Case failure
             Case ChatSendValidationFailure.MissingApiKey
-                Return "请先配置大模型ApiKey！"
+                Return "Сначала настройте ApiKey модели!"
             Case ChatSendValidationFailure.MissingApiUrl
-                Return "请先配置大模型Api！"
+                Return "Сначала настройте API модели!"
             Case ChatSendValidationFailure.MissingQuestion
-                Return "请输入问题！"
+                Return "Введите вопрос!"
             Case Else
-                Return "请求参数不完整"
+                Return "Параметры запроса неполные"
         End Select
     End Function
 
@@ -2671,7 +2679,7 @@ Public MustInherit Class BaseChatControl
             Await SaveFullWebPageAsync()
         Catch ex As Exception
             Debug.WriteLine("Send 请求失败: " & ex.Message & vbCrLf & ex.StackTrace)
-            GlobalStatusStrip.ShowWarning("请求失败: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка запроса: " & ex.Message)
         Finally
         End Try
 
@@ -2750,7 +2758,7 @@ Public MustInherit Class BaseChatControl
             If Not validation.IsValid Then
                 Debug.WriteLine($"[SelfCheck] PostFlush校验失败: {String.Join(";", validation.Errors.Select(Function(e) e.Message))}")
                 If validation.Errors.Any(Function(e) e.Level = ErrorLevel.Critical) Then
-                    GlobalStatusStrip.ShowWarning($"AI响应格式校验未通过，可能存在指令错误")
+                    GlobalStatusStrip.ShowWarning($"Проверка формата ответа ИИ не пройдена; возможны ошибки в инструкциях")
                 End If
             Else
                 Debug.WriteLine($"[SelfCheck] PostFlush校验通过，解析到 {validation.ParsedInstructions.Count} 条指令")
@@ -2865,17 +2873,17 @@ Public MustInherit Class BaseChatControl
     Protected Overridable Async Sub HandleRetryReformat(jsonDoc As JObject)
         Try
             Dim uuid As String = If(jsonDoc("uuid")?.ToString(), "")
-            Dim errorMsg As String = If(jsonDoc("error")?.ToString(), "格式不符合规范")
+            Dim errorMsg As String = If(jsonDoc("error")?.ToString(), "Формат не соответствует стандарту")
 
             If String.IsNullOrEmpty(uuid) Then
-                GlobalStatusStrip.ShowWarning("重试失败：缺少uuid")
+                GlobalStatusStrip.ShowWarning("Ошибка повтора: отсутствует uuid")
                 Return
             End If
 
             Dim retryCount As Integer = ReformatSvc.GetRetryCount(uuid)
 
             If retryCount >= 1 Then
-                GlobalStatusStrip.ShowWarning("排版重试次数已达上限")
+                GlobalStatusStrip.ShowWarning("Достигнут предел повторных попыток форматирования")
                 Return
             End If
 
@@ -2883,27 +2891,27 @@ Public MustInherit Class BaseChatControl
 
             ' 构建重试提示
             Dim retryPrompt As New System.Text.StringBuilder()
-            retryPrompt.AppendLine("你上次返回的JSON格式有错误，请修正后重新返回。")
+            retryPrompt.AppendLine("JSON в твоём предыдущем ответе содержит ошибку; исправь и верни заново.")
             retryPrompt.AppendLine()
-            retryPrompt.AppendLine($"错误信息：{errorMsg}")
+            retryPrompt.AppendLine($"Сообщение об ошибке: {errorMsg}")
             retryPrompt.AppendLine()
-            retryPrompt.AppendLine("请注意以下JSON格式要求：")
-            retryPrompt.AppendLine("1. 所有字符串必须使用英文双引号("")")
-            retryPrompt.AppendLine("2. 不要在数组或对象的最后一个元素后加逗号")
-            retryPrompt.AppendLine("3. 属性名必须用双引号包裹")
-            retryPrompt.AppendLine("4. 不要在JSON中包含注释")
-            retryPrompt.AppendLine("5. 确保所有括号正确匹配")
+            retryPrompt.AppendLine("Обрати внимание на следующие требования к формату JSON:")
+            retryPrompt.AppendLine("1. Все строки должны использовать двойные кавычки("")")
+            retryPrompt.AppendLine("2. Не ставь запятую после последнего элемента массива или объекта")
+            retryPrompt.AppendLine("3. Имена свойств должны быть заключены в двойные кавычки")
+            retryPrompt.AppendLine("4. Не включай комментарии в JSON")
+            retryPrompt.AppendLine("5. Убедись, что все скобки правильно закрыты")
             retryPrompt.AppendLine()
-            retryPrompt.AppendLine("请只返回修正后的纯JSON，不要包含任何解释文字或代码块标记。")
+            retryPrompt.AppendLine("Верни только исправленный чистый JSON, без пояснений и маркеров блоков кода.")
 
-            GlobalStatusStrip.ShowWarning("JSON解析失败，正在重试...")
+            GlobalStatusStrip.ShowWarning("Не удалось разобрать JSON, повторяю попытку...")
 
             ' 发送重试请求
             Await Send(retryPrompt.ToString(), "", False, "reformat")
 
         Catch ex As Exception
             Debug.WriteLine("HandleRetryReformat 错误: " & ex.Message)
-            GlobalStatusStrip.ShowWarning("重试失败: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка повтора: " & ex.Message)
         End Try
     End Sub
 
@@ -2922,7 +2930,7 @@ Public MustInherit Class BaseChatControl
     ''' </summary>
     Protected Overridable Sub HandleUploadDocxTemplateFromPath(filePath As String)
         ' 默认不支持，由WordAi子类覆盖实现
-        GlobalStatusStrip.ShowWarning("当前应用不支持解析Word模板")
+        GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает разбор шаблонов Word")
     End Sub
 
     ''' <summary>
@@ -2948,7 +2956,7 @@ Public MustInherit Class BaseChatControl
             End Try
 
             If officeApp Is Nothing Then
-                GlobalStatusStrip.ShowWarning("无法获取Office应用对象，请尝试按 Ctrl+Z 撤销")
+                GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Office; попробуйте отменить по Ctrl+Z")
                 Return
             End If
 
@@ -2960,15 +2968,15 @@ Public MustInherit Class BaseChatControl
                     ' Word: 支持 UndoRecord，撤销入口在 Document.Undo
                     Try
                         officeApp.ActiveDocument.Undo(1)
-                        GlobalStatusStrip.ShowInfo("已撤销排版操作")
+                        GlobalStatusStrip.ShowInfo("Форматирование отменено")
                     Catch ex As Exception
                         Debug.WriteLine($"Word Document.Undo 失败，尝试 CommandBars Undo: {ex.Message}")
                         Try
                             officeApp.CommandBars.ExecuteMso("Undo")
-                            GlobalStatusStrip.ShowInfo("已撤销排版操作")
+                            GlobalStatusStrip.ShowInfo("Форматирование отменено")
                         Catch ex2 As Exception
                             Debug.WriteLine($"Word CommandBars 撤销也失败: {ex2.Message}")
-                            GlobalStatusStrip.ShowWarning("撤销排版失败，请手动按 Ctrl+Z")
+                            GlobalStatusStrip.ShowWarning("Не удалось отменить форматирование, нажмите Ctrl+Z вручную")
                         End Try
                     End Try
 
@@ -2977,16 +2985,16 @@ Public MustInherit Class BaseChatControl
                     Try
                         ' PowerPoint Application 没有 ActiveDocument 属性，使用 ActivePresentation
                         officeApp.ActivePresentation.Undo()
-                        GlobalStatusStrip.ShowWarning("已撤销排版操作（PPT撤销受限，如果未完全恢复请多次按 Ctrl+Z）")
+                        GlobalStatusStrip.ShowWarning("Форматирование отменено (в PPT отмена ограничена; если изменения не откатились полностью, нажмите Ctrl+Z несколько раз)")
                     Catch ex As Exception
                         Debug.WriteLine($"PowerPoint 撤销失败: {ex.Message}")
                         Try
                             ' 备选：通过 CommandBars 触发标准撤销
                             officeApp.CommandBars.ExecuteMso("Undo")
-                            GlobalStatusStrip.ShowWarning("已撤销排版操作（PPT撤销受限，如果未完全恢复请多次按 Ctrl+Z）")
+                            GlobalStatusStrip.ShowWarning("Форматирование отменено (в PPT отмена ограничена; если изменения не откатились полностью, нажмите Ctrl+Z несколько раз)")
                         Catch ex2 As Exception
                             Debug.WriteLine($"PowerPoint CommandBars 撤销也失败: {ex2.Message}")
-                            GlobalStatusStrip.ShowWarning("PPT撤销排版失败，请手动按 Ctrl+Z 多次撤销")
+                            GlobalStatusStrip.ShowWarning("Не удалось отменить форматирование в PPT; отменяйте вручную несколькими нажатиями Ctrl+Z")
                         End Try
                     End Try
 
@@ -2995,15 +3003,15 @@ Public MustInherit Class BaseChatControl
                     Try
                         ' Excel 使用 ActiveWorkbook，没有 ActiveDocument
                         officeApp.ActiveWorkbook.Undo()
-                        GlobalStatusStrip.ShowInfo("已撤销排版操作")
+                        GlobalStatusStrip.ShowInfo("Форматирование отменено")
                     Catch ex As Exception
                         Debug.WriteLine($"Excel 撤销失败: {ex.Message}")
                         Try
                             officeApp.CommandBars.ExecuteMso("Undo")
-                            GlobalStatusStrip.ShowInfo("已撤销排版操作")
+                            GlobalStatusStrip.ShowInfo("Форматирование отменено")
                         Catch ex2 As Exception
                             Debug.WriteLine($"Excel CommandBars 撤销也失败: {ex2.Message}")
-                            GlobalStatusStrip.ShowWarning("撤销排版失败，请手动按 Ctrl+Z")
+                            GlobalStatusStrip.ShowWarning("Не удалось отменить форматирование, нажмите Ctrl+Z вручную")
                         End Try
                     End Try
 
@@ -3011,16 +3019,16 @@ Public MustInherit Class BaseChatControl
                     ' 未知应用类型，尝试通用方式
                     Try
                         officeApp.Undo()
-                        GlobalStatusStrip.ShowInfo("已撤销排版操作")
+                        GlobalStatusStrip.ShowInfo("Форматирование отменено")
                     Catch ex As Exception
                         Debug.WriteLine($"通用撤销失败: {ex.Message}")
-                        GlobalStatusStrip.ShowWarning("撤销排版失败，请尝试按 Ctrl+Z")
+                        GlobalStatusStrip.ShowWarning("Не удалось отменить форматирование; попробуйте нажать Ctrl+Z")
                     End Try
             End Select
 
         Catch ex As Exception
             Debug.WriteLine($"HandleUndoReformat 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"撤销排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось отменить форматирование: {ex.Message}")
         End Try
     End Sub
 

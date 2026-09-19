@@ -44,7 +44,7 @@ Public Class BatchDataGenerationForm
     End Sub
 
     Private Sub InitializeComponent()
-        Me.Text = "批量数据生成"
+        Me.Text = "Пакетная генерация данных"
         Me.Size = New Size(620, 450)
         Me.StartPosition = FormStartPosition.CenterScreen
         Me.MinimizeBox = False
@@ -58,9 +58,9 @@ Public Class BatchDataGenerationForm
         _fieldListView.View = View.Details
         _fieldListView.FullRowSelect = True
         _fieldListView.GridLines = True
-        _fieldListView.Columns.Add("字段名", 120)
-        _fieldListView.Columns.Add("目标列（如A）", 110)
-        _fieldListView.Columns.Add("字段描述", 360)
+        _fieldListView.Columns.Add("Имя поля", 120)
+        _fieldListView.Columns.Add("Целевой столбец (напр. A)", 110)
+        _fieldListView.Columns.Add("Описание поля", 360)
         Me.Controls.Add(_fieldListView)
 
         ' 行数设置面板
@@ -70,7 +70,7 @@ Public Class BatchDataGenerationForm
         Me.Controls.Add(rowCountPanel)
 
         Dim rowCountLabel As New Label()
-        rowCountLabel.Text = "生成行数："
+        rowCountLabel.Text = "Число строк:"
         rowCountLabel.Location = New Point(10, 12)
         rowCountLabel.Width = 70
         rowCountPanel.Controls.Add(rowCountLabel)
@@ -85,7 +85,7 @@ Public Class BatchDataGenerationForm
 
         ' 添加一个提示标签
         Dim hintLabel As New Label()
-        hintLabel.Text = "提示：目标列填写Excel列字母（如A、B、C），AI将按字段描述生成对应内容"
+        hintLabel.Text = "Подсказка: укажите букву столбца Excel (например, A, B, C); ИИ сгенерирует содержимое по описанию поля"
         hintLabel.Location = New Point(180, 12)
         hintLabel.Width = 420
         hintLabel.ForeColor = Drawing.Color.Gray
@@ -98,28 +98,28 @@ Public Class BatchDataGenerationForm
         Me.Controls.Add(buttonPanel)
 
         _addButton = New Button()
-        _addButton.Text = "添加字段"
+        _addButton.Text = "Добавить поле"
         _addButton.Location = New Point(10, 12)
         _addButton.Width = 100
         AddHandler _addButton.Click, AddressOf AddButton_Click
         buttonPanel.Controls.Add(_addButton)
 
         _removeButton = New Button()
-        _removeButton.Text = "移除字段"
+        _removeButton.Text = "Удалить поле"
         _removeButton.Location = New Point(120, 12)
         _removeButton.Width = 100
         AddHandler _removeButton.Click, AddressOf RemoveButton_Click
         buttonPanel.Controls.Add(_removeButton)
 
         _generateButton = New Button()
-        _generateButton.Text = "生成数据"
+        _generateButton.Text = "Сгенерировать данные"
         _generateButton.Location = New Point(390, 12)
         _generateButton.Width = 100
         AddHandler _generateButton.Click, AddressOf GenerateButton_Click
         buttonPanel.Controls.Add(_generateButton)
 
         _cancelButton = New Button()
-        _cancelButton.Text = "取消"
+        _cancelButton.Text = "Отмена"
         _cancelButton.Location = New Point(500, 12)
         _cancelButton.Width = 100
         AddHandler _cancelButton.Click, AddressOf CancelButton_Click
@@ -145,7 +145,7 @@ Public Class BatchDataGenerationForm
 
     Private Sub GenerateButton_Click(sender As Object, e As EventArgs)
         If _fieldListView.Items.Count = 0 Then
-            MessageBox.Show("请先添加至少一个字段。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Сначала добавьте хотя бы одно поле.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
         Me.DialogResult = DialogResult.OK
@@ -177,7 +177,7 @@ Public Class FieldInputForm
     End Sub
 
     Private Sub InitializeComponent()
-        Me.Text = "添加字段"
+        Me.Text = "Добавить поле"
         Me.Size = New Size(400, 230)
         Me.StartPosition = FormStartPosition.CenterParent
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -185,7 +185,7 @@ Public Class FieldInputForm
         Me.MinimizeBox = False
 
         Dim fieldNameLabel As New Label()
-        fieldNameLabel.Text = "字段名称:"
+        fieldNameLabel.Text = "Имя поля:"
         fieldNameLabel.Location = New Point(10, 15)
         fieldNameLabel.Width = 80
         Me.Controls.Add(fieldNameLabel)
@@ -196,7 +196,7 @@ Public Class FieldInputForm
         Me.Controls.Add(_fieldNameTextBox)
 
         Dim cellColumnLabel As New Label()
-        cellColumnLabel.Text = "目标列:"
+        cellColumnLabel.Text = "Целевой столбец:"
         cellColumnLabel.Location = New Point(10, 45)
         cellColumnLabel.Width = 80
         Me.Controls.Add(cellColumnLabel)
@@ -208,14 +208,14 @@ Public Class FieldInputForm
         Me.Controls.Add(_cellColumnTextBox)
 
         Dim colHint As New Label()
-        colHint.Text = "（Excel列字母，如 A、B、AA）"
+        colHint.Text = "(буква столбца Excel, напр. A, B, AA)"
         colHint.Location = New Point(190, 45)
         colHint.Width = 200
         colHint.ForeColor = Drawing.Color.Gray
         Me.Controls.Add(colHint)
 
         Dim fieldDescLabel As New Label()
-        fieldDescLabel.Text = "字段描述:"
+        fieldDescLabel.Text = "Описание поля:"
         fieldDescLabel.Location = New Point(10, 75)
         fieldDescLabel.Width = 80
         Me.Controls.Add(fieldDescLabel)
@@ -228,14 +228,14 @@ Public Class FieldInputForm
         Me.Controls.Add(_fieldDescTextBox)
 
         _okButton = New Button()
-        _okButton.Text = "确定"
+        _okButton.Text = "OK"
         _okButton.Location = New Point(210, 155)
         _okButton.Width = 80
         AddHandler _okButton.Click, AddressOf OkButton_Click
         Me.Controls.Add(_okButton)
 
         _cancelButton = New Button()
-        _cancelButton.Text = "取消"
+        _cancelButton.Text = "Отмена"
         _cancelButton.Location = New Point(300, 155)
         _cancelButton.Width = 80
         AddHandler _cancelButton.Click, AddressOf CancelButton_Click
@@ -244,18 +244,18 @@ Public Class FieldInputForm
 
     Private Sub OkButton_Click(sender As Object, e As EventArgs)
         If String.IsNullOrWhiteSpace(_fieldNameTextBox.Text) Then
-            MessageBox.Show("请输入字段名称。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Введите имя поля.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
         Dim colText = _cellColumnTextBox.Text.Trim().ToUpper()
         If String.IsNullOrWhiteSpace(colText) Then
-            MessageBox.Show("请输入目标列（如 A、B）。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Введите целевой столбец (напр. A, B).", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
         ' 只允许 1~3 个大写字母（对应 Excel 最大列 XFD=16384）；
         ' 不校验会导致 ColumnLetterToIndex 返回 0，数据静默写入失败，用户不知道哪里错了
         If colText.Length > 3 OrElse colText.Any(Function(ch) ch < "A"c OrElse ch > "Z"c) Then
-            MessageBox.Show("目标列只能是 1~3 个英文字母（如 A、B、AA、XFD）。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Целевой столбец может содержать только 1–3 латинские буквы (напр. A, B, AA, XFD).", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
         FieldName = _fieldNameTextBox.Text.Trim()

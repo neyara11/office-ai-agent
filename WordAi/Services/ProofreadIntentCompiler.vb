@@ -1,5 +1,5 @@
 ' WordAi\Services\ProofreadIntentCompiler.vb
-' 将自然语言校对请求编译为结构化计划；不直接访问 Word COM。
+' 将自然语言校对请求编译为结构化计划; 不直接访问 Word COM。
 
 Imports System.Text
 Imports System.Collections.Generic
@@ -41,29 +41,29 @@ Namespace Services
 
         Public Function ToHumanReadableSummary() As String
             Dim typesText = If(IssueTypes Is Nothing OrElse IssueTypes.Count = 0,
-                               "全部问题",
-                               String.Join("、", IssueTypes.Select(Function(t) IssueTypeToText(t))))
-            Return $"范围: {ScopeToText(Scope)}；类型: {typesText}；模式: {If(ApplyMode = ProofreadApplyMode.AutoApplyHighConfidence, "高置信自动修正", "建议预览")}"
+                               "все проблемы",
+                               String.Join(", ", IssueTypes.Select(Function(t) IssueTypeToText(t))))
+            Return $"Диапазон: {ScopeToText(Scope)}; типы: {typesText}; режим: {If(ApplyMode = ProofreadApplyMode.AutoApplyHighConfidence, "автоисправление надёжных", "предпросмотр предложений")}"
         End Function
 
         Private Shared Function ScopeToText(scope As ProofreadTargetScope) As String
             Select Case scope
-                Case ProofreadTargetScope.Selection : Return "当前选区"
-                Case ProofreadTargetScope.Document : Return "全文"
-                Case ProofreadTargetScope.CurrentParagraph : Return "当前段落"
-                Case Else : Return "自动"
+                Case ProofreadTargetScope.Selection : Return "Текущее выделение"
+                Case ProofreadTargetScope.Document : Return "Весь документ"
+                Case ProofreadTargetScope.CurrentParagraph : Return "Текущий абзац"
+                Case Else : Return "Автоматически"
             End Select
         End Function
 
         Private Shared Function IssueTypeToText(issueType As ProofreadIssueType) As String
             Select Case issueType
-                Case ProofreadIssueType.Typo : Return "错别字"
-                Case ProofreadIssueType.Punctuation : Return "标点"
-                Case ProofreadIssueType.Grammar : Return "语法"
-                Case ProofreadIssueType.Wording : Return "表达"
-                Case ProofreadIssueType.Terminology : Return "术语"
-                Case ProofreadIssueType.NumberFormat : Return "数字格式"
-                Case ProofreadIssueType.StyleConsistency : Return "风格一致性"
+                Case ProofreadIssueType.Typo : Return "Опечатки"
+                Case ProofreadIssueType.Punctuation : Return "Пунктуация"
+                Case ProofreadIssueType.Grammar : Return "Грамматика"
+                Case ProofreadIssueType.Wording : Return "Формулировки"
+                Case ProofreadIssueType.Terminology : Return "Терминология"
+                Case ProofreadIssueType.NumberFormat : Return "Формат чисел"
+                Case ProofreadIssueType.StyleConsistency : Return "Единообразие стиля"
                 Case Else : Return issueType.ToString()
             End Select
         End Function
@@ -97,7 +97,7 @@ Namespace Services
 
             If ContainsAny(message, {"自动修正", "自动修改", "直接修正", "直接修改"}) Then
                 plan.ApplyMode = ProofreadApplyMode.AutoApplyHighConfidence
-                plan.Notes.Add("仅建议自动应用高置信、低风险修正；其他问题仍进入侧边栏确认。")
+                plan.Notes.Add("Автоматически применять только надёжные низкорисковые исправления; остальные проблемы по-прежнему требуют подтверждения на боковой панели.")
             End If
 
             plan.Confidence = 0.88

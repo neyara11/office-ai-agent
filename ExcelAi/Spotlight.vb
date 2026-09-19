@@ -79,12 +79,12 @@ Public Class Spotlight
                         ApplyHighlight()
                     End If
 
-                    GlobalStatusStripAll.ShowWarning("聚光灯颜色已更新")
+                    GlobalStatusStripAll.ShowWarning("Цвет подсветки обновлён")
                 End If
             End Using
         Catch ex As Exception
             Debug.WriteLine("显示颜色对话框时出错: " & ex.Message)
-            MessageBox.Show("显示颜色对话框时出错: " & ex.Message, "聚光灯颜色", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при показе диалога выбора цвета: " & ex.Message, "Цвет подсветки", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -92,10 +92,10 @@ Public Class Spotlight
     Public Function Toggle() As Boolean
         If _spotlightActive Then
             Deactivate()
-            GlobalStatusStripAll.ShowWarning("聚光灯功能已关闭,双击聚光灯按钮可修改颜色")
+            GlobalStatusStripAll.ShowWarning("Режим подсветки выключен. Дважды щёлкните кнопку подсветки, чтобы изменить цвет")
         Else
             Activate()
-            GlobalStatusStripAll.ShowWarning("聚光灯功能已开启，双击聚光灯按钮可修改颜色")
+            GlobalStatusStripAll.ShowWarning("Режим подсветки включён. Дважды щёлкните кнопку подсветки, чтобы изменить цвет")
         End If
 
         Return _spotlightActive
@@ -127,7 +127,7 @@ Public Class Spotlight
             Debug.WriteLine("聚光灯功能已激活")
         Catch ex As Exception
             Debug.WriteLine("激活聚光灯功能时出错: " & ex.Message)
-            MessageBox.Show("激活聚光灯功能时出错: " & ex.Message, "聚光灯功能", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при активации режима подсветки: " & ex.Message, "Режим подсветки", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 

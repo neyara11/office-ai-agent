@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\Services\UtilsService.vb
+﻿' ShareRibbon\Controls\Services\UtilsService.vb
 ' 工具服务：通用工具方法封装
 
 Imports System.Text
@@ -117,11 +117,11 @@ function copyCode(button) {
         textarea.setSelectionRange(0, 99999);
         document.execCommand('copy');
         const originalText = button.innerHTML;
-        button.innerHTML = '已复制';
+        button.innerHTML = 'Скопировано';
         setTimeout(() => { button.innerHTML = originalText; }, 2000);
     } catch (err) {
         console.error('复制失败:', err);
-        alert('复制失败');
+        alert('Не удалось скопировать');
     } finally {
         document.body.removeChild(textarea);
     }
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const preElement = this.nextElementSibling;
             if (preElement && preElement.tagName.toLowerCase() === 'pre') {
                 preElement.classList.toggle('collapsed');
-                this.textContent = preElement.classList.contains('collapsed') ? '点击展开代码' : '点击折叠代码';
+                this.textContent = preElement.classList.contains('collapsed') ? 'Показать код' : 'Скрыть код';
             }
         };
     });
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.toggle('collapsed');
             const toggleLabel = this.previousElementSibling;
             if (toggleLabel && toggleLabel.classList.contains('code-toggle-label')) {
-                toggleLabel.textContent = this.classList.contains('collapsed') ? '点击展开代码' : '点击折叠代码';
+                toggleLabel.textContent = this.classList.contains('collapsed') ? 'Показать код' : 'Скрыть код';
             }
         };
     });
@@ -257,7 +257,7 @@ if (document.readyState !== 'loading') {
            ex.Message.Contains("Programmatic access to Visual Basic Project is not trusted") Then
             ShowVbaTrustDialog()
         Else
-            System.Windows.Forms.MessageBox.Show("执行 VBA 代码时出错: " & ex.Message, "错误",
+            System.Windows.Forms.MessageBox.Show("Ошибка при выполнении кода VBA: " & ex.Message, "Ошибка",
                 System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error)
         End If
     End Sub
@@ -267,12 +267,12 @@ if (document.readyState !== 'loading') {
     ''' </summary>
     Public Shared Sub ShowVbaTrustDialog()
         System.Windows.Forms.MessageBox.Show(
-            "无法执行 VBA 代码，请按以下步骤设置：" & vbCrLf & vbCrLf &
-            "1. 点击 '文件' -> '选项' -> '信任中心'" & vbCrLf &
-            "2. 点击 '信任中心设置'" & vbCrLf &
-            "3. 选择 '宏设置'" & vbCrLf &
-            "4. 勾选 '信任对 VBA 项目对象模型的访问'",
-            "需要设置信任中心权限",
+            "Не удалось выполнить код VBA. Настройте параметры следующим образом:" & vbCrLf & vbCrLf &
+            "1. Нажмите 'Файл' -> 'Параметры' -> 'Центр управления безопасностью'" & vbCrLf &
+            "2. Нажмите 'Параметры Центра управления безопасностью'" & vbCrLf &
+            "3. Выберите 'Параметры макросов'" & vbCrLf &
+            "4. Установите флажок 'Доверять доступ к объектной модели проектов VBA'",
+            "Требуется настроить разрешения Центра управления безопасностью",
             System.Windows.Forms.MessageBoxButtons.OK,
             System.Windows.Forms.MessageBoxIcon.Warning)
     End Sub

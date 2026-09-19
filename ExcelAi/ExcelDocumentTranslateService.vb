@@ -36,7 +36,7 @@ Public Class ExcelDocumentTranslateService
         ' 获取翻译配置
         Dim cfg = ConfigManager.ConfigData.FirstOrDefault(Function(c) c.translateSelected)
         If cfg Is Nothing OrElse cfg.model Is Nothing OrElse cfg.model.Count = 0 Then
-            GlobalStatusStripAll.ShowWarning("未配置翻译平台，请先在翻译配置中选择平台和模型")
+            GlobalStatusStripAll.ShowWarning("Платформа перевода не настроена. Сначала выберите платформу и модель в настройках перевода")
             Return results
         End If
 
@@ -91,7 +91,7 @@ Public Class ExcelDocumentTranslateService
             Dim endIdx = Math.Min(startIdx + BATCH_SIZE, texts.Count)
             Dim batchTexts = texts.Skip(startIdx).Take(endIdx - startIdx).ToList()
             
-            GlobalStatusStripAll.ShowWarning($"正在翻译批次 {batchIndex + 1}/{CInt(batchCount)}（共{texts.Count}个单元格）...")
+            GlobalStatusStripAll.ShowWarning($"Перевод партии {batchIndex + 1}/{CInt(batchCount)} (ячеек: {texts.Count})...")
             
             Try
                 Dim batchResults = Await TranslateBatchAsync(batchTexts, systemPrompt, sourceLang, targetLang, apiUrl, apiKey, modelName)
@@ -125,9 +125,9 @@ Public Class ExcelDocumentTranslateService
                                                 modelName As String) As Task(Of List(Of String))
         ' 构建编号格式的请求
         Dim sb As New StringBuilder()
-        sb.AppendLine($"请将以下编号内容从{sourceLang}翻译为{targetLang}。")
-        sb.AppendLine("严格按照相同的编号格式返回翻译结果，每行一个编号，格式为 [编号] 翻译内容")
-        sb.AppendLine("不要添加任何额外解释，只返回翻译结果。")
+        sb.AppendLine($"Переведи приведённые ниже пронумерованные фрагменты с языка {sourceLang} на язык {targetLang}.")
+        sb.AppendLine("Строго соблюдай тот же формат нумерации: каждая строка — один номер в формате [номер] перевод.")
+        sb.AppendLine("Не добавляй никаких лишних пояснений, возвращай только перевод.")
         sb.AppendLine()
         
         For i = 0 To texts.Count - 1
@@ -296,21 +296,21 @@ Public Class ExcelDocumentTranslateService
     ''' </summary>
     Private Function GetLanguageName(code As String) As String
         Select Case code.ToLower()
-            Case "auto" : Return "原语言"
-            Case "zh" : Return "中文"
-            Case "en" : Return "英文"
-            Case "ja" : Return "日语"
-            Case "ko" : Return "韩语"
-            Case "fr" : Return "法语"
-            Case "de" : Return "德语"
-            Case "es" : Return "西班牙语"
-            Case "ru" : Return "俄语"
-            Case "pt" : Return "葡萄牙语"
-            Case "it" : Return "意大利语"
-            Case "vi" : Return "越南语"
-            Case "th" : Return "泰语"
-            Case "id" : Return "印尼语"
-            Case "ar" : Return "阿拉伯语"
+            Case "auto" : Return "Исходный язык"
+            Case "zh" : Return "Китайский"
+            Case "en" : Return "Английский"
+            Case "ja" : Return "Японский"
+            Case "ko" : Return "Корейский"
+            Case "fr" : Return "Французский"
+            Case "de" : Return "Немецкий"
+            Case "es" : Return "Испанский"
+            Case "ru" : Return "Русский"
+            Case "pt" : Return "Португальский"
+            Case "it" : Return "Итальянский"
+            Case "vi" : Return "Вьетнамский"
+            Case "th" : Return "Тайский"
+            Case "id" : Return "Индонезийский"
+            Case "ar" : Return "Арабский"
             Case Else : Return code
         End Select
     End Function

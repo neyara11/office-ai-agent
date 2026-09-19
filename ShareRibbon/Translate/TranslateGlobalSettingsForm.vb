@@ -26,7 +26,7 @@ Public Class TranslateGlobalSettingsForm
     Private btnCancel As Button
 
     Public Sub New()
-        Me.Text = "翻译领域管理"
+        Me.Text = "Управление областями перевода"
         Me.Size = New Size(520, 480)
         Me.StartPosition = FormStartPosition.CenterParent
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -41,7 +41,7 @@ Public Class TranslateGlobalSettingsForm
 
         ' ========== 领域模板管理 ==========
         grpDomain = New GroupBox() With {
-            .Text = "翻译领域模板",
+            .Text = "Шаблоны областей перевода",
             .Location = New Point(10, yPos),
             .Size = New Size(485, 320)
         }
@@ -55,7 +55,7 @@ Public Class TranslateGlobalSettingsForm
         grpDomain.Controls.Add(lstDomains)
 
         Dim lblDesc As New Label() With {
-            .Text = "领域提示词预览:",
+            .Text = "Предпросмотр промпта области:",
             .Location = New Point(230, 25),
             .AutoSize = True
         }
@@ -72,7 +72,7 @@ Public Class TranslateGlobalSettingsForm
         grpDomain.Controls.Add(txtDomainDesc)
 
         btnAddDomain = New Button() With {
-            .Text = "添加领域",
+            .Text = "Добавить область",
             .Location = New Point(15, 235),
             .Size = New Size(90, 28)
         }
@@ -80,7 +80,7 @@ Public Class TranslateGlobalSettingsForm
         grpDomain.Controls.Add(btnAddDomain)
 
         btnEditDomain = New Button() With {
-            .Text = "编辑",
+            .Text = "Изменить",
             .Location = New Point(115, 235),
             .Size = New Size(50, 28)
         }
@@ -88,7 +88,7 @@ Public Class TranslateGlobalSettingsForm
         grpDomain.Controls.Add(btnEditDomain)
 
         btnDeleteDomain = New Button() With {
-            .Text = "删除",
+            .Text = "Удалить",
             .Location = New Point(170, 235),
             .Size = New Size(50, 28)
         }
@@ -96,7 +96,7 @@ Public Class TranslateGlobalSettingsForm
         grpDomain.Controls.Add(btnDeleteDomain)
 
         Dim lblTip As New Label() With {
-            .Text = "提示: 内置领域不可删除，您可以添加自定义领域模板",
+            .Text = "Подсказка: встроенные области нельзя удалить, но можно добавить собственные шаблоны областей",
             .Location = New Point(15, 275),
             .Size = New Size(455, 35),
             .ForeColor = Color.Gray
@@ -107,13 +107,13 @@ Public Class TranslateGlobalSettingsForm
 
         ' ========== 高级设置 ==========
         grpAdvanced = New GroupBox() With {
-            .Text = "高级设置",
+            .Text = "Дополнительные настройки",
             .Location = New Point(10, yPos),
             .Size = New Size(485, 60)
         }
         Me.Controls.Add(grpAdvanced)
 
-        Dim lblBatch As New Label() With {.Text = "每批翻译段落数:", .Location = New Point(15, 25), .AutoSize = True}
+        Dim lblBatch As New Label() With {.Text = "Число абзацев за пакет:", .Location = New Point(15, 25), .AutoSize = True}
         grpAdvanced.Controls.Add(lblBatch)
 
         numBatchSize = New NumericUpDown() With {
@@ -126,7 +126,7 @@ Public Class TranslateGlobalSettingsForm
         grpAdvanced.Controls.Add(numBatchSize)
 
         chkShowProgress = New CheckBox() With {
-            .Text = "显示翻译进度",
+            .Text = "Показывать ход перевода",
             .Location = New Point(200, 24),
             .AutoSize = True,
             .Checked = True
@@ -137,7 +137,7 @@ Public Class TranslateGlobalSettingsForm
 
         ' ========== 按钮 ==========
         btnOk = New Button() With {
-            .Text = "确定",
+            .Text = "OK",
             .Location = New Point(320, yPos),
             .Size = New Size(80, 32),
             .DialogResult = DialogResult.OK
@@ -147,7 +147,7 @@ Public Class TranslateGlobalSettingsForm
         Me.AcceptButton = btnOk
 
         btnCancel = New Button() With {
-            .Text = "取消",
+            .Text = "Отмена",
             .Location = New Point(410, yPos),
             .Size = New Size(80, 32),
             .DialogResult = DialogResult.Cancel
@@ -171,7 +171,7 @@ Public Class TranslateGlobalSettingsForm
         TranslateDomainManager.Load()
         For Each template In TranslateDomainManager.Templates
             Dim displayText = template.Name
-            If template.IsBuiltIn Then displayText &= " [内置]"
+            If template.IsBuiltIn Then displayText &= " [встроенный]"
             lstDomains.Items.Add(displayText)
         Next
 
@@ -200,13 +200,13 @@ Public Class TranslateGlobalSettingsForm
 
     Private Sub EditDomain_Click(sender As Object, e As EventArgs)
         If lstDomains.SelectedIndex < 0 Then
-            MessageBox.Show("请先选择要编辑的领域模板。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Сначала выберите шаблон области для изменения.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
         Dim template = TranslateDomainManager.Templates(lstDomains.SelectedIndex)
         If template.IsBuiltIn Then
-            MessageBox.Show("内置模板不可编辑，您可以添加新的自定义模板。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Встроенный шаблон нельзя изменить, но можно добавить собственный.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
@@ -220,17 +220,17 @@ Public Class TranslateGlobalSettingsForm
 
     Private Sub DeleteDomain_Click(sender As Object, e As EventArgs)
         If lstDomains.SelectedIndex < 0 Then
-            MessageBox.Show("请先选择要删除的领域模板。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Сначала выберите шаблон области для удаления.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
         Dim template = TranslateDomainManager.Templates(lstDomains.SelectedIndex)
         If template.IsBuiltIn Then
-            MessageBox.Show("内置模板不可删除。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Встроенный шаблон нельзя удалить.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
-        If MessageBox.Show($"确定要删除领域模板 '{template.Name}' 吗？", "确认删除",
+        If MessageBox.Show($"Удалить шаблон области '{template.Name}'?", "Подтверждение удаления",
                           MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             TranslateDomainManager.RemoveTemplate(template.Name)
             LoadDomainTemplates()
@@ -258,7 +258,7 @@ Public Class DomainTemplateEditForm
     Private btnCancel As Button
 
     Public Sub New()
-        Me.Text = "编辑领域模板"
+        Me.Text = "Изменение шаблона области"
         Me.Size = New Size(500, 420)
         Me.StartPosition = FormStartPosition.CenterParent
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -271,7 +271,7 @@ Public Class DomainTemplateEditForm
     Private Sub InitializeControls()
         Dim yPos = 15
 
-        Dim lblName As New Label() With {.Text = "领域名称:", .Location = New Point(12, yPos + 3), .AutoSize = True}
+        Dim lblName As New Label() With {.Text = "Название области:", .Location = New Point(12, yPos + 3), .AutoSize = True}
         Me.Controls.Add(lblName)
 
         txtName = New TextBox() With {
@@ -281,7 +281,7 @@ Public Class DomainTemplateEditForm
         Me.Controls.Add(txtName)
         yPos += 35
 
-        Dim lblDesc As New Label() With {.Text = "领域描述:", .Location = New Point(12, yPos + 3), .AutoSize = True}
+        Dim lblDesc As New Label() With {.Text = "Описание области:", .Location = New Point(12, yPos + 3), .AutoSize = True}
         Me.Controls.Add(lblDesc)
 
         txtDescription = New TextBox() With {
@@ -291,7 +291,7 @@ Public Class DomainTemplateEditForm
         Me.Controls.Add(txtDescription)
         yPos += 35
 
-        Dim lblPrompt As New Label() With {.Text = "系统提示词:", .Location = New Point(12, yPos), .AutoSize = True}
+        Dim lblPrompt As New Label() With {.Text = "Системный промпт:", .Location = New Point(12, yPos), .AutoSize = True}
         Me.Controls.Add(lblPrompt)
         yPos += 22
 
@@ -305,7 +305,7 @@ Public Class DomainTemplateEditForm
         yPos += 230
 
         btnOk = New Button() With {
-            .Text = "保存",
+            .Text = "Сохранить",
             .Location = New Point(300, yPos),
             .Size = New Size(80, 32),
             .DialogResult = DialogResult.OK
@@ -315,7 +315,7 @@ Public Class DomainTemplateEditForm
         Me.AcceptButton = btnOk
 
         btnCancel = New Button() With {
-            .Text = "取消",
+            .Text = "Отмена",
             .Location = New Point(390, yPos),
             .Size = New Size(80, 32),
             .DialogResult = DialogResult.Cancel
@@ -338,7 +338,7 @@ Public Class DomainTemplateEditForm
 
     Private Sub OkButton_Click(sender As Object, e As EventArgs)
         If String.IsNullOrWhiteSpace(txtName.Text) Then
-            MessageBox.Show("请输入领域名称。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Введите название области.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Me.DialogResult = DialogResult.None
             Return
         End If

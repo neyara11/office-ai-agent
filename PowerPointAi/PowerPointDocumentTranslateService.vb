@@ -233,7 +233,7 @@ Public Class PowerPointDocumentTranslateService
                 End If
             Next
         Catch ex As Exception
-            MessageBox.Show("应用翻译结果时出错：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при применении результатов перевода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -323,7 +323,7 @@ Public Class PowerPointDocumentTranslateService
             Next
 
         Catch ex As Exception
-            MessageBox.Show("应用沉浸式翻译时出错：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при применении иммерсивного перевода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -422,7 +422,7 @@ Public Class PowerPointDocumentTranslateService
 
             newPres.Windows(1).Activate()
         Catch ex As Exception
-            MessageBox.Show("创建新演示文稿时出错：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при создании новой презентации: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -495,21 +495,21 @@ Public Class PowerPointDocumentTranslateService
             If item.SlideIndex <> currentSlide Then
                 currentSlide = item.SlideIndex
                 sb.AppendLine()
-                sb.AppendLine($"=== 幻灯片 {currentSlide} ===")
+                sb.AppendLine($"=== Слайд {currentSlide} ===")
                 sb.AppendLine()
             End If
 
             If showOriginal Then
-                sb.AppendLine("【原文】")
+                sb.AppendLine("【Оригинал】")
                 sb.AppendLine(result.OriginalText)
                 sb.AppendLine()
-                sb.AppendLine("【译文】")
+                sb.AppendLine("【Перевод】")
             End If
 
             If result.Success Then
                 sb.AppendLine(result.TranslatedText)
             Else
-                sb.AppendLine($"[翻译失败: {result.ErrorMessage}]")
+                sb.AppendLine($"[Ошибка перевода: {result.ErrorMessage}]")
                 sb.AppendLine(result.OriginalText)
             End If
 
@@ -526,6 +526,6 @@ Public Class PowerPointDocumentTranslateService
         Dim slideCount = _presentation.Slides.Count
         Dim textCount = _textItems.Count
 
-        Return $"共 {slideCount} 张幻灯片，{textCount} 个文本块"
+        Return $"Слайдов: {slideCount}, текстовых блоков: {textCount}"
     End Function
 End Class

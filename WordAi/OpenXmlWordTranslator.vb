@@ -181,7 +181,7 @@ Public Class OpenXmlWordTranslator
 
         Try
             document.Application.ScreenUpdating = False
-            document.Application.UndoRecord.StartCustomRecord("AI翻译")
+                document.Application.UndoRecord.StartCustomRecord("AI-перевод")
 
             Select Case outputMode
                 Case TranslateOutputMode.Replace
@@ -195,7 +195,7 @@ Public Class OpenXmlWordTranslator
             document.Application.UndoRecord.EndCustomRecord()
         Catch ex As Exception
             Debug.WriteLine($"[OpenXmlTranslator] ApplyTranslation error: {ex.Message}")
-            MessageBox.Show("应用翻译结果时出错：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при применении результатов перевода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             document.Application.ScreenUpdating = True
         End Try

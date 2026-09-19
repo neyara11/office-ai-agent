@@ -51,7 +51,7 @@ Public NotInheritable Class ExceptionClassifier
     Public Shared Function Classify(ex As Exception) As ClassifiedError
         Dim result As New ClassifiedError()
         If ex Is Nothing Then
-            result.UserMessage = "发生未知错误"
+            result.UserMessage = "Произошла неизвестная ошибка"
             result.DebugDetail = "Exception was Nothing"
             result.Recoverable = False
             Return result
@@ -62,14 +62,14 @@ Public NotInheritable Class ExceptionClassifier
 
         If TypeOf baseEx Is TaskCanceledException OrElse TypeOf baseEx Is OperationCanceledException Then
             result.ErrorCode = CodeTimeout
-            result.UserMessage = "操作超时或已取消，请重试"
+            result.UserMessage = "Операция прервана или превышено время ожидания. Повторите попытку"
             result.Recoverable = True
             Return result
         End If
 
         If TypeOf baseEx Is HttpRequestException OrElse TypeOf baseEx Is WebException Then
             result.ErrorCode = CodeNetwork
-            result.UserMessage = "网络请求失败，请检查网络与 API 配置后重试"
+            result.UserMessage = "Сетевой запрос не удался. Проверьте сеть и настройки API и повторите"
             result.Recoverable = True
             Return result
         End If
@@ -79,7 +79,7 @@ Public NotInheritable Class ExceptionClassifier
            TypeOf baseEx Is JsonSerializationException OrElse
            (baseEx.GetType().Name.IndexOf("Json", StringComparison.OrdinalIgnoreCase) >= 0) Then
             result.ErrorCode = CodeJson
-            result.UserMessage = "数据解析失败，请重试或调整指令"
+            result.UserMessage = "Не удалось разобрать данные. Повторите или измените команду"
             result.Recoverable = True
             Return result
         End If
@@ -89,8 +89,8 @@ Public NotInheritable Class ExceptionClassifier
         If TypeOf baseEx Is COMException OrElse TypeOf baseEx Is InvalidComObjectException OrElse isComInterfaceCastFailure Then
             result.ErrorCode = CodeCom
             result.UserMessage = If(isComInterfaceCastFailure,
-                                    "当前 Office/WPS 宿主不支持所需的 COM 接口，请更新宿主或使用兼容路径",
-                                    "Office 文档操作失败，请确认文档未锁定且选区有效")
+                                    "Текущий хост Office/WPS не поддерживает требуемый COM-интерфейс. Обновите хост или используйте совместимый путь",
+                                    "Не удалось выполнить операцию с документом Office. Убедитесь, что документ не заблокирован и выделение корректно")
             ' QueryInterface/E_NOINTERFACE is deterministic for the current host.
             ' Retrying the same tool with AI-generated parameters cannot add the missing interface.
             result.Recoverable = Not isComInterfaceCastFailure
@@ -103,34 +103,34 @@ Public NotInheritable Class ExceptionClassifier
            msg.IndexOf("被调用的对象已与其客户端断开连接", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
            msg.IndexOf("COM", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso msg.IndexOf("线程", StringComparison.OrdinalIgnoreCase) >= 0 Then
             result.ErrorCode = CodeCom
-            result.UserMessage = "Office 对象跨线程访问失败，请重试该操作"
+            result.UserMessage = "Сбой межпоточного доступа к объекту Office. Повторите операцию"
             result.Recoverable = True
             Return result
         End If
 
         If TypeOf baseEx Is ArgumentException OrElse TypeOf baseEx Is ArgumentNullException OrElse TypeOf baseEx Is ArgumentOutOfRangeException Then
             result.ErrorCode = CodeArgument
-            result.UserMessage = "参数无效，请检查指令参数后重试"
+            result.UserMessage = "Недопустимый параметр. Проверьте аргументы команды и повторите"
             result.Recoverable = True
             Return result
         End If
 
         If TypeOf baseEx Is FileNotFoundException OrElse TypeOf baseEx Is DirectoryNotFoundException Then
             result.ErrorCode = CodeNotFound
-            result.UserMessage = "找不到所需文件或目录"
+            result.UserMessage = "Не удалось найти нужный файл или каталог"
             result.Recoverable = False
             Return result
         End If
 
         If TypeOf baseEx Is IOException Then
             result.ErrorCode = CodeIo
-            result.UserMessage = "文件读写失败，请检查路径与权限"
+            result.UserMessage = "Не удалось прочитать или записать файл. Проверьте путь и права доступа"
             result.Recoverable = True
             Return result
         End If
 
         result.ErrorCode = CodeUnknown
-        result.UserMessage = "操作失败，请重试；若反复出现请查看日志"
+        result.UserMessage = "Операция не удалась. Повторите; если ошибка повторяется, проверьте журнал"
         result.Recoverable = True
         Return result
     End Function

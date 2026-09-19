@@ -42,16 +42,16 @@ Namespace Context
                 End If
 
                 Dim summary As New StringBuilder()
-                summary.AppendLine($"工作簿: {If(String.IsNullOrWhiteSpace(workbookName), "(未保存或未知)", workbookName)}")
-                If worksheet IsNot Nothing Then summary.AppendLine($"当前工作表: {worksheet.Name}")
+                summary.AppendLine($"Рабочая книга: {If(String.IsNullOrWhiteSpace(workbookName), "(не сохранена или неизвестна)", workbookName)}")
+                If worksheet IsNot Nothing Then summary.AppendLine($"Текущий лист: {worksheet.Name}")
                 If usedRange IsNot Nothing Then
-                    summary.AppendLine($"使用区域: {GetRangeAddress(usedRange)}")
-                    summary.AppendLine($"使用区域规模: {usedRange.Rows.Count} 行 x {usedRange.Columns.Count} 列")
+                    summary.AppendLine($"Используемый диапазон: {GetRangeAddress(usedRange)}")
+                    summary.AppendLine($"Размер используемого диапазона: {usedRange.Rows.Count} строк x {usedRange.Columns.Count} столбцов")
                     summary.AppendLine(BuildHeaderSummary(usedRange))
                     summary.AppendLine(BuildFormulaSummary(usedRange))
                     summary.AppendLine(BuildQualitySummary(usedRange))
-                    summary.AppendLine($"推荐默认工作范围: {If(selectedRange IsNot Nothing, GetRangeAddress(selectedRange), GetRangeAddress(usedRange))}")
-                    summary.AppendLine($"推荐输出位置: {GetSuggestedOutputCell(usedRange)}")
+                    summary.AppendLine($"Рекомендуемый диапазон по умолчанию: {If(selectedRange IsNot Nothing, GetRangeAddress(selectedRange), GetRangeAddress(usedRange))}")
+                    summary.AppendLine($"Рекомендуемая позиция вывода: {GetSuggestedOutputCell(usedRange)}")
                 End If
 
                 ctx.DocStructure = New DocumentStructure With {
@@ -71,7 +71,7 @@ Namespace Context
                 If ws IsNot Nothing Then Return $"{ws.Name}!{address}"
                 Return address
             Catch
-                Return "(未知范围)"
+                Return "(неизвестный диапазон)"
             End Try
         End Function
 
@@ -88,7 +88,7 @@ Namespace Context
         Private Function BuildRangePreview(range As Excel.Range, maxRows As Integer, maxCols As Integer) As String
             Dim sb As New StringBuilder()
             Try
-                sb.AppendLine("数据预览:")
+                sb.AppendLine("Предпросмотр данных:")
                 Dim rows = Math.Min(range.Rows.Count, maxRows)
                 Dim cols = Math.Min(range.Columns.Count, maxCols)
 
@@ -103,10 +103,10 @@ Namespace Context
                 Next
 
                 If range.Rows.Count > rows OrElse range.Columns.Count > cols Then
-                    sb.AppendLine($"...仅显示前 {rows} 行 x {cols} 列")
+                    sb.AppendLine($"...показаны только первые {rows} строк x {cols} столбцов")
                 End If
             Catch ex As Exception
-                sb.AppendLine($"数据预览失败: {ex.Message}")
+                sb.AppendLine($"Не удалось построить предпросмотр данных: {ex.Message}")
             End Try
             Return sb.ToString().TrimEnd()
         End Function
@@ -115,24 +115,24 @@ Namespace Context
             Dim sb As New StringBuilder()
             Try
                 sb.AppendLine()
-                sb.AppendLine("范围画像:")
-                sb.AppendLine($"- 地址: {GetRangeAddress(range)}")
-                sb.AppendLine($"- 规模: {range.Rows.Count} 行 x {range.Columns.Count} 列")
-                sb.AppendLine($"- 类型: {InferRangeDataType(range)}")
+                sb.AppendLine("Профиль диапазона:")
+                sb.AppendLine($"- Адрес: {GetRangeAddress(range)}")
+                sb.AppendLine($"- Размер: {range.Rows.Count} строк x {range.Columns.Count} столбцов")
+                sb.AppendLine($"- Тип: {InferRangeDataType(range)}")
 
                 Dim headers = GetHeaders(range, Math.Min(range.Columns.Count, 12))
-                If headers.Count > 0 Then sb.AppendLine($"- 表头: {String.Join(", ", headers)}")
+                If headers.Count > 0 Then sb.AppendLine($"- Заголовки: {String.Join(", ", headers)}")
                 sb.AppendLine(BuildColumnTypeSummary(range, Math.Min(range.Columns.Count, 8), Math.Min(range.Rows.Count, 30)))
             Catch ex As Exception
-                sb.AppendLine($"- 范围画像失败: {ex.Message}")
+                sb.AppendLine($"- Не удалось построить профиль диапазона: {ex.Message}")
             End Try
             Return sb.ToString().TrimEnd()
         End Function
 
         Private Function BuildHeaderSummary(range As Excel.Range) As String
             Dim headers = GetHeaders(range, Math.Min(range.Columns.Count, 20))
-            If headers.Count = 0 Then Return "表头: 未识别"
-            Return "表头: " & String.Join(", ", headers)
+            If headers.Count = 0 Then Return "Заголовки: не распознаны"
+            Return "Заголовки: " & String.Join(", ", headers)
         End Function
 
         Private Function GetHeaders(range As Excel.Range, maxCols As Integer) As List(Of String)
@@ -197,8 +197,8 @@ Namespace Context
             Catch
             End Try
 
-            If parts.Count = 0 Then Return "- 列类型: 未识别"
-            Return "- 列类型: " & String.Join(", ", parts)
+            If parts.Count = 0 Then Return "- Типы столбцов: не распознаны"
+            Return "- Типы столбцов: " & String.Join(", ", parts)
         End Function
 
         Private Function BuildFormulaSummary(range As Excel.Range) As String
@@ -221,9 +221,9 @@ Namespace Context
                     Next
                 Next
 
-                Return $"公式/错误: 公式单元格 {formulaCells} 个，疑似错误值 {errorCells} 个"
+                Return $"Формулы/ошибки: ячеек с формулами {formulaCells}, предположительно ошибочных значений {errorCells}"
             Catch ex As Exception
-                Return $"公式/错误: 统计失败 ({ex.Message})"
+                Return $"Формулы/ошибки: не удалось подсчитать ({ex.Message})"
             End Try
         End Function
 
@@ -249,9 +249,9 @@ Namespace Context
                     End If
                 Next
 
-                Return $"数据质量: 采样空单元格 {blankCount} 个，疑似重复行 {duplicateRows} 行"
+                Return $"Качество данных: пустых ячеек в выборке {blankCount}, предположительно дублирующихся строк {duplicateRows}"
             Catch ex As Exception
-                Return $"数据质量: 统计失败 ({ex.Message})"
+                Return $"Качество данных: не удалось подсчитать ({ex.Message})"
             End Try
         End Function
 
@@ -259,14 +259,14 @@ Namespace Context
             Try
                 If range.Rows.Count >= 2 AndAlso range.Columns.Count >= 2 Then
                     Dim headers = GetHeaders(range, Math.Min(range.Columns.Count, 8))
-                    If headers.Count >= Math.Min(range.Columns.Count, 2) Then Return "表格(疑似含表头)"
-                    Return "表格"
+                    If headers.Count >= Math.Min(range.Columns.Count, 2) Then Return "Таблица (вероятно, с заголовками)"
+                    Return "Таблица"
                 End If
-                If range.Rows.Count = 1 AndAlso range.Columns.Count > 1 Then Return "行数据"
-                If range.Columns.Count = 1 AndAlso range.Rows.Count > 1 Then Return "列数据"
-                Return "单元格"
+                If range.Rows.Count = 1 AndAlso range.Columns.Count > 1 Then Return "Данные строки"
+                If range.Columns.Count = 1 AndAlso range.Rows.Count > 1 Then Return "Данные столбца"
+                Return "Ячейка"
             Catch
-                Return "Excel数据"
+                Return "Данные Excel"
             End Try
         End Function
 
@@ -279,7 +279,7 @@ Namespace Context
                 If ws IsNot Nothing Then Return $"{ws.Name}!{addr}"
                 Return addr
             Catch
-                Return "当前表右侧空白区域"
+                Return "Пустая область справа от текущего листа"
             End Try
         End Function
 

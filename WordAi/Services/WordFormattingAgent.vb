@@ -1,5 +1,5 @@
 ' WordAi\Services\WordFormattingAgent.vb
-' Word 专属排版 Agent 外壳：承接计划、执行和解释；具体 Word COM 操作仍由 SmartFormatter 执行。
+' Word 专属排版 Agent 外壳：承接计划、执行和解释; 具体 Word COM 操作仍由 SmartFormatter 执行。
 
 Imports Word = Microsoft.Office.Interop.Word
 Imports System.Linq
@@ -32,23 +32,23 @@ Namespace Services
             Get
                 Select Case Kind
                     Case WordFormattingTaskKind.DirectFormatting
-                        Return "直接格式调整"
+                        Return "Прямая настройка формата"
                     Case Else
-                        Return "语义智能排版"
+                        Return "Умное семантическое форматирование"
                 End Select
             End Get
         End Property
 
         Public Function ToHumanReadableSummary() As String
             Dim parts As New List(Of String)()
-            parts.Add($"任务: {KindLabel}")
-            If Not String.IsNullOrWhiteSpace(ScopeSummary) Then parts.Add($"范围: {ScopeSummary}")
-            If Not String.IsNullOrWhiteSpace(StandardName) Then parts.Add($"标准: {StandardName}")
+            parts.Add($"Задача: {KindLabel}")
+            If Not String.IsNullOrWhiteSpace(ScopeSummary) Then parts.Add($"Диапазон: {ScopeSummary}")
+            If Not String.IsNullOrWhiteSpace(StandardName) Then parts.Add($"Стандарт: {StandardName}")
             If Not String.IsNullOrWhiteSpace(TargetSummary) Then parts.Add(TargetSummary)
             If Operations IsNot Nothing AndAlso Operations.Count > 0 Then
-                parts.Add("计划: " & String.Join("；", Operations.Take(4)))
+                parts.Add("План: " & String.Join("; ", Operations.Take(4)))
             End If
-            Return String.Join("；", parts)
+            Return String.Join("; ", parts)
         End Function
 
         Public Shared Function FromDirectFormatting(userRequest As String,
@@ -61,12 +61,12 @@ Namespace Services
 
             If plan IsNot Nothing Then
                 Dim summary = plan.ToHumanReadableSummary()
-                Dim segments = summary.Split("；"c)
+                Dim segments = summary.Split(New String() {"; "}, StringSplitOptions.None)
                 If segments.Length > 0 Then
-                    task.ScopeSummary = segments(0).Replace("范围: ", "")
+                    task.ScopeSummary = segments(0).Replace("Диапазон: ", "")
                 End If
                 If segments.Length > 1 Then
-                    task.Operations.Add(segments(1).Replace("操作: ", ""))
+                    task.Operations.Add(segments(1).Replace("операции: ", ""))
                 Else
                     task.Operations.Add(summary)
                 End If
@@ -90,9 +90,9 @@ Namespace Services
             }
 
             If changeCount > 0 Then
-                task.Operations.Add($"预览 {changeCount} 处结构/样式调整，确认后应用")
+                task.Operations.Add($"Предпросмотр изменений структуры/стиля: {changeCount}; применить после подтверждения")
             Else
-                task.Operations.Add("先完成结构分析，再根据用户微调继续生成调整")
+                task.Operations.Add("Сначала выполняется структурный анализ, затем по уточнениям пользователя формируются изменения")
             End If
 
             Return task
@@ -121,7 +121,7 @@ Namespace Services
         Public Function ToHumanReadableSummary() As String
             If Not String.IsNullOrWhiteSpace(ExecutionSummary) Then
                 If TaskPlan IsNot Nothing Then
-                    Return TaskPlan.ToHumanReadableSummary() & "；执行: " & ExecutionSummary
+                    Return TaskPlan.ToHumanReadableSummary() & "; выполнение: " & ExecutionSummary
                 End If
                 Return ExecutionSummary
             End If
@@ -132,13 +132,13 @@ Namespace Services
                     If stepInfo.Name = "Observe" AndAlso
                        stepInfo.Status = WordFormattingAgentStepStatus.Completed AndAlso
                        Not String.IsNullOrWhiteSpace(stepInfo.ResultSummary) Then
-                        Return summary & "；" & stepInfo.ResultSummary
+                        Return summary & "; " & stepInfo.ResultSummary
                     End If
                 Next
                 Return summary
             End If
             If Not String.IsNullOrWhiteSpace(ErrorMessage) Then Return ErrorMessage
-            Return If(Success, "排版任务已完成", "排版任务未完成")
+            Return If(Success, "Задача форматирования выполнена", "Задача форматирования не выполнена")
         End Function
 
         Public Shared Function FromSemanticReformat(taskPlan As WordFormattingTaskPlan,
@@ -155,10 +155,10 @@ Namespace Services
             }
 
             Dim parts As New List(Of String)()
-            parts.Add($"已应用 {appliedCount} / {expectedCount} 个文本段落")
-            If repairCount > 0 Then parts.Add($"自动修复 {repairCount} 个结构段落")
+            parts.Add($"Применено текстовых абзацев: {appliedCount} / {expectedCount}")
+            If repairCount > 0 Then parts.Add($"Автоматически исправлено структурных абзацев: {repairCount}")
             If Not String.IsNullOrWhiteSpace(detailSummary) Then parts.Add(detailSummary)
-            result.ExecutionSummary = String.Join("；", parts)
+            result.ExecutionSummary = String.Join("; ", parts)
             Return result
         End Function
     End Class
@@ -173,23 +173,23 @@ Namespace Services
 
         Public Function RunDirectFormatting(userRequest As String) As WordFormattingAgentResult
             Dim agentResult As New WordFormattingAgentResult()
-            Dim planStep = AddStep(agentResult, "Plan", "理解用户排版需求并生成格式计划")
-            Dim applyStep = AddStep(agentResult, "Apply", "把格式计划应用到当前 Word 文档")
-            Dim observeStep = AddStep(agentResult, "Observe", "观察排版执行结果是否已作用到文档")
-            Dim explainStep = AddStep(agentResult, "Explain", "生成用户可理解的执行摘要")
+            Dim planStep = AddStep(agentResult, "Plan", "Понять потребность пользователя в форматировании и построить план формата")
+            Dim applyStep = AddStep(agentResult, "Apply", "Применить план формата к текущему документу Word")
+            Dim observeStep = AddStep(agentResult, "Observe", "Проверить, применился ли результат форматирования к документу")
+            Dim explainStep = AddStep(agentResult, "Explain", "Сформировать понятную пользователю сводку выполнения")
 
             Try
                 planStep.Status = WordFormattingAgentStepStatus.Running
                 Dim compiler As New FormattingIntentCompiler()
                 Dim plan = compiler.Compile(userRequest, HasUsableSelection())
                 agentResult.TaskPlan = WordFormattingTaskPlan.FromDirectFormatting(userRequest, plan)
-                planStep.ResultSummary = If(plan Is Nothing, "未生成计划", plan.ToHumanReadableSummary())
+                planStep.ResultSummary = If(plan Is Nothing, "План не сформирован", plan.ToHumanReadableSummary())
                 planStep.Status = If(plan IsNot Nothing AndAlso plan.HasOperations,
                                      WordFormattingAgentStepStatus.Completed,
                                      WordFormattingAgentStepStatus.Failed)
 
                 If planStep.Status = WordFormattingAgentStepStatus.Failed Then
-                    agentResult.ErrorMessage = "未识别到可执行格式操作"
+                    agentResult.ErrorMessage = "Исполняемые операции форматирования не распознаны"
                     Return agentResult
                 End If
 
@@ -197,7 +197,7 @@ Namespace Services
                 Dim formatter As New SmartFormatter(_app)
                 Dim formattingResult = formatter.ApplyNaturalLanguageFormatDetailed(userRequest)
                 agentResult.FormattingResult = formattingResult
-                applyStep.ResultSummary = If(formattingResult Is Nothing, "没有执行结果", formattingResult.ToHumanReadableSummary())
+                applyStep.ResultSummary = If(formattingResult Is Nothing, "Нет результата выполнения", formattingResult.ToHumanReadableSummary())
                 applyStep.Status = If(formattingResult IsNot Nothing AndAlso formattingResult.Success,
                                       WordFormattingAgentStepStatus.Completed,
                                       WordFormattingAgentStepStatus.Failed)
@@ -220,7 +220,7 @@ Namespace Services
                 End If
 
                 explainStep.Status = WordFormattingAgentStepStatus.Completed
-                explainStep.ResultSummary = formattingResult.ToHumanReadableSummary() & "；" & observeSummary
+                explainStep.ResultSummary = formattingResult.ToHumanReadableSummary() & "; " & observeSummary
                 agentResult.Success = True
                 Return agentResult
             Catch ex As Exception
@@ -241,29 +241,29 @@ Namespace Services
 
         Private Function ObserveFormattingResult(formattingResult As FormattingExecutionResult, ByRef summary As String) As Boolean
             If formattingResult Is Nothing Then
-                summary = "没有可观察的排版执行结果"
+                summary = "Нет результата форматирования для наблюдения"
                 Return False
             End If
 
             Try
                 If _app Is Nothing OrElse _app.ActiveDocument Is Nothing Then
-                    summary = "无法观察 Word 文档状态：没有活动文档"
+                    summary = "Не удалось проверить состояние документа Word: нет активного документа"
                     Return False
                 End If
             Catch ex As Exception
-                summary = "无法观察 Word 文档状态：" & ex.Message
+                summary = "Не удалось проверить состояние документа Word: " & ex.Message
                 Return False
             End Try
 
             If Not formattingResult.Success Then
                 summary = If(String.IsNullOrWhiteSpace(formattingResult.ErrorMessage),
-                             "排版执行未成功，无法进入观察确认",
+                             "Форматирование не выполнено успешно; наблюдение невозможно",
                              formattingResult.ErrorMessage)
                 Return False
             End If
 
             If formattingResult.AppliedRangeCount <= 0 OrElse formattingResult.AppliedOperationCount <= 0 Then
-                summary = "执行器没有报告有效应用范围或操作数量"
+                summary = "Исполнитель не сообщил допустимый диапазон применения или число операций"
                 Return False
             End If
 
@@ -272,7 +272,7 @@ Namespace Services
             Dim sampleRanges = ResolveObservationRanges(formattingResult.Plan)
 
             If sampleRanges.Count = 0 Then
-                summary = $"执行器已应用 {formattingResult.AppliedRangeCount} 个范围、{formattingResult.AppliedOperationCount} 个操作；但未能读取可观察样本"
+                summary = $"Исполнитель применил диапазонов: {formattingResult.AppliedRangeCount}, операций: {formattingResult.AppliedOperationCount}, но не удалось прочитать наблюдаемые образцы"
                 Return True
             End If
 
@@ -281,12 +281,12 @@ Namespace Services
             Next
 
             If failures.Count > 0 Then
-                summary = "观察到部分格式未达到预期：" & String.Join("；", failures.Take(3))
+                summary = "Часть формата не соответствует ожидаемому: " & String.Join("; ", failures.Take(3))
                 Return False
             End If
 
-            Dim observedText = If(confirmations.Count > 0, String.Join("；", confirmations.Distinct().Take(4)), "已读取文档样本")
-            summary = $"已观察到排版应用结果：{formattingResult.AppliedRangeCount} 个范围，{formattingResult.AppliedOperationCount} 个操作；{observedText}"
+            Dim observedText = If(confirmations.Count > 0, String.Join("; ", confirmations.Distinct().Take(4)), "Образцы документа прочитаны")
+            summary = $"Результат применения форматирования: диапазонов {formattingResult.AppliedRangeCount}, операций {formattingResult.AppliedOperationCount}; {observedText}"
             Return True
         End Function
 
@@ -377,14 +377,14 @@ Namespace Services
 
             If op.Kind = FormattingOperationKind.FontSizeDelta OrElse
                op.Kind = FormattingOperationKind.FontSizeGradeDelta Then
-                confirmations.Add("字号增量已由执行器应用")
+                confirmations.Add("Приращение размера шрифта применено исполнителем")
                 Return
             End If
 
             If passedCount = checkedCount Then
                 confirmations.Add(OperationObservedText(op))
             Else
-                failures.Add($"{OperationObservedText(op)} 仅 {passedCount}/{checkedCount} 个样本符合")
+                failures.Add($"{OperationObservedText(op)}: соответствуют только {passedCount}/{checkedCount} образцов")
             End If
         End Sub
 
@@ -455,25 +455,25 @@ Namespace Services
         Private Function OperationObservedText(op As FormattingOperation) As String
             Select Case op.Kind
                 Case FormattingOperationKind.FontSizeGradeDelta
-                    Return $"字号等级{If(op.NumericValue >= 0, "+", "")}{op.NumericValue}"
+                    Return $"Уровень размера шрифта {If(op.NumericValue >= 0, "+", "")}{op.NumericValue}"
                 Case FormattingOperationKind.FontSizeAbsolute
-                    Return $"字号={op.NumericValue}pt"
+                    Return $"Размер шрифта={op.NumericValue}pt"
                 Case FormattingOperationKind.FontFamily
-                    Return $"字体={op.TextValue}"
+                    Return $"Шрифт={op.TextValue}"
                 Case FormattingOperationKind.Bold
-                    Return If(op.BooleanValue, "加粗已生效", "取消加粗已生效")
+                    Return If(op.BooleanValue, "Полужирный применён", "Отмена полужирного применена")
                 Case FormattingOperationKind.Italic
-                    Return If(op.BooleanValue, "斜体已生效", "取消斜体已生效")
+                    Return If(op.BooleanValue, "Курсив применён", "Отмена курсива применена")
                 Case FormattingOperationKind.Underline
-                    Return "下划线已生效"
+                    Return "Подчёркивание применено"
                 Case FormattingOperationKind.FontColor
-                    Return $"颜色={op.TextValue}"
+                    Return $"Цвет={op.TextValue}"
                 Case FormattingOperationKind.Alignment
-                    Return $"对齐={op.TextValue}"
+                    Return $"Выравнивание={op.TextValue}"
                 Case FormattingOperationKind.LineSpacing
-                    Return $"行距={op.NumericValue}"
+                    Return $"Межстрочный интервал={op.NumericValue}"
                 Case FormattingOperationKind.FirstLineIndent
-                    Return $"首行缩进={op.NumericValue}"
+                    Return $"Отступ первой строки={op.NumericValue}"
                 Case Else
                     Return op.Kind.ToString()
             End Select

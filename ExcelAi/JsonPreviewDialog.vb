@@ -43,7 +43,7 @@ Public Class JsonPreviewDialog
     End Function
 
     Private Sub InitializeComponent()
-        Me.Text = "JSON 命令预览"
+        Me.Text = "Предварительный просмотр команды JSON"
         Me.Size = New Size(700, 500)
         Me.StartPosition = FormStartPosition.CenterParent
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -56,7 +56,7 @@ Public Class JsonPreviewDialog
         tabControl.Height = 380
 
         ' Tab1: 执行计划摘要
-        tabSummary = New TabPage("执行计划")
+        tabSummary = New TabPage("План выполнения")
         summaryTextBox = New RichTextBox()
         summaryTextBox.Dock = DockStyle.Fill
         summaryTextBox.ReadOnly = True
@@ -66,21 +66,21 @@ Public Class JsonPreviewDialog
         tabControl.TabPages.Add(tabSummary)
 
         ' Tab2: 单元格变更列表
-        tabCellChanges = New TabPage("单元格变更")
+        tabCellChanges = New TabPage("Изменения ячеек")
         cellChangesListView = New ListView()
         cellChangesListView.Dock = DockStyle.Fill
         cellChangesListView.View = View.Details
         cellChangesListView.FullRowSelect = True
         cellChangesListView.GridLines = True
-        cellChangesListView.Columns.Add("地址", 80)
-        cellChangesListView.Columns.Add("变更类型", 80)
-        cellChangesListView.Columns.Add("原值", 200)
-        cellChangesListView.Columns.Add("新值", 200)
+        cellChangesListView.Columns.Add("Адрес", 80)
+        cellChangesListView.Columns.Add("Тип изменения", 80)
+        cellChangesListView.Columns.Add("Прежнее значение", 200)
+        cellChangesListView.Columns.Add("Новое значение", 200)
         tabCellChanges.Controls.Add(cellChangesListView)
         tabControl.TabPages.Add(tabCellChanges)
 
         ' Tab3: JSON命令详情
-        tabJsonCode = New TabPage("JSON 命令")
+        tabJsonCode = New TabPage("Команда JSON")
         jsonCodeTextBox = New RichTextBox()
         jsonCodeTextBox.Dock = DockStyle.Fill
         jsonCodeTextBox.ReadOnly = True
@@ -100,14 +100,14 @@ Public Class JsonPreviewDialog
         buttonPanel.BackColor = Color.FromArgb(245, 245, 245)
 
         btnCancel = New Button()
-        btnCancel.Text = "取消"
+        btnCancel.Text = "Отмена"
         btnCancel.Size = New Size(100, 35)
         btnCancel.DialogResult = DialogResult.Cancel
         btnCancel.FlatStyle = FlatStyle.Flat
         btnCancel.FlatAppearance.BorderColor = Color.Gray
 
         btnExecute = New Button()
-        btnExecute.Text = "确认执行"
+        btnExecute.Text = "Выполнить"
         btnExecute.Size = New Size(100, 35)
         btnExecute.BackColor = Color.FromArgb(74, 111, 165)
         btnExecute.ForeColor = Color.White
@@ -153,7 +153,7 @@ Public Class JsonPreviewDialog
         ' 标题
         summaryTextBox.SelectionFont = New Font("Microsoft YaHei", 14, FontStyle.Bold)
         summaryTextBox.SelectionColor = Color.FromArgb(74, 111, 165)
-        summaryTextBox.AppendText("执行计划预览" & vbCrLf & vbCrLf)
+        summaryTextBox.AppendText("Предварительный просмотр плана выполнения" & vbCrLf & vbCrLf)
 
         ' 摘要
         If Not String.IsNullOrEmpty(_previewResult.Summary) Then
@@ -166,7 +166,7 @@ Public Class JsonPreviewDialog
         If _previewResult.ExecutionPlan IsNot Nothing AndAlso _previewResult.ExecutionPlan.Count > 0 Then
             summaryTextBox.SelectionFont = New Font("Microsoft YaHei", 11, FontStyle.Bold)
             summaryTextBox.SelectionColor = Color.FromArgb(74, 111, 165)
-            summaryTextBox.AppendText("执行步骤：" & vbCrLf)
+            summaryTextBox.AppendText("Шаги выполнения:" & vbCrLf)
 
             For Each execStep In _previewResult.ExecutionPlan
                 Dim icon = GetStepIcon(execStep.Icon)
@@ -187,7 +187,7 @@ Public Class JsonPreviewDialog
             summaryTextBox.AppendText(vbCrLf)
             summaryTextBox.SelectionFont = New Font("Microsoft YaHei", 11, FontStyle.Bold)
             summaryTextBox.SelectionColor = Color.FromArgb(74, 111, 165)
-            summaryTextBox.AppendText("预计变更：" & vbCrLf)
+            summaryTextBox.AppendText("Ожидаемые изменения:" & vbCrLf)
 
             Dim addedCount = _previewResult.CellChanges.Where(Function(c) c.ChangeType = "Added").Count()
             Dim modifiedCount = _previewResult.CellChanges.Where(Function(c) c.ChangeType = "Modified").Count()
@@ -196,21 +196,21 @@ Public Class JsonPreviewDialog
             summaryTextBox.SelectionFont = New Font("Microsoft YaHei", 10)
             If addedCount > 0 Then
                 summaryTextBox.SelectionColor = Color.Green
-                summaryTextBox.AppendText($"  + 新增: {addedCount} 个单元格" & vbCrLf)
+                summaryTextBox.AppendText($"  + Добавлено: {addedCount} ячеек" & vbCrLf)
             End If
             If modifiedCount > 0 Then
                 summaryTextBox.SelectionColor = Color.Orange
-                summaryTextBox.AppendText($"  ~ 修改: {modifiedCount} 个单元格" & vbCrLf)
+                summaryTextBox.AppendText($"  ~ Изменено: {modifiedCount} ячеек" & vbCrLf)
             End If
             If deletedCount > 0 Then
                 summaryTextBox.SelectionColor = Color.Red
-                summaryTextBox.AppendText($"  - 删除: {deletedCount} 个单元格" & vbCrLf)
+                summaryTextBox.AppendText($"  - Удалено: {deletedCount} ячеек" & vbCrLf)
             End If
         Else
             summaryTextBox.AppendText(vbCrLf)
             summaryTextBox.SelectionFont = New Font("Microsoft YaHei", 10)
             summaryTextBox.SelectionColor = Color.Gray
-            summaryTextBox.AppendText("（此命令不会产生单元格变更预览）" & vbCrLf)
+            summaryTextBox.AppendText("(Эта команда не создаёт предпросмотр изменений ячеек)" & vbCrLf)
         End If
     End Sub
 
@@ -276,11 +276,11 @@ Public Class JsonPreviewDialog
     Private Function GetChangeTypeText(changeType As String) As String
         Select Case changeType
             Case "Added"
-                Return "新增"
+                Return "Добавлено"
             Case "Modified"
-                Return "修改"
+                Return "Изменено"
             Case "Deleted"
-                Return "删除"
+                Return "Удалено"
             Case Else
                 Return changeType
         End Select

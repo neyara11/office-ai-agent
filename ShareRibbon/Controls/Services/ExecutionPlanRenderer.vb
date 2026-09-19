@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\Services\ExecutionPlanRenderer.vb
+﻿' ShareRibbon\Controls\Services\ExecutionPlanRenderer.vb
 ' 执行计划渲染服务：将JSON命令转换为用户友好的执行步骤
 
 Imports Newtonsoft.Json.Linq
@@ -13,27 +13,27 @@ Public Class ExecutionPlanRenderer
 
     ' 操作类型中文描述
     Private Shared ReadOnly OperationDescriptions As New Dictionary(Of String, String) From {
-        {"removeDuplicates", "删除重复项"},
-        {"fillEmpty", "填充空值"},
-        {"trim", "去除空格"},
-        {"replace", "替换内容"},
-        {"transpose", "转置数据"},
-        {"split", "拆分列"},
-        {"merge", "合并列"},
-        {"summary", "生成摘要"},
-        {"pivot", "创建透视表"},
-        {"groupby", "分组汇总"},
-        {"ranking", "排名分析"}
+        {"removeDuplicates", "Удаление дубликатов"},
+        {"fillEmpty", "Заполнение пустых значений"},
+        {"trim", "Удаление пробелов"},
+        {"replace", "Замена содержимого"},
+        {"transpose", "Транспонирование данных"},
+        {"split", "Разделение столбцов"},
+        {"merge", "Объединение столбцов"},
+        {"summary", "Создание сводки"},
+        {"pivot", "Создание сводной таблицы"},
+        {"groupby", "Группировка и итоги"},
+        {"ranking", "Анализ рейтинга"}
     }
 
     ' 图表类型中文描述
     Private Shared ReadOnly ChartTypeDescriptions As New Dictionary(Of String, String) From {
-        {"Column", "柱状图"},
-        {"Line", "折线图"},
-        {"Pie", "饼图"},
-        {"Bar", "条形图"},
-        {"Scatter", "散点图"},
-        {"Area", "面积图"}
+        {"Column", "Гистограмма"},
+        {"Line", "Линейчатая диаграмма"},
+        {"Pie", "Круговая диаграмма"},
+        {"Bar", "Полосчатая диаграмма"},
+        {"Scatter", "Точечная диаграмма"},
+        {"Area", "Диаграмма с областями"}
     }
 
 #End Region
@@ -75,12 +75,12 @@ Public Class ExecutionPlanRenderer
                     plan.AddRange(GenerateReportSteps(params))
                 Case Else
                     ' 通用处理
-                    plan.Add(New ExecutionStep(1, $"执行 {command} 命令", "default"))
+                    plan.Add(New ExecutionStep(1, $"Выполнить команду {command}", "default"))
             End Select
 
         Catch ex As Exception
             Debug.WriteLine($"ParseJsonToExecutionPlan 出错: {ex.Message}")
-            plan.Add(New ExecutionStep(1, "解析命令失败", "default"))
+            plan.Add(New ExecutionStep(1, "Не удалось разобрать команду", "default"))
         End Try
 
         Return plan
@@ -96,22 +96,22 @@ Public Class ExecutionPlanRenderer
     Private Function GenerateFormulaSteps(params As JToken) As List(Of ExecutionStep)
         Dim steps As New List(Of ExecutionStep)()
         
-        Dim targetRange = If(params?("targetRange")?.ToString(), "目标区域")
+        Dim targetRange = If(params?("targetRange")?.ToString(), "Целевой диапазон")
         Dim formula = If(params?("formula")?.ToString(), "")
         Dim fillDown = If(params?("fillDown")?.Value(Of Boolean)(), False)
 
-        steps.Add(New ExecutionStep(1, $"在 {targetRange} 应用公式", "formula") With {
+        steps.Add(New ExecutionStep(1, $"Применить формулу к {targetRange}", "formula") With {
             .WillModify = targetRange,
-            .EstimatedTime = "1秒"
+            .EstimatedTime = "1 сек"
         })
 
         If Not String.IsNullOrEmpty(formula) Then
             Dim formulaDesc = GetFormulaDescription(formula)
-            steps.Add(New ExecutionStep(2, $"公式内容: {formulaDesc}", "formula"))
+            steps.Add(New ExecutionStep(2, $"Содержимое формулы: {formulaDesc}", "formula"))
         End If
 
         If fillDown Then
-            steps.Add(New ExecutionStep(3, "自动向下填充公式", "formula"))
+            steps.Add(New ExecutionStep(3, "Автоматически заполнить формулу вниз", "formula"))
         End If
 
         Return steps
@@ -123,11 +123,11 @@ Public Class ExecutionPlanRenderer
     Private Function GenerateWriteDataSteps(params As JToken) As List(Of ExecutionStep)
         Dim steps As New List(Of ExecutionStep)()
         
-        Dim targetRange = If(params?("targetRange")?.ToString(), "目标区域")
+        Dim targetRange = If(params?("targetRange")?.ToString(), "Целевой диапазон")
         
-        steps.Add(New ExecutionStep(1, $"向 {targetRange} 写入数据", "data") With {
+        steps.Add(New ExecutionStep(1, $"Записать данные в {targetRange}", "data") With {
             .WillModify = targetRange,
-            .EstimatedTime = "1秒"
+            .EstimatedTime = "1 сек"
         })
 
         Return steps
@@ -139,22 +139,22 @@ Public Class ExecutionPlanRenderer
     Private Function GenerateFormatSteps(params As JToken) As List(Of ExecutionStep)
         Dim steps As New List(Of ExecutionStep)()
         
-        Dim range = If(params?("range")?.ToString(), If(params?("targetRange")?.ToString(), "目标区域"))
+        Dim range = If(params?("range")?.ToString(), If(params?("targetRange")?.ToString(), "Целевой диапазон"))
         Dim style = If(params?("style")?.ToString(), "")
         
-        steps.Add(New ExecutionStep(1, $"选择 {range} 区域", "search") With {
-            .EstimatedTime = "1秒"
+        steps.Add(New ExecutionStep(1, $"Выбрать диапазон {range}", "search") With {
+            .EstimatedTime = "1 сек"
         })
 
-        Dim formatDesc = "应用格式设置"
+        Dim formatDesc = "Применить форматирование"
         If Not String.IsNullOrEmpty(style) Then
-            formatDesc = $"应用 {style} 样式"
+            formatDesc = $"Применить стиль {style}"
         End If
 
         Dim formatDetails As New List(Of String)()
-        If params?("bold")?.Value(Of Boolean)() = True Then formatDetails.Add("加粗")
-        If params?("italic")?.Value(Of Boolean)() = True Then formatDetails.Add("斜体")
-        If params?("borders")?.Value(Of Boolean)() = True Then formatDetails.Add("边框")
+        If params?("bold")?.Value(Of Boolean)() = True Then formatDetails.Add("Полужирный")
+        If params?("italic")?.Value(Of Boolean)() = True Then formatDetails.Add("Курсив")
+        If params?("borders")?.Value(Of Boolean)() = True Then formatDetails.Add("Границы")
         
         If formatDetails.Count > 0 Then
             formatDesc &= $" ({String.Join(", ", formatDetails)})"
@@ -162,7 +162,7 @@ Public Class ExecutionPlanRenderer
 
         steps.Add(New ExecutionStep(2, formatDesc, "format") With {
             .WillModify = range,
-            .EstimatedTime = "1秒"
+            .EstimatedTime = "1 сек"
         })
 
         Return steps
@@ -175,26 +175,26 @@ Public Class ExecutionPlanRenderer
         Dim steps As New List(Of ExecutionStep)()
         
         Dim chartType = If(params?("type")?.ToString(), "Column")
-        Dim dataRange = If(params?("dataRange")?.ToString(), "数据区域")
+        Dim dataRange = If(params?("dataRange")?.ToString(), "Диапазон данных")
         Dim title = If(params?("title")?.ToString(), "")
         Dim position = If(params?("position")?.ToString(), "")
 
         Dim chartTypeName = If(ChartTypeDescriptions.ContainsKey(chartType), ChartTypeDescriptions(chartType), chartType)
 
-        steps.Add(New ExecutionStep(1, $"读取 {dataRange} 作为图表数据源", "search") With {
-            .EstimatedTime = "1秒"
+        steps.Add(New ExecutionStep(1, $"Прочитать {dataRange} как источник данных диаграммы", "search") With {
+            .EstimatedTime = "1 сек"
         })
 
-        steps.Add(New ExecutionStep(2, $"创建 {chartTypeName}", "chart") With {
-            .EstimatedTime = "2秒"
+        steps.Add(New ExecutionStep(2, $"Создать {chartTypeName}", "chart") With {
+            .EstimatedTime = "2 сек"
         })
 
         If Not String.IsNullOrEmpty(title) Then
-            steps.Add(New ExecutionStep(3, $"设置图表标题: {title}", "chart"))
+            steps.Add(New ExecutionStep(3, $"Задать заголовок диаграммы: {title}", "chart"))
         End If
 
         If Not String.IsNullOrEmpty(position) Then
-            steps.Add(New ExecutionStep(4, $"将图表放置在 {position}", "chart") With {
+            steps.Add(New ExecutionStep(4, $"Разместить диаграмму в {position}", "chart") With {
                 .WillModify = position
             })
         End If
@@ -209,20 +209,20 @@ Public Class ExecutionPlanRenderer
         Dim steps As New List(Of ExecutionStep)()
         
         Dim operation = If(params?("operation")?.ToString(), "clean")
-        Dim range = If(params?("range")?.ToString(), "数据区域")
+        Dim range = If(params?("range")?.ToString(), "Диапазон данных")
 
         Dim operationDesc = If(OperationDescriptions.ContainsKey(operation), OperationDescriptions(operation), operation)
 
-        steps.Add(New ExecutionStep(1, $"扫描 {range} 区域", "search") With {
-            .EstimatedTime = "1秒"
+        steps.Add(New ExecutionStep(1, $"Сканировать диапазон {range}", "search") With {
+            .EstimatedTime = "1 сек"
         })
 
-        steps.Add(New ExecutionStep(2, $"执行清洗操作: {operationDesc}", "clean") With {
+        steps.Add(New ExecutionStep(2, $"Выполнить очистку: {operationDesc}", "clean") With {
             .WillModify = range,
-            .EstimatedTime = "2秒"
+            .EstimatedTime = "2 сек"
         })
 
-        steps.Add(New ExecutionStep(3, "验证清洗结果", "data"))
+        steps.Add(New ExecutionStep(3, "Проверить результат очистки", "data"))
 
         Return steps
     End Function
@@ -234,21 +234,21 @@ Public Class ExecutionPlanRenderer
         Dim steps As New List(Of ExecutionStep)()
         
         Dim analysisType = If(params?("type")?.ToString(), "summary")
-        Dim sourceRange = If(params?("sourceRange")?.ToString(), "数据区域")
+        Dim sourceRange = If(params?("sourceRange")?.ToString(), "Диапазон данных")
         Dim targetRange = If(params?("targetRange")?.ToString(), "")
 
         Dim analysisDesc = If(OperationDescriptions.ContainsKey(analysisType), OperationDescriptions(analysisType), analysisType)
 
-        steps.Add(New ExecutionStep(1, $"读取 {sourceRange} 数据", "search") With {
-            .EstimatedTime = "1秒"
+        steps.Add(New ExecutionStep(1, $"Прочитать данные {sourceRange}", "search") With {
+            .EstimatedTime = "1 сек"
         })
 
-        steps.Add(New ExecutionStep(2, $"执行分析: {analysisDesc}", "data") With {
-            .EstimatedTime = "3秒"
+        steps.Add(New ExecutionStep(2, $"Выполнить анализ: {analysisDesc}", "data") With {
+            .EstimatedTime = "3 сек"
         })
 
         If Not String.IsNullOrEmpty(targetRange) Then
-            steps.Add(New ExecutionStep(3, $"输出结果到 {targetRange}", "data") With {
+            steps.Add(New ExecutionStep(3, $"Вывести результат в {targetRange}", "data") With {
                 .WillModify = targetRange
             })
         End If
@@ -263,18 +263,18 @@ Public Class ExecutionPlanRenderer
         Dim steps As New List(Of ExecutionStep)()
         
         Dim operation = If(params?("operation")?.ToString(), "transform")
-        Dim sourceRange = If(params?("sourceRange")?.ToString(), "源区域")
+        Dim sourceRange = If(params?("sourceRange")?.ToString(), "Исходный диапазон")
         Dim targetRange = If(params?("targetRange")?.ToString(), "")
 
         Dim operationDesc = If(OperationDescriptions.ContainsKey(operation), OperationDescriptions(operation), operation)
 
-        steps.Add(New ExecutionStep(1, $"读取 {sourceRange} 数据", "search"))
-        steps.Add(New ExecutionStep(2, $"执行转换: {operationDesc}", "data") With {
-            .EstimatedTime = "2秒"
+        steps.Add(New ExecutionStep(1, $"Прочитать данные {sourceRange}", "search"))
+        steps.Add(New ExecutionStep(2, $"Выполнить преобразование: {operationDesc}", "data") With {
+            .EstimatedTime = "2 сек"
         })
 
         If Not String.IsNullOrEmpty(targetRange) Then
-            steps.Add(New ExecutionStep(3, $"输出到 {targetRange}", "data") With {
+            steps.Add(New ExecutionStep(3, $"Вывести в {targetRange}", "data") With {
                 .WillModify = targetRange
             })
         End If
@@ -288,23 +288,23 @@ Public Class ExecutionPlanRenderer
     Private Function GenerateReportSteps(params As JToken) As List(Of ExecutionStep)
         Dim steps As New List(Of ExecutionStep)()
         
-        Dim sourceRange = If(params?("sourceRange")?.ToString(), "数据区域")
-        Dim targetSheet = If(params?("targetSheet")?.ToString(), "新工作表")
-        Dim title = If(params?("title")?.ToString(), "报表")
+        Dim sourceRange = If(params?("sourceRange")?.ToString(), "Диапазон данных")
+        Dim targetSheet = If(params?("targetSheet")?.ToString(), "Новый лист")
+        Dim title = If(params?("title")?.ToString(), "Отчёт")
         Dim includeChart = If(params?("includeChart")?.Value(Of Boolean)(), False)
 
-        steps.Add(New ExecutionStep(1, $"收集 {sourceRange} 数据", "search"))
-        steps.Add(New ExecutionStep(2, $"创建报表工作表: {targetSheet}", "data") With {
-            .EstimatedTime = "1秒"
+        steps.Add(New ExecutionStep(1, $"Собрать данные {sourceRange}", "search"))
+        steps.Add(New ExecutionStep(2, $"Создать лист отчёта: {targetSheet}", "data") With {
+            .EstimatedTime = "1 сек"
         })
-        steps.Add(New ExecutionStep(3, $"填充数据并设置标题: {title}", "data"))
-        steps.Add(New ExecutionStep(4, "应用报表格式", "format") With {
-            .EstimatedTime = "2秒"
+        steps.Add(New ExecutionStep(3, $"Заполнить данные и задать заголовок: {title}", "data"))
+        steps.Add(New ExecutionStep(4, "Применить формат отчёта", "format") With {
+            .EstimatedTime = "2 сек"
         })
 
         If includeChart Then
-            steps.Add(New ExecutionStep(5, "添加数据图表", "chart") With {
-                .EstimatedTime = "2秒"
+            steps.Add(New ExecutionStep(5, "Добавить диаграмму данных", "chart") With {
+                .EstimatedTime = "2 сек"
             })
         End If
 
@@ -328,31 +328,31 @@ Public Class ExecutionPlanRenderer
         Dim upperFormula = formula.ToUpper()
         
         If upperFormula.StartsWith("SUM(") Then
-            Return "求和"
+            Return "Сумма"
         ElseIf upperFormula.StartsWith("AVERAGE(") Then
-            Return "计算平均值"
+            Return "Среднее значение"
         ElseIf upperFormula.StartsWith("COUNT(") Then
-            Return "计数"
+            Return "Количество"
         ElseIf upperFormula.StartsWith("MAX(") Then
-            Return "取最大值"
+            Return "Максимум"
         ElseIf upperFormula.StartsWith("MIN(") Then
-            Return "取最小值"
+            Return "Минимум"
         ElseIf upperFormula.StartsWith("VLOOKUP(") Then
-            Return "垂直查找"
+            Return "Вертикальный поиск"
         ElseIf upperFormula.StartsWith("IF(") Then
-            Return "条件判断"
+            Return "Условная проверка"
         ElseIf upperFormula.StartsWith("SUMIF(") Then
-            Return "条件求和"
+            Return "Сумма по условию"
         ElseIf upperFormula.StartsWith("COUNTIF(") Then
-            Return "条件计数"
+            Return "Количество по условию"
         ElseIf upperFormula.Contains("+") Then
-            Return "加法运算"
+            Return "Сложение"
         ElseIf upperFormula.Contains("-") Then
-            Return "减法运算"
+            Return "Вычитание"
         ElseIf upperFormula.Contains("*") Then
-            Return "乘法运算"
+            Return "Умножение"
         ElseIf upperFormula.Contains("/") Then
-            Return "除法运算"
+            Return "Деление"
         Else
             ' 截断过长的公式
             If formula.Length > 30 Then

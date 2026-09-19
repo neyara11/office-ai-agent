@@ -44,12 +44,12 @@ Public Class ThisAddIn
         Try
             Dim webView2Init = _lazyWebView2.Value
         Catch ex As Exception
-            MessageBox.Show($"WebView2 初始化失败: {ex.Message}")
+            MessageBox.Show($"Ошибка инициализации WebView2: {ex.Message}")
         End Try
         Try
             Dim sqliteInit = _lazySqlite.Value
         Catch ex As Exception
-            MessageBox.Show($"SQLite 原生库加载失败，Skills/记忆功能可能不可用: {ex.Message}")
+            MessageBox.Show($"Не удалось загрузить нативную библиотеку SQLite; функции Skills/памяти могут быть недоступны: {ex.Message}")
         End Try
     End Sub
 
@@ -74,14 +74,14 @@ Public Class ThisAddIn
             If _deepseekControl Is Nothing Then
                 ' 为新工作簿创建任务窗格
                 _deepseekControl = New DeepseekControl()
-                _deepseekTaskPane = Me.CustomTaskPanes.Add(_deepseekControl, "Deepseek AI智能助手")
+                _deepseekTaskPane = Me.CustomTaskPanes.Add(_deepseekControl, "ИИ-помощник Deepseek")
                 _deepseekTaskPane.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight
                 _deepseekTaskPane.Width = 420
                 AddHandler _deepseekTaskPane.VisibleChanged, AddressOf DeepseekTaskPane_VisibleChanged
                 _deepseekTaskPane.Visible = False
             End If
         Catch ex As Exception
-            MessageBox.Show($"初始化任务窗格失败: {ex.Message}")
+            MessageBox.Show($"Не удалось инициализировать панель задач: {ex.Message}")
         End Try
     End Sub
 
@@ -91,12 +91,12 @@ Public Class ThisAddIn
                 ' 为新工作簿创建任务窗格
                 _doubaoControl = New DoubaoChat()
                 'Await _doubaoControl.InitializeAsync()
-                _doubaoTaskPane = Me.CustomTaskPanes.Add(_doubaoControl, "Doubao AI智能助手")
+                _doubaoTaskPane = Me.CustomTaskPanes.Add(_doubaoControl, "ИИ-помощник Doubao")
                 _doubaoTaskPane.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight
                 _doubaoTaskPane.Width = 420
             End If
         Catch ex As Exception
-            MessageBox.Show($"初始化Doubao任务窗格失败: {ex.Message}")
+            MessageBox.Show($"Не удалось инициализировать панель задач Doubao: {ex.Message}")
         End Try
     End Function
 
@@ -123,12 +123,12 @@ Public Class ThisAddIn
 
             ' 为新工作簿创建任务窗格
             chatControl = New ChatControl()
-            chatTaskPane = Me.CustomTaskPanes.Add(chatControl, "PPT AI智能助手")
+            chatTaskPane = Me.CustomTaskPanes.Add(chatControl, "ИИ-помощник PPT")
             chatTaskPane.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight
             chatTaskPane.Width = 420
             AddHandler chatTaskPane.VisibleChanged, AddressOf ChatTaskPane_VisibleChanged
         Catch ex As Exception
-            MessageBox.Show($"初始化 PPT AI 任务窗格失败: {ex.Message}")
+            MessageBox.Show($"Не удалось инициализировать панель задач PPT AI: {ex.Message}")
         End Try
     End Sub
 

@@ -123,7 +123,7 @@ Public Class ChatControl
             VBAxceptionHandle(ex)
             Return False
         Catch ex As Exception
-            MessageBox.Show("执行代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -180,12 +180,12 @@ Public Class ChatControl
                     Dim newValue As Object = excel.Evaluate(formula)
 
                     ' 创建预览对话框
-                    Dim previewMsg As String = $"将要在单元格 {targetCell} 中应用公式:" & vbCrLf & vbCrLf &
+                    Dim previewMsg As String = $"В ячейку {targetCell} будет применена формула:" & vbCrLf & vbCrLf &
                                           $"={formula}" & vbCrLf & vbCrLf &
-                                          $"当前值: {If(currentValue Is Nothing, "(空)", currentValue)}" & vbCrLf &
-                                          $"新值: {If(newValue Is Nothing, "(空)", newValue)}"
+                                          $"Текущее значение: {If(currentValue Is Nothing, "(пусто)", currentValue)}" & vbCrLf &
+                                          $"Новое значение: {If(newValue Is Nothing, "(пусто)", newValue)}"
 
-                    Dim result As DialogResult = MessageBox.Show(previewMsg, "Excel公式预览",
+                    Dim result As DialogResult = MessageBox.Show(previewMsg, "Предпросмотр формулы Excel",
                                                           MessageBoxButtons.OKCancel,
                                                           MessageBoxIcon.Information)
 
@@ -198,7 +198,7 @@ Public Class ChatControl
                 Dim range As Object = Globals.ThisAddIn.Application.Range(targetCell)
                 range.Formula = "=" & formula
 
-                GlobalStatusStrip.ShowInfo($"公式 '={formula}' 已应用到单元格 {targetCell}")
+                GlobalStatusStrip.ShowInfo($"Формула '={formula}' применена к ячейке {targetCell}")
                 Return True
             Else
                 ' 普通公式计算 (不包含赋值)
@@ -212,20 +212,20 @@ Public Class ChatControl
 
                 ' 如果需要预览，显示计算结果
                 If preview Then
-                    Dim previewMsg As String = $"公式计算结果:" & vbCrLf & vbCrLf &
+                    Dim previewMsg As String = $"Результат вычисления формулы:" & vbCrLf & vbCrLf &
                                          $"={formulaCode}" & vbCrLf & vbCrLf &
-                                         $"结果: {If(result Is Nothing, "(空)", result)}"
+                                         $"Результат: {If(result Is Nothing, "(пусто)", result)}"
 
-                    MessageBox.Show(previewMsg, "Excel公式结果", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    MessageBox.Show(previewMsg, "Результат формулы Excel", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Else
                     ' 显示结果
-                    GlobalStatusStrip.ShowInfo($"公式 '={formulaCode}' 的计算结果: {result}")
+                    GlobalStatusStrip.ShowInfo($"Результат формулы '={formulaCode}': {result}")
                 End If
 
                 Return True
             End If
         Catch ex As Exception
-            MessageBox.Show("执行Excel公式时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении формулы Excel: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -266,10 +266,10 @@ Public Class ChatControl
             ' 执行查询
             queryTable.Refresh(False)
 
-            GlobalStatusStrip.ShowWarning("SQL查询已执行")
+            GlobalStatusStrip.ShowWarning("SQL-запрос выполнен")
             Return True
         Catch ex As Exception
-            MessageBox.Show("执行SQL查询时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении SQL-запроса: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -294,15 +294,15 @@ Public Class ChatControl
             Dim versionSupported As Boolean = excelApp.Version >= 15 ' Excel 2013及以上版本
 
             If Not versionSupported Then
-                GlobalStatusStrip.ShowWarning("PowerQuery需要Excel 2013或更高版本")
+                GlobalStatusStrip.ShowWarning("PowerQuery требует Excel 2013 или более новой версии")
                 Return False
             End If
 
             ' PowerQuery执行逻辑需要根据具体需求实现
-            GlobalStatusStrip.ShowWarning("PowerQuery代码执行功能正在开发中")
+            GlobalStatusStrip.ShowWarning("Функция выполнения кода PowerQuery находится в разработке")
             Return True
         Catch ex As Exception
-            MessageBox.Show("执行PowerQuery代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода PowerQuery: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -334,7 +334,7 @@ Public Class ChatControl
 
             If Not versionSupported Then
                 ' 如果内置Python不可用，可以尝试通过外部Python解释器执行
-                GlobalStatusStrip.ShowWarning("此Excel版本不支持内置Python，尝试使用外部Python...")
+                GlobalStatusStrip.ShowWarning("Эта версия Excel не поддерживает встроенный Python. Пробуем внешний Python...")
 
                 ' 创建临时Python文件
                 Dim tempFile As String = Path.Combine(Path.GetTempPath(), "excel_python_" & Guid.NewGuid().ToString() & ".py")
@@ -356,9 +356,9 @@ Public Class ChatControl
                     process.WaitForExit()
 
                     If Not String.IsNullOrEmpty(error1) Then
-                        GlobalStatusStrip.ShowWarning("Python执行错误: " & error1)
+                        GlobalStatusStrip.ShowWarning("Ошибка выполнения Python: " & error1)
                     Else
-                        GlobalStatusStrip.ShowWarning("Python执行结果: " & output)
+                        GlobalStatusStrip.ShowWarning("Результат выполнения Python: " & output)
                     End If
                 End Using
 
@@ -371,12 +371,12 @@ Public Class ChatControl
             Else
                 ' 使用Excel内置Python执行代码
                 Dim result As Object = excelApp.PythonExecute(pythonCode)
-                GlobalStatusStrip.ShowWarning("Python代码已执行")
+                GlobalStatusStrip.ShowWarning("Код Python выполнен")
             End If
 
             Return True
         Catch ex As Exception
-            MessageBox.Show("执行Python代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода Python: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -530,7 +530,7 @@ Public Class ChatControl
                 Debug.WriteLine($"JSON格式验证失败: {errorMessage}")
                 Debug.WriteLine($"原始JSON: {processedJson}")
 
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON格式不符合规范: {errorMessage}")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Формат JSON не соответствует спецификации: {errorMessage}")
 
                 ' 通知前端显示格式修正提示
                 Dim correctionPrompt = ExcelJsonCommandSchema.GetFormatCorrectionPrompt(
@@ -554,14 +554,14 @@ Public Class ChatControl
                 Return ExecuteSingleCommand(jsonObj, processedJson, preview)
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowWarning("无效的JSON格式")
+            ShareRibbon.GlobalStatusStrip.ShowWarning("Недопустимый формат JSON")
             Return False
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON格式无效: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Недопустимый формат JSON: {ex.Message}")
             Return False
         Catch ex As Exception
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -573,7 +573,7 @@ Public Class ChatControl
         Try
             Dim commands = CType(commandsArray, Newtonsoft.Json.Linq.JArray)
             If commands.Count = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("命令数组为空")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Массив команд пуст")
                 Return False
             End If
 
@@ -589,7 +589,7 @@ Public Class ChatControl
                     ' 显示预览对话框
                     Using dialog As New JsonPreviewDialog()
                         If dialog.ShowPreview(previewResult) <> DialogResult.OK Then
-                            ShareRibbon.GlobalStatusStrip.ShowInfo("用户取消执行")
+                            ShareRibbon.GlobalStatusStrip.ShowInfo("Выполнение отменено пользователем")
                             ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                             Return True
                         End If
@@ -598,7 +598,7 @@ Public Class ChatControl
                     Debug.WriteLine($"批量预览生成失败，使用简单预览: {previewEx.Message}")
                     ' 回退到简单预览
                     Dim previewMsg As New StringBuilder()
-                    previewMsg.AppendLine($"即将执行 {commands.Count} 个命令:")
+                    previewMsg.AppendLine($"Будет выполнено команд: {commands.Count}:")
                     previewMsg.AppendLine()
 
                     Dim cmdIndex = 1
@@ -610,16 +610,16 @@ Public Class ChatControl
                             Dim formula = If(cmdObj("formula")?.ToString(), cmdObj("params")?("formula")?.ToString())
 
                             previewMsg.AppendLine($"{cmdIndex}. {cmdName}")
-                            If Not String.IsNullOrEmpty(range) Then previewMsg.AppendLine($"   范围: {range}")
-                            If Not String.IsNullOrEmpty(formula) Then previewMsg.AppendLine($"   公式: {formula}")
+                            If Not String.IsNullOrEmpty(range) Then previewMsg.AppendLine($"   Диапазон: {range}")
+                            If Not String.IsNullOrEmpty(formula) Then previewMsg.AppendLine($"   Формула: {formula}")
                             previewMsg.AppendLine()
                             cmdIndex += 1
                         End If
                     Next
 
-                    previewMsg.AppendLine("是否继续执行？")
+                    previewMsg.AppendLine("Продолжить выполнение?")
 
-                    If MessageBox.Show(previewMsg.ToString(), "批量命令预览", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) <> DialogResult.OK Then
+                    If MessageBox.Show(previewMsg.ToString(), "Предпросмотр пакетных команд", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) <> DialogResult.OK Then
                         ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                         Return True
                     End If
@@ -658,16 +658,16 @@ Public Class ChatControl
             Next
 
             If failCount = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"所有 {successCount} 个命令执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Все команды выполнены успешно: {successCount}")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"执行完成: {successCount} 成功, {failCount} 失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Выполнено: успешно {successCount}, с ошибкой {failCount}")
             End If
 
             Return failCount = 0
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteCommandsArray 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"批量执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка пакетного выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -704,9 +704,9 @@ Public Class ChatControl
 
         ' 生成摘要
         Dim summaryBuilder As New StringBuilder()
-        summaryBuilder.AppendLine($"即将执行 {commands.Count} 个命令")
+        summaryBuilder.AppendLine($"Будет выполнено команд: {commands.Count}")
         summaryBuilder.AppendLine()
-        summaryBuilder.AppendLine("命令列表:")
+        summaryBuilder.AppendLine("Список команд:")
 
         Dim cmdIndex = 1
         For Each cmd In commands
@@ -717,8 +717,8 @@ Public Class ChatControl
                 Dim range = If(cmdObj("range")?.ToString(), cmdObj("params")?("range")?.ToString())
 
                 summaryBuilder.AppendLine($"  {cmdIndex}. {cmdName}")
-                If Not String.IsNullOrEmpty(formula) Then summaryBuilder.AppendLine($"      公式: {formula}")
-                If Not String.IsNullOrEmpty(range) Then summaryBuilder.AppendLine($"      范围: {range}")
+                If Not String.IsNullOrEmpty(formula) Then summaryBuilder.AppendLine($"      Формула: {formula}")
+                If Not String.IsNullOrEmpty(range) Then summaryBuilder.AppendLine($"      Диапазон: {range}")
                 cmdIndex += 1
             End If
         Next
@@ -755,17 +755,17 @@ Public Class ChatControl
         Select Case command?.ToLower()
             Case "applyformula"
                 If Not String.IsNullOrEmpty(formula) Then
-                    Return $"应用公式 {formula}"
+                    Return $"Применить формулу {formula}"
                 End If
-                Return "应用公式"
+                Return "Применить формулу"
             Case "writedata"
-                Return "写入数据"
+                Return "Записать данные"
             Case "formatrange"
-                Return "设置格式"
+                Return "Задать формат"
             Case "createchart"
-                Return "创建图表"
+                Return "Создать диаграмму"
             Case "cleandata"
-                Return "清洗数据"
+                Return "Очистить данные"
             Case Else
                 Return command
         End Select
@@ -781,7 +781,7 @@ Public Class ChatControl
             ' 校验JSON命令
             Dim errorMsg As String = ""
             If Not ExcelJsonCommandSchema.ValidateCommand(commandJson, errorMsg) Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON命令格式错误: {errorMsg}")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка формата команды JSON: {errorMsg}")
                 Return False
             End If
 
@@ -797,7 +797,7 @@ Public Class ChatControl
                     ' 显示预览对话框
                     Using dialog As New JsonPreviewDialog()
                         If dialog.ShowPreview(previewResult) <> DialogResult.OK Then
-                            ShareRibbon.GlobalStatusStrip.ShowInfo("用户取消执行")
+                            ShareRibbon.GlobalStatusStrip.ShowInfo("Выполнение отменено пользователем")
                             ' 通知前端用户取消了执行（恢复按钮可点击状态）
                             ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                             Return True ' 返回True表示正常取消，而非错误
@@ -810,13 +810,13 @@ Public Class ChatControl
                     Dim targetRange = If(params?("targetRange")?.ToString(), params?("range")?.ToString())
                     Dim formula = params?("formula")?.ToString()
 
-                    Dim previewMsg = $"即将执行 Excel 命令:{vbCrLf}{vbCrLf}" &
-                                    $"命令: {command}{vbCrLf}" &
-                                    If(Not String.IsNullOrEmpty(targetRange), $"目标: {targetRange}{vbCrLf}", "") &
-                                    If(Not String.IsNullOrEmpty(formula), $"公式: {formula}{vbCrLf}", "") &
-                                    $"{vbCrLf}是否继续执行？"
+                    Dim previewMsg = $"Будет выполнена команда Excel:{vbCrLf}{vbCrLf}" &
+                                    $"Команда: {command}{vbCrLf}" &
+                                    If(Not String.IsNullOrEmpty(targetRange), $"Цель: {targetRange}{vbCrLf}", "") &
+                                    If(Not String.IsNullOrEmpty(formula), $"Формула: {formula}{vbCrLf}", "") &
+                                    $"{vbCrLf}Продолжить выполнение?"
 
-                    If MessageBox.Show(previewMsg, "JSON命令预览", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) <> DialogResult.OK Then
+                    If MessageBox.Show(previewMsg, "Предпросмотр команды JSON", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) <> DialogResult.OK Then
                         ' 通知前端用户取消了执行
                         ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                         Return True
@@ -828,9 +828,9 @@ Public Class ChatControl
             Dim success = operationService.ExecuteCommand(commandJson)
 
             If success Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"命令 '{command}' 执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Команда '{command}' выполнена успешно")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"命令 '{command}' 执行失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Команда '{command}' выполнена с ошибкой")
             End If
 
             Return success
@@ -858,16 +858,16 @@ Public Class ChatControl
 
             ' 生成摘要
             Dim summaryBuilder As New StringBuilder()
-            summaryBuilder.AppendLine($"将执行 {command} 命令")
+            summaryBuilder.AppendLine($"Будет выполнена команда {command}")
 
             Dim targetRange = If(params?("targetRange")?.ToString(), params?("range")?.ToString())
             If Not String.IsNullOrEmpty(targetRange) Then
-                summaryBuilder.AppendLine($"目标范围: {targetRange}")
+                summaryBuilder.AppendLine($"Целевой диапазон: {targetRange}")
             End If
 
             Dim formula = params?("formula")?.ToString()
             If Not String.IsNullOrEmpty(formula) Then
-                summaryBuilder.AppendLine($"公式: {formula}")
+                summaryBuilder.AppendLine($"Формула: {formula}")
             End If
 
             result.Summary = summaryBuilder.ToString()
@@ -880,14 +880,14 @@ Public Class ChatControl
                 result.CellChanges.Add(New CellChange() With {
                     .Address = targetRange,
                     .ChangeType = "Modified",
-                    .OldValue = "(当前值)",
-                    .NewValue = "(新值)"
+                    .OldValue = "(текущее значение)",
+                    .NewValue = "(новое значение)"
                 })
             End If
 
         Catch ex As Exception
             Debug.WriteLine($"GenerateJsonPreviewResult 出错: {ex.Message}")
-            result.Summary = "无法生成详细预览"
+            result.Summary = "Не удалось сформировать подробный предпросмотр"
         End Try
 
         Return result
@@ -905,12 +905,12 @@ Public Class ChatControl
                 workbook = excelApp.Workbooks.Open(filePath, ReadOnly:=True)
                 Dim contentBuilder As New StringBuilder()
 
-                contentBuilder.AppendLine($"文件: {Path.GetFileName(filePath)} 包含以下内容:")
+                contentBuilder.AppendLine($"Файл: {Path.GetFileName(filePath)} содержит следующее:")
 
                 ' 处理每个工作表
                 For Each worksheet As Microsoft.Office.Interop.Excel.Worksheet In workbook.Worksheets
                     Dim sheetName As String = worksheet.Name
-                    contentBuilder.AppendLine($"工作表: {sheetName}")
+                    contentBuilder.AppendLine($"Лист: {sheetName}")
 
                     ' 获取使用范围
                     Dim usedRange As Microsoft.Office.Interop.Excel.Range = worksheet.UsedRange
@@ -922,7 +922,7 @@ Public Class ChatControl
                         Dim maxRows As Integer = Math.Min(lastRow, 30)
                         Dim maxCols As Integer = Math.Min(lastCol, 10)
 
-                        contentBuilder.AppendLine($"  使用范围: {GetExcelColumnName(usedRange.Column)}{usedRange.Row}:{GetExcelColumnName(lastCol)}{lastRow}")
+                        contentBuilder.AppendLine($"  Используемый диапазон: {GetExcelColumnName(usedRange.Column)}{usedRange.Row}:{GetExcelColumnName(lastCol)}{lastRow}")
 
                         ' 读取单元格内容
                         For rowIndex As Integer = usedRange.Row To maxRows
@@ -944,10 +944,10 @@ Public Class ChatControl
 
                         ' 如果有更多行或列未显示，添加提示
                         If lastRow > maxRows Then
-                            contentBuilder.AppendLine($"  ... 共有 {lastRow - usedRange.Row + 1} 行，仅显示前 {maxRows - usedRange.Row + 1} 行")
+                            contentBuilder.AppendLine($"  ... всего строк: {lastRow - usedRange.Row + 1}, показаны только первые {maxRows - usedRange.Row + 1}")
                         End If
                         If lastCol > maxCols Then
-                            contentBuilder.AppendLine($"  ... 共有 {lastCol - usedRange.Column + 1} 列，仅显示前 {maxCols - usedRange.Column + 1} 列")
+                            contentBuilder.AppendLine($"  ... всего столбцов: {lastCol - usedRange.Column + 1}, показаны только первые {maxCols - usedRange.Column + 1}")
                         End If
                     End If
 
@@ -978,7 +978,7 @@ Public Class ChatControl
             Return New FileContentResult With {
             .FileName = Path.GetFileName(filePath),
             .FileType = "Excel",
-            .ParsedContent = $"[解析 Excel 文件时出错: {ex.Message}]"
+            .ParsedContent = $"[Ошибка при разборе файла Excel: {ex.Message}]"
         }
         End Try
     End Function
@@ -1021,11 +1021,11 @@ Public Class ChatControl
                 UndoManagerExtension.CreateAIOperationUndoPoint(
                     "Excel",
                     Globals.ThisAddIn.Application,
-                    "AI操作",
-                    "AI 生成内容")
+                    "Операция ИИ",
+                    "Содержимое, созданное ИИ")
             End Sub,
             "ExcelAi.ChatControl",
-            "创建撤销点")
+            "Создание точки отмены")
 
         ' 尝试检测并应用公式 - 使用 ErrorHandler 包装
         ErrorHandlerExtension.SafeExecute(
@@ -1041,8 +1041,8 @@ Public Class ChatControl
                         UndoManagerExtension.CreateAIOperationUndoPoint(
                             "Excel",
                             Globals.ThisAddIn.Application,
-                            "AI公式应用",
-                            "应用AI生成的Excel公式")
+                            "Применение формулы ИИ",
+                            "Применение формулы Excel, созданной ИИ")
 
                         FormulaHandlerExtension.TryApplyFormula(aiResponse, Globals.ThisAddIn.Application)
 
@@ -1053,8 +1053,8 @@ Public Class ChatControl
                 End If
             End Sub,
             "ExcelAi.ChatControl",
-            "公式应用",
-            "应用公式时出错，请检查公式格式。")
+            "Применение формулы",
+            "Ошибка при применении формулы. Проверьте формат формулы.")
     End Sub
 
     ''' <summary>
@@ -1160,7 +1160,7 @@ Public Class ChatControl
             Dim success = ExecuteJsonCommandCore(jsonCode, preview)
             Dim afterSnapshot = CaptureExcelCommandSnapshot(commandEnvelope)
             Dim observation = BuildExcelCommandObservation(toolId, commandEnvelope, success, beforeSnapshot, afterSnapshot)
-            Dim summary = If(observation?("summary")?.ToString(), $"{toolId} 执行完成")
+            Dim summary = If(observation?("summary")?.ToString(), $"{toolId}: выполнение завершено")
             Dim observationError = If(afterSnapshot?("captureError")?.ToString(),
                                       beforeSnapshot?("captureError")?.ToString())
 
@@ -1169,9 +1169,9 @@ Public Class ChatControl
             If success AndAlso Not String.IsNullOrWhiteSpace(observationError) Then
                 Return Agent.ToolResult.Failed(
                     toolId,
-                    $"Excel 命令可能已执行，但结果观察失败: {observationError}",
+                    $"Команда Excel, возможно, уже выполнена, но наблюдение результата не удалось: {observationError}",
                     errorCode:=ExceptionClassifier.CodeObservationFailed,
-                    userMessage:="Excel 操作可能已经完成，但插件无法安全验证结果；已停止自动重试",
+                    userMessage:="Операция Excel, возможно, уже выполнена, но плагин не может безопасно проверить результат; автоматические повторы остановлены",
                     recoverable:=False,
                     observation:=observation)
             End If
@@ -1303,7 +1303,7 @@ Public Class ChatControl
         End If
 
         Dim warnings As New JArray()
-        If success AndAlso Not changed Then warnings.Add("命令已处理，但宿主快照未检测到变化；可能为用户取消、格式等价或 noop")
+        If success AndAlso Not changed Then warnings.Add("Команда обработана, но снимок узла не обнаружил изменений; возможны отмена пользователем, эквивалентный формат или noop")
         If afterSnapshot?("captureError") IsNot Nothing Then warnings.Add(afterSnapshot("captureError"))
 
         Dim diff As New JObject From {
@@ -1315,7 +1315,7 @@ Public Class ChatControl
 
         Return New JObject From {
             {"kind", "write"},
-            {"summary", If(success, $"Excel 工具 {toolId} 已执行", $"Excel 工具 {toolId} 执行失败")},
+            {"summary", If(success, $"Инструмент Excel {toolId} выполнен", $"Сбой выполнения инструмента Excel {toolId}")},
             {"targetRefs", targetRefs},
             {"changed", changed},
             {"before", beforeSnapshot},

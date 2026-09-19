@@ -45,9 +45,9 @@ Public Class CommandPreviewForm
         listView.View = View.Details
         listView.FullRowSelect = True
         listView.GridLines = True
-        listView.Columns.Add("序号", 50)
-        listView.Columns.Add("命令", 120)
-        listView.Columns.Add("描述", 400)
+        listView.Columns.Add("№", 50)
+        listView.Columns.Add("Команда", 120)
+        listView.Columns.Add("Описание", 400)
         AddHandler listView.SelectedIndexChanged, AddressOf ListView_SelectedIndexChanged
 
         ' 详情文本框
@@ -70,13 +70,13 @@ Public Class CommandPreviewForm
         buttonPanel.Padding = New Padding(10)
 
         cancelButton = New Button()
-        cancelButton.Text = "取消"
+        cancelButton.Text = "Отмена"
         cancelButton.Size = New Size(80, 28)
         cancelButton.DialogResult = DialogResult.Cancel
         AddHandler cancelButton.Click, AddressOf CancelButton_Click
 
         confirmButton = New Button()
-        confirmButton.Text = "确认执行"
+        confirmButton.Text = "Подтвердить выполнение"
         confirmButton.Size = New Size(90, 28)
         confirmButton.BackColor = Color.FromArgb(0, 120, 212)
         confirmButton.ForeColor = Color.White
@@ -90,7 +90,7 @@ Public Class CommandPreviewForm
         Dim infoLabel As New Label()
         infoLabel.Dock = DockStyle.Top
         infoLabel.Height = 30
-        infoLabel.Text = "  选择命令查看详情，点击「确认执行」开始执行所有命令"
+        infoLabel.Text = "  Выберите команду для подробностей; нажмите «Подтвердить выполнение», чтобы выполнить все команды"
         infoLabel.TextAlign = ContentAlignment.MiddleLeft
         infoLabel.BackColor = Color.FromArgb(240, 240, 240)
 
@@ -158,38 +158,38 @@ Public Class CommandPreviewForm
             Case "inserttext"
                 Dim content = params?("content")?.ToString()
                 If Not String.IsNullOrEmpty(content) Then
-                    sb.Append($"插入文本: {content.Substring(0, Math.Min(60, content.Length))}")
+                    sb.Append($"Вставить текст: {content.Substring(0, Math.Min(60, content.Length))}")
                     If content.Length > 60 Then sb.Append("...")
                 End If
 
             Case "formattext"
                 Dim range = params?("range")?.ToString()
-                sb.Append($"格式化{If(range = "all", "全文", "选中内容")}: ")
-                If params?("bold")?.Value(Of Boolean)() = True Then sb.Append("加粗 ")
-                If params?("italic")?.Value(Of Boolean)() = True Then sb.Append("斜体 ")
+                sb.Append($"Форматирование {If(range = "all", "всего текста", "выделения")}: ")
+                If params?("bold")?.Value(Of Boolean)() = True Then sb.Append("полужирный ")
+                If params?("italic")?.Value(Of Boolean)() = True Then sb.Append("курсив ")
                 Dim fontSize = params?("fontSize")?.Value(Of Integer)()
-                If fontSize > 0 Then sb.Append($"字号{fontSize} ")
+                If fontSize > 0 Then sb.Append($"размер {fontSize} ")
 
             Case "replacetext"
                 Dim find = params?("find")?.ToString()
                 Dim replace = params?("replace")?.ToString()
-                sb.Append($"替换 ""{find}"" 为 ""{replace}""")
+                sb.Append($"Заменить ""{find}"" на ""{replace}""")
 
             Case "inserttable"
                 Dim rows = params?("rows")?.Value(Of Integer)()
                 Dim cols = params?("cols")?.Value(Of Integer)()
-                sb.Append($"插入 {rows}行×{cols}列 表格")
+                sb.Append($"Вставить таблицу {rows}×{cols}")
 
             Case "applystyle"
                 Dim styleName = params?("styleName")?.ToString()
-                sb.Append($"应用样式: {styleName}")
+                sb.Append($"Применить стиль: {styleName}")
 
             Case "generatetoc"
                 Dim levels = params?("levels")?.Value(Of Integer)()
-                sb.Append($"生成目录 (级别: {If(levels > 0, levels, 3)})")
+                sb.Append($"Создать оглавление (уровни: {If(levels > 0, levels, 3)})")
 
             Case "beautifydocument"
-                sb.Append("美化文档格式")
+                sb.Append("Улучшить оформление документа")
 
             Case Else
                 sb.Append(cmdName)

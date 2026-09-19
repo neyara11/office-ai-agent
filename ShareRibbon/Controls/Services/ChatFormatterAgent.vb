@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\Services\ChatFormatterAgent.vb
+﻿' ShareRibbon\Controls\Services\ChatFormatterAgent.vb
 ' Chat格式化代理 - 处理Chat中的排版对话消息并生成排版卡片HTML。
 
 Imports System.Collections.Generic
@@ -189,27 +189,27 @@ Public Class ChatFormatterAgent
         sb.AppendLine("<div class=""formatting-card formatting-card-analysis"">")
         sb.AppendLine("  <div class=""formatting-card-header"">")
         sb.AppendLine("    <span class=""formatting-card-icon"">&#x1F50D;</span>")
-        sb.AppendLine("    <span class=""formatting-card-title"">AI分析完成</span>")
+        sb.AppendLine("    <span class=""formatting-card-title"">Анализ ИИ завершён</span>")
         sb.AppendLine("  </div>")
         sb.AppendLine("  <div class=""formatting-card-body"">")
 
         ' 文档类型与标准
         If Not String.IsNullOrWhiteSpace(plan.ScopeSummary) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">作用范围: <strong>{System.Web.HttpUtility.HtmlEncode(plan.ScopeSummary)}</strong></div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Область действия: <strong>{System.Web.HttpUtility.HtmlEncode(plan.ScopeSummary)}</strong></div>")
         End If
         If plan.TextParagraphCount > 0 AndAlso plan.TextParagraphCount <> plan.TotalParagraphs Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">文本段落: <strong>{plan.TextParagraphCount}</strong> / 总段落 {plan.TotalParagraphs}</div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Текстовые абзацы: <strong>{plan.TextParagraphCount}</strong> / всего абзацев {plan.TotalParagraphs}</div>")
         End If
         If ShouldShowDocumentType(plan) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">文档类型: <strong>{GetDocumentTypeLabel(plan)}</strong> (置信度{Math.Round(plan.TypeConfidence * 100)}%)</div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Тип документа: <strong>{GetDocumentTypeLabel(plan)}</strong> (уверенность {Math.Round(plan.TypeConfidence * 100)}%)</div>")
         End If
         If Not String.IsNullOrEmpty(plan.StandardName) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">排版标准: <strong>{plan.StandardName}</strong></div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Стандарт форматирования: <strong>{plan.StandardName}</strong></div>")
         End If
 
         ' AI标注摘要
         sb.AppendLine("    <div class=""formatting-changes"">")
-        sb.AppendLine("      <div class=""formatting-changes-title"">AI识别的文档结构:</div>")
+        sb.AppendLine("      <div class=""formatting-changes-title"">Структура документа, распознанная ИИ:</div>")
 
         ' 按tagId分组
         Dim grouped = taggedParagraphs.GroupBy(Function(t) t.TagId).OrderByDescending(Function(g) g.Count()).ToList()
@@ -222,22 +222,22 @@ Public Class ChatFormatterAgent
 
             sb.AppendLine($"      <div class=""formatting-change-item"">")
             sb.AppendLine($"        <span class=""formatting-change-section"">{System.Web.HttpUtility.HtmlEncode(displayName)}</span>")
-            sb.AppendLine($"        <span class=""formatting-change-count"">({count}处)</span>")
+            sb.AppendLine($"        <span class=""formatting-change-count"">({count} шт.)</span>")
             If Not String.IsNullOrEmpty(sampleReason) Then
                 sb.AppendLine($"        <span class=""formatting-change-reason"">- {System.Web.HttpUtility.HtmlEncode(sampleReason)}</span>")
             End If
             sb.AppendLine($"      </div>")
         Next
 
-        sb.AppendLine($"      <div class=""formatting-change-summary"">合计: {taggedParagraphs.Count}个段落, {grouped.Count}种样式</div>")
+        sb.AppendLine($"      <div class=""formatting-change-summary"">Итого: {taggedParagraphs.Count} абзацев, {grouped.Count} стилей</div>")
         sb.AppendLine("    </div>")
 
         ' 操作按钮
         sb.AppendLine("    <div class=""formatting-card-actions"">")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">确认应用</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-secondary"" onclick=""previewReformat();"">预览对比</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-outline"" onclick=""alternateReformat();"">换一种</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-ghost"" onclick=""startRefinement();"">微调</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">Применить</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-secondary"" onclick=""previewReformat();"">Предпросмотр</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-outline"" onclick=""alternateReformat();"">Другой вариант</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-ghost"" onclick=""startRefinement();"">Уточнить</button>")
         sb.AppendLine("    </div>")
         sb.AppendLine("  </div>")
         sb.AppendLine("</div>")
@@ -254,39 +254,39 @@ Public Class ChatFormatterAgent
         sb.AppendLine("<div class=""formatting-card formatting-card-warning"">")
         sb.AppendLine("  <div class=""formatting-card-header"">")
         sb.AppendLine("    <span class=""formatting-card-icon"">&#x26A0;</span>")
-        sb.AppendLine("    <span class=""formatting-card-title"">排版建议（基础模式）</span>")
+        sb.AppendLine("    <span class=""formatting-card-title"">Рекомендация по форматированию (базовый режим)</span>")
         sb.AppendLine("  </div>")
         sb.AppendLine("  <div class=""formatting-card-body"">")
 
-        sb.AppendLine("    <div class=""formatting-info-row formatting-info-warning"">AI分析器未启用，将使用基于规则的分析，精度有限。建议配置AI模型以获得更精准的排版效果。</div>")
+        sb.AppendLine("    <div class=""formatting-info-row formatting-info-warning"">Анализатор ИИ не включён, будет использован анализ на основе правил с ограниченной точностью. Рекомендуется настроить модель ИИ для более точного форматирования.</div>")
 
         ' 文档类型与标准
         If ShouldShowDocumentType(plan) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">文档类型: <strong>{GetDocumentTypeLabel(plan)}</strong></div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Тип документа: <strong>{GetDocumentTypeLabel(plan)}</strong></div>")
         End If
         If Not String.IsNullOrEmpty(plan.StandardName) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">排版标准: <strong>{plan.StandardName}</strong></div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Стандарт форматирования: <strong>{plan.StandardName}</strong></div>")
         End If
 
         ' 变更列表
         sb.AppendLine("    <div class=""formatting-changes"">")
-        sb.AppendLine("      <div class=""formatting-changes-title"">即将修改:</div>")
+        sb.AppendLine("      <div class=""formatting-changes-title"">Будет изменено:</div>")
         Dim grouped = plan.Changes.GroupBy(Function(c) If(String.IsNullOrEmpty(c.NewTag), "__pending__", c.NewTag)).ToList()
         For Each group In grouped
-            Dim tagName = If(group.Key = "__pending__", "待标注", group.Key)
+            Dim tagName = If(group.Key = "__pending__", "Ожидает разметки", group.Key)
             Dim count = group.Count()
             sb.AppendLine($"      <div class=""formatting-change-item"">")
             sb.AppendLine($"        <span class=""formatting-change-section"">{System.Web.HttpUtility.HtmlEncode(tagName)}</span>")
-            sb.AppendLine($"        <span class=""formatting-change-count"">({count}处)</span>")
+            sb.AppendLine($"        <span class=""formatting-change-count"">({count} шт.)</span>")
             sb.AppendLine($"      </div>")
         Next
-        sb.AppendLine($"      <div class=""formatting-change-summary"">合计: {plan.TotalChanges}处段落</div>")
+        sb.AppendLine($"      <div class=""formatting-change-summary"">Итого: {plan.TotalChanges} абзацев</div>")
         sb.AppendLine("    </div>")
 
         ' 操作按钮
         sb.AppendLine("    <div class=""formatting-card-actions"">")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">应用排版</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-outline"" onclick=""alternateReformat();"">换一种</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">Применить форматирование</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-outline"" onclick=""alternateReformat();"">Другой вариант</button>")
         sb.AppendLine("    </div>")
         sb.AppendLine("  </div>")
         sb.AppendLine("</div>")
@@ -303,10 +303,10 @@ Public Class ChatFormatterAgent
         sb.AppendLine("<div class=""formatting-card"">")
         sb.AppendLine("  <div class=""formatting-card-header"">")
         sb.AppendLine("    <span class=""formatting-card-icon"">&#x1F4CB;</span>")
-        sb.AppendLine("    <span class=""formatting-card-title"">排版建议</span>")
+        sb.AppendLine("    <span class=""formatting-card-title"">Рекомендация по форматированию</span>")
         sb.AppendLine("  </div>")
         sb.AppendLine("  <div class=""formatting-card-body"">")
-        sb.AppendLine("    <div class=""formatting-info-row"">未能生成排版方案。请尝试更明确的指令，如""按公文排版""或""整理格式""。</div>")
+        sb.AppendLine("    <div class=""formatting-info-row"">Не удалось сформировать план форматирования. Попробуйте более конкретную команду, например «оформи как официальный документ» или «приведи к единому стилю».</div>")
         sb.AppendLine("  </div>")
         sb.AppendLine("</div>")
 
@@ -322,40 +322,40 @@ Public Class ChatFormatterAgent
         sb.AppendLine("<div class=""formatting-card"">")
         sb.AppendLine("  <div class=""formatting-card-header"">")
         sb.AppendLine("    <span class=""formatting-card-icon"">&#x1F4CB;</span>")
-        sb.AppendLine("    <span class=""formatting-card-title"">排版建议</span>")
+        sb.AppendLine("    <span class=""formatting-card-title"">Рекомендация по форматированию</span>")
         sb.AppendLine("  </div>")
         sb.AppendLine("  <div class=""formatting-card-body"">")
 
         ' 文档类型与标准
         If ShouldShowDocumentType(plan) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">文档类型: <strong>{GetDocumentTypeLabel(plan)}</strong> (置信度{Math.Round(plan.TypeConfidence * 100)}%)</div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Тип документа: <strong>{GetDocumentTypeLabel(plan)}</strong> (уверенность {Math.Round(plan.TypeConfidence * 100)}%)</div>")
         End If
         If Not String.IsNullOrEmpty(plan.StandardName) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">推荐标准: <strong>{plan.StandardName}</strong></div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Рекомендуемый стандарт: <strong>{plan.StandardName}</strong></div>")
         End If
         If Not String.IsNullOrWhiteSpace(plan.StandardDescription) Then
-            sb.AppendLine($"    <div class=""formatting-info-row"">方案说明: <strong>{System.Web.HttpUtility.HtmlEncode(plan.StandardDescription)}</strong></div>")
+            sb.AppendLine($"    <div class=""formatting-info-row"">Описание решения: <strong>{System.Web.HttpUtility.HtmlEncode(plan.StandardDescription)}</strong></div>")
         End If
 
         ' 变更列表 — 按NewTag分组显示，面向用户展示语义名称而不是技术标签。
         sb.AppendLine("    <div class=""formatting-changes"">")
-        sb.AppendLine("      <div class=""formatting-changes-title"">即将修改:</div>")
+        sb.AppendLine("      <div class=""formatting-changes-title"">Будет изменено:</div>")
 
         ' 按NewTag分组
         Dim grouped = plan.Changes.GroupBy(Function(c) If(String.IsNullOrEmpty(c.NewTag), "__pending__", c.NewTag)).ToList()
         If grouped.Count = 0 Then
             sb.AppendLine("      <div class=""formatting-change-item"">")
-            sb.AppendLine("        <span class=""formatting-change-section"">已完成文档结构分析</span>")
-            sb.AppendLine("        <span class=""formatting-change-desc"">: 暂未发现需要立即调整的样式区，可继续微调或换一种方案。</span>")
+            sb.AppendLine("        <span class=""formatting-change-section"">Анализ структуры документа завершён</span>")
+            sb.AppendLine("        <span class=""formatting-change-desc"">: пока не найдено стилевых областей, требующих немедленной правки; можно продолжить уточнение или выбрать другой вариант.</span>")
             sb.AppendLine("      </div>")
         Else
             For Each group In grouped
-                Dim tagName = If(group.Key = "__pending__", "AI待标注", GetTagDisplayName(group.Key, plan.SemanticMapping))
+                Dim tagName = If(group.Key = "__pending__", "ИИ: ожидает разметки", GetTagDisplayName(group.Key, plan.SemanticMapping))
                 Dim count = group.Count()
                 Dim sampleDesc = group.FirstOrDefault()?.ChangeDescription
                 sb.AppendLine($"      <div class=""formatting-change-item"">")
                 sb.AppendLine($"        <span class=""formatting-change-section"">{System.Web.HttpUtility.HtmlEncode(tagName)}</span>")
-                sb.AppendLine($"        <span class=""formatting-change-count"">({count}处)</span>")
+                sb.AppendLine($"        <span class=""formatting-change-count"">({count} шт.)</span>")
                 If Not String.IsNullOrEmpty(sampleDesc) Then
                     sb.AppendLine($"        <span class=""formatting-change-desc"">: {System.Web.HttpUtility.HtmlEncode(sampleDesc)}</span>")
                 End If
@@ -363,15 +363,15 @@ Public Class ChatFormatterAgent
             Next
         End If
 
-        sb.AppendLine($"      <div class=""formatting-change-summary"">合计: {plan.TotalChanges}处段落, {grouped.Count}个样式区</div>")
+        sb.AppendLine($"      <div class=""formatting-change-summary"">Итого: {plan.TotalChanges} абзацев, {grouped.Count} стилевых областей</div>")
         sb.AppendLine("    </div>")
 
         ' 操作按钮
         sb.AppendLine("    <div class=""formatting-card-actions"">")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">应用排版</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-secondary"" onclick=""previewReformat();"">预览对比</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-outline"" onclick=""alternateReformat();"">换一种</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-ghost"" onclick=""startRefinement();"">微调</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">Применить форматирование</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-secondary"" onclick=""previewReformat();"">Предпросмотр</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-outline"" onclick=""alternateReformat();"">Другой вариант</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-ghost"" onclick=""startRefinement();"">Уточнить</button>")
         sb.AppendLine("    </div>")
         sb.AppendLine("  </div>")
         sb.AppendLine("</div>")
@@ -391,7 +391,7 @@ Public Class ChatFormatterAgent
         sb.AppendLine("<div class=""formatting-card formatting-card-refinement"">")
         sb.AppendLine("  <div class=""formatting-card-header"">")
         sb.AppendLine("    <span class=""formatting-card-icon"">&#x1F504;</span>")
-        sb.AppendLine("    <span class=""formatting-card-title"">排版已微调</span>")
+        sb.AppendLine("    <span class=""formatting-card-title"">Форматирование уточнено</span>")
         sb.AppendLine("  </div>")
         sb.AppendLine("  <div class=""formatting-card-body"">")
 
@@ -416,8 +416,8 @@ Public Class ChatFormatterAgent
 
         ' 操作按钮
         sb.AppendLine("    <div class=""formatting-card-actions"">")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">应用排版</button>")
-        sb.AppendLine("      <button class=""formatting-btn formatting-btn-ghost"" onclick=""startRefinement();"">继续微调</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-primary"" onclick=""applyReformat();"">Применить форматирование</button>")
+        sb.AppendLine("      <button class=""formatting-btn formatting-btn-ghost"" onclick=""startRefinement();"">Продолжить уточнение</button>")
         sb.AppendLine("    </div>")
         sb.AppendLine("  </div>")
         sb.AppendLine("</div>")
@@ -504,7 +504,7 @@ Public Class ChatFormatterAgent
             For i = 0 To paragraphs.Count - 1
                 ' 使用InferDefaultTag进行基于规则的推断（而非全部body.normal）
                 Dim inferredTag = SmartFormattingOrchestrator.InferDefaultTagPublic(i, paragraphs.Count, paragraphs(i), Nothing)
-                fallback.Add(New TaggedParagraph(i, inferredTag, "规则推断（无AI）"))
+                fallback.Add(New TaggedParagraph(i, inferredTag, "Правило (без ИИ)"))
             Next
             _lastTaggedParagraphs = fallback
             Return fallback
@@ -556,7 +556,7 @@ Public Class ChatFormatterAgent
         Dim result As New List(Of TaggedParagraph)()
         For i = 0 To paragraphs.Count - 1
             Dim inferredTag = SmartFormattingOrchestrator.InferDefaultTagPublic(i, paragraphs.Count, paragraphs(i), Nothing)
-            result.Add(New TaggedParagraph(i, inferredTag, "规则推断"))
+            result.Add(New TaggedParagraph(i, inferredTag, "Правило"))
         Next
         _lastTaggedParagraphs = result
         Return Task.FromResult(result)
@@ -602,7 +602,7 @@ Public Class ChatFormatterAgent
         ' 如果解析失败或结果为空，返回空列表（调用方会降级到规则推断）
         If result.Count = 0 Then
             For i = 0 To paragraphCount - 1
-                result.Add(New TaggedParagraph(i, "body.normal", "解析失败降级"))
+                result.Add(New TaggedParagraph(i, "body.normal", "Сбой разбора, упрощённый режим"))
             Next
         End If
 

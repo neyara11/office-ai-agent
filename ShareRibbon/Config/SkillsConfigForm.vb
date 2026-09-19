@@ -25,7 +25,7 @@ Public Class SkillsConfigForm
     Private txtContent As TextBox
 
     Public Sub New()
-        Me.Text = "Skills配置"
+        Me.Text = "Настройка Skills"
         Me.Size = New Size(850, 550)
         Me.MinimumSize = New Size(700, 450)
         Me.StartPosition = FormStartPosition.CenterScreen
@@ -48,7 +48,7 @@ Public Class SkillsConfigForm
     Private Sub InitializeUI()
         ' 顶部说明
         Dim lblInfo As New Label() With {
-            .Text = "Skills目录：Documents\OfficeAiAppData\Skills，将符合Claude规范的Skills目录拷贝到此即可",
+            .Text = "Каталог Skills: Documents\OfficeAiAppData\Skills. Скопируйте сюда каталоги Skills, соответствующие спецификации Claude",
             .Location = New Point(15, 10),
             .Size = New Size(800, 20),
             .ForeColor = Color.Gray,
@@ -71,7 +71,7 @@ Public Class SkillsConfigForm
 
         ' 左侧：Skills列表
         Dim lblList As New Label() With {
-            .Text = "已安装的Skills：",
+            .Text = "Установленные Skills:",
             .Location = New Point(0, 0),
             .Size = New Size(270, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left
@@ -93,7 +93,7 @@ Public Class SkillsConfigForm
 
         ' 名称
         lblName = New Label() With {
-            .Text = "名称：",
+            .Text = "Имя:",
             .Location = New Point(xRight, p2Y),
             .Size = New Size(70, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left,
@@ -112,7 +112,7 @@ Public Class SkillsConfigForm
 
         ' 描述
         lblDescription = New Label() With {
-            .Text = "描述：",
+            .Text = "Описание:",
             .Location = New Point(xRight, p2Y),
             .Size = New Size(70, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left
@@ -138,7 +138,7 @@ Public Class SkillsConfigForm
         split.Panel2.Controls.Add(metadataPanel)
 
         lblLicense = New Label() With {
-            .Text = "许可证：",
+            .Text = "Лицензия:",
             .Location = New Point(5, 5),
             .Size = New Size(60, 18),
             .ForeColor = Color.Gray
@@ -153,7 +153,7 @@ Public Class SkillsConfigForm
         metadataPanel.Controls.Add(txtLicense)
 
         lblCompatibility = New Label() With {
-            .Text = "环境：",
+            .Text = "Окружение:",
             .Location = New Point(5, 28),
             .Size = New Size(60, 18),
             .ForeColor = Color.Gray
@@ -168,7 +168,7 @@ Public Class SkillsConfigForm
         metadataPanel.Controls.Add(txtCompatibility)
 
         lblAllowedTools = New Label() With {
-            .Text = "工具：",
+            .Text = "Инструменты:",
             .Location = New Point(5, 51),
             .Size = New Size(60, 18),
             .ForeColor = Color.Gray
@@ -183,7 +183,7 @@ Public Class SkillsConfigForm
         metadataPanel.Controls.Add(txtAllowedTools)
 
         lblAuthor = New Label() With {
-            .Text = "作者：",
+            .Text = "Автор:",
             .Location = New Point(5, 74),
             .Size = New Size(60, 18),
             .ForeColor = Color.Gray
@@ -198,7 +198,7 @@ Public Class SkillsConfigForm
         metadataPanel.Controls.Add(txtAuthor)
 
         lblVersion = New Label() With {
-            .Text = "版本：",
+            .Text = "Версия:",
             .Location = New Point(280, 74),
             .Size = New Size(50, 18),
             .ForeColor = Color.Gray
@@ -216,7 +216,7 @@ Public Class SkillsConfigForm
 
         ' 内容区域
         Dim lblContent As New Label() With {
-            .Text = "Skill内容：",
+            .Text = "Содержимое Skill:",
             .Location = New Point(xRight, p2Y),
             .Size = New Size(70, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left
@@ -241,7 +241,7 @@ Public Class SkillsConfigForm
         ' 底部按钮
         Dim y = 475
         Dim btnOpenDir As New Button() With {
-            .Text = "打开Skills目录",
+            .Text = "Открыть каталог Skills",
             .Location = New Point(15, y),
             .Size = New Size(120, 28),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Left,
@@ -253,7 +253,7 @@ Public Class SkillsConfigForm
         Me.Controls.Add(btnOpenDir)
 
         Dim btnRefresh As New Button() With {
-            .Text = "刷新列表",
+            .Text = "Обновить список",
             .Location = New Point(145, y),
             .Size = New Size(100, 28),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
@@ -262,7 +262,7 @@ Public Class SkillsConfigForm
         Me.Controls.Add(btnRefresh)
 
         Dim btnClose As New Button() With {
-            .Text = "关闭",
+            .Text = "Закрыть",
             .Location = New Point(740, y),
             .Size = New Size(80, 28),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Right
@@ -284,12 +284,12 @@ Public Class SkillsConfigForm
             Next
 
             If listBox.Items.Count = 0 Then
-                listBox.Items.Add("(暂无Skills，请打开Skills目录添加)")
+                listBox.Items.Add("(Навыков нет. Откройте каталог Skills и добавьте.)")
             End If
         Catch ex As Exception
             listBox.Items.Clear()
-            listBox.Items.Add("(加载失败: " & ex.Message & ")")
-            GlobalStatusStrip.ShowWarning("加载Skills失败")
+            listBox.Items.Add("(Ошибка загрузки: " & ex.Message & ")")
+            GlobalStatusStrip.ShowWarning("Не удалось загрузить Skills")
         End Try
     End Sub
 
@@ -311,7 +311,7 @@ Public Class SkillsConfigForm
         If txtName IsNot Nothing Then txtName.Text = skill.Name
 
         Dim txtDescription = Me.Controls.Find("txtDescription", True).FirstOrDefault()
-        If txtDescription IsNot Nothing Then txtDescription.Text = If(String.IsNullOrWhiteSpace(skill.Description), "(无描述)", skill.Description)
+        If txtDescription IsNot Nothing Then txtDescription.Text = If(String.IsNullOrWhiteSpace(skill.Description), "(нет описания)", skill.Description)
 
         Dim txtLicense = Me.Controls.Find("txtLicense", True).FirstOrDefault()
         If txtLicense IsNot Nothing Then txtLicense.Text = If(String.IsNullOrWhiteSpace(skill.License), "-", skill.License)
@@ -328,7 +328,7 @@ Public Class SkillsConfigForm
         Dim txtVersion = Me.Controls.Find("txtVersion", True).FirstOrDefault()
         If txtVersion IsNot Nothing Then txtVersion.Text = If(String.IsNullOrWhiteSpace(skill.Version), "-", skill.Version)
 
-        txtContent.Text = If(String.IsNullOrWhiteSpace(skill.Content), "(无内容)", skill.Content)
+        txtContent.Text = If(String.IsNullOrWhiteSpace(skill.Content), "(нет содержимого)", skill.Content)
     End Sub
 
     Private Sub ClearDetail()
@@ -359,15 +359,15 @@ Public Class SkillsConfigForm
     Private Sub BtnOpenDirClick(sender As Object, e As EventArgs)
         Try
             SkillsDirectoryService.OpenSkillsDirectory()
-            GlobalStatusStrip.ShowInfo("已打开Skills目录")
+            GlobalStatusStrip.ShowInfo("Каталог Skills открыт")
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning("打开目录失败: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Не удалось открыть каталог: " & ex.Message)
         End Try
     End Sub
 
     Private Sub BtnRefreshClick(sender As Object, e As EventArgs)
         LoadSkills()
-        GlobalStatusStrip.ShowInfo("已刷新Skills列表")
+        GlobalStatusStrip.ShowInfo("Список Skills обновлён")
     End Sub
 
     Private Class ListItem

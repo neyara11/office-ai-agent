@@ -79,7 +79,7 @@ Public Class DeepseekControl
             VBAxceptionHandle(ex)
             Return False
         Catch ex As Exception
-            MessageBox.Show("执行代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -98,7 +98,7 @@ Public Class DeepseekControl
 
     ' Word 不支持公式评估，此功能仅适用于 Excel
     Protected Overrides Function EvaluateFormula(formulaCode As String, preview As Boolean) As Boolean
-        GlobalStatusStrip.ShowWarning("公式评估功能不支持在 Word 中使用")
+        GlobalStatusStrip.ShowWarning("Оценка формул не поддерживается в Word")
         Return False
     End Function
 End Class

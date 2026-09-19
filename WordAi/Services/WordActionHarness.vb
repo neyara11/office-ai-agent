@@ -103,7 +103,7 @@ Namespace Services
                                            errorCode:=If(Status = WordCapabilityExecutionStatus.Fallback,
                                                          ExceptionClassifier.CodeUnknown,
                                                          ExceptionClassifier.CodeCom),
-                                           userMessage:=If(UserMessage, "Capability 执行失败"),
+                                           userMessage:=If(UserMessage, "Сбой выполнения Capability"),
                                            debugDetail:=DebugDetail,
                                            recoverable:=Recoverable,
                                            observation:=observation)
@@ -136,7 +136,7 @@ Namespace Services
                 AssignCapability(result,
                                  WordActionKind.Proofread,
                                  Math.Max(0.86, proofreadPlan.Confidence),
-                                 "已生成可执行 ProofreadIntentPlan")
+                                 "Сформирован исполняемый ProofreadIntentPlan")
                 Return result
             End If
 
@@ -144,7 +144,7 @@ Namespace Services
                 AssignCapability(result,
                                  WordActionKind.Numbering,
                                  0.92,
-                                 "匹配到 Word 自动编号连续化 capability")
+                                 "Совпадение с capability непрерывной автонумерации Word")
                 Return result
             End If
 
@@ -152,7 +152,7 @@ Namespace Services
                 AssignCapability(result,
                                  WordActionKind.DirectFormatting,
                                  Math.Max(0.82, formattingPlan.Confidence),
-                                 "已生成可执行 FormattingIntentPlan")
+                                 "Сформирован исполняемый FormattingIntentPlan")
                 Return result
             End If
 
@@ -162,21 +162,21 @@ Namespace Services
                         AssignCapability(result,
                                          WordActionKind.Proofread,
                                          Math.Max(0.72, intent.Confidence),
-                                         "意图识别为校对")
+                                         "Намерение распознано как вычитка")
                         Return result
 
                     Case OfficeIntentType.TEXT_FORMAT
                         AssignCapability(result,
                                          WordActionKind.DirectFormatting,
                                          Math.Max(0.62, intent.Confidence),
-                                         "意图识别为文本格式调整，交给排版执行器尝试")
+                                         "Намерение распознано как настройка текстового формата; передано исполнителю форматирования")
                         Return result
 
                     Case OfficeIntentType.FORMAT_STYLE
                         AssignCapability(result,
                                          WordActionKind.SemanticReformat,
                                          Math.Max(0.66, intent.Confidence),
-                                         "意图识别为样式/排版调整")
+                                         "Намерение распознано как настройка стиля/форматирования")
                         Return result
                 End Select
             End If
@@ -185,7 +185,7 @@ Namespace Services
                 AssignCapability(result,
                                  WordActionKind.SemanticReformat,
                                  0.7,
-                                 "匹配到结构化排版/标题/编号整理请求")
+                                 "Совпадение с запросом структурного форматирования/упорядочивания заголовков/нумерации")
                 Return result
             End If
 
@@ -206,7 +206,7 @@ Namespace Services
             If plan.Capability IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(plan.Capability.DisplayName) Then
                 reasonParts.Add("capability=" & plan.Capability.DisplayName)
             End If
-            plan.Reason = String.Join("；", reasonParts)
+            plan.Reason = String.Join("; ", reasonParts)
         End Sub
 
         Private Function ShouldRouteToNumbering(message As String) As Boolean

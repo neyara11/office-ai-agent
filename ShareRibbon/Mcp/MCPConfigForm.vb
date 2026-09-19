@@ -55,13 +55,13 @@ Public Class MCPConfigForm
     End Sub
 
     Private Sub InitializeComponent()
-        Me.Text = "通用MCP客户端配置"
+        Me.Text = "Настройка универсального MCP-клиента"
         Me.Size = New Size(900, 600)  ' 增加窗体宽度
         Me.StartPosition = FormStartPosition.CenterScreen
 
         ' 状态标签
         _statusLabel = New Label()
-        _statusLabel.Text = "就绪 - 请配置MCP服务器连接"
+        _statusLabel.Text = "Готово — настройте подключение к MCP-серверу"
         _statusLabel.Location = New Point(210, 10)  ' 向右移动
         _statusLabel.Width = 680
         _statusLabel.ForeColor = Color.Blue
@@ -69,7 +69,7 @@ Public Class MCPConfigForm
 
         ' 添加左侧连接列表
         Dim connectionListLabel = New Label()
-        connectionListLabel.Text = "已保存的连接:"
+        connectionListLabel.Text = "Сохранённые подключения:"
         connectionListLabel.Location = New Point(10, 10)
         connectionListLabel.Width = 180
         Me.Controls.Add(connectionListLabel)
@@ -79,21 +79,21 @@ Public Class MCPConfigForm
         _connectionsListView.Size = New Size(180, 450)
         _connectionsListView.View = View.Details
         _connectionsListView.FullRowSelect = True
-        _connectionsListView.Columns.Add("连接名称", 120)
-        _connectionsListView.Columns.Add("状态", 50)
+        _connectionsListView.Columns.Add("Имя подключения", 120)
+        _connectionsListView.Columns.Add("Состояние", 50)
         AddHandler _connectionsListView.SelectedIndexChanged, AddressOf ConnectionsListView_SelectedIndexChanged
         Me.Controls.Add(_connectionsListView)
 
         ' 添加/移除连接按钮
         _addConnectionButton = New Button()
-        _addConnectionButton.Text = "添加"
+        _addConnectionButton.Text = "Добавить"
         _addConnectionButton.Location = New Point(10, 490)
         _addConnectionButton.Width = 80
         AddHandler _addConnectionButton.Click, AddressOf AddConnectionButton_Click
         Me.Controls.Add(_addConnectionButton)
 
         _removeConnectionButton = New Button()
-        _removeConnectionButton.Text = "移除"
+        _removeConnectionButton.Text = "Удалить"
         _removeConnectionButton.Location = New Point(100, 490)
         _removeConnectionButton.Width = 80
         AddHandler _removeConnectionButton.Click, AddressOf RemoveConnectionButton_Click
@@ -127,7 +127,7 @@ Public Class MCPConfigForm
     Private Sub CreateConnectionConfigArea()
         ' 连接名称输入框
         Dim nameLabel As New Label()
-        nameLabel.Text = "连接名称:"
+        nameLabel.Text = "Имя подключения:"
         nameLabel.Location = New Point(210, 40)
         nameLabel.Width = 80
         Me.Controls.Add(nameLabel)
@@ -139,7 +139,7 @@ Public Class MCPConfigForm
 
         ' 连接类型选择
         Dim typeLabel As New Label()
-        typeLabel.Text = "连接类型:"
+        typeLabel.Text = "Тип подключения:"
         typeLabel.Location = New Point(210, 70)
         typeLabel.Width = 80
         Me.Controls.Add(typeLabel)
@@ -148,14 +148,14 @@ Public Class MCPConfigForm
         typeCombo.Location = New Point(300, 67)
         typeCombo.Width = 150
         typeCombo.DropDownStyle = ComboBoxStyle.DropDownList
-        typeCombo.Items.AddRange({"HTTP/SSE", "Stdio (本地进程)"})
+        typeCombo.Items.AddRange({"HTTP/SSE", "Stdio (локальный процесс)"})
         typeCombo.SelectedIndex = 0
         AddHandler typeCombo.SelectedIndexChanged, AddressOf TypeCombo_SelectedIndexChanged
         Me.Controls.Add(typeCombo)
 
         ' 服务器URL/命令
         Dim serverUrlLabel As New Label()
-        serverUrlLabel.Text = "服务器URL:"
+        serverUrlLabel.Text = "URL сервера:"
         serverUrlLabel.Location = New Point(210, 100)
         serverUrlLabel.Width = 80
         Me.Controls.Add(serverUrlLabel)
@@ -170,7 +170,7 @@ Public Class MCPConfigForm
 
         ' 高级设置按钮 - 调整位置，填补预设按钮的空缺
         _advancedButton = New Button()
-        _advancedButton.Text = "高级设置"
+        _advancedButton.Text = "Дополнительные настройки"
         _advancedButton.Location = New Point(710, 67)  ' 移到预设按钮的位置
         _advancedButton.Width = 170  ' 增加宽度
         _advancedButton.Enabled = False ' 默认禁用（HTTP模式）
@@ -179,7 +179,7 @@ Public Class MCPConfigForm
 
         ' 测试连接按钮
         _testButton = New Button()
-        _testButton.Text = "连接并探索"
+        _testButton.Text = "Подключиться и исследовать"
         _testButton.Location = New Point(710, 97)
         _testButton.Width = 170
         AddHandler _testButton.Click, AddressOf TestConnectionAsync
@@ -190,21 +190,21 @@ Public Class MCPConfigForm
     Private Sub CreateBottomButtons()
         ' 添加导入配置按钮
         Dim importConfigButton As New Button()
-        importConfigButton.Text = "导入配置"
+        importConfigButton.Text = "Импорт настроек"
         importConfigButton.Location = New Point(570, 520)
         importConfigButton.Width = 100
         AddHandler importConfigButton.Click, AddressOf ImportConfigButton_Click
         Me.Controls.Add(importConfigButton)
 
         _saveButton = New Button()
-        _saveButton.Text = "保存配置"
+        _saveButton.Text = "Сохранить настройки"
         _saveButton.Location = New Point(680, 520)
         _saveButton.Width = 100
         AddHandler _saveButton.Click, AddressOf SaveButton_Click
         Me.Controls.Add(_saveButton)
 
         _cancelButton = New Button()
-        _cancelButton.Text = "取消"
+        _cancelButton.Text = "Отмена"
         _cancelButton.Location = New Point(790, 520)
         _cancelButton.Width = 100
         AddHandler _cancelButton.Click, AddressOf CancelButton_Click
@@ -226,12 +226,12 @@ Public Class MCPConfigForm
                         _currentConnections = MCPConnectionManager.LoadConnections()
                         LoadConnectionsList()
 
-                        MessageBox.Show($"成功导入并合并了 {importedCount} 个连接配置", "导入成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        MessageBox.Show($"Успешно импортировано и объединено подключений: {importedCount}", "Импорт выполнен", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     Else
-                        MessageBox.Show("没有找到有效的MCP服务器配置", "导入提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                        MessageBox.Show("Не найдены допустимые настройки MCP-сервера", "Импорт", MessageBoxButtons.OK, MessageBoxIcon.Information)
                     End If
                 Catch ex As Exception
-                    MessageBox.Show($"导入配置失败: {ex.Message}", "导入错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show($"Не удалось импортировать настройки: {ex.Message}", "Ошибка импорта", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End Try
             End If
         End Using
@@ -251,7 +251,7 @@ Public Class MCPConfigForm
 
         For Each connection In _currentConnections
             Dim item = New ListViewItem(connection.Name)
-            item.SubItems.Add(If(connection.Enabled, "启用", "禁用"))
+            item.SubItems.Add(If(connection.Enabled, "Включено", "Отключено"))
             item.Tag = connection
             _connectionsListView.Items.Add(item)
         Next
@@ -335,7 +335,7 @@ Public Class MCPConfigForm
                         ' 添加到ListView
                         Dim item = New ListViewItem(tool.Name)
                         item.SubItems.Add(If(tool.Description Is Nothing, "", tool.Description))
-                        item.SubItems.Add(If(tool.InputSchema IsNot Nothing, "是", "否"))
+                        item.SubItems.Add(If(tool.InputSchema IsNot Nothing, "Да", "Нет"))
                         item.Tag = tool
                         _toolsListView.Items.Add(item)
 
@@ -352,16 +352,16 @@ Public Class MCPConfigForm
                 _testToolCombo.SelectedIndex = 0
             End If
 
-            UpdateStatus($"已从保存的连接加载 {_currentTools.Count} 个工具", Color.Green)
+            UpdateStatus($"Загружено инструментов из сохранённого подключения: {_currentTools.Count}", Color.Green)
         Else
-            UpdateStatus("此连接没有保存的工具信息，需要重新连接服务器进行探索", Color.Blue)
+            UpdateStatus("В этом подключении нет сохранённой информации об инструментах. Подключитесь к серверу заново для исследования", Color.Blue)
         End If
     End Sub
 
     ' 添加新方法：添加连接按钮处理
     Private Sub AddConnectionButton_Click(sender As Object, e As EventArgs)
         ' 清空表单以创建新连接
-        _connectionNameTextBox.Text = "新连接_" & DateTime.Now.ToString("yyyyMMdd_HHmmss")
+        _connectionNameTextBox.Text = "Новое подключение_" & DateTime.Now.ToString("yyyyMMdd_HHmmss")
         _serverUrlTextBox.Text = "http://localhost:3000"
 
         ' 设置为HTTP模式
@@ -382,7 +382,7 @@ Public Class MCPConfigForm
         If _connectionsListView.SelectedItems.Count > 0 Then
             Dim selectedConnection = CType(_connectionsListView.SelectedItems(0).Tag, MCPConnectionConfig)
 
-            If MessageBox.Show($"确定要移除连接 '{selectedConnection.Name}' 吗?", "确认移除",
+            If MessageBox.Show($"Удалить подключение '{selectedConnection.Name}'?", "Подтверждение удаления",
                               MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
                 ' 移除连接
                 _currentConnections = MCPConnectionManager.RemoveConnection(_currentConnections, selectedConnection.Name)
@@ -398,7 +398,7 @@ Public Class MCPConfigForm
                 _currentConnectionName = String.Empty
             End If
         Else
-            MessageBox.Show("请先选择要移除的连接", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Сначала выберите подключение для удаления", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
     End Sub
 
@@ -408,7 +408,7 @@ Public Class MCPConfigForm
         If Not _advancedButton.Enabled Then Return
 
         Dim isStdio = _serverUrlTextBox.Text.StartsWith("stdio://") OrElse
-         (_serverUrlTextBox.Text.Contains("高级设置") AndAlso Not _serverUrlTextBox.Text.StartsWith("http"))
+         (_serverUrlTextBox.Text.Contains("Дополнительные настройки") AndAlso Not _serverUrlTextBox.Text.StartsWith("http"))
 
         If isStdio Then
             ' 创建新的StdioOptions对象
@@ -476,7 +476,7 @@ Public Class MCPConfigForm
             End Using
         Else
             ' HTTP 模式下的设置
-            MessageBox.Show("HTTP/SSE 模式不需要额外配置。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Для режима HTTP/SSE дополнительная настройка не требуется.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
         End If
     End Sub
 
@@ -488,14 +488,14 @@ Public Class MCPConfigForm
                 _serverUrlTextBox.ReadOnly = False
                 _serverUrlTextBox.BackColor = SystemColors.Window
                 _serverUrlTextBox.Text = "http://localhost:3000"
-                _statusLabel.Text = "HTTP/SSE 模式: 输入服务器URL即可连接"
+                _statusLabel.Text = "Режим HTTP/SSE: введите URL сервера для подключения"
                 _advancedButton.Enabled = False ' 禁用高级设置按钮
             Case 1 ' Stdio
                 ' 使服务器URL文本框只读，突出显示需要配置
                 _serverUrlTextBox.ReadOnly = True
                 _serverUrlTextBox.BackColor = Color.LightYellow
-                _serverUrlTextBox.Text = "【请点击右侧""高级设置""按钮配置本地进程】"
-                _statusLabel.Text = "Stdio 模式: 需要通过高级设置配置本地进程"
+                _serverUrlTextBox.Text = "Нажмите кнопку ""Дополнительные настройки"" справа, чтобы настроить локальный процесс"
+                _statusLabel.Text = "Режим Stdio: настройте локальный процесс через дополнительные настройки"
                 _advancedButton.Enabled = True ' 启用高级设置按钮
         End Select
     End Sub
@@ -506,7 +506,7 @@ Public Class MCPConfigForm
     End Sub
 
     Private Sub CreateToolsTab()
-        Dim toolsTab = New TabPage("工具(Tools)")
+        Dim toolsTab = New TabPage("Инструменты (Tools)")
 
         ' 创建分割容器 - 不使用 DockStyle.Fill
         Dim splitter = New SplitContainer()
@@ -525,9 +525,9 @@ Public Class MCPConfigForm
         _toolsListView.View = View.Details
         _toolsListView.FullRowSelect = True
         _toolsListView.HideSelection = False
-        _toolsListView.Columns.Add("工具名称", 150)
-        _toolsListView.Columns.Add("描述", 200)
-        _toolsListView.Columns.Add("有输入架构", 80)
+        _toolsListView.Columns.Add("Имя инструмента", 150)
+        _toolsListView.Columns.Add("Описание", 200)
+        _toolsListView.Columns.Add("Есть схема входа", 80)
 
         ' 工具详情富文本框
         Dim detailsBox = New RichTextBox()
@@ -560,17 +560,17 @@ Public Class MCPConfigForm
             ' 创建详细描述文本
             Dim sb As New StringBuilder()
 
-            sb.AppendLine("【工具名称】")
+            sb.AppendLine("Имя инструмента:")
             sb.AppendLine(tool.Name)
             sb.AppendLine()
 
-            sb.AppendLine("【工具描述】")
-            sb.AppendLine(If(String.IsNullOrEmpty(tool.Description), "(无描述)", tool.Description))
+            sb.AppendLine("Описание инструмента:")
+            sb.AppendLine(If(String.IsNullOrEmpty(tool.Description), "(без описания)", tool.Description))
             sb.AppendLine()
 
             ' 如果有输入架构，显示详细参数信息
             If tool.InputSchema IsNot Nothing Then
-                sb.AppendLine("【参数架构】")
+                sb.AppendLine("Схема параметров:")
 
                 Dim schema = tool.InputSchema
                 Dim schemaObj As JObject = Nothing
@@ -590,12 +590,12 @@ Public Class MCPConfigForm
                 ' 显示架构详情
                 If schemaObj IsNot Nothing Then
                     ' 提取类型
-                    sb.AppendLine($"类型: {If(schemaObj("type") IsNot Nothing, schemaObj("type").ToString(), "Object")}")
+                    sb.AppendLine($"Тип: {If(schemaObj("type") IsNot Nothing, schemaObj("type").ToString(), "Object")}")
 
                     ' 如果有properties属性，说明是对象类型
                     If schemaObj("properties") IsNot Nothing Then
                         sb.AppendLine("")
-                        sb.AppendLine("参数列表:")
+                        sb.AppendLine("Список параметров:")
 
                         Dim props = schemaObj("properties")
                         ' 正确的方式是先检查元素是否存在
@@ -626,7 +626,7 @@ Public Class MCPConfigForm
                                 ' 添加"(必需)"，并设置为红色
                                 detailsBox.SelectionStart = detailsBox.TextLength
                                 detailsBox.SelectionColor = Color.Red
-                                detailsBox.AppendText(" (必需)")
+                                detailsBox.AppendText(" (обязательный)")
                                 detailsBox.SelectionColor = detailsBox.ForeColor ' 恢复默认颜色
                             End If
 
@@ -638,19 +638,19 @@ Public Class MCPConfigForm
                             ' 参数描述
                             Dim propDesc = propObj("description")?.ToString()
                             If Not String.IsNullOrEmpty(propDesc) Then
-                                detailsBox.AppendText($"  描述: {propDesc}{Environment.NewLine}")
+                                detailsBox.AppendText($"  Описание: {propDesc}{Environment.NewLine}")
                             End If
 
                             ' 枚举值
                             If propObj("enum") IsNot Nothing Then
-                                detailsBox.AppendText($"  可选值: ")
+                                detailsBox.AppendText($"  Допустимые значения: ")
                                 Dim enumVals = propObj("enum").ToObject(Of List(Of Object))()
                                 detailsBox.AppendText(String.Join(", ", enumVals) & Environment.NewLine)
                             End If
 
                             ' 默认值
                             If propObj("default") IsNot Nothing Then
-                                detailsBox.AppendText($"  默认值: {propObj("default")}{Environment.NewLine}")
+                                detailsBox.AppendText($"  Значение по умолчанию: {propObj("default")}{Environment.NewLine}")
                             End If
 
                             detailsBox.AppendText(Environment.NewLine)
@@ -658,7 +658,7 @@ Public Class MCPConfigForm
 
                         ' 如果有示例，显示示例
                         If schemaObj("examples") IsNot Nothing Then
-                            detailsBox.AppendText(Environment.NewLine & "示例:" & Environment.NewLine)
+                            detailsBox.AppendText(Environment.NewLine & "Примеры:" & Environment.NewLine)
                             For Each example In schemaObj("examples")
                                 detailsBox.AppendText(example.ToString(Newtonsoft.Json.Formatting.Indented) & Environment.NewLine)
                             Next
@@ -671,7 +671,7 @@ Public Class MCPConfigForm
                     ' 如果有示例，显示示例
                     If schemaObj("examples") IsNot Nothing Then
                         sb.AppendLine("")
-                        sb.AppendLine("示例:")
+                        sb.AppendLine("Примеры:")
                         For Each example In schemaObj("examples")
                             sb.AppendLine(example.ToString(Newtonsoft.Json.Formatting.Indented))
                         Next
@@ -681,8 +681,8 @@ Public Class MCPConfigForm
                     sb.AppendLine(JsonConvert.SerializeObject(tool.InputSchema, Newtonsoft.Json.Formatting.Indented))
                 End If
             Else
-                sb.AppendLine("【参数架构】")
-                sb.AppendLine("(无参数架构)")
+                sb.AppendLine("Схема параметров:")
+                sb.AppendLine("(без схемы параметров)")
             End If
 
             ' 如果前面没有直接操作 RichTextBox，则在这里设置文本
@@ -690,12 +690,12 @@ Public Class MCPConfigForm
             detailsBox.SelectionStart = 0
             detailsBox.ScrollToCaret()
         Catch ex As Exception
-            detailsBox.Text = $"无法加载工具详情: {ex.Message}"
+            detailsBox.Text = $"Не удалось загрузить сведения об инструменте: {ex.Message}"
         End Try
     End Sub
 
     Private Sub CreateResourcesTab()
-        Dim resourcesTab = New TabPage("资源(Resources)")
+        Dim resourcesTab = New TabPage("Ресурсы (Resources)")
 
         ' 创建分割容器 - 不使用 DockStyle.Fill
         Dim splitter = New SplitContainer()
@@ -714,8 +714,8 @@ Public Class MCPConfigForm
         _resourcesListView.View = View.Details
         _resourcesListView.FullRowSelect = True
         _resourcesListView.Columns.Add("URI", 180)
-        _resourcesListView.Columns.Add("名称", 120)
-        _resourcesListView.Columns.Add("MIME类型", 100)
+        _resourcesListView.Columns.Add("Имя", 120)
+        _resourcesListView.Columns.Add("Тип MIME", 100)
 
         ' 右侧详情面板
         Dim detailsBox = New RichTextBox()
@@ -729,9 +729,9 @@ Public Class MCPConfigForm
                                                                 If _resourcesListView.SelectedItems.Count > 0 Then
                                                                     Dim resource = CType(_resourcesListView.SelectedItems(0).Tag, MCPResourceInfo)
                                                                     detailsBox.Text = $"URI: {resource.Uri}{Environment.NewLine}{Environment.NewLine}" &
-                                                                        $"名称: {resource.Name}{Environment.NewLine}{Environment.NewLine}" &
-                                                                        $"描述: {resource.Description}{Environment.NewLine}{Environment.NewLine}" &
-                                                                        $"MIME类型: {resource.MimeType}"
+                                                                        $"Имя: {resource.Name}{Environment.NewLine}{Environment.NewLine}" &
+                                                                        $"Описание: {resource.Description}{Environment.NewLine}{Environment.NewLine}" &
+                                                                        $"Тип MIME: {resource.MimeType}"
                                                                 End If
                                                             End Sub
 
@@ -746,7 +746,7 @@ Public Class MCPConfigForm
     End Sub
 
     Private Sub CreatePromptsTab()
-        Dim promptsTab = New TabPage("提示(Prompts)")
+        Dim promptsTab = New TabPage("Промпты (Prompts)")
 
         ' 创建分割容器 - 不使用 DockStyle.Fill
         Dim splitter = New SplitContainer()
@@ -764,9 +764,9 @@ Public Class MCPConfigForm
         _promptsListView.Dock = DockStyle.Fill
         _promptsListView.View = View.Details
         _promptsListView.FullRowSelect = True
-        _promptsListView.Columns.Add("提示名称", 180)
-        _promptsListView.Columns.Add("描述", 200)
-        _promptsListView.Columns.Add("参数数量", 80)
+        _promptsListView.Columns.Add("Имя промпта", 180)
+        _promptsListView.Columns.Add("Описание", 200)
+        _promptsListView.Columns.Add("Кол-во параметров", 80)
 
         ' 右侧详情面板
         Dim detailsBox = New RichTextBox()
@@ -780,20 +780,20 @@ Public Class MCPConfigForm
                                                               If _promptsListView.SelectedItems.Count > 0 Then
                                                                   Dim prompt = CType(_promptsListView.SelectedItems(0).Tag, MCPPromptInfo)
                                                                   Dim sb = New StringBuilder()
-                                                                  sb.AppendLine($"名称: {prompt.Name}")
-                                                                  sb.AppendLine($"描述: {prompt.Description}")
+                                                                  sb.AppendLine($"Имя: {prompt.Name}")
+                                                                  sb.AppendLine($"Описание: {prompt.Description}")
                                                                   sb.AppendLine()
 
                                                                   If prompt.Arguments IsNot Nothing AndAlso prompt.Arguments.Count > 0 Then
-                                                                      sb.AppendLine("参数列表:")
+                                                                      sb.AppendLine("Список параметров:")
                                                                       For Each arg In prompt.Arguments
                                                                           sb.AppendLine($"· {arg.Name}")
-                                                                          sb.AppendLine($"  描述: {arg.Description}")
-                                                                          sb.AppendLine($"  必需: {arg.Required}")
+                                                                          sb.AppendLine($"  Описание: {arg.Description}")
+                                                                          sb.AppendLine($"  Обязательный: {arg.Required}")
                                                                           sb.AppendLine()
                                                                       Next
                                                                   Else
-                                                                      sb.AppendLine("无参数")
+                                                                      sb.AppendLine("Нет параметров")
                                                                   End If
 
                                                                   detailsBox.Text = sb.ToString()
@@ -809,11 +809,11 @@ Public Class MCPConfigForm
     End Sub
 
     Private Sub CreateTestTab()
-        Dim testTab = New TabPage("测试工具")
+        Dim testTab = New TabPage("Тестирование инструментов")
 
         ' 工具选择
         Dim toolLabel = New Label()
-        toolLabel.Text = "选择工具:"
+        toolLabel.Text = "Выберите инструмент:"
         toolLabel.Location = New Point(10, 10)
         toolLabel.Width = 80
         testTab.Controls.Add(toolLabel)
@@ -826,7 +826,7 @@ Public Class MCPConfigForm
         testTab.Controls.Add(_testToolCombo)
 
         _executeTestButton = New Button()
-        _executeTestButton.Text = "执行"
+        _executeTestButton.Text = "Выполнить"
         _executeTestButton.Location = New Point(560, 5)  ' 调整位置
         _executeTestButton.Width = 90  ' 略微增加按钮宽度
         AddHandler _executeTestButton.Click, AddressOf ExecuteTestAsync
@@ -834,7 +834,7 @@ Public Class MCPConfigForm
 
         ' 参数输入
         Dim paramsLabel = New Label()
-        paramsLabel.Text = "参数(JSON):"
+        paramsLabel.Text = "Параметры (JSON):"
         paramsLabel.Location = New Point(10, 40)
         paramsLabel.Width = 100
         testTab.Controls.Add(paramsLabel)
@@ -844,13 +844,13 @@ Public Class MCPConfigForm
         _testParametersTextBox.Size = New Size(650, 100)  ' 增加宽度
         _testParametersTextBox.Multiline = True
         _testParametersTextBox.ScrollBars = ScrollBars.Both
-        _testParametersTextBox.Text = "{""location"": ""北京""}"
+        _testParametersTextBox.Text = "{""location"": ""Москва""}"
         _testParametersTextBox.Font = New Font("Consolas", 9)  ' 使用等宽字体，方便编辑JSON
         testTab.Controls.Add(_testParametersTextBox)
 
         ' 结果显示
         Dim resultLabel = New Label()
-        resultLabel.Text = "执行结果:"
+        resultLabel.Text = "Результат выполнения:"
         resultLabel.Location = New Point(10, 170)
         resultLabel.Width = 100
         testTab.Controls.Add(resultLabel)
@@ -955,7 +955,7 @@ Public Class MCPConfigForm
                             Dim propType = If(propObj("type") IsNot Nothing, propObj("type").ToString(), "string")
                             Select Case propType.ToLower()
                                 Case "string"
-                                    defaultValue = "示例值"
+                                    defaultValue = "пример"
                                     ' 尝试从描述中提取合适的示例
                                     Dim desc = propObj("description")?.ToString()
                                     If Not String.IsNullOrEmpty(desc) Then
@@ -971,15 +971,15 @@ Public Class MCPConfigForm
 
                                         ' 特殊参数示例
                                         If propName.ToLower().Contains("location") Then
-                                            defaultValue = "北京"
+                                            defaultValue = "Москва"
                                         ElseIf propName.ToLower().Contains("address") Then
-                                            defaultValue = "北京市海淀区上地十街10号"
+                                            defaultValue = "Москва, ул. Тверская, д. 1"
                                         ElseIf propName.ToLower().Contains("query") Then
-                                            defaultValue = "天安门"
+                                            defaultValue = "Москва"
                                         ElseIf propName.ToLower().Contains("origin") Then
-                                            defaultValue = "北京站"
+                                            defaultValue = "Москва"
                                         ElseIf propName.ToLower().Contains("destination") Then
-                                            defaultValue = "北京西站"
+                                            defaultValue = "Санкт-Петербург"
                                         End If
                                     End If
                                 Case "number", "integer"
@@ -1008,7 +1008,7 @@ Public Class MCPConfigForm
                 ' 检查是否有任何可选参数
                 If schemaObj("properties") IsNot Nothing AndAlso schemaObj("properties").Count() > 0 Then
                     ' 添加注释提示用户这个工具有可选参数但没有必需参数
-                    paramObj("_注释") = "此工具没有必需参数，但有可选参数。请根据需要添加。"
+                    paramObj("_注释") = "У этого инструмента нет обязательных параметров, но есть необязательные. Добавьте при необходимости."
                 End If
             End If
 
@@ -1105,7 +1105,7 @@ Public Class MCPConfigForm
         For Each tool In _currentTools
             Dim item = New ListViewItem(tool.Name)
             item.SubItems.Add(If(tool.Description Is Nothing, "", tool.Description))
-            item.SubItems.Add(If(tool.InputSchema IsNot Nothing, "是", "否"))
+            item.SubItems.Add(If(tool.InputSchema IsNot Nothing, "Да", "Нет"))
             item.Tag = tool
             _toolsListView.Items.Add(item)
 
@@ -1145,7 +1145,7 @@ Public Class MCPConfigForm
     ' 修改 LoadServerCapabilitiesAsync 方法
     Private Async Function LoadServerCapabilitiesAsync() As Task
         Try
-            UpdateStatus("正在加载服务器功能...", Color.Blue)
+            UpdateStatus("Загрузка функций сервера...", Color.Blue)
 
             ' 初始化工具集合，避免空引用
             If _currentTools Is Nothing Then
@@ -1184,10 +1184,10 @@ Public Class MCPConfigForm
                 End Try
             End If
 
-            UpdateStatus($"服务器功能加载完成！工具: {_currentTools.Count}个", Color.Green)
+            UpdateStatus($"Функции сервера загружены! Инструментов: {_currentTools.Count}", Color.Green)
 
         Catch ex As Exception
-            UpdateStatus($"加载服务器功能失败: {ex.Message}", Color.Red)
+            UpdateStatus($"Не удалось загрузить функции сервера: {ex.Message}", Color.Red)
         End Try
     End Function
 
@@ -1195,19 +1195,19 @@ Public Class MCPConfigForm
     Private Async Sub TestConnectionAsync(sender As Object, e As EventArgs)
         ' 验证连接名称
         If String.IsNullOrEmpty(_connectionNameTextBox.Text) Then
-            UpdateStatus("请输入连接名称", Color.Red)
+            UpdateStatus("Введите имя подключения", Color.Red)
             Return
         End If
 
         If String.IsNullOrEmpty(_serverUrlTextBox.Text) OrElse
-       (_serverUrlTextBox.Text.Contains("请点击") AndAlso _serverUrlTextBox.Text.Contains("高级设置")) Then
-            UpdateStatus("请先配置连接信息", Color.Red)
+       (_serverUrlTextBox.Text.Contains("Нажмите кнопку") AndAlso _serverUrlTextBox.Text.Contains("Дополнительные настройки")) Then
+            UpdateStatus("Сначала настройте подключение", Color.Red)
             Return
         End If
 
         Try
             _testButton.Enabled = False
-            UpdateStatus("正在连接MCP服务器...", Color.Blue)
+            UpdateStatus("Подключение к MCP-серверу...", Color.Blue)
 
             ' 不使用 API 密钥
             Dim apiKey As String = Nothing
@@ -1219,7 +1219,7 @@ Public Class MCPConfigForm
             Dim result = Await _mcpClient.InitializeAsync()
 
             If Not result.Success Then
-                UpdateStatus($"连接失败: {result.ErrorMessage}", Color.Red)
+                UpdateStatus($"Не удалось подключиться: {result.ErrorMessage}", Color.Red)
                 Return
             End If
 
@@ -1227,12 +1227,12 @@ Public Class MCPConfigForm
             Dim transportText = If(_mcpClient.TransportType = MCPTransportType.Stdio, "Stdio", "HTTP/SSE")
             Dim serverInfo = If(result.ServerInfo IsNot Nothing,
            $"{result.ServerInfo.Name} v{result.ServerInfo.Version}",
-           "未知服务器")
+           "неизвестный сервер")
             Dim protocolInfo = If(Not String.IsNullOrEmpty(result.ProtocolVersion),
-            $"协议版本: {result.ProtocolVersion}",
+            $"Версия протокола: {result.ProtocolVersion}",
             "")
 
-            UpdateStatus($"连接成功！传输类型: {transportText}, 服务器: {serverInfo} {protocolInfo}", Color.Green)
+            UpdateStatus($"Подключено! Тип транспорта: {transportText}, сервер: {serverInfo} {protocolInfo}", Color.Green)
 
             ' 加载服务器功能
             Await LoadServerCapabilitiesAsync()
@@ -1314,7 +1314,7 @@ Public Class MCPConfigForm
             Next
 
         Catch ex As Exception
-            UpdateStatus($"连接失败: {ex.Message}", Color.Red)
+            UpdateStatus($"Не удалось подключиться: {ex.Message}", Color.Red)
         Finally
             _testButton.Enabled = True
         End Try
@@ -1323,13 +1323,13 @@ Public Class MCPConfigForm
     ' 更新 ExecuteTestAsync 方法，添加更多错误处理
     Private Async Sub ExecuteTestAsync(sender As Object, e As EventArgs)
         If _testToolCombo.SelectedItem Is Nothing Then
-            MessageBox.Show("请选择要测试的工具", "提示")
+            MessageBox.Show("Выберите инструмент для тестирования", "Подсказка")
             Return
         End If
 
         Try
             _executeTestButton.Enabled = False
-            _testResultTextBox.Text = "正在执行..."
+            _testResultTextBox.Text = "Выполняется..."
 
             Dim toolName = _testToolCombo.SelectedItem.ToString()
             Dim parameters As Object = Nothing
@@ -1341,7 +1341,7 @@ Public Class MCPConfigForm
                     ' 调试输出参数
                     Debug.WriteLine($"测试工具参数: {_testParametersTextBox.Text}")
                 Catch jsonEx As Exception
-                    _testResultTextBox.Text = $"参数JSON格式错误: {jsonEx.Message}"
+                    _testResultTextBox.Text = $"Ошибка формата JSON параметров: {jsonEx.Message}"
                     _executeTestButton.Enabled = True
                     Return
                 End Try
@@ -1354,37 +1354,37 @@ Public Class MCPConfigForm
 
             ' 显示结果
             If result.IsError Then
-                _testResultTextBox.Text = $"执行失败: {result.ErrorMessage}"
+                _testResultTextBox.Text = $"Ошибка выполнения: {result.ErrorMessage}"
             Else
                 Dim resultText As New StringBuilder()
 
                 ' 显示原始JSON以便调试
-                resultText.AppendLine("【原始JSON响应】")
+                resultText.AppendLine("Исходный JSON-ответ:")
                 Dim rawJson = Newtonsoft.Json.JsonConvert.SerializeObject(result, Newtonsoft.Json.Formatting.Indented)
                 resultText.AppendLine(rawJson)
                 resultText.AppendLine()
 
-                resultText.AppendLine("【解析后内容】")
+                resultText.AppendLine("Разобранное содержимое:")
 
                 ' 处理各种内容类型
                 If result.Content IsNot Nothing AndAlso result.Content.Count > 0 Then
                     For Each content In result.Content
-                        resultText.AppendLine($"内容类型: {content.Type}")
+                        resultText.AppendLine($"Тип содержимого: {content.Type}")
 
                         If content.Type = "text" AndAlso Not String.IsNullOrEmpty(content.Text) Then
                             resultText.AppendLine(content.Text)
                         ElseIf content.Type = "image" Then
-                            resultText.AppendLine($"[图像内容] MIME类型: {content.MimeType}")
+                            resultText.AppendLine($"[Изображение] Тип MIME: {content.MimeType}")
                         ElseIf Not String.IsNullOrEmpty(content.Data) Then
-                            resultText.AppendLine($"[数据] {content.Data}")
+                            resultText.AppendLine($"[Данные] {content.Data}")
                         Else
-                            resultText.AppendLine("[无可显示内容]")
+                            resultText.AppendLine("[Нет отображаемого содержимого]")
                         End If
 
                         resultText.AppendLine()
                     Next
                 Else
-                    resultText.AppendLine("响应中没有内容数据")
+                    resultText.AppendLine("В ответе нет данных")
                 End If
 
                 _testResultTextBox.Text = resultText.ToString()
@@ -1393,7 +1393,7 @@ Public Class MCPConfigForm
         Catch ex As Exception
             ' 显示更详细的错误信息
             Debug.WriteLine($"执行测试时发生异常: {ex.ToString()}")
-            _testResultTextBox.Text = $"执行失败: {ex.Message}{Environment.NewLine}{Environment.NewLine}详细错误:{Environment.NewLine}{ex.ToString()}"
+            _testResultTextBox.Text = $"Ошибка выполнения: {ex.Message}{Environment.NewLine}{Environment.NewLine}Подробности:{Environment.NewLine}{ex.ToString()}"
         Finally
             _executeTestButton.Enabled = True
         End Try
@@ -1407,7 +1407,7 @@ Public Class MCPConfigForm
 
         ' 创建一个详细信息窗口，代替简单的消息框
         Dim detailForm As New Form()
-        detailForm.Text = $"工具详情: {selectedTool.Name}"
+        detailForm.Text = $"Сведения об инструменте: {selectedTool.Name}"
         detailForm.Size = New Size(700, 500)
         detailForm.StartPosition = FormStartPosition.CenterParent
 
@@ -1422,7 +1422,7 @@ Public Class MCPConfigForm
 
         ' 在测试标签页添加测试按钮
         Dim testButton As New Button()
-        testButton.Text = "使用此工具测试"
+        testButton.Text = "Тестировать этим инструментом"
         testButton.Dock = DockStyle.Bottom
         testButton.Height = 30
 
@@ -1453,20 +1453,20 @@ Public Class MCPConfigForm
             ' 读取资源内容
             Dim content = Await _mcpClient.ReadResourceAsync(selectedResource.Uri)
 
-            Dim details = $"资源URI: {selectedResource.Uri}" & vbCrLf &
-                         $"名称: {selectedResource.Name}" & vbCrLf &
-                         $"描述: {selectedResource.Description}" & vbCrLf &
-                         $"MIME类型: {selectedResource.MimeType}" & vbCrLf & vbCrLf
+            Dim details = $"URI ресурса: {selectedResource.Uri}" & vbCrLf &
+                         $"Имя: {selectedResource.Name}" & vbCrLf &
+                         $"Описание: {selectedResource.Description}" & vbCrLf &
+                         $"Тип MIME: {selectedResource.MimeType}" & vbCrLf & vbCrLf
 
             For Each contentItem In content.Contents
                 If Not String.IsNullOrEmpty(contentItem.Text) Then
-                    details += $"内容: {contentItem.Text}" & vbCrLf
+                    details += $"Содержимое: {contentItem.Text}" & vbCrLf
                 End If
             Next
 
-            MessageBox.Show(details, "资源详情", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show(details, "Сведения о ресурсе", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            MessageBox.Show($"读取资源失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Не удалось прочитать ресурс: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -1480,7 +1480,7 @@ Public Class MCPConfigForm
     Private Sub SaveButton_Click(sender As Object, e As EventArgs)
         ' 验证连接名称
         If String.IsNullOrEmpty(_connectionNameTextBox.Text) Then
-            MessageBox.Show("请输入连接名称", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Введите имя подключения", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
@@ -1566,7 +1566,7 @@ Public Class MCPConfigForm
     Private Sub SetupConnectionsContextMenu()
         Dim menu = New ContextMenuStrip()
 
-        Dim enableItem = New ToolStripMenuItem("启用")
+        Dim enableItem = New ToolStripMenuItem("Включить")
         AddHandler enableItem.Click, Sub(sender, e)
                                          If _connectionsListView.SelectedItems.Count > 0 Then
                                              Dim connection = CType(_connectionsListView.SelectedItems(0).Tag, MCPConnectionConfig)
@@ -1576,7 +1576,7 @@ Public Class MCPConfigForm
                                          End If
                                      End Sub
 
-        Dim disableItem = New ToolStripMenuItem("禁用")
+        Dim disableItem = New ToolStripMenuItem("Отключить")
         AddHandler disableItem.Click, Sub(sender, e)
                                           If _connectionsListView.SelectedItems.Count > 0 Then
                                               Dim connection = CType(_connectionsListView.SelectedItems(0).Tag, MCPConnectionConfig)

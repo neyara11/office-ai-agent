@@ -56,9 +56,9 @@ Partial Class Ribbon1
         Me.ClearCacheButton.Image = ShareRibbon.SharedResources.Clear
 
         ' 设置 Excel 特定的提示
-        Me.DataAnalysisButton.SuperTip = "可选中提出的问题和数据后AI帮你整理到另外一个sheet中"
-        Me.PromptConfigButton.SuperTip = "优秀的提示词可以更好的帮AI确定自己的定位，让输出内容更符合你的期望"
-        Me.ChatButton.SuperTip = "像使用客户端一样与AI对话，聊天更加便捷"
+        Me.DataAnalysisButton.SuperTip = "Выделите данные и вопрос — AI оформит результат на отдельном листе"
+        Me.PromptConfigButton.SuperTip = "Хороший промпт помогает AI точнее понять задачу и выдавать ожидаемый результат"
+        Me.ChatButton.SuperTip = "Общайтесь с AI как в отдельном клиенте — удобный чат прямо здесь"
 
         ' 设置 RibbonType
         Me.RibbonType = "Microsoft.Excel.Workbook"

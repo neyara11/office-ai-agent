@@ -33,7 +33,7 @@ Public Class Ribbon1
                 spotlight.Toggle()
             End If
         Catch ex As Exception
-            MsgBox("激活聚光灯功能时出错：" & ex.Message, vbCritical)
+            MsgBox("Ошибка при активации режима подсветки: " & ex.Message, vbCritical)
         End Try
     End Sub
 
@@ -85,17 +85,17 @@ Public Class Ribbon1
             Dim excelApp As Excel.Application = Globals.ThisAddIn.Application
             Dim activeSheet As Excel.Worksheet = TryCast(excelApp.ActiveSheet, Excel.Worksheet)
             If activeSheet Is Nothing Then
-                GlobalStatusStripAll.ShowWarning("无法获取当前工作表")
+                GlobalStatusStripAll.ShowWarning("Не удалось получить текущий лист")
                 Return
             End If
 
             Try
-                GlobalStatusStripAll.ShowWarning($"正在生成 {rowCount} 条数据，请稍候...")
+                GlobalStatusStripAll.ShowWarning($"Генерация строк данных ({rowCount}), подождите...")
                 Dim svc As New BatchDataService()
                 Dim jsonText = Await svc.GenerateBatchDataAsync(fields, rowCount)
 
                 If String.IsNullOrEmpty(jsonText) Then
-                    GlobalStatusStripAll.ShowWarning("数据生成失败，请检查 AI 配置")
+                    GlobalStatusStripAll.ShowWarning("Не удалось сгенерировать данные. Проверьте настройки ИИ")
                     Return
                 End If
 
@@ -104,7 +104,7 @@ Public Class Ribbon1
                 Dim startIdx = cleanJson.IndexOf("[")
                 Dim endIdx = cleanJson.LastIndexOf("]")
                 If startIdx < 0 OrElse endIdx <= startIdx Then
-                    GlobalStatusStripAll.ShowWarning("AI 返回格式异常，未能解析 JSON 数组")
+                    GlobalStatusStripAll.ShowWarning("Некорректный формат ответа ИИ: не удалось разобрать массив JSON")
                     Return
                 End If
                 cleanJson = cleanJson.Substring(startIdx, endIdx - startIdx + 1)
@@ -130,9 +130,9 @@ Public Class Ribbon1
                     Next
                 Next
 
-                GlobalStatusStripAll.ShowWarning($"成功生成 {rows.Count} 条数据")
+                GlobalStatusStripAll.ShowWarning($"Успешно сгенерировано строк данных: {rows.Count}")
             Catch ex As Exception
-                GlobalStatusStripAll.ShowWarning($"数据生成失败: {ex.Message}")
+                GlobalStatusStripAll.ShowWarning($"Не удалось сгенерировать данные: {ex.Message}")
                 Debug.WriteLine($"[BatchDataGen] 错误: {ex}")
             End Try
         End Using
@@ -167,7 +167,7 @@ Public Class Ribbon1
             Dim selection As Excel.Range = TryCast(excelApp.Selection, Excel.Range)
 
             If selection Is Nothing OrElse selection.Cells.Count = 0 Then
-                MessageBox.Show("请先选择要翻译的单元格区域。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Сначала выберите диапазон ячеек для перевода.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
 
@@ -189,7 +189,7 @@ Public Class Ribbon1
             Next
 
             If cellTexts.Count = 0 Then
-                MessageBox.Show("选中的单元格没有文本内容。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("В выбранных ячейках нет текстового содержимого.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
 
@@ -201,16 +201,16 @@ Public Class Ribbon1
             settings.OutputMode = actionForm.OutputMode
             settings.Save()
 
-            ShareRibbon.GlobalStatusStripAll.ShowWarning($"正在翻译 {cellTexts.Count} 个单元格...")
+            ShareRibbon.GlobalStatusStripAll.ShowWarning($"Перевод ячеек ({cellTexts.Count})...")
 
             ' 使用Excel文档翻译服务翻译
             Dim translateService As New ExcelDocumentTranslateService()
             Dim results = Await translateService.TranslateCellsAsync(cellTexts, cellRanges, settings)
 
-            ShareRibbon.GlobalStatusStripAll.ShowWarning($"翻译完成，共处理 {cellTexts.Count} 个单元格")
+            ShareRibbon.GlobalStatusStripAll.ShowWarning($"Перевод завершён, обработано ячеек: {cellTexts.Count}")
 
         Catch ex As Exception
-            MessageBox.Show("翻译过程出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при переводе: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -233,14 +233,14 @@ Public Class Ribbon1
 
             Dim chatCtrl = ThisAddIn.chatControl
             If chatCtrl Is Nothing Then
-                GlobalStatusStripAll.ShowWarning("无法获取 AI 助手面板")
+                GlobalStatusStripAll.ShowWarning("Не удалось получить панель ИИ-помощника")
                 Return
             End If
 
             Dim requestJson = JsonConvert.SerializeObject(request)
             Await chatCtrl.ExecuteJavaScriptAsyncJS($"sendMessageToServer({{ type: 'startAgent', request: {requestJson} }});")
         Catch ex As Exception
-            GlobalStatusStripAll.ShowWarning($"启动 AI Agent 失败: {ex.Message}")
+            GlobalStatusStripAll.ShowWarning($"Не удалось запустить AI Agent: {ex.Message}")
         End Try
     End Function
 End Class

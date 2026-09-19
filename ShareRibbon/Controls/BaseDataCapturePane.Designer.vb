@@ -107,7 +107,7 @@ Partial Class BaseDataCapturePane
         Me.NavigateButton.Name = "NavigateButton"
         Me.NavigateButton.Size = New System.Drawing.Size(50, 24)
         Me.NavigateButton.TabIndex = 2
-        Me.NavigateButton.Text = "打开"
+        Me.NavigateButton.Text = "Открыть"
         '
         'CaptureButton
         '
@@ -117,7 +117,7 @@ Partial Class BaseDataCapturePane
         Me.CaptureButton.Name = "CaptureButton"
         Me.CaptureButton.Size = New System.Drawing.Size(75, 24)
         Me.CaptureButton.TabIndex = 3
-        Me.CaptureButton.Text = "抓取整页"
+        Me.CaptureButton.Text = "Захватить страницу"
         '
         'SelectDomButton
         '
@@ -127,7 +127,7 @@ Partial Class BaseDataCapturePane
         Me.SelectDomButton.Name = "SelectDomButton"
         Me.SelectDomButton.Size = New System.Drawing.Size(75, 24)
         Me.SelectDomButton.TabIndex = 4
-        Me.SelectDomButton.Text = "选择元素"
+        Me.SelectDomButton.Text = "Выбрать элемент"
         '
         'UrlTextBox
         '

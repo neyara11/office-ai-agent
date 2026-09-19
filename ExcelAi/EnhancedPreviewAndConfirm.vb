@@ -64,7 +64,7 @@ Public Class EnhancedPreviewAndConfirm
         Dim originalWorkbook As Workbook = application.ActiveWorkbook
 
         If originalWorkbook Is Nothing Then
-            MessageBox.Show("û�д򿪵Ĺ��������޷�Ԥ�������", "Ԥ������", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Нет открытой книги, невозможно показать предпросмотр изменений", "Предпросмотр изменений", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End If
 
@@ -104,7 +104,7 @@ Public Class EnhancedPreviewAndConfirm
             Return userConfirmed
 
         Catch ex As Exception
-            MessageBox.Show("Ԥ������ִ��ʱ����: " & ex.Message, "Ԥ������", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении предпросмотра изменений: " & ex.Message, "Предпросмотр изменений", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         Finally
             application.DisplayAlerts = False
@@ -151,7 +151,7 @@ Public Class EnhancedPreviewAndConfirm
                                           cellDifferences As List(Of CellDifference),
                                           sheetDifferences As List(Of SheetDifference)) As Boolean
         Dim previewForm As New Form() With {
-            .Text = "VBA����ִ��Ԥ��",
+            .Text = "Предварительный просмотр выполнения VBA",
             .Size = New Size(950, 650),
             .StartPosition = FormStartPosition.CenterScreen,
             .MinimizeBox = False,
@@ -165,7 +165,7 @@ Public Class EnhancedPreviewAndConfirm
         }
 
         ' ������
-        Dim codeTab As New TabPage("VBA����")
+        Dim codeTab As New TabPage("Код VBA")
         Dim codeTextBox As New TextBox() With {
             .Multiline = True,
             .ReadOnly = True,
@@ -178,15 +178,15 @@ Public Class EnhancedPreviewAndConfirm
         codeTab.Controls.Add(codeTextBox)
 
         ' ���������
-        Dim sheetTab As New TabPage("���������")
+        Dim sheetTab As New TabPage("Изменения листов")
         Dim sheetListView As New ListView() With {
             .View = View.Details,
             .FullRowSelect = True,
             .GridLines = True,
             .Dock = DockStyle.Fill
         }
-        sheetListView.Columns.Add("����������", 150)
-        sheetListView.Columns.Add("�������", 100)
+        sheetListView.Columns.Add("Имя листа", 150)
+        sheetListView.Columns.Add("Тип изменения", 100)
 
         For Each diff In sheetDifferences
             Dim item As New ListViewItem(diff.SheetName)
@@ -200,30 +200,30 @@ Public Class EnhancedPreviewAndConfirm
             sheetListView.Items.Add(item)
         Next
         If sheetDifferences.Count = 0 Then
-            sheetListView.Items.Add(New ListViewItem("�޹��������"))
+            sheetListView.Items.Add(New ListViewItem("Нет изменений листов"))
         End If
         sheetTab.Controls.Add(sheetListView)
 
         ' ��Ԫ����
-        Dim cellTab As New TabPage("��Ԫ����")
+        Dim cellTab As New TabPage("Изменения ячеек")
         Dim cellListView As New ListView() With {
             .View = View.Details,
             .FullRowSelect = True,
             .GridLines = True,
             .Dock = DockStyle.Fill
         }
-        cellListView.Columns.Add("������", 80)
-        cellListView.Columns.Add("��Ԫ��", 80)
-        cellListView.Columns.Add("�������", 80)
-        cellListView.Columns.Add("ԭֵ", 150)
-        cellListView.Columns.Add("��ֵ", 150)
+        cellListView.Columns.Add("Лист", 80)
+        cellListView.Columns.Add("Ячейка", 80)
+        cellListView.Columns.Add("Тип изменения", 80)
+        cellListView.Columns.Add("Прежнее значение", 150)
+        cellListView.Columns.Add("Новое значение", 150)
 
         For Each diff In cellDifferences
             Dim item As New ListViewItem(diff.SheetName)
             item.SubItems.Add(diff.Address)
             item.SubItems.Add(diff.ChangeType)
-            item.SubItems.Add(If(diff.OldValue Is Nothing, "(��)", diff.OldValue.ToString()))
-            item.SubItems.Add(If(diff.NewValue Is Nothing, "(��)", diff.NewValue.ToString()))
+            item.SubItems.Add(If(diff.OldValue Is Nothing, "(пусто)", diff.OldValue.ToString()))
+            item.SubItems.Add(If(diff.NewValue Is Nothing, "(пусто)", diff.NewValue.ToString()))
             Select Case diff.ChangeType
                 Case "����"
                     item.BackColor = Color.LightGreen
@@ -235,12 +235,12 @@ Public Class EnhancedPreviewAndConfirm
             cellListView.Items.Add(item)
         Next
         If cellDifferences.Count = 0 Then
-            cellListView.Items.Add(New ListViewItem("�޵�Ԫ����"))
+            cellListView.Items.Add(New ListViewItem("Нет изменений ячеек"))
         End If
         cellTab.Controls.Add(cellListView)
 
         ' ժҪ
-        Dim summaryTab As New TabPage("���ժҪ")
+        Dim summaryTab As New TabPage("Сводка изменений")
         Dim summaryTextBox As New TextBox() With {
             .Multiline = True,
             .ReadOnly = True,
@@ -269,12 +269,12 @@ Public Class EnhancedPreviewAndConfirm
         buttonPanel.Controls.Add(flowLayout)
 
         Dim acceptButton As New Button() With {
-            .Text = "Ӧ�ñ��",
+            .Text = "Применить изменения",
             .DialogResult = DialogResult.Yes,
             .AutoSize = True
         }
         Dim cancelButton As New Button() With {
-            .Text = "ȡ��",
+            .Text = "Отмена",
             .DialogResult = DialogResult.No,
             .AutoSize = True
         }
@@ -308,11 +308,11 @@ Public Class EnhancedPreviewAndConfirm
     Private Function GenerateSummary(sheetDiffs As List(Of SheetDifference),
                                     cellDiffs As List(Of CellDifference)) As String
         Dim sb As New StringBuilder()
-        sb.AppendLine("# ���ժҪ")
+        sb.AppendLine("# Сводка изменений")
         sb.AppendLine()
 
         If sheetDiffs.Count > 0 Then
-            sb.AppendLine("## ���������")
+            sb.AppendLine("## Изменения листов")
             For Each diff In sheetDiffs
                 sb.AppendLine($"- {diff.SheetName}: {diff.ChangeType}")
             Next
@@ -321,28 +321,28 @@ Public Class EnhancedPreviewAndConfirm
 
         If cellDiffs.Count > 0 Then
             Dim grouped = cellDiffs.GroupBy(Function(d) d.SheetName)
-            sb.AppendLine("## ��Ԫ����")
+            sb.AppendLine("## Изменения ячеек")
             For Each group In grouped
-                sb.AppendLine($"### ������: {group.Key}")
+                sb.AppendLine($"### Лист: {group.Key}")
                 Dim addCount = group.Count(Function(d) d.ChangeType = "����")
                 Dim modifyCount = group.Count(Function(d) d.ChangeType = "�޸�")
                 Dim deleteCount = group.Count(Function(d) d.ChangeType = "ɾ��")
 
                 If addCount > 0 Then
-                    sb.AppendLine($"- ����: {addCount} ����Ԫ��")
+                    sb.AppendLine($"- Добавлено: {addCount} ячеек")
                 End If
                 If modifyCount > 0 Then
-                    sb.AppendLine($"- �޸�: {modifyCount} ����Ԫ��")
+                    sb.AppendLine($"- Изменено: {modifyCount} ячеек")
                 End If
                 If deleteCount > 0 Then
-                    sb.AppendLine($"- ɾ��: {deleteCount} ����Ԫ��")
+                    sb.AppendLine($"- Удалено: {deleteCount} ячеек")
                 End If
                 sb.AppendLine()
             Next
         End If
 
         If sheetDiffs.Count = 0 AndAlso cellDiffs.Count = 0 Then
-            sb.AppendLine("�˴���ִ�к�û�з������ݱ��.")
+            sb.AppendLine("После выполнения этого кода изменения данных отсутствуют.")
         End If
         Return sb.ToString()
     End Function
@@ -413,7 +413,7 @@ Public Class EnhancedPreviewAndConfirm
                     workbook.Application.Run(tempModuleName & "." & procName)
                 Else
                     'MessageBox.Show("�޷��ڴ������ҵ���ִ�еĹ���")
-                    GlobalStatusStrip.ShowWarning("�޷��ڴ������ҵ���ִ�еĹ���")
+                    GlobalStatusStrip.ShowWarning("Не удалось найти исполняемую процедуру в коде")
                 End If
             Else
                 ' ���벻�������������������װ�� Auto_Run ������
@@ -427,7 +427,7 @@ Public Class EnhancedPreviewAndConfirm
             End If
 
         Catch ex As Exception
-            MessageBox.Show("ִ�� ��ʱVBA ����ʱ����: " & ex.Message, "����", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении временного кода VBA: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             ' ���۳ɹ�����ʧ�ܣ���ɾ����ʱģ��
             Try

@@ -45,7 +45,7 @@ Namespace Services
                         End If
 
                         ' 获取样式名称
-                        Dim styleName As String = "正文"
+                        Dim styleName As String = "Основной текст"
                         Try
                             styleName = para.Style.NameLocal
                         Catch
@@ -95,7 +95,7 @@ Namespace Services
                 Try
                     result("style") = para.Style.NameLocal
                 Catch
-                    result("style") = "正文"
+                    result("style") = "Основной текст"
                 End Try
 
                 ' 字体信息

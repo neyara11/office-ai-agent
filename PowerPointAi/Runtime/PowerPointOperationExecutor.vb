@@ -23,7 +23,7 @@ Namespace OfficeRuntime
                     Return ToolResult.Failed(toolId,
                                              "OfficeObjectOperation requires a batch object",
                                              errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                             userMessage:="声明式 PowerPoint 操作格式无效",
+                                             userMessage:="Недопустимый формат декларативной операции PowerPoint",
                                              recoverable:=True)
                 End If
                 batch = batchToken.ToObject(Of OfficeOperationBatch)()
@@ -32,14 +32,14 @@ Namespace OfficeRuntime
                     Return ToolResult.Failed(toolId,
                                              validation.ToErrorMessage(),
                                              errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                             userMessage:="声明式 PowerPoint 操作未通过合同校验",
+                                             userMessage:="Декларативная операция PowerPoint не прошла проверку контракта",
                                              recoverable:=True)
                 End If
                 If Not String.Equals(OfficeObjectRef.NormalizeAppType(batch.AppType), "PowerPoint", StringComparison.OrdinalIgnoreCase) Then
                     Return ToolResult.Failed(toolId,
                                              $"Unsupported batch appType {batch.AppType}",
                                              errorCode:=ExceptionClassifier.CodeHostUnsupported,
-                                             userMessage:="当前 PowerPoint 宿主不能执行其他 Office 应用的操作",
+                                             userMessage:="Текущий узел PowerPoint не может выполнять операции других приложений Office",
                                              recoverable:=False)
                 End If
 
@@ -87,7 +87,7 @@ Namespace OfficeRuntime
                                                  ex.Message,
                                                  data:=New JObject From {{"targetRefs", JArray.FromObject(targetRefs)}},
                                                  errorCode:=code,
-                                                 userMessage:="PowerPoint 声明式操作未全部完成",
+                                                 userMessage:="Декларативные операции PowerPoint выполнены не полностью",
                                                  recoverable:=ex.Recoverable,
                                                  observation:=failureObservation)
                     Catch ex As Exception
@@ -140,7 +140,7 @@ Namespace OfficeRuntime
                                              "PowerPoint operation verification failed",
                                              data:=data,
                                              errorCode:=ExceptionClassifier.CodeVerifyFailed,
-                                             userMessage:="PowerPoint 已执行操作，但实际结果未满足成功标准",
+                                             userMessage:="PowerPoint выполнил операцию, но фактический результат не соответствует критериям успеха",
                                              recoverable:=True,
                                              observation:=observation)
                 End If
@@ -149,7 +149,7 @@ Namespace OfficeRuntime
                 Return ToolResult.Failed(toolId,
                                          ex.Message,
                                          errorCode:=ex.ErrorCode,
-                                         userMessage:="PowerPoint 对象操作失败",
+                                         userMessage:="Сбой операции с объектом PowerPoint",
                                          recoverable:=ex.Recoverable)
             Catch ex As Exception
                 Return ToolResult.FromException(toolId, ex)

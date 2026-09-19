@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\BaseChatControl.Designer.vb
+ï»¿' ShareRibbon\Controls\BaseChatControl.Designer.vb
 Imports System.Windows.Forms
 Imports Microsoft.Web.WebView2.WinForms
 
@@ -6,7 +6,7 @@ Imports Microsoft.Web.WebView2.WinForms
 Partial Class BaseChatControl
     Inherits System.Windows.Forms.UserControl
 
-    'UserControl ÖØĞ´ Dispose£¬ÒÔÇåÀí×é¼şÁĞ±í¡£
+    'UserControl é‡å†™ Disposeï¼Œä»¥æ¸…ç†ç»„ä»¶åˆ—è¡¨ã€‚
     <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
@@ -18,12 +18,12 @@ Partial Class BaseChatControl
         End Try
     End Sub
 
-    'Windows ´°ÌåÉè¼ÆÆ÷Ëù±ØĞèµÄ
+    'Windows çª—ä½“è®¾è®¡å™¨æ‰€å¿…éœ€çš„
     Protected components As System.ComponentModel.IContainer
 
-    '×¢Òâ: ÒÔÏÂ¹ı³ÌÊÇ Windows ´°ÌåÉè¼ÆÆ÷Ëù±ØĞèµÄ
-    '¿ÉÒÔÊ¹ÓÃ Windows ´°ÌåÉè¼ÆÆ÷ĞŞ¸ÄËü¡£
-    '²»ÒªÊ¹ÓÃ´úÂë±à¼­Æ÷ĞŞ¸ÄËü¡£
+    'æ³¨æ„: ä»¥ä¸‹è¿‡ç¨‹æ˜¯ Windows çª—ä½“è®¾è®¡å™¨æ‰€å¿…éœ€çš„
+    'å¯ä»¥ä½¿ç”¨ Windows çª—ä½“è®¾è®¡å™¨ä¿®æ”¹å®ƒã€‚
+    'ä¸è¦ä½¿ç”¨ä»£ç ç¼–è¾‘å™¨ä¿®æ”¹å®ƒã€‚
     <System.Diagnostics.DebuggerStepThrough()>
     Protected Sub InitializeComponent()
         Me.ChatBrowser = New Microsoft.Web.WebView2.WinForms.WebView2()

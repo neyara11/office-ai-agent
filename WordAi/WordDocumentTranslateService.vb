@@ -137,7 +137,7 @@ Public Class WordDocumentTranslateService
 
             newDoc.Activate()
         Catch ex As Exception
-            MessageBox.Show("创建新文档时出错：" & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при создании нового документа: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -149,16 +149,16 @@ Public Class WordDocumentTranslateService
 
         For Each result In results
             If showOriginal Then
-                sb.AppendLine("【原文】")
+                sb.AppendLine("【Оригинал】")
                 sb.AppendLine(result.OriginalText)
                 sb.AppendLine()
-                sb.AppendLine("【译文】")
+                sb.AppendLine("【Перевод】")
             End If
 
             If result.Success Then
                 sb.AppendLine(result.TranslatedText)
             Else
-                sb.AppendLine($"[翻译失败: {result.ErrorMessage}]")
+                sb.AppendLine($"[Ошибка перевода: {result.ErrorMessage}]")
                 sb.AppendLine(result.OriginalText)
             End If
 

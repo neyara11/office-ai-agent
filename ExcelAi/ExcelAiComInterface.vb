@@ -1,11 +1,11 @@
-'Imports System.IO
+ï»¿'Imports System.IO
 'Imports System.Reflection
 'Imports System.Runtime.InteropServices
 'Imports Microsoft.Win32
 
-'' COM½Ó¿Ú¶¨Òå
+'' COMæ¥å£å®šä¹‰
 '<ComVisible(True)>
-'<Guid("12345678-1234-1234-1234-123456789012")> ' Éú³ÉÒ»¸öĞÂµÄGUID
+'<Guid("12345678-1234-1234-1234-123456789012")> ' ç”Ÿæˆä¸€ä¸ªæ–°çš„GUID
 '<InterfaceType(ComInterfaceType.InterfaceIsDual)>
 'Public Interface IExcelAiFunctions
 '    Function TLLM(prompt As String) As String
@@ -15,9 +15,9 @@
 '                             Optional maxTokens As Integer = 1000) As String
 'End Interface
 
-'' ÊµÏÖ½Ó¿ÚµÄCOMÀà
+'' å®ç°æ¥å£çš„COMç±»
 '<ComVisible(True)>
-'<Guid("87654321-4321-4321-4321-210987654321")> ' Éú³ÉÒ»¸öĞÂµÄGUID
+'<Guid("87654321-4321-4321-4321-210987654321")> ' ç”Ÿæˆä¸€ä¸ªæ–°çš„GUID
 '<ProgId("ExcelAi.Functions")>
 '<ClassInterface(ClassInterfaceType.None)>
 'Public Class ExcelAiFunctions
@@ -29,7 +29,7 @@
 '        Try
 '            Return excelFunctions.TLLM(prompt)
 '        Catch ex As Exception
-'            Return $"´íÎó: {ex.Message}"
+'            Return $"é”™è¯¯: {ex.Message}"
 '        End Try
 '    End Function
 
@@ -40,90 +40,90 @@
 '        Try
 '            Return excelFunctions.CLLM(prompt, model, systemPrompt, temperature, maxTokens)
 '        Catch ex As Exception
-'            Return $"´íÎó: {ex.Message}"
+'            Return $"é”™è¯¯: {ex.Message}"
 '        End Try
 '    End Function
 
-'    ' ÊÖ¶¯×¢²áCOM×é¼şµÄ¸¨Öú·½·¨
+'    ' æ‰‹åŠ¨æ³¨å†ŒCOMç»„ä»¶çš„è¾…åŠ©æ–¹æ³•
 '    Public Shared Sub RegisterFunction()
 '        Try
 '            Dim regKey As RegistryKey = Registry.CurrentUser.CreateSubKey("ExcelAi.Functions")
 '            regKey.SetValue("", "Excel AI Functions")
 
-'            ' Ìí¼ÓCLSIDÏî
+'            ' æ·»åŠ CLSIDé¡¹
 '            Dim clsidKey As RegistryKey = regKey.CreateSubKey("CLSID")
 '            clsidKey.SetValue("", "{87654321-4321-4321-4321-210987654321}")
 
 '            regKey.Close()
 
-'            System.Diagnostics.Debug.WriteLine("COM ProgIDÒÑÊÖ¶¯×¢²á")
+'            System.Diagnostics.Debug.WriteLine("COM ProgIDå·²æ‰‹åŠ¨æ³¨å†Œ")
 '        Catch ex As Exception
-'            ' Èç¹ûÎŞ·¨·ÃÎÊ×¢²á±í£¬Ôò¼ÇÂ¼´íÎó
-'            System.Diagnostics.Debug.WriteLine($"×¢²áº¯ÊıÊ±·¢Éú´íÎó: {ex.Message}")
+'            ' å¦‚æœæ— æ³•è®¿é—®æ³¨å†Œè¡¨ï¼Œåˆ™è®°å½•é”™è¯¯
+'            System.Diagnostics.Debug.WriteLine($"æ³¨å†Œå‡½æ•°æ—¶å‘ç”Ÿé”™è¯¯: {ex.Message}")
 '        End Try
 '    End Sub
 
-'    ' Ìá¹©COM×¢²áºÍ×¢ÏúµÄ¸¨ÖúÀà
+'    ' æä¾›COMæ³¨å†Œå’Œæ³¨é”€çš„è¾…åŠ©ç±»
 '    <ComVisible(False)>
 '    Public Class ComRegistrationHelper
-'        ' ×¢²áCOM×é¼ş
+'        ' æ³¨å†ŒCOMç»„ä»¶
 '        Public Shared Sub RegisterCom()
 '            Try
-'                ' »ñÈ¡µ±Ç°³ÌĞò¼¯Â·¾¶
+'                ' è·å–å½“å‰ç¨‹åºé›†è·¯å¾„
 '                Dim assemblyPath As String = Assembly.GetExecutingAssembly().Location
 
-'                ' Ê¹ÓÃregasm.exe×¢²áCOM×é¼ş
+'                ' ä½¿ç”¨regasm.exeæ³¨å†ŒCOMç»„ä»¶
 '                Dim regasmPath As String = Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(), "regasm.exe")
 '                Dim process As New System.Diagnostics.Process()
 '                process.StartInfo.FileName = regasmPath
 '                process.StartInfo.Arguments = $"/codebase ""{assemblyPath}"""
 '                process.StartInfo.UseShellExecute = True
-'                process.StartInfo.Verb = "runas"  ' ÇëÇó¹ÜÀíÔ±È¨ÏŞ
+'                process.StartInfo.Verb = "runas"  ' è¯·æ±‚ç®¡ç†å‘˜æƒé™
 '                process.StartInfo.CreateNoWindow = False
 '                process.Start()
 '                process.WaitForExit()
 
 '                If process.ExitCode = 0 Then
-'                    System.Diagnostics.Debug.WriteLine("COM×é¼ş×¢²á³É¹¦")
+'                    System.Diagnostics.Debug.WriteLine("COMç»„ä»¶æ³¨å†ŒæˆåŠŸ")
 '                Else
-'                    System.Diagnostics.Debug.WriteLine($"COM×é¼ş×¢²áÊ§°Ü£¬ÍË³ö´úÂë: {process.ExitCode}")
+'                    System.Diagnostics.Debug.WriteLine($"COMç»„ä»¶æ³¨å†Œå¤±è´¥ï¼Œé€€å‡ºä»£ç : {process.ExitCode}")
 '                End If
 '            Catch ex As Exception
-'                System.Diagnostics.Debug.WriteLine($"×¢²áCOM×é¼şÊ±³ö´í: {ex.Message}")
+'                System.Diagnostics.Debug.WriteLine($"æ³¨å†ŒCOMç»„ä»¶æ—¶å‡ºé”™: {ex.Message}")
 '            End Try
 '        End Sub
 '    End Class
 
-'    ' Ìí¼ÓCOM×¢²á·½·¨
+'    ' æ·»åŠ COMæ³¨å†Œæ–¹æ³•
 '    <ComRegisterFunction()>
 '    Public Shared Sub RegisterFunction(ByVal type As Type)
 '        Try
-'            System.Diagnostics.Debug.WriteLine($"COM×¢²á: {type.Name}")
+'            System.Diagnostics.Debug.WriteLine($"COMæ³¨å†Œ: {type.Name}")
 
-'            ' ×¢²áµ½ CurrentUser\Software\Classes (ÕâÊÇ CurrentUser µÄÕıÈ·Î»ÖÃ)
+'            ' æ³¨å†Œåˆ° CurrentUser\Software\Classes (è¿™æ˜¯ CurrentUser çš„æ­£ç¡®ä½ç½®)
 '            Dim regKey As RegistryKey = Registry.CurrentUser.CreateSubKey("Software\Classes\ExcelAi.Functions")
 '            regKey.SetValue("", "Excel AI Functions")
 
-'            ' Ìí¼ÓCLSIDÏî
+'            ' æ·»åŠ CLSIDé¡¹
 '            Dim clsidKey As RegistryKey = regKey.CreateSubKey("CLSID")
 '            clsidKey.SetValue("", "{87654321-4321-4321-4321-210987654321}")
 
 '            regKey.Close()
 
-'            System.Diagnostics.Debug.WriteLine("COM×¢²á³É¹¦")
+'            System.Diagnostics.Debug.WriteLine("COMæ³¨å†ŒæˆåŠŸ")
 '        Catch ex As Exception
-'            System.Diagnostics.Debug.WriteLine($"COM×¢²áÊ§°Ü: {ex.Message}")
+'            System.Diagnostics.Debug.WriteLine($"COMæ³¨å†Œå¤±è´¥: {ex.Message}")
 '        End Try
 '    End Sub
 
-'    ' Ìí¼ÓCOM×¢Ïú·½·¨
+'    ' æ·»åŠ COMæ³¨é”€æ–¹æ³•
 '    <ComUnregisterFunction()>
 '    Public Shared Sub UnregisterFunction(ByVal type As Type)
 '        Try
 '            Registry.CurrentUser.DeleteSubKeyTree("Software\Classes\ExcelAi.Functions", False)
-'            System.Diagnostics.Debug.WriteLine("COM×¢Ïú³É¹¦")
+'            System.Diagnostics.Debug.WriteLine("COMæ³¨é”€æˆåŠŸ")
 '        Catch ex As Exception
-'            System.Diagnostics.Debug.WriteLine($"COM×¢ÏúÊ§°Ü: {ex.Message}")
+'            System.Diagnostics.Debug.WriteLine($"COMæ³¨é”€å¤±è´¥: {ex.Message}")
 '        End Try
 '    End Sub
 'End Class

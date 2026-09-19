@@ -77,7 +77,7 @@ Public Class ChatControl
     Protected Overrides Sub HandlePreviewTemplateInWord(jsonDoc As Newtonsoft.Json.Linq.JObject)
         Dim templateId As String = jsonDoc("templateId")?.ToString()
         If String.IsNullOrEmpty(templateId) Then
-            GlobalStatusStrip.ShowWarning("模板ID不能为空")
+            GlobalStatusStrip.ShowWarning("ID шаблона не может быть пустым")
             Return
         End If
 
@@ -86,20 +86,20 @@ Public Class ChatControl
             Dim mappingId = templateId.Substring(5)
             Dim mapping = SemanticMappingManager.Instance.GetMappingById(mappingId)
             If mapping Is Nothing Then
-                GlobalStatusStrip.ShowWarning("语义映射不存在")
+                GlobalStatusStrip.ShowWarning("Семантическое сопоставление не существует")
                 Return
             End If
             If String.IsNullOrEmpty(mapping.SourceFilePath) OrElse Not IO.File.Exists(mapping.SourceFilePath) Then
-                GlobalStatusStrip.ShowWarning("原始模板文件已丢失，请重新上传")
+                GlobalStatusStrip.ShowWarning("Исходный файл шаблона утерян, загрузите его заново")
                 Return
             End If
 
             ' 直接用系统默认方式打开文档（新Word实例）
             Try
                 Process.Start(mapping.SourceFilePath)
-                GlobalStatusStrip.ShowInfo($"已打开模板文档预览: {mapping.Name}")
+                GlobalStatusStrip.ShowInfo($"Открыт предпросмотр документа шаблона: {mapping.Name}")
             Catch ex As Exception
-                GlobalStatusStrip.ShowWarning($"打开文档失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось открыть документ: {ex.Message}")
             End Try
             Return
         End If
@@ -107,7 +107,7 @@ Public Class ChatControl
         ' 常规模板预览：先保存为临时文件，然后用系统默认方式打开
         Dim template As ReformatTemplate = ReformatTemplateManager.Instance.GetTemplateById(templateId)
         If template Is Nothing Then
-            GlobalStatusStrip.ShowWarning($"找不到ID为 {templateId} 的模板")
+            GlobalStatusStrip.ShowWarning($"Шаблон с ID {templateId} не найден")
             Return
         End If
 
@@ -128,9 +128,9 @@ Public Class ChatControl
             ' 用系统默认方式打开（新Word实例）
             Process.Start(tempPath)
 
-            GlobalStatusStrip.ShowInfo($"已打开模板预览: {template.Name}")
+            GlobalStatusStrip.ShowInfo($"Открыт предпросмотр шаблона: {template.Name}")
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning($"预览模板失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось показать предпросмотр шаблона: {ex.Message}")
             Debug.WriteLine($"HandlePreviewTemplateInWord 错误: {ex.Message}")
         End Try
     End Sub
@@ -142,7 +142,7 @@ Public Class ChatControl
         Try
             ' 添加预览标记标题
             Dim para = doc.Paragraphs.Add()
-            para.Range.Text = $"【模板预览】{template.Name}"
+            para.Range.Text = $"【Предпросмотр шаблона】{template.Name}"
             para.Range.Font.Size = 16
             para.Range.Font.Bold = 1
             para.Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter
@@ -161,7 +161,7 @@ Public Class ChatControl
 
                     ' 添加新段落
                     para = doc.Paragraphs.Add()
-                    para.Range.Text = If(String.IsNullOrEmpty(element.DefaultValue), $"【{element.Name}】示例内容", element.DefaultValue)
+                    para.Range.Text = If(String.IsNullOrEmpty(element.DefaultValue), $"【{element.Name}】Пример содержимого", element.DefaultValue)
 
                     ' 安全地应用字体设置
                     If element.Font IsNot Nothing Then
@@ -206,13 +206,13 @@ Public Class ChatControl
             ' 添加正文样式预览
             If template.BodyStyles IsNot Nothing AndAlso template.BodyStyles.Count > 0 Then
                 para = doc.Paragraphs.Add()
-                para.Range.Text = "─────正文样式预览─────"
+                para.Range.Text = "─────Предпросмотр стиля основного текста─────"
                 para.Range.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter
                 para.Range.InsertParagraphAfter()
 
                 For Each style In template.BodyStyles
                     para = doc.Paragraphs.Add()
-                    para.Range.Text = $"【{style.RuleName}】这是正文样式的示例文本，用于展示排版效果。"
+                    para.Range.Text = $"【{style.RuleName}】Это пример текста основного стиля для демонстрации форматирования."
 
                     If style.Font IsNot Nothing Then
                         If Not String.IsNullOrEmpty(style.Font.FontNameCN) Then
@@ -258,14 +258,14 @@ Public Class ChatControl
             ' 转换旧模板为SemanticStyleMapping
             Dim mapping = LegacyTemplateConverter.Convert(template)
             If mapping Is Nothing Then
-                GlobalStatusStrip.ShowWarning("模板转换失败")
+                GlobalStatusStrip.ShowWarning("Не удалось преобразовать шаблон")
                 Return
             End If
 
             Await StartSemanticReformatPipeline(mapping, template.Name)
         Catch ex As Exception
             Debug.WriteLine($"ApplyReformatWithTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -277,7 +277,7 @@ Public Class ChatControl
             Await StartSemanticReformatPipeline(mapping, mapping.Name)
         Catch ex As Exception
             Debug.WriteLine($"ApplyReformatWithMapping 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -315,7 +315,7 @@ Public Class ChatControl
                 Try
                     styleName = p.Style.NameLocal
                 Catch
-                    styleName = "正文"
+                    styleName = "Основной текст"
                 End Try
                 styles.Add(styleName)
                 types.Add(paraType)
@@ -434,13 +434,13 @@ Public Class ChatControl
     Private Async Function StartSemanticReformatPipeline(mapping As SemanticStyleMapping, displayName As String) As Task
         Dim wordApp = Globals.ThisAddIn.Application
         If wordApp Is Nothing OrElse wordApp.Selection Is Nothing OrElse wordApp.Selection.Range Is Nothing Then
-            GlobalStatusStrip.ShowWarning("请先选中需要排版的文本内容。")
+            GlobalStatusStrip.ShowWarning("Сначала выберите текст для форматирования.")
             Return
         End If
 
         Dim job = CreateReformatJobFromRange(wordApp.Selection.Range)
         If job Is Nothing OrElse Not job.HasUsableParagraphs() Then
-            GlobalStatusStrip.ShowWarning("选中的内容没有有效段落。")
+            GlobalStatusStrip.ShowWarning("В выбранном содержимом нет допустимых абзацев.")
             Return
         End If
 
@@ -451,12 +451,12 @@ Public Class ChatControl
                                                         mapping As SemanticStyleMapping,
                                                         displayName As String) As Task
         If job Is Nothing OrElse Not job.HasUsableParagraphs() Then
-            GlobalStatusStrip.ShowWarning("排版任务上下文丢失，请重新生成排版方案。")
+            GlobalStatusStrip.ShowWarning("Контекст задачи форматирования потерян. Сформируйте план форматирования заново.")
             Return
         End If
 
         If mapping Is Nothing Then
-            GlobalStatusStrip.ShowWarning("排版映射上下文丢失。")
+            GlobalStatusStrip.ShowWarning("Контекст сопоставления форматирования потерян.")
             Return
         End If
 
@@ -487,9 +487,9 @@ Public Class ChatControl
             Dim analysis = analyzer.Analyze(job.ParagraphTexts)
             If analysis.DocStructure IsNot Nothing AndAlso analysis.DocStructure.Headings.Count > 0 Then
                 Dim sb As New System.Text.StringBuilder()
-                sb.AppendLine("以下段落被系统初步判定为标题，供参考：")
+                sb.AppendLine("Следующие абзацы предварительно определены системой как заголовки (для справки):")
                 For Each h In analysis.DocStructure.Headings
-                    sb.AppendLine($"  段落[{h.ParagraphIndex}] 级别{h.Level}: {h.Text.Substring(0, Math.Min(h.Text.Length, 60))}")
+                    sb.AppendLine($"  Абзац[{h.ParagraphIndex}] уровень {h.Level}: {h.Text.Substring(0, Math.Min(h.Text.Length, 60))}")
                 Next
                 detectedHeadingInfo = sb.ToString()
             End If
@@ -502,7 +502,7 @@ Public Class ChatControl
         docTypeCtx.AppendLine(displayName)
         If mapping.SemanticTags.Count > 0 Then
             docTypeCtx.AppendLine()
-            docTypeCtx.AppendLine("各语义标签的识别规则：")
+            docTypeCtx.AppendLine("Правила распознавания семантических тегов:")
             Dim tags As List(Of SemanticTag) = mapping.SemanticTags
             For i As Integer = 0 To tags.Count - 1
                 Dim tag As SemanticTag = tags(i)
@@ -521,8 +521,8 @@ Public Class ChatControl
         job.PreviewPlan = If(job.PreviewPlan, _activeReformatPlan)
         _activeReformatJob = job
         SetReformatContext(job.WordParagraphs, job.ParagraphStyles, job.ParagraphTypes, mapping)
-        Await Send("请使用「" & displayName & "」对选中内容进行语义标注。", systemPrompt, False, "semantic_reformat")
-        GlobalStatusStrip.ShowInfo("正在使用「" & displayName & "」排版...范围: " & job.GetScopeSummary())
+        Await Send("Выполни семантическую разметку выбранного содержимого с помощью «" & displayName & "».", systemPrompt, False, "semantic_reformat")
+        GlobalStatusStrip.ShowInfo("Форматирование по «" & displayName & "»... диапазон: " & job.GetScopeSummary())
     End Function
 
     ''' <summary>
@@ -541,7 +541,7 @@ Public Class ChatControl
             End Try
 
             If String.IsNullOrWhiteSpace(selText) Then
-                GlobalStatusStrip.ShowWarning("请先选中需要排版的文本内容。")
+                GlobalStatusStrip.ShowWarning("Сначала выберите текст для форматирования.")
                 Return
             End If
 
@@ -550,7 +550,7 @@ Public Class ChatControl
             Dim paragraphTypes As List(Of String) = Nothing
             Dim paragraphTexts As List(Of String) = Nothing
             If Not CollectParagraphsFromSelection(wordApp.Selection.Range, allParagraphs, paragraphStyles, paragraphTypes, paragraphTexts) Then
-                GlobalStatusStrip.ShowWarning("选中的内容没有有效段落。")
+                GlobalStatusStrip.ShowWarning("В выбранном содержимом нет допустимых абзацев.")
                 Return
             End If
 
@@ -561,17 +561,17 @@ Public Class ChatControl
             If mapping IsNot Nothing Then
                 Dim systemPrompt = SemanticPromptBuilder.BuildSemanticTaggingPrompt(mapping, paragraphTexts)
                 SetReformatContext(allParagraphs.Cast(Of Object).ToList(), paragraphStyles, paragraphTypes, mapping)
-                Await Send("请使用「" & guide.Name & "」排版规范对选中内容进行语义标注。", systemPrompt, False, "semantic_reformat")
+                Await Send("Выполни семантическую разметку выбранного содержимого по стандарту форматирования «" & guide.Name & "».", systemPrompt, False, "semantic_reformat")
             Else
                 Dim conversionPrompt = StyleGuideConverter.BuildConversionPrompt(guide.GuideContent)
                 SetReformatContext(allParagraphs.Cast(Of Object).ToList(), paragraphStyles, paragraphTypes, Nothing)
-                Await Send("请解析「" & guide.Name & "」排版规范并提取格式参数。", conversionPrompt, False, "styleguide_convert")
+                Await Send("Разбери стандарт форматирования «" & guide.Name & "» и извлеки параметры формата.", conversionPrompt, False, "styleguide_convert")
             End If
 
-            GlobalStatusStrip.ShowInfo("正在使用「" & guide.Name & "」规范排版...")
+            GlobalStatusStrip.ShowInfo("Нормативное форматирование по «" & guide.Name & "»...")
         Catch ex As Exception
             Debug.WriteLine($"ApplyReformatWithStyleGuide 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -595,10 +595,10 @@ Public Class ChatControl
             "var smartInput = document.getElementById('smart-input');" &
             "if (smartInput) { smartInput.focus(); }" &
             "var chatInput = document.getElementById('chat-input');" &
-            "if (chatInput) { chatInput.placeholder = '请描述你的排版需求，例如：按公文标准排版'; }"
+            "if (chatInput) { chatInput.placeholder = 'Опишите требования к форматированию, например: оформить по стандарту документа'; }"
 
         Await ExecuteJavaScriptAsyncJS(js)
-        GlobalStatusStrip.ShowInfo("已打开对话排版，请在聊天框输入排版需求。")
+        GlobalStatusStrip.ShowInfo("Форматирование в диалоге открыто. Введите требования к форматированию в чат.")
     End Function
 
     Public Async Function TriggerSmartReformat() As Task
@@ -611,7 +611,7 @@ Public Class ChatControl
 
             Dim job = CreateReformatJobFromRange(targetRange, scopeKind)
             If job Is Nothing OrElse Not job.HasUsableParagraphs() Then
-                GlobalStatusStrip.ShowWarning("没有找到有效段落。")
+                GlobalStatusStrip.ShowWarning("Допустимые абзацы не найдены.")
                 Return
             End If
 
@@ -627,7 +627,7 @@ Public Class ChatControl
             plan.ParagraphTypes = job.ParagraphTypes
             AttachReformatJobMetadata(plan, job)
             _reformatVariantIndex = 0
-            _activeWordFormattingTaskPlan = CreateSemanticWordFormattingTaskPlan("一键智能排版", job, plan)
+            _activeWordFormattingTaskPlan = CreateSemanticWordFormattingTaskPlan("Умное форматирование в один клик", job, plan)
 
             ' 保存方案供后续应用
             _activeReformatPlan = plan
@@ -636,10 +636,10 @@ Public Class ChatControl
             SetReformatContext(job.WordParagraphs, job.ParagraphStyles, job.ParagraphTypes, plan.SemanticMapping)
 
             Await ShowReformatPlanCard(plan)
-            GlobalStatusStrip.ShowInfo($"分析完成，推荐标准: {plan.StandardName}。请确认后应用排版。范围: {job.GetScopeSummary()}")
+            GlobalStatusStrip.ShowInfo($"Анализ завершён, рекомендуемый стандарт: {plan.StandardName}. Подтвердите применение форматирования. Диапазон: {job.GetScopeSummary()}")
         Catch ex As Exception
             Debug.WriteLine($"TriggerSmartReformat error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"智能排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка умного форматирования: {ex.Message}")
         End Try
     End Function
 
@@ -648,7 +648,7 @@ Public Class ChatControl
         Dim html = agent.GenerateFormattingCardHtml(plan)
         Dim responseUuid As String = Guid.NewGuid().ToString()
 
-        Dim jsCreate As String = $"createChatSection('AI排版助手', formatDateTime(new Date()), '{responseUuid}');"
+        Dim jsCreate As String = $"createChatSection('AI-помощник по форматированию', formatDateTime(new Date()), '{responseUuid}');"
         Await ExecuteJavaScriptAsyncJS(jsCreate)
 
         Dim jsonPayload As New JObject()
@@ -681,9 +681,9 @@ Public Class ChatControl
 
         Dim targetSummary As String = ""
         If plan.TextParagraphCount > 0 AndAlso plan.TextParagraphCount <> plan.TotalParagraphs Then
-            targetSummary = $"文本段落 {plan.TextParagraphCount} / 总段落 {plan.TotalParagraphs}"
+            targetSummary = $"Текстовых абзацев {plan.TextParagraphCount} / всего абзацев {plan.TotalParagraphs}"
         Else
-            targetSummary = $"段落 {plan.TotalParagraphs}"
+            targetSummary = $"Абзацев {plan.TotalParagraphs}"
         End If
 
         Return Services.WordFormattingTaskPlan.FromSemanticReformat(
@@ -698,14 +698,14 @@ Public Class ChatControl
                                                      executionSummary As String) As String
         If taskPlan Is Nothing Then Return executionSummary
         If String.IsNullOrWhiteSpace(executionSummary) Then Return taskPlan.ToHumanReadableSummary()
-        Return taskPlan.ToHumanReadableSummary() & "；执行: " & executionSummary
+        Return taskPlan.ToHumanReadableSummary() & "; выполнение: " & executionSummary
     End Function
 
     ''' <summary>应用当前预览的排版方案到 Word 文档</summary>
     Private Async Function ApplyReformatPlan() As Task
         Try
             If _activeReformatPlan Is Nothing OrElse _activeReformatPlan.SemanticMapping Is Nothing Then
-                GlobalStatusStrip.ShowWarning("没有可应用的排版方案。")
+                GlobalStatusStrip.ShowWarning("Нет плана форматирования для применения.")
                 Return
             End If
 
@@ -718,7 +718,7 @@ Public Class ChatControl
             End If
         Catch ex As Exception
             Debug.WriteLine($"ApplyReformatPlan error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"应用排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка применения форматирования: {ex.Message}")
         End Try
     End Function
 
@@ -731,13 +731,13 @@ Public Class ChatControl
     Protected Overrides Sub HandleUndoReformat(jsonDoc As JObject)
         Dim wordApp = Globals.ThisAddIn.Application
         If wordApp Is Nothing Then
-            GlobalStatusStrip.ShowWarning("无法获取Word应用对象。")
+            GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Word.")
             Return
         End If
 
         Dim doc = wordApp.ActiveDocument
         If doc Is Nothing Then
-            GlobalStatusStrip.ShowWarning("没有活动文档。")
+            GlobalStatusStrip.ShowWarning("Нет активного документа.")
             Return
         End If
 
@@ -750,7 +750,7 @@ Public Class ChatControl
             Try
                 undoSucceeded = doc.Undo(1)
                 If undoSucceeded Then
-                    GlobalStatusStrip.ShowInfo("排版已撤销。")
+                    GlobalStatusStrip.ShowInfo("Форматирование отменено.")
                     Debug.WriteLine("使用Word Document.Undo撤销排版成功")
                 Else
                     Debug.WriteLine("Word Document.Undo 返回False，将尝试快照恢复")
@@ -767,17 +767,17 @@ Public Class ChatControl
 
                 If restoredCount > 0 Then
                     undoSucceeded = True
-                    GlobalStatusStrip.ShowInfo($"已通过快照撤销排版，共恢复 {restoredCount} 个段落。")
+                    GlobalStatusStrip.ShowInfo($"Форматирование отменено по снимку, восстановлено абзацев: {restoredCount}.")
                     Debug.WriteLine($"使用快照恢复排版成功: {restoredCount}")
                 End If
             End If
 
             If Not undoSucceeded Then
-                GlobalStatusStrip.ShowWarning("没有可撤销的排版操作。")
+                GlobalStatusStrip.ShowWarning("Нет операций форматирования для отмены.")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleUndoReformat 失败: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"撤销排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка отмены форматирования: {ex.Message}")
         Finally
             If screenUpdated Then
                 Try : wordApp.ScreenUpdating = True : Catch : End Try
@@ -795,7 +795,7 @@ Public Class ChatControl
         Try
             Dim instruction As String = If(jsonDoc("instruction")?.ToString(), jsonDoc("command")?.ToString())
             If String.IsNullOrEmpty(instruction) Then
-                GlobalStatusStrip.ShowWarning("未提供微调指令。")
+                GlobalStatusStrip.ShowWarning("Не указана команда тонкой настройки.")
                 Return
             End If
 
@@ -806,7 +806,7 @@ Public Class ChatControl
             End If
 
             If job Is Nothing OrElse Not job.HasUsableParagraphs() Then
-                GlobalStatusStrip.ShowWarning("没有找到有效段落。")
+                GlobalStatusStrip.ShowWarning("Допустимые абзацы не найдены.")
                 Return
             End If
 
@@ -830,13 +830,13 @@ Public Class ChatControl
                 jsonPayload("uuid") = responseUuid
                 jsonPayload("html") = html
                 Await ExecuteJavaScriptAsyncJS($"appendFormattingCard({jsonPayload.ToString(Newtonsoft.Json.Formatting.None)});")
-                GlobalStatusStrip.ShowInfo("排版方案已微调。")
+                GlobalStatusStrip.ShowInfo("План форматирования скорректирован.")
             Else
-                GlobalStatusStrip.ShowWarning("微调失败，请尝试更明确的指令。")
+                GlobalStatusStrip.ShowWarning("Тонкая настройка не удалась. Попробуйте более конкретную команду.")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleRefineSmartReformat error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"排版微调失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка тонкой настройки форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -854,7 +854,7 @@ Public Class ChatControl
                 End If
 
                 If job Is Nothing OrElse Not job.HasUsableParagraphs() Then
-                    GlobalStatusStrip.ShowWarning("没有找到有效段落。")
+                    GlobalStatusStrip.ShowWarning("Допустимые абзацы не найдены.")
                     Return
                 End If
 
@@ -871,7 +871,7 @@ Public Class ChatControl
                 If plan IsNot Nothing Then
                     plan.ParagraphTypes = job.ParagraphTypes
                     AttachReformatJobMetadata(plan, job)
-                    _activeWordFormattingTaskPlan = CreateSemanticWordFormattingTaskPlan("换一种排版方案", job, plan)
+                    _activeWordFormattingTaskPlan = CreateSemanticWordFormattingTaskPlan("Другой вариант форматирования", job, plan)
                     _activeReformatPlan = plan
                     job.PreviewPlan = plan
                     _activeReformatJob = job
@@ -883,14 +883,14 @@ Public Class ChatControl
                     jsonPayload("uuid") = responseUuid
                     jsonPayload("html") = html
                     Await ExecuteJavaScriptAsyncJS($"appendFormattingCard({jsonPayload.ToString(Newtonsoft.Json.Formatting.None)});")
-                    GlobalStatusStrip.ShowInfo($"已切换到备选排版方案: {plan.StandardName}")
+                    GlobalStatusStrip.ShowInfo($"Переключено на альтернативный план форматирования: {plan.StandardName}")
                 End If
             Else
-                GlobalStatusStrip.ShowInfo($"切换到标准: {templateName}")
+                GlobalStatusStrip.ShowInfo($"Переключено на стандарт: {templateName}")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleSwitchReformatTemplate error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"切换排版标准失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка переключения стандарта форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -898,20 +898,20 @@ Public Class ChatControl
     Protected Overrides Async Sub HandlePreviewReformatCompare(jsonDoc As JObject)
         Try
             If _activeReformatPlan Is Nothing Then
-                GlobalStatusStrip.ShowWarning("没有可预览的排版方案。")
+                GlobalStatusStrip.ShowWarning("Нет плана форматирования для предпросмотра.")
                 Return
             End If
 
             Dim sb As New StringBuilder()
-            sb.AppendLine("【排版前后对比】")
+            sb.AppendLine("【Сравнение до и после форматирования】")
             If Not String.IsNullOrWhiteSpace(_activeReformatPlan.ScopeSummary) Then
-                sb.AppendLine($"作用范围: {_activeReformatPlan.ScopeSummary}")
+                sb.AppendLine($"Область применения: {_activeReformatPlan.ScopeSummary}")
             End If
-            sb.AppendLine($"推荐标准: {_activeReformatPlan.StandardName}")
-            sb.AppendLine($"文档类型: {_activeReformatPlan.DetectedType.ToString()}")
-            sb.AppendLine($"共 {_activeReformatPlan.TotalStyleChanges} 处格式变更:")
+            sb.AppendLine($"Рекомендуемый стандарт: {_activeReformatPlan.StandardName}")
+            sb.AppendLine($"Тип документа: {_activeReformatPlan.DetectedType.ToString()}")
+            sb.AppendLine($"Всего изменений формата: {_activeReformatPlan.TotalStyleChanges}:")
             If _activeReformatPlan.Changes Is Nothing OrElse _activeReformatPlan.Changes.Count = 0 Then
-                sb.AppendLine("  - 已完成结构分析，暂未发现需要立即调整的样式区。")
+                sb.AppendLine("  - Структурный анализ выполнен; области, требующие немедленной настройки, не обнаружены.")
             Else
                 For Each change In _activeReformatPlan.Changes
                     Dim tagName = GetReformatTagDisplayName(change.NewTag, _activeReformatPlan.SemanticMapping)
@@ -920,18 +920,18 @@ Public Class ChatControl
             End If
 
             Dim responseUuid As String = Guid.NewGuid().ToString()
-            Dim jsCreate As String = $"createChatSection('排版对比', formatDateTime(new Date()), '{responseUuid}');"
+            Dim jsCreate As String = $"createChatSection('Сравнение форматирования', formatDateTime(new Date()), '{responseUuid}');"
             Await ExecuteJavaScriptAsyncJS(jsCreate)
             Dim escapedText = sb.ToString().Replace("\", "\\").Replace("'", "\'").Replace(vbCr, "\n").Replace(vbLf, "")
             Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','{escapedText}');")
         Catch ex As Exception
             Debug.WriteLine($"HandlePreviewReformatCompare error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"预览对比失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка сравнения предпросмотра: {ex.Message}")
         End Try
     End Sub
 
     Private Function GetReformatTagDisplayName(tagId As String, mapping As SemanticStyleMapping) As String
-        If String.IsNullOrWhiteSpace(tagId) Then Return "待识别样式"
+        If String.IsNullOrWhiteSpace(tagId) Then Return "Стиль для распознавания"
 
         Try
             If mapping IsNot Nothing Then
@@ -945,17 +945,17 @@ Public Class ChatControl
 
         Select Case tagId.ToLowerInvariant()
             Case "body.normal"
-                Return "正文"
+                Return "Основной текст"
             Case "title.1", "heading.1"
-                Return "一级标题"
+                Return "Заголовок 1 уровня"
             Case "title.2", "heading.2"
-                Return "二级标题"
+                Return "Заголовок 2 уровня"
             Case "title.3", "heading.3"
-                Return "三级标题"
+                Return "Заголовок 3 уровня"
             Case "list.ordered"
-                Return "有序列表"
+                Return "Нумерованный список"
             Case "list.unordered"
-                Return "无序列表"
+                Return "Маркированный список"
             Case Else
                 Return tagId
         End Select
@@ -1017,7 +1017,7 @@ Public Class ChatControl
             Dim safetyDecision = recorder.EvaluateSafety()
             If safetyDecision IsNot Nothing AndAlso safetyDecision.Action <> Agent.Execution.SafetyAction.Allow Then
                 recorder.CompleteSafetyDecision(safetyDecision)
-                GlobalStatusStrip.ShowWarning(If(safetyDecision.UserMessage, "该操作需要确认，已转入 Agent 安全路径"))
+                GlobalStatusStrip.ShowWarning(If(safetyDecision.UserMessage, "Операция требует подтверждения; выполняется через безопасный путь Agent"))
                 Return False
             End If
 
@@ -1068,7 +1068,7 @@ Public Class ChatControl
 
         Try
             If result.Status = Services.WordCapabilityExecutionStatus.Failed Then
-                GlobalStatusStrip.ShowWarning(If(String.IsNullOrWhiteSpace(result.UserMessage), $"{capabilityId} 执行失败", result.UserMessage))
+                GlobalStatusStrip.ShowWarning(If(String.IsNullOrWhiteSpace(result.UserMessage), $"{capabilityId}: ошибка выполнения", result.UserMessage))
             End If
         Catch
         End Try
@@ -1081,7 +1081,7 @@ Public Class ChatControl
                 plan,
                 If(applied, Services.WordCapabilityExecutionStatus.Succeeded, Services.WordCapabilityExecutionStatus.Fallback),
                 applied,
-                If(applied, "直接格式调整已应用。", "直接格式调整未能应用，回退到 Agent 主路径。"),
+                If(applied, "Настройка формата применена.", "Не удалось применить настройку формата; возврат к основному пути Agent."),
                 plan?.Reason,
                 New With {.applied = applied}))
             If Not applied Then
@@ -1097,10 +1097,10 @@ Public Class ChatControl
                 plan,
                 Services.WordCapabilityExecutionStatus.Failed,
                 False,
-                $"格式调整失败: {ex.Message}",
+                $"Не удалось изменить формат: {ex.Message}",
                 ex.ToString(),
                 recoverable:=True))
-            GlobalStatusStrip.ShowWarning($"格式调整失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка настройки формата: {ex.Message}")
             Try
                 If originalJsonDoc IsNot Nothing Then
                     MyBase.HandleSendMessage(originalJsonDoc)
@@ -1116,14 +1116,14 @@ Public Class ChatControl
     Private Async Sub HandleNumberingCommand(userMessage As String, originalJsonDoc As JObject, plan As Services.WordActionPlan)
         Try
             Dim userMsgUuid = Guid.NewGuid().ToString()
-            Await ExecuteJavaScriptAsyncJS($"createChatSection('你', formatDateTime(new Date()), '{userMsgUuid}');")
+            Await ExecuteJavaScriptAsyncJS($"createChatSection('Вы', formatDateTime(new Date()), '{userMsgUuid}');")
             Await ExecuteJavaScriptAsyncJS($"document.getElementById('content-{userMsgUuid}').innerHTML = '<p>{EscapeHtmlForInline(userMessage)}</p>';")
 
             Dim agent As New Services.WordNumberingAgent(Globals.ThisAddIn.Application)
             Dim result = agent.RebuildSequentialNumbering(userMessage)
 
             If result Is Nothing OrElse Not result.Success Then
-                Dim reason = If(result Is Nothing, "未生成编号执行结果", result.ToHumanReadableSummary())
+                Dim reason = If(result Is Nothing, "Результат выполнения нумерации не сформирован", result.ToHumanReadableSummary())
                 Debug.WriteLine($"[Word] 自动编号重排未执行: {reason}")
                 ReportWordCapabilityResult(plan, Services.WordCapabilityExecutionResult.FromPlan(
                     plan,
@@ -1134,15 +1134,15 @@ Public Class ChatControl
                     result,
                     recoverable:=True))
                 Dim failureResponseUuid = Guid.NewGuid().ToString()
-                Await ExecuteJavaScriptAsyncJS($"createChatSection('AI编号助手', formatDateTime(new Date()), '{failureResponseUuid}');")
+                Await ExecuteJavaScriptAsyncJS($"createChatSection('AI-помощник по нумерации', formatDateTime(new Date()), '{failureResponseUuid}');")
                 Dim escapedReason = reason.Replace("\", "\\").Replace("'", "\'").Replace(vbCr, "").Replace(vbLf, "\n")
-                Await ExecuteJavaScriptAsyncJS($"appendRenderer('{failureResponseUuid}','没有执行自动编号重排：{escapedReason}');")
+                Await ExecuteJavaScriptAsyncJS($"appendRenderer('{failureResponseUuid}','Автонумерация не перестроена: {escapedReason}');")
                 GlobalStatusStrip.ShowWarning(reason)
                 Return
             End If
 
             Dim responseUuid = Guid.NewGuid().ToString()
-            Await ExecuteJavaScriptAsyncJS($"createChatSection('AI编号助手', formatDateTime(new Date()), '{responseUuid}');")
+            Await ExecuteJavaScriptAsyncJS($"createChatSection('AI-помощник по нумерации', formatDateTime(new Date()), '{responseUuid}');")
             Dim summary = result.ToHumanReadableSummary()
             ReportWordCapabilityResult(plan, Services.WordCapabilityExecutionResult.FromPlan(
                 plan,
@@ -1152,18 +1152,18 @@ Public Class ChatControl
                 summary,
                 result))
             Dim escapedSummary = summary.Replace("\", "\\").Replace("'", "\'").Replace(vbCr, "").Replace(vbLf, "\n")
-            Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','已完成自动编号重排：{escapedSummary}');")
-            GlobalStatusStrip.ShowSuccess("自动编号已重排为连续递增")
+            Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','Автонумерация успешно перестроена: {escapedSummary}');")
+            GlobalStatusStrip.ShowSuccess("Автонумерация перестроена в непрерывную")
         Catch ex As Exception
             Debug.WriteLine($"HandleNumberingCommand error: {ex.Message}")
             ReportWordCapabilityResult(plan, Services.WordCapabilityExecutionResult.FromPlan(
                 plan,
                 Services.WordCapabilityExecutionStatus.Failed,
                 False,
-                $"自动编号重排失败: {ex.Message}",
+                $"Не удалось перестроить автонумерацию: {ex.Message}",
                 ex.ToString(),
                 recoverable:=True))
-            GlobalStatusStrip.ShowWarning($"自动编号重排失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка автоматической перенумерации: {ex.Message}")
             Try
                 If originalJsonDoc IsNot Nothing Then
                     MyBase.HandleSendMessage(originalJsonDoc)
@@ -1181,7 +1181,7 @@ Public Class ChatControl
         Try
             If showUserMessage Then
                 Dim userMsgUuid = Guid.NewGuid().ToString()
-                Await ExecuteJavaScriptAsyncJS($"createChatSection('你', formatDateTime(new Date()), '{userMsgUuid}');")
+                Await ExecuteJavaScriptAsyncJS($"createChatSection('Вы', formatDateTime(new Date()), '{userMsgUuid}');")
                 Await ExecuteJavaScriptAsyncJS($"document.getElementById('content-{userMsgUuid}').innerHTML = '<p>{EscapeHtmlForInline(userMessage)}</p>';")
             End If
 
@@ -1190,21 +1190,21 @@ Public Class ChatControl
             _activeWordFormattingTaskPlan = result?.TaskPlan
 
             If result Is Nothing OrElse Not result.Success Then
-                Dim reason = If(result Is Nothing, "未生成执行结果", result.ToHumanReadableSummary())
+                Dim reason = If(result Is Nothing, "Результат выполнения не сформирован", result.ToHumanReadableSummary())
                 Debug.WriteLine($"[Word] 直接格式调整未执行: {reason}")
                 Return False
             End If
 
             Dim responseUuid = Guid.NewGuid().ToString()
-            Await ExecuteJavaScriptAsyncJS($"createChatSection('AI排版助手', formatDateTime(new Date()), '{responseUuid}');")
+            Await ExecuteJavaScriptAsyncJS($"createChatSection('AI-помощник по форматированию', formatDateTime(new Date()), '{responseUuid}');")
             Dim unifiedSummary = FormatWordFormattingTaskSummary(result.TaskPlan, result.ToHumanReadableSummary())
             Dim escapedSummary = unifiedSummary.Replace("\", "\\").Replace("'", "\'").Replace(vbCr, "").Replace(vbLf, "\n")
-            Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','已应用格式调整：{escapedSummary}');")
-            GlobalStatusStrip.ShowSuccess("格式调整已应用")
+            Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','Настройка формата применена: {escapedSummary}');")
+            GlobalStatusStrip.ShowSuccess("Настройка формата применена")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ExecuteDirectFormattingCommandAsync error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"格式调整失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка настройки формата: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1218,11 +1218,11 @@ Public Class ChatControl
     Private Async Sub HandleMixedProofreadFormattingCommand(userMessage As String, originalJsonDoc As JObject)
         Try
             Dim userMsgUuid = Guid.NewGuid().ToString()
-            Await ExecuteJavaScriptAsyncJS($"createChatSection('你', formatDateTime(new Date()), '{userMsgUuid}');")
+            Await ExecuteJavaScriptAsyncJS($"createChatSection('Вы', formatDateTime(new Date()), '{userMsgUuid}');")
             Await ExecuteJavaScriptAsyncJS($"document.getElementById('content-{userMsgUuid}').innerHTML = '<p>{EscapeHtmlForInline(userMessage)}</p>';")
 
             _pendingPostProofreadFormattingRequest = ExtractPostProofreadFormattingRequest(userMessage)
-            GlobalStatusStrip.ShowInfo("已识别组合任务：先校对，再排版。")
+            GlobalStatusStrip.ShowInfo("Распознана составная задача: сначала проверка, затем форматирование.")
 
             Dim wordApp = Globals.ThisAddIn.Application
             Dim compiler As New Services.ProofreadIntentCompiler()
@@ -1230,7 +1230,7 @@ Public Class ChatControl
             Await ExecuteProofreadAsync(plan, userMessage)
         Catch ex As Exception
             Debug.WriteLine($"HandleMixedProofreadFormattingCommand error: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"组合任务启动失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка запуска составной задачи: {ex.Message}")
             Try
                 If originalJsonDoc IsNot Nothing Then
                     MyBase.HandleSendMessage(originalJsonDoc)
@@ -1304,7 +1304,7 @@ Public Class ChatControl
             Else
                 Dim applied = Await ExecuteDirectFormattingCommandAsync(message, Not directAttempted)
                 If Not applied Then
-                    GlobalStatusStrip.ShowWarning("未能自动生成可执行排版计划，已转为普通对话。")
+                    GlobalStatusStrip.ShowWarning("Не удалось автоматически сформировать исполняемый план форматирования; переход в обычный диалог.")
                     fallbackNeeded = True
                 End If
             End If
@@ -1321,7 +1321,7 @@ Public Class ChatControl
     Private Async Sub HandleProofreadCommand(userMessage As String, originalJsonDoc As JObject, plan As Services.WordActionPlan)
         Try
             Dim userMsgUuid = Guid.NewGuid().ToString()
-            Await ExecuteJavaScriptAsyncJS($"createChatSection('你', formatDateTime(new Date()), '{userMsgUuid}');")
+            Await ExecuteJavaScriptAsyncJS($"createChatSection('Вы', formatDateTime(new Date()), '{userMsgUuid}');")
             Await ExecuteJavaScriptAsyncJS($"document.getElementById('content-{userMsgUuid}').innerHTML = '<p>{EscapeHtmlForInline(userMessage)}</p>';")
 
             Dim wordApp = Globals.ThisAddIn.Application
@@ -1332,7 +1332,7 @@ Public Class ChatControl
                 plan,
                 If(started, Services.WordCapabilityExecutionStatus.Succeeded, Services.WordCapabilityExecutionStatus.Fallback),
                 started,
-                If(started, "校对流程已启动。", "校对流程未启动，回退到 Agent 主路径。"),
+                If(started, "Процесс проверки запущен.", "Процесс проверки не запущен; возврат к основному пути Agent."),
                 If(proofreadPlan Is Nothing, "", proofreadPlan.ToHumanReadableSummary()),
                 proofreadPlan))
             If Not started AndAlso originalJsonDoc IsNot Nothing Then
@@ -1344,10 +1344,10 @@ Public Class ChatControl
                 plan,
                 Services.WordCapabilityExecutionStatus.Failed,
                 False,
-                $"校对启动失败: {ex.Message}",
+                $"Не удалось запустить проверку: {ex.Message}",
                 ex.ToString(),
                 recoverable:=True))
-            GlobalStatusStrip.ShowWarning($"校对启动失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка запуска проверки: {ex.Message}")
             Try
                 MyBase.HandleSendMessage(originalJsonDoc)
             Catch fallbackEx As Exception
@@ -1434,7 +1434,7 @@ Public Class ChatControl
                     planContext,
                     Services.WordCapabilityExecutionStatus.Fallback,
                     False,
-                    "当前范围没有可用于语义排版的段落，回退到 Agent 主路径。",
+                    "В текущем диапазоне нет абзацев, пригодных для семантического форматирования; возврат к основному пути Agent.",
                     "CreateReformatJobFromRange returned no usable paragraphs",
                     New With {.scope = scopeKind.ToString()}))
                 ' 没有选区时回退到正常AI对话流程
@@ -1448,13 +1448,13 @@ Public Class ChatControl
 
             ' 3. 显示用户消息到Chat（普通气泡）
             Dim userMsgUuid = Guid.NewGuid().ToString()
-            Dim jsUserMsg = $"createChatSection('你', formatDateTime(new Date()), '{userMsgUuid}');"
+            Dim jsUserMsg = $"createChatSection('Вы', formatDateTime(new Date()), '{userMsgUuid}');"
             Await ExecuteJavaScriptAsyncJS(jsUserMsg)
             Dim escapedMsg = userMessage.Replace("\", "\\").Replace("'", "\'").Replace(vbCr, "\n").Replace(vbLf, "")
             Await ExecuteJavaScriptAsyncJS($"document.getElementById('content-{userMsgUuid}').innerHTML = '<p>{escapedMsg}</p>';")
 
             ' 4. 通过编排器解析意图并推荐标准（增强版，传入Word富文本信息）
-            GlobalStatusStrip.ShowInfo("正在分析文档...")
+            GlobalStatusStrip.ShowInfo("Анализ документа...")
             Dim agent = GetFormatterAgent()
             Dim intentResult = Await agent.RecognizeReformatIntentAsync(
                 userMessage,
@@ -1464,7 +1464,7 @@ Public Class ChatControl
                 job.ParagraphIsBold)
             If intentResult IsNot Nothing Then
                 Debug.WriteLine($"[ReformatIntent] source={intentResult.Source}, confidence={intentResult.Confidence:0.00}, type={intentResult.Intent.IntentType}, standard={intentResult.Intent.TargetStandardName}")
-                GlobalStatusStrip.ShowInfo($"已识别排版意图: {intentResult.Intent.IntentType} ({intentResult.Source})")
+                GlobalStatusStrip.ShowInfo($"Распознано намерение форматирования: {intentResult.Intent.IntentType} ({intentResult.Source})")
 
                 If intentResult.ScopeHint = ReformatScopeKind.WholeDocument AndAlso
                    scopeKind <> ReformatScopeKind.WholeDocument AndAlso
@@ -1504,7 +1504,7 @@ Public Class ChatControl
             ' 7. 生成排版卡片并推送到Chat
             Dim html = agent.GenerateFormattingCardHtml(plan)
             Dim responseUuid = Guid.NewGuid().ToString()
-            Dim jsCreate = $"createChatSection('AI排版助手', formatDateTime(new Date()), '{responseUuid}');"
+            Dim jsCreate = $"createChatSection('AI-помощник по форматированию', formatDateTime(new Date()), '{responseUuid}');"
             Await ExecuteJavaScriptAsyncJS(jsCreate)
 
             Dim jsonPayload As New JObject()
@@ -1516,20 +1516,20 @@ Public Class ChatControl
                 planContext,
                 Services.WordCapabilityExecutionStatus.Succeeded,
                 True,
-                $"语义排版预览已生成，推荐标准: {plan.StandardName}。",
+                $"Предпросмотр семантического форматирования сформирован, рекомендуемый стандарт: {plan.StandardName}.",
                 $"scope={job.GetScopeSummary()}, paragraphs={job.ParagraphTexts.Count}, standard={plan.StandardName}",
                 New With {.scope = job.GetScopeSummary(), .paragraphCount = job.ParagraphTexts.Count, .standardName = plan.StandardName}))
-            GlobalStatusStrip.ShowInfo($"分析完成，推荐标准: {plan.StandardName}。范围: {job.GetScopeSummary()}")
+            GlobalStatusStrip.ShowInfo($"Анализ завершён, рекомендуемый стандарт: {plan.StandardName}. Диапазон: {job.GetScopeSummary()}")
         Catch ex As Exception
             Debug.WriteLine($"HandleChatDrivenReformat error: {ex.Message}")
             ReportWordCapabilityResult(planContext, Services.WordCapabilityExecutionResult.FromPlan(
                 planContext,
                 Services.WordCapabilityExecutionStatus.Failed,
                 False,
-                $"智能排版失败: {ex.Message}",
+                $"Сбой умного форматирования: {ex.Message}",
                 ex.ToString(),
                 recoverable:=True))
-            GlobalStatusStrip.ShowWarning($"智能排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка умного форматирования: {ex.Message}")
             ' 排版失败时回退到正常AI对话流程
             Try
                 MyBase.HandleSendMessage(originalJsonDoc)
@@ -1658,27 +1658,27 @@ Public Class ChatControl
 
             Dim selRange = ResolveProofreadRange(wordApp, plan)
             If selRange Is Nothing OrElse String.IsNullOrWhiteSpace(If(selRange.Text, "")) Then
-                GlobalStatusStrip.ShowWarning("当前文档没有可校对的文本内容。")
+                GlobalStatusStrip.ShowWarning("В текущем документе нет текста для проверки.")
                 Return False
             End If
 
             ' 按段落收集文本
             Dim paragraphs As New List(Of String)()
             Dim sb As New StringBuilder()
-            sb.AppendLine("以下是需要校对的内容（按段落编号）：")
-            sb.AppendLine("校对计划：" & plan.ToHumanReadableSummary())
+            sb.AppendLine("Ниже приведено содержимое для проверки (с номерами абзацев):")
+            sb.AppendLine("План проверки: " & plan.ToHumanReadableSummary())
             sb.AppendLine()
 
             For Each p In selRange.Paragraphs
                 Dim paraText As String = If(p.Range.Text IsNot Nothing, p.Range.Text.ToString().TrimEnd(vbCr, vbLf), String.Empty)
                 If Not String.IsNullOrWhiteSpace(paraText) Then
                     paragraphs.Add(paraText)
-                    sb.AppendLine($"[段落{paragraphs.Count - 1}] {paraText}")
+                    sb.AppendLine($"[Абзац {paragraphs.Count - 1}] {paraText}")
                 End If
             Next
 
             If paragraphs.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("选中的内容没有有效段落。")
+                GlobalStatusStrip.ShowWarning("В выбранном содержимом нет допустимых абзацев.")
                 Return False
             End If
 
@@ -1702,7 +1702,7 @@ Public Class ChatControl
 
             ' 显示加载中提示
             Await ExecuteJavaScriptAsyncJS("showProofreadModeIndicator(); showProofreadLoading();")
-            GlobalStatusStrip.ShowInfo("正在校对，请稍候... " & plan.ToHumanReadableSummary())
+            GlobalStatusStrip.ShowInfo("Проверка выполняется, подождите... " & plan.ToHumanReadableSummary())
 
             ' 构建校对提示词
             Dim systemPrompt = ProofreadPromptBuilder.BuildFullDocumentPrompt(paragraphs) &
@@ -1714,7 +1714,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteProofreadAsync 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"校对失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка проверки: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1760,12 +1760,13 @@ Public Class ChatControl
     Private Function BuildProofreadPlanInstruction(plan As Services.ProofreadIntentPlan) As String
         Dim sb As New StringBuilder()
         sb.AppendLine()
-        sb.AppendLine("【本次校对计划】")
+        sb.AppendLine("【План текущей проверки】")
         sb.AppendLine(plan.ToHumanReadableSummary())
-        sb.AppendLine("请严格只检查计划中列出的类型；如果计划类型为全部问题，则执行完整校对。")
+        sb.AppendLine("Проверяй строго только типы, перечисленные в плане; если в плане указаны все проблемы, выполни полную проверку.")
         If plan.ApplyMode = Services.ProofreadApplyMode.AutoApplyHighConfidence Then
-            sb.AppendLine("对于高置信、低风险的错别字/标点问题，请在 JSON 中标记 severity=high；其他建议保留为 medium/low 供用户确认。")
+            sb.AppendLine("Для высоконадёжных и низкорисковых опечаток/пунктуационных ошибок укажи в JSON severity=high; остальные предложения оставь со severity medium/low для подтверждения пользователем.")
         End If
+        sb.AppendLine("Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть.")
         Return sb.ToString()
     End Function
 
@@ -1821,8 +1822,8 @@ Public Class ChatControl
     Private Async Sub ContinuePostProofreadFormattingAsync(formattingRequest As String)
         Try
             Dim responseUuid = Guid.NewGuid().ToString()
-            Await ExecuteJavaScriptAsyncJS($"createChatSection('AI排版助手', formatDateTime(new Date()), '{responseUuid}');")
-            Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','校对步骤已完成，继续执行后续排版任务。');")
+            Await ExecuteJavaScriptAsyncJS($"createChatSection('AI-помощник по форматированию', formatDateTime(new Date()), '{responseUuid}');")
+            Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}','Проверка завершена, продолжаем задачи форматирования.');")
 
             If Services.SmartFormatter.LooksLikeDirectFormattingCommand(formattingRequest) Then
                 Dim applied = Await ExecuteDirectFormattingCommandAsync(formattingRequest, False)
@@ -1836,7 +1837,7 @@ Public Class ChatControl
             End If
         Catch ex As Exception
             Debug.WriteLine($"ContinuePostProofreadFormattingAsync 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"后续排版任务执行失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка выполнения последующей задачи форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -1909,7 +1910,7 @@ Public Class ChatControl
 
             ElseIf selection.InlineShapes.Count > 0 OrElse selection.ShapeRange.Count > 0 Then
                 ' 如果选中的是图片或形状
-                content = "[图片或形状]"
+                content = "[Изображение или фигура]"
             Else
                 ' 普通文本选择
                 content = selection.Text
@@ -1920,7 +1921,7 @@ Public Class ChatControl
                 AddSelectedContentItem(
                 "Word文档",  ' 使用文档名称作为标识
                 If(selection.Tables.Count > 0,
-                   "[表格内容]",
+                   "[Содержимое таблицы]",
                    content.Substring(0, Math.Min(content.Length, 50)) & If(content.Length > 50, "...", ""))
             )
             Else
@@ -1993,7 +1994,7 @@ Public Class ChatControl
                 previewRange = selection.Range
             Else
                 ' 没有选中文本，查找或创建预览段落
-                Dim previewMarker = "【样式预览】"
+                Dim previewMarker = "【Предпросмотр стиля】"
                 Dim found = False
 
                 ' 查找已有的预览段落
@@ -2010,7 +2011,7 @@ Public Class ChatControl
                     Dim endRange = doc.Range(doc.Content.End - 1, doc.Content.End - 1)
                     endRange.InsertParagraphAfter()
                     endRange = doc.Range(doc.Content.End - 1, doc.Content.End - 1)
-                    endRange.Text = previewMarker & "这是用于预览样式效果的示例文本，您可以在此查看字体、字号、对齐等效果。"
+                    endRange.Text = previewMarker & "Это пример текста для предпросмотра стиля; здесь видны шрифт, размер, выравнивание и другие эффекты."
                     previewRange = doc.Paragraphs.Last.Range
                 End If
             End If
@@ -2078,8 +2079,8 @@ Public Class ChatControl
     ' 预览运行：展示代码并询问是否继续（返回 True 执行）
     Protected Overrides Function RunCodePreview(vbaCode As String, preview As Boolean) As Boolean
         If Not preview Then Return True
-        Dim prompt As String = "预览将要执行的 VBA 代码，是否继续？" & vbCrLf & "----" & vbCrLf & vbaCode
-        Return (MessageBox.Show(prompt, "VBA 预览", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
+        Dim prompt As String = "Предпросмотр выполняемого кода VBA. Продолжить?" & vbCrLf & "----" & vbCrLf & vbaCode
+        Return (MessageBox.Show(prompt, "Предпросмотр VBA", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes)
     End Function
 
     ' 真正执行宏（通过 Application.Run 调用模块.过程）
@@ -2087,7 +2088,7 @@ Public Class ChatControl
         Try
             Globals.ThisAddIn.Application.Run(vbaCode)
         Catch ex As Exception
-            MessageBox.Show("执行宏失败: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка выполнения макроса: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
         Return Nothing
     End Function
@@ -2152,8 +2153,8 @@ Public Class ChatControl
                 doc = wordApp.Documents.Open(FileName:=filePath, ReadOnly:=True, Visible:=False)
                 Dim contentBuilder As New StringBuilder()
 
-                contentBuilder.AppendLine($"文件: {Path.GetFileName(filePath)}")
-                contentBuilder.AppendLine($"共 {doc.Paragraphs.Count} 个段落")
+                contentBuilder.AppendLine($"Файл: {Path.GetFileName(filePath)}")
+                contentBuilder.AppendLine($"Всего абзацев: {doc.Paragraphs.Count}")
                 contentBuilder.AppendLine()
 
                 ' 限制处理的段落数量
@@ -2174,7 +2175,7 @@ Public Class ChatControl
                         End Try
 
                         ' 判断是否是标题
-                        Dim prefix As String = $"段落{paraIndex}"
+                        Dim prefix As String = $"Абзац {paraIndex}"
                         If styleName.Contains("标题") OrElse styleName.ToLower().Contains("heading") OrElse styleName.ToLower().Contains("заголов") Then
                             prefix = $"[{styleName}]"
                         End If
@@ -2186,14 +2187,14 @@ Public Class ChatControl
                 ' 处理表格
                 If doc.Tables.Count > 0 Then
                     contentBuilder.AppendLine()
-                    contentBuilder.AppendLine($"=== 文档包含 {doc.Tables.Count} 个表格 ===")
+                    contentBuilder.AppendLine($"=== Документ содержит таблиц: {doc.Tables.Count} ===")
 
                     Dim tableIndex As Integer = 0
                     For Each tbl As Microsoft.Office.Interop.Word.Table In doc.Tables
                         tableIndex += 1
                         If tableIndex > 5 Then Exit For ' 限制表格数量
 
-                        contentBuilder.AppendLine($"表格 {tableIndex}: {tbl.Rows.Count}行×{tbl.Columns.Count}列")
+                        contentBuilder.AppendLine($"Таблица {tableIndex}: {tbl.Rows.Count} строк × {tbl.Columns.Count} столбцов")
 
                         ' 读取表格前几行
                         Dim maxRows = Math.Min(tbl.Rows.Count, 5)
@@ -2216,7 +2217,7 @@ Public Class ChatControl
 
                 If doc.Paragraphs.Count > maxParagraphs Then
                     contentBuilder.AppendLine()
-                    contentBuilder.AppendLine($"... 共 {doc.Paragraphs.Count} 个段落，仅显示前 {maxParagraphs} 个")
+                    contentBuilder.AppendLine($"... всего абзацев: {doc.Paragraphs.Count}, показаны только первые {maxParagraphs}")
                 End If
 
                 Return New FileContentResult With {
@@ -2241,7 +2242,7 @@ Public Class ChatControl
             Return New FileContentResult With {
                 .FileName = Path.GetFileName(filePath),
                 .FileType = "Word",
-                .ParsedContent = $"[解析Word文件时出错: {ex.Message}]"
+                .ParsedContent = $"[Ошибка при разборе файла Word: {ex.Message}]"
             }
         End Try
     End Function
@@ -2297,13 +2298,13 @@ Public Class ChatControl
             Dim corrected As String = If(jsonDoc("corrected") IsNot Nothing, jsonDoc("corrected").ToString(), String.Empty)
 
             If paraIndex < 0 Then
-                GlobalStatusStrip.ShowWarning("缺少 paraIndex 参数")
+                GlobalStatusStrip.ShowWarning("Отсутствует параметр paraIndex")
                 Return
             End If
 
             Dim appInfo As ApplicationInfo = GetApplication()
             If appInfo Is Nothing OrElse appInfo.Type <> OfficeApplicationType.Word Then
-                GlobalStatusStrip.ShowWarning("校对功能仅在 Word 环境下支持")
+                GlobalStatusStrip.ShowWarning("Проверка поддерживается только в Word")
                 Return
             End If
 
@@ -2314,7 +2315,7 @@ Public Class ChatControl
                 Debug.WriteLine("获取 Office 应用对象失败: " & ex.Message)
             End Try
             If officeApp Is Nothing Then
-                GlobalStatusStrip.ShowWarning("无法获取 Word 应用对象")
+                GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Word")
                 Return
             End If
 
@@ -2323,14 +2324,14 @@ Public Class ChatControl
 
             ' 使用选中范围内的段落索引定位
             If selRange Is Nothing OrElse String.IsNullOrWhiteSpace(selRange.Text) Then
-                GlobalStatusStrip.ShowWarning("请先选中需要校对的内容")
+                GlobalStatusStrip.ShowWarning("Сначала выберите содержимое для проверки")
                 Return
             End If
 
             ' 获取选中范围内的段落
             Dim paragraphs = selRange.Paragraphs
             If paraIndex >= paragraphs.Count Then
-                GlobalStatusStrip.ShowWarning($"段落索引 {paraIndex} 超出范围")
+                GlobalStatusStrip.ShowWarning($"Индекс абзаца {paraIndex} вне диапазона")
                 Return
             End If
 
@@ -2354,17 +2355,17 @@ Public Class ChatControl
 
                     ' 执行替换
                     replaceRange.Text = corrected
-                    GlobalStatusStrip.ShowInfo($"已替换段落 {paraIndex} 中的内容（审阅模式）")
+                    GlobalStatusStrip.ShowInfo($"Содержимое абзаца {paraIndex} заменено (режим рецензирования)")
                 Else
-                    GlobalStatusStrip.ShowWarning($"在段落 {paraIndex} 中未找到原文：{original}")
+                    GlobalStatusStrip.ShowWarning($"В абзаце {paraIndex} не найден исходный текст: {original}")
                 End If
             Else
-                GlobalStatusStrip.ShowWarning("缺少原文内容")
+                GlobalStatusStrip.ShowWarning("Отсутствует исходный текст")
             End If
 
         Catch ex As Exception
             Debug.WriteLine($"HandleApplyRevisionSegment 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("校对写回异常: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка записи результатов проверки: " & ex.Message)
         End Try
     End Sub
 
@@ -2375,13 +2376,13 @@ Public Class ChatControl
             Dim globalIndex As Integer = If(jsonDoc("globalIndex") IsNot Nothing, CInt(jsonDoc("globalIndex")), -1)
 
             If globalIndex < 0 Then
-                GlobalStatusStrip.ShowWarning("applyRevisionAccept: 缺少 globalIndex")
+                GlobalStatusStrip.ShowWarning("applyRevisionAccept: отсутствует globalIndex")
                 Return
             End If
 
             Dim appInfo As ApplicationInfo = GetApplication()
             If appInfo Is Nothing OrElse appInfo.Type <> OfficeApplicationType.Word Then
-                GlobalStatusStrip.ShowWarning("接受单个修订仅在 Word 环境下支持（默认实现）")
+                GlobalStatusStrip.ShowWarning("Принятие отдельной правки поддерживается только в Word (реализация по умолчанию)")
                 Return
             End If
 
@@ -2393,7 +2394,7 @@ Public Class ChatControl
             End Try
 
             If officeApp Is Nothing Then
-                GlobalStatusStrip.ShowWarning("无法获取 Word 应用对象，接受修订失败")
+                GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Word; принятие правки не выполнено")
                 Return
             End If
 
@@ -2402,13 +2403,13 @@ Public Class ChatControl
                 ' Word Revisions 集合是 1 基的；尝试保护性调用
                 If globalIndex >= 1 And globalIndex <= doc.Revisions.Count Then
                     doc.Revisions(globalIndex).Accept()
-                    GlobalStatusStrip.ShowInfo($"已接受修订 #{globalIndex}")
+                    GlobalStatusStrip.ShowInfo($"Правка #{globalIndex} принята")
                 Else
-                    GlobalStatusStrip.ShowWarning("指定的修订索引超出范围或不存在")
+                    GlobalStatusStrip.ShowWarning("Указанный индекс правки вне диапазона или не существует")
                 End If
             Catch ex As Exception
                 Debug.WriteLine("接受修订失败: " & ex.Message)
-                GlobalStatusStrip.ShowWarning("接受修订失败: " & ex.Message)
+                GlobalStatusStrip.ShowWarning("Не удалось принять правку: " & ex.Message)
             End Try
         Catch ex As Exception
             Debug.WriteLine($"HandleApplyRevisionAccept 出错: {ex.Message}")
@@ -2641,18 +2642,18 @@ Public Class ChatControl
             End If
 
             If paraIndex < 0 Then
-                GlobalStatusStrip.ShowWarning("缺少 paraIndex 参数")
+                GlobalStatusStrip.ShowWarning("Отсутствует параметр paraIndex")
                 Return
             End If
 
             If formatting Is Nothing Then
-                GlobalStatusStrip.ShowWarning("缺少 formatting 参数")
+                GlobalStatusStrip.ShowWarning("Отсутствует параметр formatting")
                 Return
             End If
 
             Dim appInfo As ApplicationInfo = GetApplication()
             If appInfo Is Nothing OrElse appInfo.Type <> OfficeApplicationType.Word Then
-                GlobalStatusStrip.ShowWarning("排版功能仅在 Word 环境下支持")
+                GlobalStatusStrip.ShowWarning("Форматирование поддерживается только в Word")
                 Return
             End If
 
@@ -2663,7 +2664,7 @@ Public Class ChatControl
                 Debug.WriteLine("获取 Office 应用对象失败: " & ex.Message)
             End Try
             If officeApp Is Nothing Then
-                GlobalStatusStrip.ShowWarning("无法获取 Word 应用对象")
+                GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Word")
                 Return
             End If
 
@@ -2671,14 +2672,14 @@ Public Class ChatControl
             Dim selRange = officeApp.Selection.Range
 
             If selRange Is Nothing OrElse String.IsNullOrWhiteSpace(selRange.Text) Then
-                GlobalStatusStrip.ShowWarning("请先选中需要排版的内容")
+                GlobalStatusStrip.ShowWarning("Сначала выберите содержимое для форматирования")
                 Return
             End If
 
             ' 获取选中范围内的段落
             Dim paragraphs = selRange.Paragraphs
             If paraIndex >= paragraphs.Count Then
-                GlobalStatusStrip.ShowWarning($"段落索引 {paraIndex} 超出范围")
+                GlobalStatusStrip.ShowWarning($"Индекс абзаца {paraIndex} вне диапазона")
                 Return
             End If
 
@@ -2689,15 +2690,15 @@ Public Class ChatControl
             ' 使用Word对象模型应用格式化
             Try
                 ApplyFormattingToRange(targetRange, formatting)
-                GlobalStatusStrip.ShowInfo($"已应用段落 {paraIndex} 的排版")
+                GlobalStatusStrip.ShowInfo($"Форматирование абзаца {paraIndex} применено")
             Catch ex As Exception
                 Debug.WriteLine("排版写回失败: " & ex.Message)
-                GlobalStatusStrip.ShowWarning("排版写回失败: " & ex.Message)
+                GlobalStatusStrip.ShowWarning("Ошибка записи форматирования: " & ex.Message)
             End Try
 
         Catch ex As Exception
             Debug.WriteLine("HandleApplyDocumentPlanItem 错误: " & ex.Message)
-            GlobalStatusStrip.ShowWarning("排版应用出错: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка применения форматирования: " & ex.Message)
         End Try
     End Sub
 
@@ -2710,7 +2711,7 @@ Public Class ChatControl
             Dim sampleClassification = jsonDoc("sampleClassification")?.ToObject(Of List(Of JObject))()
 
             If rules Is Nothing OrElse rules.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("没有收到有效的排版规则")
+                GlobalStatusStrip.ShowWarning("Не получены допустимые правила форматирования")
                 Return
             End If
 
@@ -2725,7 +2726,7 @@ Public Class ChatControl
 
             ' 如果没有保存的段落上下文，使用当前选中内容
             If _reformatParagraphs Is Nothing OrElse _reformatParagraphs.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("排版上下文丢失，请重新选择内容并排版")
+                GlobalStatusStrip.ShowWarning("Контекст форматирования потерян. Выберите содержимое и запустите форматирование заново")
                 Return
             End If
 
@@ -2798,15 +2799,15 @@ Public Class ChatControl
             _reformatStyles = Nothing
             _reformatTypes = Nothing
 
-            Dim resultMsg = $"排版完成，共处理 {appliedCount} 个文本段落"
+            Dim resultMsg = $"Форматирование завершено, обработано текстовых абзацев: {appliedCount}"
             If skippedCount > 0 Then
-                resultMsg &= $"，跳过 {skippedCount} 个特殊元素"
+                resultMsg &= $", пропущено специальных элементов: {skippedCount}"
             End If
             GlobalStatusStrip.ShowInfo(resultMsg)
 
         Catch ex As Exception
             Debug.WriteLine("ApplyReformatRules 错误: " & ex.Message)
-            GlobalStatusStrip.ShowWarning("应用排版规则出错: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка применения правил форматирования: " & ex.Message)
         End Try
     End Sub
 
@@ -2967,8 +2968,8 @@ Public Class ChatControl
             If Not String.Equals(paraType, "text", StringComparison.OrdinalIgnoreCase) Then Continue For
 
             Dim reason = If(String.IsNullOrWhiteSpace(change.ChangeDescription),
-                            "预览方案识别为结构段落",
-                            "预览方案: " & change.ChangeDescription)
+                            "Структурный абзац, определённый планом предпросмотра",
+                            "План предпросмотра: " & change.ChangeDescription)
             merged(change.ParagraphIndex) = New TaggedParagraph(change.ParagraphIndex, change.NewTag, reason)
             overrideCount += 1
         Next
@@ -2986,12 +2987,12 @@ Public Class ChatControl
     Private Async Sub ApplySemanticTaggingResult(taggingJson As String)
         Try
             If _reformatMapping Is Nothing Then
-                GlobalStatusStrip.ShowWarning("排版映射上下文丢失")
+                GlobalStatusStrip.ShowWarning("Контекст сопоставления форматирования потерян")
                 Return
             End If
 
             If _reformatParagraphs Is Nothing OrElse _reformatParagraphs.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("排版段落上下文丢失")
+                GlobalStatusStrip.ShowWarning("Контекст абзацев форматирования потерян")
                 Return
             End If
 
@@ -3007,15 +3008,15 @@ Public Class ChatControl
                 If _reformatRetryCount > MAX_REFORMAT_RETRIES Then
                     ' 超过重试限制，显示错误给用户
                     Debug.WriteLine($"重试次数超过限制({MAX_REFORMAT_RETRIES})，停止重试")
-                    GlobalStatusStrip.ShowWarning($"AI标注解析失败，已重试{MAX_REFORMAT_RETRIES}次")
+                    GlobalStatusStrip.ShowWarning($"Не удалось разобрать разметку ИИ; повторных попыток: {MAX_REFORMAT_RETRIES}")
                     _reformatRetryCount = 0 ' 重置计数器
 
                     ' 显示错误详情
                     Dim errorMsg = String.Join(vbCrLf, validation.Errors.Take(5))
                     If validation.Errors.Count > 5 Then
-                        errorMsg &= vbCrLf & $"...还有{validation.Errors.Count - 5}个错误"
+                        errorMsg &= vbCrLf & $"...и ещё ошибок: {validation.Errors.Count - 5}"
                     End If
-                    Await ShowReformatError($"AI标注解析失败:{vbCrLf}{errorMsg}")
+                    Await ShowReformatError($"Не удалось разобрать разметку ИИ:{vbCrLf}{errorMsg}")
                     Return
                 End If
 
@@ -3031,7 +3032,7 @@ Public Class ChatControl
 
                 Debug.WriteLine($"第{_reformatRetryCount}次重试...")
                 Dim retryPrompt = SemanticPromptBuilder.BuildRetryPrompt(_reformatMapping, paragraphTexts, validation.Errors)
-                Await Send("标注结果存在错误，请修正。", retryPrompt, False, "semantic_reformat")
+                Await Send("В результатах разметки есть ошибки, исправь их.", retryPrompt, False, "semantic_reformat")
                 Return
             End If
 
@@ -3088,9 +3089,9 @@ Public Class ChatControl
                 ' 用户取消或失败
                 If String.IsNullOrEmpty(reformatResult.ErrorMessage) OrElse
                    reformatResult.ErrorMessage.Contains("取消") Then
-                    GlobalStatusStrip.ShowInfo("排版已取消")
+                    GlobalStatusStrip.ShowInfo("Форматирование отменено")
                 Else
-                    Await ShowReformatError($"排版失败: {reformatResult.ErrorMessage}")
+                    Await ShowReformatError($"Сбой форматирования: {reformatResult.ErrorMessage}")
                 End If
                 _reformatParagraphs = Nothing
                 _reformatStyles = Nothing
@@ -3108,7 +3109,7 @@ Public Class ChatControl
                 End If
             Else
                 ' ApplySemanticFormatting 返回了 Nothing（理论上不应该）
-                Await ShowReformatError("排版渲染引擎返回空结果")
+                Await ShowReformatError("Движок отрисовки форматирования вернул пустой результат")
                 ' 清理但不抛异常
                 _reformatParagraphs = Nothing
                 _reformatStyles = Nothing
@@ -3117,12 +3118,12 @@ Public Class ChatControl
             End If
 
             ' 显示状态
-            Dim resultMsg = $"排版完成，共处理 {renderResult.AppliedCount} 个段落"
+            Dim resultMsg = $"Форматирование завершено, обработано абзацев: {renderResult.AppliedCount}"
             If renderResult.SkippedCount > 0 Then
-                resultMsg &= $"，跳过 {renderResult.SkippedCount} 个特殊元素"
+                resultMsg &= $", пропущено специальных элементов: {renderResult.SkippedCount}"
             End If
             If validation.AutoFixedCount > 0 Then
-                resultMsg &= $"，自动修正 {validation.AutoFixedCount} 个标签"
+                resultMsg &= $", автоматически исправлено тегов: {validation.AutoFixedCount}"
             End If
             GlobalStatusStrip.ShowInfo(resultMsg)
 
@@ -3135,7 +3136,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"ApplySemanticTaggingResult 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"语义排版应用失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка применения семантического форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -3231,22 +3232,22 @@ Public Class ChatControl
         Dim groups = tags.
             Where(Function(t) t IsNot Nothing).
             GroupBy(Function(t) GetReformatTagDisplayName(t.TagId, mapping)).
-            Select(Function(g) $"{g.Key} {g.Count()}段").
+            Select(Function(g) $"{g.Key}: {g.Count()} абз.").
             Take(5).
             ToList()
 
         Dim details As New List(Of String)()
         If groups.Count > 0 Then
-            details.Add("主要样式为 " & String.Join("、", groups))
+            details.Add("Основные стили: " & String.Join(", ", groups))
         End If
         If autoFixedCount > 0 Then
-            details.Add($"自动修正了 {autoFixedCount} 个标签")
+            details.Add($"Автоматически исправлено тегов: {autoFixedCount}")
         End If
 
         If expectedTextCount > 0 AndAlso result.ModifiedCount < expectedTextCount Then
-            details.Add("仍有部分段落未应用，建议使用预览对比或微调后再次应用。")
+            details.Add("Часть абзацев не применена; рекомендуется сравнить с предпросмотром или применить после тонкой настройки.")
         Else
-            details.Add("结果已进入 Word 撤销栈，可用撤销恢复。")
+            details.Add("Результат добавлен в стек отмены Word; можно восстановить отменой.")
         End If
 
         Dim agentResult = Services.WordFormattingAgentResult.FromSemanticReformat(
@@ -3254,14 +3255,14 @@ Public Class ChatControl
             result.ModifiedCount,
             expectedTextCount,
             repairCount,
-            String.Join("；", details))
+            String.Join("; ", details))
 
         Return agentResult.ToHumanReadableSummary()
     End Function
 
     Private Async Function ShowSemanticReformatObservation(summary As String) As Task
         Dim responseUuid As String = Guid.NewGuid().ToString()
-        Await ExecuteJavaScriptAsyncJS($"createChatSection('AI排版观察', formatDateTime(new Date()), '{responseUuid}');")
+        Await ExecuteJavaScriptAsyncJS($"createChatSection('AI-наблюдение за форматированием', formatDateTime(new Date()), '{responseUuid}');")
         Await ExecuteJavaScriptAsyncJS($"appendRenderer('{responseUuid}', {JsonConvert.SerializeObject(summary)});")
     End Function
 
@@ -3286,14 +3287,14 @@ Public Class ChatControl
     Private Async Sub HandleStyleGuideConversionResult(aiResponseJson As String)
         Try
             ' 解析AI返回的规范映射
-            Dim guideName As String = "排版规范"
+            Dim guideName As String = "Стандарт форматирования"
             Dim guideId As String = ""
 
             ' 尝试从响应映射获取规范信息
             Dim mapping = StyleGuideConverter.ParseAiResponse(aiResponseJson, guideName, guideId)
 
             If mapping Is Nothing OrElse mapping.SemanticTags.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("规范转换结果解析失败")
+                GlobalStatusStrip.ShowWarning("Не удалось разобрать результат нормативного преобразования")
                 Return
             End If
 
@@ -3319,11 +3320,11 @@ Public Class ChatControl
             Dim systemPrompt = SemanticPromptBuilder.BuildSemanticTaggingPrompt(mapping, paragraphTexts)
 
             ' 发送语义标注请求
-            Await Send("规范已解析，现在进行语义标注。", systemPrompt, False, "semantic_reformat")
+            Await Send("Стандарт разобран, теперь выполни семантическую разметку.", systemPrompt, False, "semantic_reformat")
 
         Catch ex As Exception
             Debug.WriteLine($"HandleStyleGuideConversionResult 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"规范转换后标注失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка разметки после нормативного преобразования: {ex.Message}")
         End Try
     End Sub
 
@@ -3334,11 +3335,11 @@ Public Class ChatControl
         Try
             Dim mapping = StyleGuideConverter.ParseAiResponse(aiResponseJson, _mirrorFormatDocName, "")
             If mapping Is Nothing OrElse mapping.SemanticTags.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("格式克隆结果解析失败，请重试")
+                GlobalStatusStrip.ShowWarning("Не удалось разобрать результат клонирования формата. Повторите попытку")
                 Return
             End If
 
-            mapping.Name = If(String.IsNullOrEmpty(_mirrorFormatDocName), "克隆格式", _mirrorFormatDocName)
+            mapping.Name = If(String.IsNullOrEmpty(_mirrorFormatDocName), "Клонированный формат", _mirrorFormatDocName)
             mapping.SourceType = SemanticMappingSourceType.FromDocxTemplate
 
             SemanticMappingManager.Instance.AddMapping(mapping)
@@ -3346,10 +3347,10 @@ Public Class ChatControl
             Dim json = JsonConvert.SerializeObject(mapping, Formatting.None)
             ExecuteJavaScriptAsyncJS($"showMappingPreview({json});")
 
-            GlobalStatusStrip.ShowInfo($"格式克隆完成，已提取 {mapping.SemanticTags.Count} 个语义标签")
+            GlobalStatusStrip.ShowInfo($"Клонирование формата завершено, извлечено семантических тегов: {mapping.SemanticTags.Count}")
         Catch ex As Exception
             Debug.WriteLine($"HandleMirrorFormatResult 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"格式克隆保存失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось сохранить клонирование формата: {ex.Message}")
         End Try
     End Sub
 
@@ -3409,7 +3410,7 @@ Public Class ChatControl
 
             ' 检查是否可以续写
             If Not _continuationService.CanContinue() Then
-                GlobalStatusStrip.ShowWarning("无法获取文档信息，请确保文档已打开")
+                GlobalStatusStrip.ShowWarning("Не удалось получить информацию о документе. Убедитесь, что документ открыт")
                 Return
             End If
 
@@ -3419,17 +3420,17 @@ Public Class ChatControl
             If isContinuationMode AndAlso _cachedContinuationContext IsNot Nothing Then
                 ' 多轮续写：使用缓存的上下文，但style作为新的调整要求
                 context = _cachedContinuationContext
-                GlobalStatusStrip.ShowInfo("继续续写...")
+                GlobalStatusStrip.ShowInfo("Продолжаем генерацию...")
             Else
                 ' 首次续写或非续写模式：重新获取上下文
                 context = _continuationService.GetCursorContext(3, 3)
                 If context Is Nothing Then
-                    GlobalStatusStrip.ShowWarning("无法获取文档上下文")
+                    GlobalStatusStrip.ShowWarning("Не удалось получить контекст документа")
                     Return
                 End If
                 ' 缓存上下文
                 _cachedContinuationContext = context
-                GlobalStatusStrip.ShowInfo("正在分析上下文并生成续写内容...")
+                GlobalStatusStrip.ShowInfo("Анализ контекста и генерация продолжения...")
             End If
 
             ' 发送续写请求（带上风格参数）
@@ -3437,7 +3438,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleTriggerContinuation 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"触发续写时出错: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка при запуске продолжения: {ex.Message}")
         End Try
     End Sub
 
@@ -3450,7 +3451,7 @@ Public Class ChatControl
             Dim positionStr As String = If(jsonDoc("position") IsNot Nothing, jsonDoc("position").ToString(), "current")
 
             If String.IsNullOrWhiteSpace(content) Then
-                GlobalStatusStrip.ShowWarning("续写内容为空")
+                GlobalStatusStrip.ShowWarning("Содержимое продолжения пусто")
                 Return
             End If
 
@@ -3473,7 +3474,7 @@ Public Class ChatControl
             ' 插入续写内容
             _continuationService.InsertContinuation(content, insertPos)
 
-            GlobalStatusStrip.ShowInfo("续写内容已插入文档")
+            GlobalStatusStrip.ShowInfo("Продолжение вставлено в документ")
 
             ' 通知前端移除操作按钮
             Dim uuid As String = If(jsonDoc("uuid") IsNot Nothing, jsonDoc("uuid").ToString(), String.Empty)
@@ -3483,7 +3484,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleApplyContinuation 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"插入续写内容时出错: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка при вставке продолжения: {ex.Message}")
         End Try
     End Sub
 
@@ -3496,7 +3497,7 @@ Public Class ChatControl
             Dim positionStr As String = If(jsonDoc("position") IsNot Nothing, jsonDoc("position").ToString(), "current")
 
             If String.IsNullOrWhiteSpace(content) Then
-                GlobalStatusStrip.ShowWarning("模板内容为空")
+                GlobalStatusStrip.ShowWarning("Содержимое шаблона пусто")
                 Return
             End If
 
@@ -3519,7 +3520,7 @@ Public Class ChatControl
             ' 插入模板内容
             _continuationService.InsertContinuation(content, insertPos)
 
-            GlobalStatusStrip.ShowInfo("模板内容已插入文档")
+            GlobalStatusStrip.ShowInfo("Содержимое шаблона вставлено в документ")
 
             ' 通知前端移除操作按钮
             Dim uuid As String = If(jsonDoc("uuid") IsNot Nothing, jsonDoc("uuid").ToString(), String.Empty)
@@ -3529,7 +3530,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleApplyTemplateContent 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"插入模板内容时出错: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка при вставке содержимого шаблона: {ex.Message}")
         End Try
     End Sub
 
@@ -3609,7 +3610,7 @@ Public Class ChatControl
                 Debug.WriteLine($"Word JSON格式验证失败: {errorMessage}")
                 Debug.WriteLine($"原始JSON: {jsonCode.Substring(0, Math.Min(200, jsonCode.Length))}...")
 
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON格式不符合规范: {errorMessage}")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Формат JSON не соответствует спецификации: {errorMessage}")
                 Return False
             End If
 
@@ -3626,14 +3627,14 @@ Public Class ChatControl
                 Return ExecuteWordSingleCommand(jsonObj, jsonCode, preview)
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowWarning("无效的JSON格式")
+            ShareRibbon.GlobalStatusStrip.ShowWarning("Недопустимый формат JSON")
             Return False
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON格式无效: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Недопустимый формат JSON: {ex.Message}")
             Return False
         Catch ex As Exception
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -3644,9 +3645,9 @@ Public Class ChatControl
             Dim normalizedJson As JToken = Nothing
 
             If Not WordJsonCommandSchema.ValidateJsonStructure(jsonCode, errorMessage, normalizedJson) Then
-                Return Agent.ToolResult.Failed("", $"JSON格式不符合规范: {errorMessage}",
+                Return Agent.ToolResult.Failed("", $"Формат JSON не соответствует спецификации: {errorMessage}",
                                                errorCode:=ExceptionClassifier.CodeJson,
-                                               userMessage:=$"JSON格式不符合规范: {errorMessage}",
+                                               userMessage:=$"Формат JSON не соответствует спецификации: {errorMessage}",
                                                recoverable:=True)
             End If
 
@@ -3663,13 +3664,13 @@ Public Class ChatControl
             End If
 
             Dim ok = ExecuteJsonCommandCore(jsonCode, preview)
-            If ok Then Return Agent.ToolResult.Succeed("", "执行成功")
-            Return Agent.ToolResult.Failed("", "JSON命令执行失败")
+            If ok Then Return Agent.ToolResult.Succeed("", "Выполнено успешно")
+            Return Agent.ToolResult.Failed("", "Сбой выполнения команды JSON")
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            Return Agent.ToolResult.Failed("", $"JSON格式无效: {ex.Message}",
+            Return Agent.ToolResult.Failed("", $"Недопустимый формат JSON: {ex.Message}",
                                            errorCode:=ExceptionClassifier.CodeJson,
-                                           userMessage:=$"JSON格式无效: {ex.Message}",
+                                           userMessage:=$"Недопустимый формат JSON: {ex.Message}",
                                            debugDetail:=ex.Message,
                                            recoverable:=True)
         Catch ex As Exception
@@ -3691,17 +3692,17 @@ Public Class ChatControl
         Try
             If preview Then
                 Dim previewObj As New JObject From {{"commands", commandsArray}}
-                If Not ShareRibbon.CommandPreviewForm.ShowPreview("Word命令预览", previewObj) Then
+                If Not ShareRibbon.CommandPreviewForm.ShowPreview("Предпросмотр команд Word", previewObj) Then
                     ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
-                    Return Agent.ToolResult.Succeed("WordCommands", "用户取消执行")
+                    Return Agent.ToolResult.Succeed("WordCommands", "Пользователь отменил выполнение")
                 End If
             End If
 
             If commandsArray Is Nothing OrElse commandsArray.Type <> JTokenType.Array Then
                 Return Agent.ToolResult.Failed("WordCommands",
-                                               "commands 必须是数组",
+                                               "commands должен быть массивом",
                                                errorCode:=ExceptionClassifier.CodeJson,
-                                               userMessage:="commands 必须是数组",
+                                               userMessage:="commands должен быть массивом",
                                                recoverable:=True)
             End If
 
@@ -3731,7 +3732,7 @@ Public Class ChatControl
 
             Dim aggregateObservation As New JObject From {
                 {"kind", "batch"},
-                {"summary", $"批量执行 Word 命令：{successCount} 成功，{failCount} 失败"},
+                {"summary", $"Пакетное выполнение команд Word: успешно {successCount}, ошибок {failCount}"},
                 {"changed", successCount > 0},
                 {"targetRefs", New JArray("Word:Document")},
                 {"warnings", New JArray()},
@@ -3740,14 +3741,14 @@ Public Class ChatControl
 
             If failCount = 0 Then
                 Return Agent.ToolResult.Succeed("WordCommands",
-                                                $"所有 {successCount} 个命令执行成功",
+                                                $"Все команды выполнены успешно: {successCount}",
                                                 observation:=aggregateObservation)
             End If
 
             Return Agent.ToolResult.Failed("WordCommands",
-                                           $"批量执行完成: {successCount} 成功, {failCount} 失败",
+                                           $"Пакетное выполнение завершено: успешно {successCount}, ошибок {failCount}",
                                            errorCode:=If(firstFailure?.ErrorCode, ExceptionClassifier.CodeUnknown),
-                                           userMessage:=If(firstFailure?.UserMessage, $"批量执行完成: {successCount} 成功, {failCount} 失败"),
+                                           userMessage:=If(firstFailure?.UserMessage, $"Пакетное выполнение завершено: успешно {successCount}, ошибок {failCount}"),
                                            recoverable:=True,
                                            observation:=aggregateObservation)
         Catch ex As Exception
@@ -3792,14 +3793,14 @@ Public Class ChatControl
 
             If success Then
                 Return Agent.ToolResult.Succeed(normalizedToolId,
-                                                If(String.IsNullOrWhiteSpace(summary), "执行成功", summary),
+                                                If(String.IsNullOrWhiteSpace(summary), "Выполнено успешно", summary),
                                                 observation:=observation)
             End If
 
             Return Agent.ToolResult.Failed(normalizedToolId,
-                                           $"{normalizedToolId} 执行失败",
+                                           $"Сбой выполнения {normalizedToolId}",
                                            errorCode:=ExceptionClassifier.CodeUnknown,
-                                           userMessage:=$"{normalizedToolId} 执行失败",
+                                           userMessage:=$"Сбой выполнения {normalizedToolId}",
                                            recoverable:=True,
                                            observation:=observation)
         Catch ex As Exception
@@ -3818,9 +3819,9 @@ Public Class ChatControl
             Case "getparagraphinfo"
                 Return ExecuteGetParagraphInfoWithToolResult(params)
             Case Else
-                Return Agent.ToolResult.Failed(If(command, ""), $"不支持的Word读取命令: {command}",
+                Return Agent.ToolResult.Failed(If(command, ""), $"Неподдерживаемая команда чтения Word: {command}",
                                                errorCode:=ExceptionClassifier.CodeNotFound,
-                                               userMessage:=$"不支持的Word读取命令: {command}",
+                                               userMessage:=$"Неподдерживаемая команда чтения Word: {command}",
                                                recoverable:=False)
         End Select
     End Function
@@ -3851,9 +3852,9 @@ Public Class ChatControl
         Dim changed = SnapshotDiffChanged(diff)
 
         If Not commandSucceeded Then
-            warnings.Add("宿主执行器返回失败，未确认文档已修改")
+            warnings.Add("Исполнитель узла вернул ошибку; изменение документа не подтверждено")
         ElseIf Not changed Then
-            warnings.Add("宿主执行器返回成功，但未检测到文档内容或选区格式变化")
+            warnings.Add("Исполнитель узла вернул успех, но изменения содержимого документа или формата выделения не обнаружены")
         End If
 
         Return New JObject From {
@@ -3871,26 +3872,26 @@ Public Class ChatControl
     Private Function BuildWordWriteSummary(toolId As String, params As JToken, commandSucceeded As Boolean, changed As Boolean) As String
         Dim prefix = ""
         If Not commandSucceeded Then
-            prefix = "未完成："
+            prefix = "Не завершено: "
         ElseIf Not changed Then
-            prefix = "已执行但未检测到变化："
+            prefix = "Выполнено, но изменения не обнаружены: "
         End If
 
         Select Case toolId
             Case "InsertText"
                 Dim content = If(params?("content")?.ToString(), "")
                 Dim position = If(params?("position")?.ToString(), "cursor")
-                Return $"{prefix}在 {DescribeWordPosition(position)} 插入 {content.Length} 个字符"
+                Return $"{prefix}в позицию «{DescribeWordPosition(position)}» вставлено символов: {content.Length}"
             Case "FormatText"
-                Return $"{prefix}格式化当前选区文本"
+                Return $"{prefix}форматирование текста текущего выделения"
             Case "ReplaceText"
                 Dim find = If(params?("find")?.ToString(), "")
-                Return $"{prefix}在文档中替换匹配文本 '{TruncateObservationText(find, 40)}'"
+                Return $"{prefix}замена в документе совпадающего текста '{TruncateObservationText(find, 40)}'"
             Case "DeleteText"
                 Dim rangeName = If(params?("range")?.ToString(), "selection")
-                Return $"{prefix}删除 {DescribeWordRange(rangeName)} 文本"
+                Return $"{prefix}удаление текста ({DescribeWordRange(rangeName)})"
             Case Else
-                Return $"{prefix}{toolId} 执行完成"
+                Return $"{prefix}{toolId}: выполнение завершено"
         End Select
     End Function
 
@@ -4127,20 +4128,20 @@ Public Class ChatControl
     Private Function DescribeWordPosition(position As String) As String
         Select Case If(position, "").Trim().ToLowerInvariant()
             Case "start"
-                Return "文档开头"
+                Return "Начало документа"
             Case "end"
-                Return "文档末尾"
+                Return "Конец документа"
             Case Else
-                Return "光标位置"
+                Return "Позиция курсора"
         End Select
     End Function
 
     Private Function DescribeWordRange(rangeName As String) As String
         Select Case If(rangeName, "").Trim().ToLowerInvariant()
             Case "all", "document", "全文"
-                Return "全文"
+                Return "Весь документ"
             Case Else
-                Return "当前选区"
+                Return "Текущее выделение"
         End Select
     End Function
 
@@ -4157,7 +4158,7 @@ Public Class ChatControl
             Dim instructions = Instruction.ParseInstructions(jsonCode)
 
             If instructions Is Nothing OrElse instructions.Count = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("DSL指令解析为空")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Разобранный DSL-набор пуст")
                 Return False
             End If
 
@@ -4169,7 +4170,7 @@ Public Class ChatControl
                 Catch
                     previewJson = New JObject()
                 End Try
-                If Not ShareRibbon.CommandPreviewForm.ShowPreview($"DSL指令预览 - 共 {instructions.Count} 条指令", previewJson) Then
+                If Not ShareRibbon.CommandPreviewForm.ShowPreview($"Предпросмотр DSL-команд — всего {instructions.Count}", previewJson) Then
                     ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                     Return True
                 End If
@@ -4177,7 +4178,7 @@ Public Class ChatControl
 
             ' 桥接到已有排版管道：DSL指令 → 语义标签 → SemanticRenderingEngine
             If _reformatMapping Is Nothing OrElse _reformatParagraphs Is Nothing Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("没有排版上下文，请先选择内容并发起排版")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Нет контекста форматирования. Сначала выберите содержимое и запустите форматирование")
                 Return False
             End If
 
@@ -4185,7 +4186,7 @@ Public Class ChatControl
             Dim undoStarted As Boolean = False
 
             Try
-                wordApp.UndoRecord.StartCustomRecord("AI排版(DSL)")
+                wordApp.UndoRecord.StartCustomRecord("AI-форматирование (DSL)")
                 undoStarted = True
             Catch ex As Exception
                 Debug.WriteLine($"DSL StartCustomRecord 失败: {ex.Message}")
@@ -4213,16 +4214,16 @@ Public Class ChatControl
             End Try
 
             If appliedCount > 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"DSL排版完成，应用了 {appliedCount}/{instructions.Count} 条指令")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Форматирование DSL завершено, применено команд: {appliedCount}/{instructions.Count}")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"DSL指令未能应用任何格式（共{instructions.Count}条）")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"DSL-команды не применили ни одного формата (всего: {instructions.Count})")
             End If
 
             Return appliedCount > 0
 
         Catch ex As Exception
             Debug.WriteLine($"[ExecuteDslCommand] 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"DSL执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения DSL: {ex.Message}")
             Return False
         End Try
     End Function
@@ -4434,14 +4435,14 @@ Public Class ChatControl
         Try
             Dim commands = CType(commandsArray, JArray)
             If commands.Count = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("命令数组为空")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Массив команд пуст")
                 Return False
             End If
 
             ' 预览所有命令
             If preview Then
                 ' 使用增强的预览表单
-                If Not ShareRibbon.CommandPreviewForm.ShowPreview($"Word命令预览 - 共 {commands.Count} 个命令", commandsArray) Then
+                If Not ShareRibbon.CommandPreviewForm.ShowPreview($"Предпросмотр команд Word — всего {commands.Count}", commandsArray) Then
                     ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                     Return True
                 End If
@@ -4463,16 +4464,16 @@ Public Class ChatControl
             Next
 
             If failCount = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"所有 {successCount} 个命令执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Все команды выполнены успешно: {successCount}")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"执行完成: {successCount} 成功, {failCount} 失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Выполнено: успешно {successCount}, с ошибкой {failCount}")
             End If
 
             Return failCount = 0
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteWordCommandsArray 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"批量执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка пакетного выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -4486,7 +4487,7 @@ Public Class ChatControl
 
             ' 预览 - 使用增强的预览表单
             If preview Then
-                If Not ShareRibbon.CommandPreviewForm.ShowPreview("Word命令预览", commandJson) Then
+                If Not ShareRibbon.CommandPreviewForm.ShowPreview("Предпросмотр команд Word", commandJson) Then
                     ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                     Return True
                 End If
@@ -4496,9 +4497,9 @@ Public Class ChatControl
             Dim success = ExecuteWordCommand(commandJson)
 
             If success Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"命令 '{command}' 执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Команда '{command}' выполнена успешно")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"命令 '{command}' 执行失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Команда '{command}' выполнена с ошибкой")
             End If
 
             Return success
@@ -4802,7 +4803,7 @@ Public Class ChatControl
             ' 更新目录
             newToc.Update()
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"已生成{levels}级目录")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Оглавление сформировано (уровней: {levels})")
             Return True
 
         Catch ex As Exception
@@ -4829,7 +4830,7 @@ Public Class ChatControl
                 ApplyThemeStyles(doc, theme)
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo("文档美化完成")
+            ShareRibbon.GlobalStatusStrip.ShowInfo("Оформление документа завершено")
             Return True
 
         Catch ex As Exception
@@ -4862,16 +4863,16 @@ Public Class ChatControl
             Dim success As Boolean = _smartFormatter.FormatByQuery(query, action)
 
             If success Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"已完成: {query} → {action}")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Выполнено: {query} → {action}")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"操作失败: {query} → {action}")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка операции: {query} → {action}")
             End If
 
             Return success
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteFindAndFormat 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -4890,7 +4891,7 @@ Public Class ChatControl
             Dim result As JArray = _paragraphService.ListParagraphs(maxCount)
 
             ' 将结果显示给用户（通过状态栏或返回到 AI）
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"找到 {result.Count} 个段落")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Найдено абзацев: {result.Count}")
             Debug.WriteLine($"[ExecuteListParagraphs] 返回: {result.ToString()}")
 
             Return True
@@ -4905,9 +4906,9 @@ Public Class ChatControl
         Try
             If _paragraphService Is Nothing Then
                 Return Agent.ToolResult.Failed("ListParagraphs",
-                                               "ParagraphService 未初始化",
+                                               "ParagraphService не инициализирован",
                                                errorCode:=ExceptionClassifier.CodeUnknown,
-                                               userMessage:="Word 段落服务未初始化",
+                                               userMessage:="Служба абзацев Word не инициализирована",
                                                recoverable:=True)
             End If
 
@@ -4926,7 +4927,7 @@ Public Class ChatControl
                 {"truncated", result.Count >= maxCount AndAlso total > result.Count}
             }
             Return Agent.ToolResult.Succeed("ListParagraphs",
-                                            $"读取 {result.Count}/{total} 个段落",
+                                            $"Прочитано абзацев: {result.Count}/{total}",
                                             data)
         Catch ex As Exception
             Debug.WriteLine($"ExecuteListParagraphsWithToolResult 出错: {ex.Message}")
@@ -4952,11 +4953,11 @@ Public Class ChatControl
 
             Dim result As JObject = _paragraphService.GetParagraphInfo(paragraphIndex)
             If result Is Nothing Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"无法获取段落 {paragraphIndex} 信息")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось получить информацию об абзаце {paragraphIndex}")
                 Return False
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"段落 {paragraphIndex}: {result("style")} {result("fontSize")}pt")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Абзац {paragraphIndex}: {result("style")} {result("fontSize")}pt")
             Debug.WriteLine($"[ExecuteGetParagraphInfo] 返回: {result.ToString()}")
 
             Return True
@@ -4971,32 +4972,32 @@ Public Class ChatControl
         Try
             If _paragraphService Is Nothing Then
                 Return Agent.ToolResult.Failed("GetParagraphInfo",
-                                               "ParagraphService 未初始化",
+                                               "ParagraphService не инициализирован",
                                                errorCode:=ExceptionClassifier.CodeUnknown,
-                                               userMessage:="Word 段落服务未初始化",
+                                               userMessage:="Служба абзацев Word не инициализирована",
                                                recoverable:=True)
             End If
 
             Dim paragraphIndex As Integer = If(params?("paragraphIndex")?.Value(Of Integer)(), 1)
             If paragraphIndex < 1 Then
                 Return Agent.ToolResult.Failed("GetParagraphInfo",
-                                               "段落索引必须大于等于 1",
+                                               "Индекс абзаца должен быть не меньше 1",
                                                errorCode:=ExceptionClassifier.CodeArgument,
-                                               userMessage:="段落索引必须大于等于 1",
+                                               userMessage:="Индекс абзаца должен быть не меньше 1",
                                                recoverable:=True)
             End If
 
             Dim result As JObject = _paragraphService.GetParagraphInfo(paragraphIndex)
             If result Is Nothing Then
                 Return Agent.ToolResult.Failed("GetParagraphInfo",
-                                               $"未找到段落: {paragraphIndex}",
+                                               $"Абзац не найден: {paragraphIndex}",
                                                errorCode:=ExceptionClassifier.CodeNotFound,
-                                               userMessage:=$"未找到段落: {paragraphIndex}",
+                                               userMessage:=$"Абзац не найден: {paragraphIndex}",
                                                recoverable:=True)
             End If
 
             Return Agent.ToolResult.Succeed("GetParagraphInfo",
-                                            $"读取第 {paragraphIndex} 段信息",
+                                            $"Информация об абзаце {paragraphIndex}",
                                             result)
         Catch ex As Exception
             Debug.WriteLine($"ExecuteGetParagraphInfoWithToolResult 出错: {ex.Message}")
@@ -5023,16 +5024,16 @@ Public Class ChatControl
             Dim success As Boolean = _paragraphService.SetParagraphFormat(paragraphIndex, CType(params, JObject))
 
             If success Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"段落 {paragraphIndex} 格式已更新")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Формат абзаца {paragraphIndex} обновлён")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"段落 {paragraphIndex} 格式更新失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось обновить формат абзаца {paragraphIndex}")
             End If
 
             Return success
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteSetParagraphFormat 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -5151,7 +5152,7 @@ Public Class ChatControl
         Try
             Dim mapping = WordTemplateParser.ExtractFromDocx(filePath)
             If mapping Is Nothing OrElse mapping.SemanticTags.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("模板解析失败，未能提取到有效的样式信息")
+                GlobalStatusStrip.ShowWarning("Не удалось разобрать шаблон: не извлечена корректная информация о стилях")
                 Return
             End If
 
@@ -5178,10 +5179,10 @@ Public Class ChatControl
             Dim json = Newtonsoft.Json.JsonConvert.SerializeObject(mapping, Newtonsoft.Json.Formatting.None)
             ExecuteJavaScriptAsyncJS($"showMappingPreview({json});")
 
-            GlobalStatusStrip.ShowInfo($"模板「{mapping.Name}」解析完成，提取到 {mapping.SemanticTags.Count} 个语义标签")
+            GlobalStatusStrip.ShowInfo($"Шаблон «{mapping.Name}» разобран, извлечено семантических тегов: {mapping.SemanticTags.Count}")
         Catch ex As Exception
             Debug.WriteLine($"HandleUploadDocxTemplateFromPath 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"模板解析失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось разобрать шаблон: {ex.Message}")
         End Try
     End Sub
 
@@ -5192,26 +5193,26 @@ Public Class ChatControl
         Try
             Dim wordApp = Globals.ThisAddIn.Application
             If wordApp Is Nothing OrElse wordApp.Documents.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("没有打开的文档")
+                GlobalStatusStrip.ShowWarning("Нет открытого документа")
                 Return
             End If
 
             Dim extracted = FormatMirrorService.ExtractFormattingFromDocument(wordApp, False)
             If extracted.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("未能从文档中提取格式信息")
+                GlobalStatusStrip.ShowWarning("Не удалось извлечь информацию о формате из документа")
                 Return
             End If
 
             ' 记录文档名，供 mirror_format 响应时命名映射
             _mirrorFormatDocName = Path.GetFileNameWithoutExtension(wordApp.ActiveDocument.Name)
-            If String.IsNullOrEmpty(_mirrorFormatDocName) Then _mirrorFormatDocName = "文档格式"
+            If String.IsNullOrEmpty(_mirrorFormatDocName) Then _mirrorFormatDocName = "Формат документа"
 
             Dim prompt = FormatMirrorService.BuildClonePrompt(extracted)
-            GlobalStatusStrip.ShowInfo("正在分析文档格式，请稍候…")
-            Await Send("请根据以下格式信息生成 SemanticStyleMapping。", prompt, False, "mirror_format")
+            GlobalStatusStrip.ShowInfo("Анализ формата документа, подождите…")
+            Await Send("Сформируй SemanticStyleMapping на основе следующей информации о формате.", prompt, False, "mirror_format")
         Catch ex As Exception
             Debug.WriteLine($"HandleSaveCurrentDocumentAsTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"分析文档格式失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось проанализировать формат документа: {ex.Message}")
         End Try
     End Sub
 

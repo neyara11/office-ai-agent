@@ -173,21 +173,21 @@ Public Class CodeExecutionService
                 ok = ExecuteExcelFormula(code, preview)
             ElseIf IsTextOnlyLanguage(lowerLang) Then
                 Return Agent.ToolResult.Failed(toolId,
-                                               $"文本类型 {language} 不可执行",
+                                               $"Текстовый тип {language} нельзя выполнить",
                                                errorCode:=ExceptionClassifier.CodeArgument,
-                                               userMessage:="当前内容是文本，不是可执行命令",
+                                               userMessage:="Текущее содержимое — текст, а не исполняемая команда",
                                                recoverable:=False)
             Else
                 Return Agent.ToolResult.Failed(toolId,
-                                               "不支持的语言类型: " & language,
+                                               "Неподдерживаемый тип языка: " & language,
                                                errorCode:=ExceptionClassifier.CodeArgument,
-                                               userMessage:="不支持的语言类型: " & language,
+                                               userMessage:="Неподдерживаемый тип языка: " & language,
                                                recoverable:=False)
             End If
 
             Dim observation = New With {
                 .kind = "code_execution",
-                .summary = If(ok, $"{toolId} 执行成功", $"{toolId} 执行失败"),
+                .summary = If(ok, $"{toolId}: выполнено успешно", $"{toolId}: ошибка выполнения"),
                 .changed = ok,
                 .targetRefs = New String() {"Office:ActiveDocument"},
                 .warnings = New String() {}
@@ -242,17 +242,17 @@ Public Class CodeExecutionService
 
                     Dim result = JsonCommandExecutorWithResult.Invoke(currentJsonCode, preview)
                     Debug.WriteLine($"[CodeExecutionService] JSON命令执行结果: {If(result Is Nothing, "null", result.ToObserveSummary())}")
-                    If result Is Nothing Then Return Agent.ToolResult.Failed("", "JSON命令执行器未返回结果")
+                    If result Is Nothing Then Return Agent.ToolResult.Failed("", "Исполнитель JSON-команд не вернул результат")
                     Return result
                 Catch ex As Exception
                     Debug.WriteLine($"[CodeExecutionService] JSON命令执行异常: {ex.Message}")
-                    GlobalStatusStrip.ShowWarning($"JSON命令执行失败: {ex.Message}")
+                    GlobalStatusStrip.ShowWarning($"Ошибка выполнения JSON-команды: {ex.Message}")
                     Return Agent.ToolResult.FromException("", ex)
                 End Try
             Else
                 Debug.WriteLine("[CodeExecutionService] JsonCommandExecutorWithResult 未设置!")
-                GlobalStatusStrip.ShowWarning("当前应用不支持JSON命令执行，请使用VBA代码")
-                Return Agent.ToolResult.Failed("", "当前应用不支持JSON命令执行，请使用VBA代码")
+                GlobalStatusStrip.ShowWarning("Текущее приложение не поддерживает выполнение JSON-команд, используйте код VBA")
+                Return Agent.ToolResult.Failed("", "Текущее приложение не поддерживает выполнение JSON-команд, используйте код VBA")
             End If
         End Function
 
@@ -268,8 +268,8 @@ Public Class CodeExecutionService
                 ' 新增：安全检查
                 Dim safety = Agent.Execution.SafetyChecker.Check(vbaCode)
                 If Not safety.IsSafe Then
-                    MessageBox.Show($"安全拦截: {safety.Reason}{vbCrLf}{vbCrLf}该代码包含危险操作，禁止执行。",
-                                    "安全拦截",
+                    MessageBox.Show($"Блокировка безопасности: {safety.Reason}{vbCrLf}{vbCrLf}Код содержит опасные операции, выполнение запрещено.",
+                                    "Блокировка безопасности",
                                     MessageBoxButtons.OK,
                                     MessageBoxIcon.Warning)
                     Debug.WriteLine($"[CodeExecutionService] 安全检查拦截: {safety.Reason}")
@@ -278,8 +278,8 @@ Public Class CodeExecutionService
 
                 If safety.NeedsConfirm Then
                     Dim result = MessageBox.Show(
-                        $"{safety.Reason}{vbCrLf}{vbCrLf}是否继续执行？",
-                        "需要确认",
+                        $"{safety.Reason}{vbCrLf}{vbCrLf}Продолжить выполнение?",
+                        "Требуется подтверждение",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question)
                     If result <> DialogResult.Yes Then
@@ -314,7 +314,7 @@ Public Class CodeExecutionService
                         If Not String.IsNullOrEmpty(procName) Then
                             _runCode(tempModuleName & "." & procName)
                         Else
-                            GlobalStatusStrip.ShowWarning("无法在代码中找到可执行的过程")
+                            GlobalStatusStrip.ShowWarning("Не удалось найти исполняемую процедуру в коде")
                         End If
                     Else
                         ' 包装为过程
@@ -327,7 +327,7 @@ Public Class CodeExecutionService
 
                     Return True
                 Catch ex As Exception
-                    MessageBox.Show("执行 VBA 代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show("Ошибка при выполнении кода VBA: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
                     Return False
                 Finally
                     ' 删除临时模块
@@ -390,7 +390,7 @@ Public Class CodeExecutionService
                ex.Message.Contains("Programmatic access to Visual Basic Project is not trusted") Then
                 ShowVBATrustMessage()
             Else
-                MessageBox.Show("执行 VBA 代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Ошибка при выполнении кода VBA: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         End Sub
 
@@ -399,12 +399,12 @@ Public Class CodeExecutionService
         ''' </summary>
         Private Sub ShowVBATrustMessage()
             MessageBox.Show(
-                "无法执行 VBA 代码，请按以下步骤设置：" & vbCrLf & vbCrLf &
-                "1. 点击 '文件' -> '选项' -> '信任中心'" & vbCrLf &
-                "2. 点击 '信任中心设置'" & vbCrLf &
-                "3. 选择 '宏设置'" & vbCrLf &
-                "4. 勾选 '信任对 VBA 项目对象模型的访问'",
-                "需要设置信任中心权限",
+                "Не удалось выполнить код VBA. Настройте параметры следующим образом:" & vbCrLf & vbCrLf &
+                "1. Нажмите 'Файл' -> 'Параметры' -> 'Центр управления безопасностью'" & vbCrLf &
+                "2. Нажмите 'Параметры Центра управления безопасностью'" & vbCrLf &
+                "3. Выберите 'Параметры макросов'" & vbCrLf &
+                "4. Установите флажок 'Доверять доступ к объектной модели проектов VBA'",
+                "Требуется настроить разрешения Центра управления безопасностью",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning)
         End Sub
@@ -420,7 +420,7 @@ Public Class CodeExecutionService
             Try
                 Dim appObject As Object = _getOfficeApplication()
                 If appObject Is Nothing Then
-                    GlobalStatusStrip.ShowWarning("无法获取Office应用程序对象")
+                    GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Office")
                     Return False
                 End If
 
@@ -458,7 +458,7 @@ Public Class CodeExecutionService
 
                 Return True
             Catch ex As Exception
-                MessageBox.Show("执行JavaScript代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Ошибка при выполнении кода JavaScript: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return False
             End Try
         End Function
@@ -511,13 +511,13 @@ Public Class CodeExecutionService
                         }}
                     }}
                 }},
-                log: function(message) {{ return '输出: ' + message; }}
+                log: function(message) {{ return 'Вывод: ' + message; }}
             }};
             function executeOfficeJsApi(codeFunc) {{
                 var workbook = Office.context.workbook;
                 if(typeof codeFunc === 'function') {{
                     try {{ return codeFunc(workbook); }}
-                    catch(e) {{ return 'Office JS API 执行错误: ' + e.message; }}
+                    catch(e) {{ return 'Ошибка выполнения Office JS API: ' + e.message; }}
                 }}
                 return 'Invalid function';
             }}
@@ -533,13 +533,13 @@ Public Class CodeExecutionService
                 try {{
                     var userFunc = function(workbook) {{ {jsCode} }};
                     executeOfficeJsApi(userFunc);
-                    return 'Office JS API 代码执行成功';
-                }} catch(e) {{ return 'Office JS API 执行错误: ' + e.message; }}
+                    return 'Код Office JS API выполнен успешно';
+                }} catch(e) {{ return 'Ошибка выполнения Office JS API: ' + e.message; }}
                 "
             Else
                 Return $"
-                try {{ {jsCode} return '代码执行成功'; }}
-                catch(e) {{ return '执行错误: ' + e.message; }}
+                try {{ {jsCode} return 'Код выполнен успешно'; }}
+                catch(e) {{ return 'Ошибка выполнения: ' + e.message; }}
                 "
             End If
         End Function
@@ -562,14 +562,14 @@ Public Class CodeExecutionService
 
                 If appInfo.Type = OfficeApplicationType.Excel Then
                     Dim result As Boolean = _evaluateFormula(formulaCode, preview)
-                    GlobalStatusStrip.ShowInfo("公式执行结果: " & result.ToString())
+                    GlobalStatusStrip.ShowInfo("Результат выполнения формулы: " & result.ToString())
                     Return True
                 Else
-                    GlobalStatusStrip.ShowWarning("Excel公式执行仅支持Excel环境")
+                    GlobalStatusStrip.ShowWarning("Выполнение формул Excel поддерживается только в среде Excel")
                     Return False
                 End If
             Catch ex As Exception
-                MessageBox.Show("执行Excel公式时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Ошибка при выполнении формулы Excel: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return False
             End Try
         End Function

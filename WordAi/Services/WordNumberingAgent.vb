@@ -18,19 +18,19 @@ Namespace Services
         Public Function ToHumanReadableSummary() As String
             If Success Then
                 Dim parts As New List(Of String) From {
-                    $"范围: {ScopeSummary}",
-                    $"已将 {AppliedCount} 个自动编号段落重排为连续 1,2,3..."
+                    $"Диапазон: {ScopeSummary}",
+                    $"Автонумерованных абзацев перестроено в непрерывную последовательность 1,2,3...: {AppliedCount}"
                 }
 
                 If ObservedPreview IsNot Nothing AndAlso ObservedPreview.Count > 0 Then
-                    parts.Add("观察: " & String.Join("，", ObservedPreview.Take(5)))
+                    parts.Add("Наблюдение: " & String.Join(", ", ObservedPreview.Take(5)))
                 End If
 
-                Return String.Join("；", parts)
+                Return String.Join("; ", parts)
             End If
 
             If Not String.IsNullOrWhiteSpace(ErrorMessage) Then Return ErrorMessage
-            Return "未找到可重排的自动编号段落"
+            Return "Не найдено автонумерованных абзацев для перестройки"
         End Function
     End Class
 
@@ -63,24 +63,24 @@ Namespace Services
 
             Try
                 If _app Is Nothing OrElse _app.ActiveDocument Is Nothing Then
-                    result.ErrorMessage = "当前没有可处理的 Word 文档"
+                    result.ErrorMessage = "Нет документа Word для обработки"
                     Return result
                 End If
 
                 Dim scope = ResolveScope(message)
-                result.ScopeSummary = If(IsExplicitSelectionScope(message) AndAlso HasUsableSelection(), "当前选区", "全文")
+                result.ScopeSummary = If(IsExplicitSelectionScope(message) AndAlso HasUsableSelection(), "Текущее выделение", "Весь документ")
 
                 Dim targets = CollectNumberedParagraphs(scope)
                 result.DetectedCount = targets.Count
                 If targets.Count = 0 Then
-                    result.ErrorMessage = $"{result.ScopeSummary}没有检测到 Word 自动编号段落"
+                    result.ErrorMessage = $"{result.ScopeSummary}: автонумерованные абзацы Word не обнаружены"
                     Return result
                 End If
 
                 Dim undoStarted As Boolean = False
                 Try
                     If _app.UndoRecord IsNot Nothing Then
-                        _app.UndoRecord.StartCustomRecord("AI重排自动编号")
+                        _app.UndoRecord.StartCustomRecord("AI-перестановка автонумерации")
                         undoStarted = True
                     End If
                 Catch ex As Exception
@@ -92,7 +92,7 @@ Namespace Services
                     ObserveNumbering(targets, result)
                     result.Success = result.AppliedCount > 0
                     If Not result.Success AndAlso String.IsNullOrWhiteSpace(result.ErrorMessage) Then
-                        result.ErrorMessage = "已检测到自动编号段落，但未能成功应用连续编号"
+                        result.ErrorMessage = "Автонумерованные абзацы обнаружены, но применить непрерывную нумерацию не удалось"
                     End If
                 Finally
                     If undoStarted Then
@@ -106,7 +106,7 @@ Namespace Services
 
             Catch ex As Exception
                 result.Success = False
-                result.ErrorMessage = $"自动编号重排失败: {ex.Message}"
+                result.ErrorMessage = $"Не удалось перестроить автонумерацию: {ex.Message}"
                 Debug.WriteLine($"[WordNumberingAgent] RebuildSequentialNumbering failed: {ex}")
             End Try
 

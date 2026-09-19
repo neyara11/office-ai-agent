@@ -68,7 +68,7 @@ Public Class DoubaoChat
 
                 Dim selectedText As String = sb.ToString().Trim()
                 If Not String.IsNullOrEmpty(selectedText) Then
-                    Return message & vbCrLf & vbCrLf & "当前选中的数据:" & vbCrLf & selectedText
+                    Return message & vbCrLf & vbCrLf & "Текущие выбранные данные:" & vbCrLf & selectedText
                 End If
             End If
 
@@ -118,7 +118,7 @@ Public Class DoubaoChat
             VBAxceptionHandle(ex)
             Return False
         Catch ex As Exception
-            MessageBox.Show("执行代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function

@@ -72,8 +72,8 @@ Namespace Extensions
                 If success Then
                     ' 成功应用
                     MessageBox.Show(
-                        "公式已成功应用到单元格 " & targetRange.Address(False, False),
-                        "公式应用成功",
+                        "Формула успешно применена к ячейке " & targetRange.Address(False, False),
+                        "Формула применена",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information)
 
@@ -84,16 +84,16 @@ Namespace Extensions
                     Dim formula As String = ExtractFormulaFromResponse(aiResponse)
                     If Not String.IsNullOrEmpty(formula) Then
                         Dim result As DialogResult = MessageBox.Show(
-                            "检测到公式，但自动应用失败。" & vbCrLf & vbCrLf &
-                            "提取的公式: " & formula & vbCrLf & vbCrLf &
-                            "是否复制到剪贴板？",
-                            "公式提取",
+                            "Обнаружена формула, но автоматическое применение не удалось." & vbCrLf & vbCrLf &
+                            "Извлечённая формула: " & formula & vbCrLf & vbCrLf &
+                            "Скопировать её в буфер обмена?",
+                            "Извлечение формулы",
                             MessageBoxButtons.YesNo,
                             MessageBoxIcon.Question)
 
                         If result = DialogResult.Yes Then
                             Clipboard.SetText(formula)
-                            MessageBox.Show("公式已复制到剪贴板，请粘贴到单元格", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                            MessageBox.Show("Формула скопирована в буфер обмена, вставьте её в ячейку", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
                         End If
                     End If
                     Return False

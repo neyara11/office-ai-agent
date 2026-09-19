@@ -380,10 +380,10 @@ Public Class SmartFormattingOrchestrator
         If candidate Is Nothing OrElse candidate.Standard Is Nothing Then Return ""
 
         Dim parts As New List(Of String)()
-        parts.Add($"备选方案 {displayIndex}/{totalCount}")
+        parts.Add($"Вариант {displayIndex}/{totalCount}")
         If Not String.IsNullOrWhiteSpace(candidate.Reason) Then parts.Add(candidate.Reason)
         If Not String.IsNullOrWhiteSpace(candidate.Standard.Description) Then parts.Add(candidate.Standard.Description)
-        Return String.Join("；", parts)
+        Return String.Join("; ", parts)
     End Function
 
     ' ============================================================

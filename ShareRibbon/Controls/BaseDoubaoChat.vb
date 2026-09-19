@@ -86,11 +86,11 @@ Public MustInherit Class BaseDoubaoChat
 
                 Debug.WriteLine($"WebView2初始化完成，开始导航到{ChatUrl}")
             Else
-                MessageBox.Show("WebView2初始化失败，CoreWebView2不可用。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Не удалось инициализировать WebView2: CoreWebView2 недоступен.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Catch ex As Exception
-            Dim errorMessage As String = $"初始化失败: {ex.Message}{Environment.NewLine}类型: {ex.GetType().Name}{Environment.NewLine}堆栈:{ex.StackTrace}"
-            MessageBox.Show(errorMessage, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Dim errorMessage As String = $"Ошибка инициализации: {ex.Message}{Environment.NewLine}Тип: {ex.GetType().Name}{Environment.NewLine}Стек: {ex.StackTrace}"
+            MessageBox.Show(errorMessage, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Function
 
@@ -568,7 +568,7 @@ End Function
     // 尽量不破坏页面样式，使用透明背景并微调内边距，使它看起来像页面上的其他按钮
     wrapper.style.cssText = 'display:inline-flex;align-items:center;margin-right:6px;cursor:pointer;user-select:none;padding:6px;border-radius:6px;background:transparent;color:inherit;font-size:12px;border:0;width:30px;';
     // 用与页面相近的 SVG（play 图标），但不强行覆盖页面样式
-    wrapper.innerHTML = '<svg xmlns=""http://www.w3.org/2000/svg"" width=""16"" height=""16"" viewBox=""0 0 24 24"" fill=""none"" style=""flex:0 0 16px;""><path fill=""currentColor"" d=""M8 5v14l11-7z""></path></svg><span style=""margin-left:6px;line-height:16px;font-size:12px;"">执行</span>';
+    wrapper.innerHTML = '<svg xmlns=""http://www.w3.org/2000/svg"" width=""16"" height=""16"" viewBox=""0 0 24 24"" fill=""none"" style=""flex:0 0 16px;""><path fill=""currentColor"" d=""M8 5v14l11-7z""></path></svg><span style=""margin-left:6px;line-height:16px;font-size:12px;"">Выполнить</span>';
     return wrapper;
 }
 
@@ -780,7 +780,7 @@ End Function
             ' 获取Office应用对象
             Dim appObject As Object = GetOfficeApplicationObject()
             If appObject Is Nothing Then
-                GlobalStatusStrip.ShowWarning("无法获取Office应用程序对象")
+                GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Office")
                 Return False
             End If
 
@@ -795,14 +795,14 @@ End Function
             Dim result = scriptEngine.Eval(jsCode)
 
             If result IsNot Nothing Then
-                GlobalStatusStrip.ShowInfo("JavaScript执行完成，结果: " & result.ToString())
+                GlobalStatusStrip.ShowInfo("Код JavaScript выполнен, результат: " & result.ToString())
             Else
-                GlobalStatusStrip.ShowInfo("JavaScript执行完成")
+                GlobalStatusStrip.ShowInfo("Код JavaScript выполнен")
             End If
 
             Return True
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning("执行JavaScript代码时出错: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка при выполнении кода JavaScript: " & ex.Message)
             Return False
         End Try
     End Function

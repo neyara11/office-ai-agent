@@ -1,4 +1,4 @@
-Imports System.Diagnostics
+﻿Imports System.Diagnostics
 Imports System.Drawing
 Imports System.IO
 Imports System.Linq
@@ -124,11 +124,11 @@ Public MustInherit Class BaseChat
 
                 Debug.WriteLine($"WebView2初始化完成，开始导航到{ChatUrl}")
             Else
-                MessageBox.Show("WebView2初始化失败，CoreWebView2不可用。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Не удалось инициализировать WebView2: CoreWebView2 недоступен.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Catch ex As Exception
-            Dim errorMessage As String = $"初始化失败: {ex.Message}{Environment.NewLine}类型: {ex.GetType().Name}{Environment.NewLine}堆栈:{ex.StackTrace}"
-            MessageBox.Show(errorMessage, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Dim errorMessage As String = $"Ошибка инициализации: {ex.Message}{Environment.NewLine}Тип: {ex.GetType().Name}{Environment.NewLine}Стек: {ex.StackTrace}"
+            MessageBox.Show(errorMessage, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Function
 
@@ -371,7 +371,7 @@ Public MustInherit Class BaseChat
                 ' 执行 Excel 函数/公式
                 ExecuteExcelFormula(code, preview)
             Case Else
-                GlobalStatusStrip.ShowWarning("不支持的语言类型: " & language)
+                GlobalStatusStrip.ShowWarning("Неподдерживаемый тип языка: " & language)
         End Select
     End Sub
 
@@ -412,8 +412,8 @@ Public MustInherit Class BaseChat
                 If Not String.IsNullOrEmpty(procName) Then
                     RunCode(tempModuleName & "." & procName)
                 Else
-                    'MessageBox.Show("无法在代码中找到可执行的过程")
-                    GlobalStatusStrip.ShowWarning("无法在代码中找到可执行的过程")
+                    'MessageBox.Show("Не удалось найти исполняемую процедуру в коде")
+                    GlobalStatusStrip.ShowWarning("Не удалось найти исполняемую процедуру в коде")
                 End If
             Else
                 ' 代码不包含过程声明，将其包装在 Auto_Run 过程中
@@ -428,7 +428,7 @@ Public MustInherit Class BaseChat
             End If
 
         Catch ex As Exception
-            MessageBox.Show("执行 VBA 代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода VBA: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             ' 无论成功还是失败，都删除临时模块
             Try
@@ -463,15 +463,15 @@ Public MustInherit Class BaseChat
             If appInfo.Type = OfficeApplicationType.Excel Then
                 ' 对于Excel，使用Evaluate方法
                 Dim result As Boolean = EvaluateFormula(formulaCode, preview)
-                GlobalStatusStrip.ShowInfo("公式执行结果: " & result.ToString())
+                GlobalStatusStrip.ShowInfo("Результат выполнения формулы: " & result.ToString())
                 Return True
             Else
                 ' 其他应用不支持直接执行Excel公式
-                GlobalStatusStrip.ShowWarning("Excel公式执行仅支持Excel环境")
+                GlobalStatusStrip.ShowWarning("Выполнение формул Excel поддерживается только в среде Excel")
                 Return False
             End If
         Catch ex As Exception
-            MessageBox.Show("执行Excel公式时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении формулы Excel: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -527,18 +527,18 @@ Public MustInherit Class BaseChat
        ex.Message.Contains("Programmatic access to Visual Basic Project is not trusted") Then
             VBATrustShowBox()
         Else
-            MessageBox.Show("执行 VBA 代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода VBA: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End If
     End Sub
 
     Private Shared Sub VBATrustShowBox()
         MessageBox.Show(
-                        "无法执行 VBA 代码，请按以下步骤设置：" & vbCrLf & vbCrLf &
-                        "1. 点击 '文件' -> '选项' -> '信任中心'" & vbCrLf &
-                        "2. 点击 '信任中心设置'" & vbCrLf &
-                        "3. 选择 '宏设置'" & vbCrLf &
-                        "4. 勾选 '信任对 VBA 项目对象模型的访问'",
-                        "需要设置信任中心权限",
+                        "Не удалось выполнить код VBA. Настройте параметры следующим образом:" & vbCrLf & vbCrLf &
+                        "1. Нажмите 'Файл' -> 'Параметры' -> 'Центр управления безопасностью'" & vbCrLf &
+                        "2. Нажмите 'Параметры Центра управления безопасностью'" & vbCrLf &
+                        "3. Выберите 'Параметры макросов'" & vbCrLf &
+                        "4. Установите флажок 'Доверять доступ к объектной модели проектов VBA'",
+                        "Требуется настроить разрешения Центра управления безопасностью",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning)
     End Sub

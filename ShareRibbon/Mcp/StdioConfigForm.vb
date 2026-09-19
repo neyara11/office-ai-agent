@@ -23,13 +23,13 @@ Public Class StdioConfigForm
     End Sub
 
     Private Sub InitializeComponent()
-        Me.Text = "Stdio连接配置"
+        Me.Text = "Настройка подключения Stdio"
         Me.Size = New Size(500, 500)
         Me.StartPosition = FormStartPosition.CenterParent
 
         ' 命令输入
         Dim commandLabel As New Label()
-        commandLabel.Text = "命令路径:"
+        commandLabel.Text = "Путь к команде:"
         commandLabel.Location = New Point(20, 20)
         commandLabel.Width = 100
         Me.Controls.Add(commandLabel)
@@ -41,7 +41,7 @@ Public Class StdioConfigForm
 
         ' 参数输入
         Dim argsLabel As New Label()
-        argsLabel.Text = "命令参数:"
+        argsLabel.Text = "Аргументы команды:"
         argsLabel.Location = New Point(20, 50)
         argsLabel.Width = 100
         Me.Controls.Add(argsLabel)
@@ -53,14 +53,14 @@ Public Class StdioConfigForm
 
         ' 环境变量标签和切换按钮
         Dim envLabel As New Label()
-        envLabel.Text = "环境变量:"
+        envLabel.Text = "Переменные окружения:"
         envLabel.Location = New Point(20, 110)
         envLabel.Width = 100
         Me.Controls.Add(envLabel)
 
         ' 添加切换视图按钮
         _switchViewButton = New Button()
-        _switchViewButton.Text = "切换到文本视图"
+        _switchViewButton.Text = "Переключить на текстовый вид"
         _switchViewButton.Location = New Point(330, 107)
         _switchViewButton.Width = 140
         AddHandler _switchViewButton.Click, AddressOf SwitchViewButton_Click
@@ -74,8 +74,8 @@ Public Class StdioConfigForm
         _envVariablesGrid.AllowUserToDeleteRows = True
         _envVariablesGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
         _envVariablesGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        _envVariablesGrid.Columns.Add("Key", "变量名")
-        _envVariablesGrid.Columns.Add("Value", "变量值")
+        _envVariablesGrid.Columns.Add("Key", "Имя переменной")
+        _envVariablesGrid.Columns.Add("Value", "Значение переменной")
         Me.Controls.Add(_envVariablesGrid)
 
         ' 环境变量文本视图
@@ -90,14 +90,14 @@ Public Class StdioConfigForm
 
         ' 底部按钮
         _okButton = New Button()
-        _okButton.Text = "确定"
+        _okButton.Text = "OK"
         _okButton.Location = New Point(310, 420)
         _okButton.Width = 80
         AddHandler _okButton.Click, AddressOf OkButton_Click
         Me.Controls.Add(_okButton)
 
         _cancelButton = New Button()
-        _cancelButton.Text = "取消"
+        _cancelButton.Text = "Отмена"
         _cancelButton.Location = New Point(400, 420)
         _cancelButton.Width = 80
         AddHandler _cancelButton.Click, AddressOf CancelButton_Click
@@ -175,7 +175,7 @@ Public Class StdioConfigForm
             ' 显示文本视图
             _envVariablesGrid.Visible = False
             _envVariablesTextBox.Visible = True
-            _switchViewButton.Text = "切换到表格视图"
+            _switchViewButton.Text = "Переключить на табличный вид"
         Else
             ' 从文本视图切换到表格视图前，先更新环境变量集合
             CollectEnvironmentVariables()
@@ -185,7 +185,7 @@ Public Class StdioConfigForm
             ' 显示表格视图
             _envVariablesTextBox.Visible = False
             _envVariablesGrid.Visible = True
-            _switchViewButton.Text = "切换到文本视图"
+            _switchViewButton.Text = "Переключить на текстовый вид"
         End If
 
         _isGridView = Not _isGridView

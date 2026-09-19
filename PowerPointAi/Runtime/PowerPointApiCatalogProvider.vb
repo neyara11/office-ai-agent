@@ -40,14 +40,14 @@ Namespace OfficeRuntime
                     Return ToolResult.Failed(toolId,
                                              validation.ToErrorMessage(),
                                              errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                             userMessage:="能力查询参数无效",
+                                             userMessage:="Недопустимые параметры запроса возможностей",
                                              recoverable:=True)
                 End If
 
                 Dim result = Search(request)
                 Dim observation = New JObject From {
                     {"kind", "office_capability_search"},
-                    {"summary", $"找到 {result.Members.Count} 个相关 PowerPoint API 成员"},
+                    {"summary", $"Найдено связанных членов PowerPoint API: {result.Members.Count}"},
                     {"changed", False},
                     {"readOnly", True},
                     {"resultCount", result.Members.Count},
@@ -61,7 +61,7 @@ Namespace OfficeRuntime
                                              "No matching PowerPoint capability was found",
                                              data:=result,
                                              errorCode:=ExceptionClassifier.CodeCapabilityNotFound,
-                                             userMessage:="未找到与目标匹配的 PowerPoint 对象能力",
+                                             userMessage:="Связанные с целью возможности объектов PowerPoint не найдены",
                                              recoverable:=True,
                                              observation:=observation)
                 End If

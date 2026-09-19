@@ -1,4 +1,4 @@
-'Imports System.Diagnostics
+ï»¿'Imports System.Diagnostics
 'Imports System.IO
 'Imports System.Net
 'Imports System.Net.Http
@@ -12,31 +12,31 @@
 'Imports Newtonsoft.Json.Linq
 'Imports ShareRibbon
 
-'' ÓÃÓÚÔÚExcelÖĞ×¢²áºÍ¶¨Òå×Ô¶¨Òåº¯Êı
+'' ç”¨äºåœ¨Excelä¸­æ³¨å†Œå’Œå®šä¹‰è‡ªå®šä¹‰å‡½æ•°
 '<ComVisible(True)>
 '<ClassInterface(ClassInterfaceType.AutoDual)>
 '<ProgId("ExcelAi.ExcelFunctions")>
 'Public Class ExcelFunctions
 
-'    ' LLMÎÄ±¾Éú³Éº¯Êı - »ù±¾°æ±¾
-'    ' ²ÎÊı£ºprompt - ÌáÊ¾´Ê
+'    ' LLMæ–‡æœ¬ç”Ÿæˆå‡½æ•° - åŸºæœ¬ç‰ˆæœ¬
+'    ' å‚æ•°ï¼šprompt - æç¤ºè¯
 '    <ComVisible(True)>
 '    Public Function TLLM(prompt As String) As String
 '        Try
-'            ' Ê¹ÓÃÄ¬ÈÏÉèÖÃµ÷ÓÃÍêÕû°æº¯Êı
+'            ' ä½¿ç”¨é»˜è®¤è®¾ç½®è°ƒç”¨å®Œæ•´ç‰ˆå‡½æ•°
 '            Return CLLM(prompt, "", "", 0.7, 1000)
 '        Catch ex As Exception
-'            Return $"´íÎó: {ex.Message}"
+'            Return $"é”™è¯¯: {ex.Message}"
 '        End Try
 '    End Function
 
-'    ' LLMÎÄ±¾Éú³Éº¯Êı - ¸ß¼¶°æ±¾
-'    ' ²ÎÊı£º
-'    ' - prompt: ÌáÊ¾´Ê
-'    ' - model: Ä£ĞÍÃû³Æ (¿ÉÑ¡)
-'    ' - systemPrompt: ÏµÍ³ÌáÊ¾´Ê (¿ÉÑ¡)
-'    ' - temperature: ÎÂ¶È²ÎÊı (¿ÉÑ¡)
-'    ' - maxTokens: ×î´óÉú³ÉÁîÅÆÊı (¿ÉÑ¡)
+'    ' LLMæ–‡æœ¬ç”Ÿæˆå‡½æ•° - é«˜çº§ç‰ˆæœ¬
+'    ' å‚æ•°ï¼š
+'    ' - prompt: æç¤ºè¯
+'    ' - model: æ¨¡å‹åç§° (å¯é€‰)
+'    ' - systemPrompt: ç³»ç»Ÿæç¤ºè¯ (å¯é€‰)
+'    ' - temperature: æ¸©åº¦å‚æ•° (å¯é€‰)
+'    ' - maxTokens: æœ€å¤§ç”Ÿæˆä»¤ç‰Œæ•° (å¯é€‰)
 
 '    <ComVisible(True)>
 '    Public Function CLLM(
@@ -47,72 +47,72 @@
 '        Optional maxTokens As Integer = 1000) As String
 
 '        Try
-'            ' ÑéÖ¤ÊäÈë
+'            ' éªŒè¯è¾“å…¥
 '            If String.IsNullOrEmpty(prompt) Then
-'                Return "´íÎó: ÌáÊ¾´Ê²»ÄÜÎª¿Õ"
+'                Return "é”™è¯¯: æç¤ºè¯ä¸èƒ½ä¸ºç©º"
 '            End If
 
-'            ' Ê¹ÓÃÄ¬ÈÏÖµ£¨Èç¹ûÎ´Ìá¹©£©
+'            ' ä½¿ç”¨é»˜è®¤å€¼ï¼ˆå¦‚æœæœªæä¾›ï¼‰
 '            Dim apiKey As String = GetApiKey()
 '            Dim apiUrl As String = GetApiUrl()
 
 '            If String.IsNullOrEmpty(apiKey) Then
-'                Return "´íÎó: Î´ÅäÖÃAPIÃÜÔ¿"
+'                Return "é”™è¯¯: æœªé…ç½®APIå¯†é’¥"
 '            End If
 
 '            If String.IsNullOrEmpty(apiUrl) Then
-'                Return "´íÎó: Î´ÅäÖÃAPI URL"
+'                Return "é”™è¯¯: æœªé…ç½®API URL"
 '            End If
 
-'            ' Ê¹ÓÃÖ¸¶¨µÄÄ£ĞÍ»òÄ¬ÈÏÄ£ĞÍ
+'            ' ä½¿ç”¨æŒ‡å®šçš„æ¨¡å‹æˆ–é»˜è®¤æ¨¡å‹
 '            Dim useModel As String = If(String.IsNullOrEmpty(model), GetDefaultModel(), model)
 
-'            ' ´´½¨ÇëÇóÌå
+'            ' åˆ›å»ºè¯·æ±‚ä½“
 '            Dim requestBody As String = LLMUtil.CreateLlmRequestBody(prompt, useModel, systemPrompt, temperature, maxTokens)
 
-'            ' µ÷ÓÃAPI²¢»ñÈ¡½á¹û£¨Ê¹ÓÃÁ÷Ê½´¦Àí£©
+'            ' è°ƒç”¨APIå¹¶è·å–ç»“æœï¼ˆä½¿ç”¨æµå¼å¤„ç†ï¼‰
 '            Dim response As String = LLMUtil.SendHttpRequest(apiUrl, apiKey, requestBody).Result
 
-'            ' Èç¹ûÏìÓ¦Îª¿Õ£¬·µ»Ø´íÎóĞÅÏ¢
+'            ' å¦‚æœå“åº”ä¸ºç©ºï¼Œè¿”å›é”™è¯¯ä¿¡æ¯
 '            If String.IsNullOrEmpty(response) Then
-'                Return "´íÎó: APIÎ´·µ»ØÏìÓ¦"
+'                Return "é”™è¯¯: APIæœªè¿”å›å“åº”"
 '            End If
 '            Dim parsedResponse As JObject = JObject.Parse(response)
 '            Dim cellValue As String = parsedResponse("choices")(0)("message")("content").ToString()
 '            Return cellValue
 '        Catch ex As Exception
-'            Return $"´íÎó: {ex.Message}"
+'            Return $"é”™è¯¯: {ex.Message}"
 '        End Try
 '    End Function
 
 
-'    ' »ñÈ¡APIÃÜÔ¿
+'    ' è·å–APIå¯†é’¥
 '    Private Function GetApiKey() As String
 '        Try
-'            ' ´ÓÅäÖÃ¹ÜÀíÆ÷»ñÈ¡APIÃÜÔ¿
+'            ' ä»é…ç½®ç®¡ç†å™¨è·å–APIå¯†é’¥
 '            Return ShareRibbon.ConfigSettings.ApiKey
 '        Catch ex As Exception
 '            Return ""
 '        End Try
 '    End Function
 
-'    ' »ñÈ¡API URL
+'    ' è·å–API URL
 '    Private Function GetApiUrl() As String
 '        Try
-'            ' ´ÓÅäÖÃ¹ÜÀíÆ÷»ñÈ¡API URL
+'            ' ä»é…ç½®ç®¡ç†å™¨è·å–API URL
 '            Return ShareRibbon.ConfigSettings.ApiUrl
 '        Catch ex As Exception
 '            Return ""
 '        End Try
 '    End Function
 
-'    ' »ñÈ¡Ä¬ÈÏÄ£ĞÍ
+'    ' è·å–é»˜è®¤æ¨¡å‹
 '    Private Function GetDefaultModel() As String
 '        Try
-'            ' ´ÓÅäÖÃ¹ÜÀíÆ÷»ñÈ¡Ä¬ÈÏÄ£ĞÍ
+'            ' ä»é…ç½®ç®¡ç†å™¨è·å–é»˜è®¤æ¨¡å‹
 '            Dim model As String = ShareRibbon.ConfigSettings.ModelName
 
-'            ' Èç¹ûÎ´ÅäÖÃ£¬Ê¹ÓÃÍ¨ÓÃÄ¬ÈÏÖµ
+'            ' å¦‚æœæœªé…ç½®ï¼Œä½¿ç”¨é€šç”¨é»˜è®¤å€¼
 '            If String.IsNullOrEmpty(model) Then
 '                Return "gpt-3.5-turbo"
 '            End If
@@ -123,38 +123,38 @@
 '        End Try
 '    End Function
 
-'    ' Ìí¼ÓCOM×¢²á·½·¨
+'    ' æ·»åŠ COMæ³¨å†Œæ–¹æ³•
 '    <ComRegisterFunction()>
 '    Public Shared Sub RegisterFunction(ByVal type As Type)
 '        Try
-'            System.Diagnostics.Debug.WriteLine($"ExcelFunctions COM×¢²á: {type.Name}")
+'            System.Diagnostics.Debug.WriteLine($"ExcelFunctions COMæ³¨å†Œ: {type.Name}")
 
-'            ' Ìí¼Ó×¢²á±íÏî
+'            ' æ·»åŠ æ³¨å†Œè¡¨é¡¹
 '            Dim regKey As RegistryKey = Registry.CurrentUser.CreateSubKey($"ExcelAi.ExcelFunctions")
 '            regKey.SetValue("", "Excel AI Functions Implementation")
 
-'            ' Ìí¼ÓCLSIDÏî
+'            ' æ·»åŠ CLSIDé¡¹
 '            Dim clsidKey As RegistryKey = regKey.CreateSubKey("CLSID")
-'            ' »ñÈ¡ÀàĞÍµÄGUID
+'            ' è·å–ç±»å‹çš„GUID
 '            Dim guidAttr As GuidAttribute = CType(type.GetCustomAttributes(GetType(GuidAttribute), False)(0), GuidAttribute)
 '            clsidKey.SetValue("", $"{{{guidAttr.Value}}}")
 
 '            regKey.Close()
 
-'            System.Diagnostics.Debug.WriteLine("ExcelFunctions COM×¢²á³É¹¦")
+'            System.Diagnostics.Debug.WriteLine("ExcelFunctions COMæ³¨å†ŒæˆåŠŸ")
 '        Catch ex As Exception
-'            System.Diagnostics.Debug.WriteLine($"ExcelFunctions COM×¢²áÊ§°Ü: {ex.Message}")
+'            System.Diagnostics.Debug.WriteLine($"ExcelFunctions COMæ³¨å†Œå¤±è´¥: {ex.Message}")
 '        End Try
 '    End Sub
 
-'    ' Ìí¼ÓCOM×¢Ïú·½·¨
+'    ' æ·»åŠ COMæ³¨é”€æ–¹æ³•
 '    <ComUnregisterFunction()>
 '    Public Shared Sub UnregisterFunction(ByVal type As Type)
 '        Try
 '            Registry.CurrentUser.DeleteSubKeyTree($"ExcelAi.ExcelFunctions", False)
-'            System.Diagnostics.Debug.WriteLine("ExcelFunctions COM×¢Ïú³É¹¦")
+'            System.Diagnostics.Debug.WriteLine("ExcelFunctions COMæ³¨é”€æˆåŠŸ")
 '        Catch ex As Exception
-'            System.Diagnostics.Debug.WriteLine($"ExcelFunctions COM×¢ÏúÊ§°Ü: {ex.Message}")
+'            System.Diagnostics.Debug.WriteLine($"ExcelFunctions COMæ³¨é”€å¤±è´¥: {ex.Message}")
 '        End Try
 '    End Sub
 'End Class

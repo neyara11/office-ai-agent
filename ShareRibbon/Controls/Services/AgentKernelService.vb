@@ -1,4 +1,4 @@
-Imports System.Text
+﻿Imports System.Text
 Imports System.Threading.Tasks
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
@@ -144,7 +144,7 @@ Public Class AgentKernelService
             Return result.Status = Agent.Harness.HarnessRunStatus.Succeeded
         Catch ex As Exception
             AppLogger.Error("AgentKernelService", "StartAgentAsync exception", ex)
-            Dim userMessage = ExceptionClassifier.ToUserMessage(ex, "Agent 启动失败，请重试")
+            Dim userMessage = ExceptionClassifier.ToUserMessage(ex, "Не удалось запустить агента, повторите попытку")
             GlobalStatusStrip.ShowWarning(userMessage)
             FinalizeAgentUi(False, userMessage)
             Return False
@@ -166,9 +166,9 @@ Public Class AgentKernelService
             AgentFullUserMessage = Nothing
             CurrentAgentSessionId = Nothing
 
-            _executeScript($"completeAgent('{sessionId}', false, '已终止')")
+            _executeScript($"completeAgent('{sessionId}', false, 'Остановлено')")
 
-            GlobalStatusStrip.ShowInfo("已终止Agent")
+            GlobalStatusStrip.ShowInfo("Агент остановлен")
         Catch ex As Exception
             AppLogger.Error("AgentKernelService", "AbortAgent exception", ex)
         End Try
@@ -340,7 +340,7 @@ Public Class AgentKernelService
     ''' </summary>
     Private Sub OnKernelCompleted(result As Agent.AgentResult)
         Dim terminalSuccess = result IsNot Nothing AndAlso result.Success
-        Dim terminalMessage = If(result?.Message, If(terminalSuccess, "任务完成", "任务失败"))
+        Dim terminalMessage = If(result?.Message, If(terminalSuccess, "Задача выполнена", "Задача не выполнена"))
         Try
             Dim userMsgForHistory = If(Not String.IsNullOrWhiteSpace(AgentFullUserMessage), AgentFullUserMessage, AgentOriginalUserRequest)
 
@@ -424,7 +424,7 @@ Public Class AgentKernelService
 
             Dim timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             _executeScript($"createChatSection('AI', '{timestamp}', '{AgentThinkingUuid}')")
-            _executeScript($"var thinkingDiv = document.getElementById('content-{AgentThinkingUuid}'); if(thinkingDiv) thinkingDiv.innerHTML = '<div class=""thinking-indicator""><div class=""thinking-dots""><span></span><span></span><span></span></div><span style=""margin-left: 12px; color: #6c757d;"">正在分析您的需求...</span></div>';")
+            _executeScript($"var thinkingDiv = document.getElementById('content-{AgentThinkingUuid}'); if(thinkingDiv) thinkingDiv.innerHTML = '<div class=""thinking-indicator""><div class=""thinking-dots""><span></span><span></span><span></span></div><span style=""margin-left: 12px; color: #6c757d;"">Анализирую ваш запрос...</span></div>';")
         Catch ex As Exception
             Debug.WriteLine($"[AgentKernelService] ShowThinkingStatus 出错: {ex.Message}")
         End Try

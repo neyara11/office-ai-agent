@@ -106,7 +106,7 @@ Public Class ReformatTemplateEditorForm
     End Sub
 
     Private Sub InitializeForm()
-        Me.Text = If(_isNewTemplate, "新建排版模板", "编辑排版模板")
+        Me.Text = If(_isNewTemplate, "Новый шаблон форматирования", "Редактирование шаблона форматирования")
         Me.Size = New Size(700, 600)
         Me.StartPosition = FormStartPosition.CenterParent
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -121,22 +121,22 @@ Public Class ReformatTemplateEditorForm
         }
 
         ' 基本信息Tab
-        tabBasicInfo = New TabPage("基本信息")
+        tabBasicInfo = New TabPage("Основные сведения")
         CreateBasicInfoTab()
         tabControl.TabPages.Add(tabBasicInfo)
 
         ' 版式Tab
-        tabLayout = New TabPage("版式配置")
+        tabLayout = New TabPage("Настройка макета")
         CreateLayoutTab()
         tabControl.TabPages.Add(tabLayout)
 
         ' 正文样式Tab
-        tabBodyStyles = New TabPage("正文样式")
+        tabBodyStyles = New TabPage("Стили основного текста")
         CreateBodyStylesTab()
         tabControl.TabPages.Add(tabBodyStyles)
 
         ' 页面设置Tab
-        tabPageSettings = New TabPage("页面设置")
+        tabPageSettings = New TabPage("Параметры страницы")
         CreatePageSettingsTab()
         tabControl.TabPages.Add(tabPageSettings)
 
@@ -144,7 +144,7 @@ Public Class ReformatTemplateEditorForm
 
         ' 底部按钮
         btnSave = New Button With {
-            .Text = "保存",
+            .Text = "Сохранить",
             .Location = New Point(500, 520),
             .Size = New Size(80, 30),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Right
@@ -153,7 +153,7 @@ Public Class ReformatTemplateEditorForm
         Me.Controls.Add(btnSave)
 
         btnCancel = New Button With {
-            .Text = "取消",
+            .Text = "Отмена",
             .Location = New Point(590, 520),
             .Size = New Size(80, 30),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Right
@@ -166,13 +166,13 @@ Public Class ReformatTemplateEditorForm
         Dim y As Integer = 20
 
         ' 模板名称
-        tabBasicInfo.Controls.Add(New Label With {.Text = "模板名称:", .Location = New Point(20, y), .AutoSize = True})
+        tabBasicInfo.Controls.Add(New Label With {.Text = "Название шаблона:", .Location = New Point(20, y), .AutoSize = True})
         txtName = New TextBox With {.Location = New Point(120, y - 3), .Size = New Size(300, 23)}
         tabBasicInfo.Controls.Add(txtName)
         y += 35
 
         ' 分类
-        tabBasicInfo.Controls.Add(New Label With {.Text = "分类:", .Location = New Point(20, y), .AutoSize = True})
+        tabBasicInfo.Controls.Add(New Label With {.Text = "Категория:", .Location = New Point(20, y), .AutoSize = True})
         cboCategory = New ComboBox With {
             .Location = New Point(120, y - 3),
             .Size = New Size(150, 23),
@@ -183,7 +183,7 @@ Public Class ReformatTemplateEditorForm
         y += 35
 
         ' 描述
-        tabBasicInfo.Controls.Add(New Label With {.Text = "描述:", .Location = New Point(20, y), .AutoSize = True})
+        tabBasicInfo.Controls.Add(New Label With {.Text = "Описание:", .Location = New Point(20, y), .AutoSize = True})
         txtDescription = New TextBox With {
             .Location = New Point(120, y - 3),
             .Size = New Size(500, 60),
@@ -193,7 +193,7 @@ Public Class ReformatTemplateEditorForm
         y += 75
 
         ' AI说明
-        tabBasicInfo.Controls.Add(New Label With {.Text = "AI说明:", .Location = New Point(20, y), .AutoSize = True})
+        tabBasicInfo.Controls.Add(New Label With {.Text = "Описание для ИИ:", .Location = New Point(20, y), .AutoSize = True})
         txtAiGuidance = New TextBox With {
             .Location = New Point(120, y - 3),
             .Size = New Size(500, 100),
@@ -203,7 +203,7 @@ Public Class ReformatTemplateEditorForm
 
         ' 提示文本
         Dim tipLabel = New Label With {
-            .Text = "AI说明：提供给AI的额外上下文信息，帮助AI更好地理解排版需求。",
+            .Text = "Описание для ИИ: дополнительный контекст для ИИ, помогающий лучше понять требования к форматированию.",
             .Location = New Point(120, y + 105),
             .AutoSize = True,
             .ForeColor = Color.Gray,
@@ -214,7 +214,7 @@ Public Class ReformatTemplateEditorForm
 
     Private Sub CreateLayoutTab()
         ' 左侧列表
-        tabLayout.Controls.Add(New Label With {.Text = "骨架元素:", .Location = New Point(20, 15), .AutoSize = True})
+        tabLayout.Controls.Add(New Label With {.Text = "Элементы каркаса:", .Location = New Point(20, 15), .AutoSize = True})
 
         lstLayoutElements = New ListBox With {
             .Location = New Point(20, 35),
@@ -250,12 +250,12 @@ Public Class ReformatTemplateEditorForm
 
         Dim y As Integer = 15
 
-        pnlElementEdit.Controls.Add(New Label With {.Text = "元素名称:", .Location = New Point(15, y), .AutoSize = True})
+        pnlElementEdit.Controls.Add(New Label With {.Text = "Имя элемента:", .Location = New Point(15, y), .AutoSize = True})
         txtElementName = New TextBox With {.Location = New Point(100, y - 3), .Size = New Size(150, 23)}
         pnlElementEdit.Controls.Add(txtElementName)
         y += 35
 
-        pnlElementEdit.Controls.Add(New Label With {.Text = "元素类型:", .Location = New Point(15, y), .AutoSize = True})
+        pnlElementEdit.Controls.Add(New Label With {.Text = "Тип элемента:", .Location = New Point(15, y), .AutoSize = True})
         cboElementType = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(150, 23),
@@ -265,12 +265,12 @@ Public Class ReformatTemplateEditorForm
         pnlElementEdit.Controls.Add(cboElementType)
         y += 35
 
-        pnlElementEdit.Controls.Add(New Label With {.Text = "默认值:", .Location = New Point(15, y), .AutoSize = True})
+        pnlElementEdit.Controls.Add(New Label With {.Text = "Значение по умолчанию:", .Location = New Point(15, y), .AutoSize = True})
         txtElementDefaultValue = New TextBox With {.Location = New Point(100, y - 3), .Size = New Size(280, 23)}
         pnlElementEdit.Controls.Add(txtElementDefaultValue)
         y += 35
 
-        pnlElementEdit.Controls.Add(New Label With {.Text = "中文字体:", .Location = New Point(15, y), .AutoSize = True})
+        pnlElementEdit.Controls.Add(New Label With {.Text = "Китайский шрифт:", .Location = New Point(15, y), .AutoSize = True})
         cboElementFontCN = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(150, 23),
@@ -283,7 +283,7 @@ Public Class ReformatTemplateEditorForm
         pnlElementEdit.Controls.Add(cboElementFontCN)
         y += 35
 
-        pnlElementEdit.Controls.Add(New Label With {.Text = "字号:", .Location = New Point(15, y), .AutoSize = True})
+        pnlElementEdit.Controls.Add(New Label With {.Text = "Размер шрифта:", .Location = New Point(15, y), .AutoSize = True})
         cboElementFontSize = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(80, 23),
@@ -295,12 +295,12 @@ Public Class ReformatTemplateEditorForm
         AddHandler cboElementFontSize.SelectedIndexChanged, AddressOf OnElementStyleChanged
         pnlElementEdit.Controls.Add(cboElementFontSize)
 
-        chkElementBold = New CheckBox With {.Text = "加粗", .Location = New Point(200, y - 3), .AutoSize = True}
+        chkElementBold = New CheckBox With {.Text = "Полужирный", .Location = New Point(200, y - 3), .AutoSize = True}
         AddHandler chkElementBold.CheckedChanged, AddressOf OnElementStyleChanged
         pnlElementEdit.Controls.Add(chkElementBold)
         y += 35
 
-        pnlElementEdit.Controls.Add(New Label With {.Text = "对齐方式:", .Location = New Point(15, y), .AutoSize = True})
+        pnlElementEdit.Controls.Add(New Label With {.Text = "Выравнивание:", .Location = New Point(15, y), .AutoSize = True})
         cboElementAlignment = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(120, 23),
@@ -312,7 +312,7 @@ Public Class ReformatTemplateEditorForm
 
         ' 保存元素按钮
         Dim btnSaveElement As New Button With {
-            .Text = "保存元素",
+            .Text = "Сохранить элемент",
             .Location = New Point(15, 350),
             .Size = New Size(100, 30)
         }
@@ -322,7 +322,7 @@ Public Class ReformatTemplateEditorForm
 
     Private Sub CreateBodyStylesTab()
         ' 左侧列表
-        tabBodyStyles.Controls.Add(New Label With {.Text = "正文样式:", .Location = New Point(20, 15), .AutoSize = True})
+        tabBodyStyles.Controls.Add(New Label With {.Text = "Стили основного текста:", .Location = New Point(20, 15), .AutoSize = True})
 
         lstBodyStyles = New ListBox With {
             .Location = New Point(20, 35),
@@ -350,17 +350,17 @@ Public Class ReformatTemplateEditorForm
 
         Dim y As Integer = 15
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "样式名称:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Имя стиля:", .Location = New Point(15, y), .AutoSize = True})
         txtStyleName = New TextBox With {.Location = New Point(100, y - 3), .Size = New Size(150, 23)}
         pnlStyleEdit.Controls.Add(txtStyleName)
         y += 35
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "匹配条件:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Условие совпадения:", .Location = New Point(15, y), .AutoSize = True})
         txtStyleCondition = New TextBox With {.Location = New Point(100, y - 3), .Size = New Size(280, 23)}
         pnlStyleEdit.Controls.Add(txtStyleCondition)
         y += 35
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "中文字体:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Китайский шрифт:", .Location = New Point(15, y), .AutoSize = True})
         cboStyleFontCN = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(150, 23),
@@ -373,7 +373,7 @@ Public Class ReformatTemplateEditorForm
         pnlStyleEdit.Controls.Add(cboStyleFontCN)
         y += 35
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "字号:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Размер шрифта:", .Location = New Point(15, y), .AutoSize = True})
         cboStyleFontSize = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(80, 23),
@@ -385,12 +385,12 @@ Public Class ReformatTemplateEditorForm
         AddHandler cboStyleFontSize.SelectedIndexChanged, AddressOf OnBodyStyleChanged
         pnlStyleEdit.Controls.Add(cboStyleFontSize)
 
-        chkStyleBold = New CheckBox With {.Text = "加粗", .Location = New Point(200, y - 3), .AutoSize = True}
+        chkStyleBold = New CheckBox With {.Text = "Полужирный", .Location = New Point(200, y - 3), .AutoSize = True}
         AddHandler chkStyleBold.CheckedChanged, AddressOf OnBodyStyleChanged
         pnlStyleEdit.Controls.Add(chkStyleBold)
         y += 35
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "对齐方式:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Выравнивание:", .Location = New Point(15, y), .AutoSize = True})
         cboStyleAlignment = New ComboBox With {
             .Location = New Point(100, y - 3),
             .Size = New Size(120, 23),
@@ -401,7 +401,7 @@ Public Class ReformatTemplateEditorForm
         pnlStyleEdit.Controls.Add(cboStyleAlignment)
         y += 35
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "首行缩进:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Отступ первой строки:", .Location = New Point(15, y), .AutoSize = True})
         numStyleFirstIndent = New NumericUpDown With {
             .Location = New Point(100, y - 3),
             .Size = New Size(80, 23),
@@ -412,10 +412,10 @@ Public Class ReformatTemplateEditorForm
         }
         AddHandler numStyleFirstIndent.ValueChanged, AddressOf OnBodyStyleChanged
         pnlStyleEdit.Controls.Add(numStyleFirstIndent)
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "字符", .Location = New Point(185, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "симв.", .Location = New Point(185, y), .AutoSize = True})
         y += 35
 
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "行距:", .Location = New Point(15, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "Межстрочный интервал:", .Location = New Point(15, y), .AutoSize = True})
         numStyleLineSpacing = New NumericUpDown With {
             .Location = New Point(100, y - 3),
             .Size = New Size(80, 23),
@@ -427,11 +427,11 @@ Public Class ReformatTemplateEditorForm
         }
         AddHandler numStyleLineSpacing.ValueChanged, AddressOf OnBodyStyleChanged
         pnlStyleEdit.Controls.Add(numStyleLineSpacing)
-        pnlStyleEdit.Controls.Add(New Label With {.Text = "倍", .Location = New Point(185, y), .AutoSize = True})
+        pnlStyleEdit.Controls.Add(New Label With {.Text = "×", .Location = New Point(185, y), .AutoSize = True})
 
         ' 保存样式按钮
         Dim btnSaveStyle As New Button With {
-            .Text = "保存样式",
+            .Text = "Сохранить стиль",
             .Location = New Point(15, 380),
             .Size = New Size(100, 30)
         }
@@ -444,13 +444,13 @@ Public Class ReformatTemplateEditorForm
 
         ' 页边距组
         Dim grpMargins As New GroupBox With {
-            .Text = "页边距 (cm)",
+            .Text = "Поля (см)",
             .Location = New Point(20, y),
             .Size = New Size(600, 100)
         }
         tabPageSettings.Controls.Add(grpMargins)
 
-        grpMargins.Controls.Add(New Label With {.Text = "上:", .Location = New Point(30, 30), .AutoSize = True})
+        grpMargins.Controls.Add(New Label With {.Text = "Сверху:", .Location = New Point(30, 30), .AutoSize = True})
         numMarginTop = New NumericUpDown With {
             .Location = New Point(60, 27),
             .Size = New Size(70, 23),
@@ -462,7 +462,7 @@ Public Class ReformatTemplateEditorForm
         }
         grpMargins.Controls.Add(numMarginTop)
 
-        grpMargins.Controls.Add(New Label With {.Text = "下:", .Location = New Point(160, 30), .AutoSize = True})
+        grpMargins.Controls.Add(New Label With {.Text = "Снизу:", .Location = New Point(160, 30), .AutoSize = True})
         numMarginBottom = New NumericUpDown With {
             .Location = New Point(190, 27),
             .Size = New Size(70, 23),
@@ -474,7 +474,7 @@ Public Class ReformatTemplateEditorForm
         }
         grpMargins.Controls.Add(numMarginBottom)
 
-        grpMargins.Controls.Add(New Label With {.Text = "左:", .Location = New Point(290, 30), .AutoSize = True})
+        grpMargins.Controls.Add(New Label With {.Text = "Слева:", .Location = New Point(290, 30), .AutoSize = True})
         numMarginLeft = New NumericUpDown With {
             .Location = New Point(320, 27),
             .Size = New Size(70, 23),
@@ -486,7 +486,7 @@ Public Class ReformatTemplateEditorForm
         }
         grpMargins.Controls.Add(numMarginLeft)
 
-        grpMargins.Controls.Add(New Label With {.Text = "右:", .Location = New Point(420, 30), .AutoSize = True})
+        grpMargins.Controls.Add(New Label With {.Text = "Справа:", .Location = New Point(420, 30), .AutoSize = True})
         numMarginRight = New NumericUpDown With {
             .Location = New Point(450, 27),
             .Size = New Size(70, 23),
@@ -502,24 +502,24 @@ Public Class ReformatTemplateEditorForm
 
         ' 页码组
         Dim grpPageNumber As New GroupBox With {
-            .Text = "页码设置",
+            .Text = "Настройка нумерации страниц",
             .Location = New Point(20, y),
             .Size = New Size(600, 100)
         }
         tabPageSettings.Controls.Add(grpPageNumber)
 
-        chkPageNumber = New CheckBox With {.Text = "显示页码", .Location = New Point(30, 30), .AutoSize = True}
+        chkPageNumber = New CheckBox With {.Text = "Показывать номера страниц", .Location = New Point(30, 30), .AutoSize = True}
         grpPageNumber.Controls.Add(chkPageNumber)
 
-        grpPageNumber.Controls.Add(New Label With {.Text = "格式:", .Location = New Point(30, 60), .AutoSize = True})
+        grpPageNumber.Controls.Add(New Label With {.Text = "Формат:", .Location = New Point(30, 60), .AutoSize = True})
         txtPageNumberFormat = New TextBox With {
             .Location = New Point(70, 57),
             .Size = New Size(200, 23),
-            .Text = "第{page}页 共{total}页"
+            .Text = "Страница {page} из {total}"
         }
         grpPageNumber.Controls.Add(txtPageNumberFormat)
 
-        grpPageNumber.Controls.Add(New Label With {.Text = "位置:", .Location = New Point(300, 60), .AutoSize = True})
+        grpPageNumber.Controls.Add(New Label With {.Text = "Положение:", .Location = New Point(300, 60), .AutoSize = True})
         cboPageNumberPosition = New ComboBox With {
             .Location = New Point(340, 57),
             .Size = New Size(100, 23),
@@ -721,7 +721,7 @@ Public Class ReformatTemplateEditorForm
     Private Sub BtnSave_Click(sender As Object, e As EventArgs)
         ' 验证
         If String.IsNullOrWhiteSpace(txtName.Text) Then
-            MessageBox.Show("请输入模板名称", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Введите название шаблона", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 

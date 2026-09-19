@@ -29,7 +29,7 @@ Public Class WebDataCapturePane
             ' 调用基类的初始化方法
             Await InitializeWebView2()
         Catch ex As Exception
-            MessageBox.Show($"初始化网页视图失败: {ex.Message}", "错误",
+            MessageBox.Show($"Не удалось инициализировать веб-представление: {ex.Message}", "Ошибка",
                           MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -40,7 +40,7 @@ Public Class WebDataCapturePane
         Globals.ThisAddIn.ShowChatTaskPane()
         ' 添加选中的内容到引用区
         ThisAddIn.chatControl.AddSelectedContentItem(
-                "来自网页",  ' 使用文档名称作为标识
+                "Из веб-страницы",  ' 使用文档名称作为标识
                    content.Substring(0, Math.Min(content.Length, 50)) & If(content.Length > 50, "...", ""))
     End Sub
 
@@ -75,9 +75,9 @@ Public Class WebDataCapturePane
             table.AllowAutoFit = True
             table.AutoFitBehavior(Microsoft.Office.Interop.Word.WdAutoFitBehavior.wdAutoFitWindow)
 
-            Return "[表格已插入]" & vbCrLf
+            Return "[Таблица вставлена]" & vbCrLf
         Catch ex As Exception
-            MessageBox.Show($"创建表格时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при создании таблицы: {ex.Message}", "Ошибка")
             Return String.Empty
         End Try
     End Function
@@ -106,7 +106,7 @@ Public Class WebDataCapturePane
                 End If
             End If
         Catch ex As Exception
-            MessageBox.Show($"处理提取内容时出错: {ex.Message}", "错误",
+            MessageBox.Show($"Ошибка при обработке извлечённого содержимого: {ex.Message}", "Ошибка",
                       MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
@@ -152,7 +152,7 @@ Public Class WebDataCapturePane
                             insertedLength += chunk.Length
                         Catch insertEx As Exception
                             Debug.WriteLine($"InsertAfter也失败: {insertEx.Message}")
-                            MessageBox.Show($"在第 {i / chunkSize + 1} 块时插入失败: {insertEx.Message}", "警告")
+                            MessageBox.Show($"Ошибка вставки блока {i / chunkSize + 1}: {insertEx.Message}", "Предупреждение")
                             Exit For
                         End Try
                     End Try
@@ -162,11 +162,11 @@ Public Class WebDataCapturePane
             Debug.WriteLine($"分块插入完成，实际插入: {insertedLength} 字符")
 
             If insertedLength < totalLength Then
-                MessageBox.Show($"警告：只插入了 {insertedLength}/{totalLength} 字符", "部分插入")
+                MessageBox.Show($"Внимание: вставлено только {insertedLength}/{totalLength} символов", "Частичная вставка")
             End If
 
         Catch ex As Exception
-            MessageBox.Show($"分块插入失败: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка блочной вставки: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -176,13 +176,13 @@ Public Class WebDataCapturePane
             ' 获取活动文档
             Dim doc = Globals.ThisAddIn.Application.ActiveDocument
             If doc Is Nothing Then
-                MessageBox.Show("请先打开一个Word文档", "提示")
+                MessageBox.Show("Сначала откройте документ Word", "Подсказка")
                 Return
             End If
 
             Dim selection = doc.Application.Selection
             If selection Is Nothing Then
-                MessageBox.Show("无法获取当前选择位置", "错误")
+                MessageBox.Show("Не удалось получить текущую позицию выделения", "Ошибка")
                 Return
             End If
 
@@ -232,7 +232,7 @@ Public Class WebDataCapturePane
                                               selection.TypeText(vbCrLf)
                                               selection.Font.Italic = True
                                               selection.Font.Size = 9
-                                              selection.TypeText($"图片说明: {alt}")
+                                              selection.TypeText($"Подпись к изображению: {alt}")
                                               selection.Font.Italic = False
                                               selection.Font.Size = 11
                                               selection.TypeText(vbCrLf & vbCrLf)
@@ -245,19 +245,19 @@ Public Class WebDataCapturePane
                                               End If
 
                                           Catch ex As Exception
-                                              MessageBox.Show($"插入图片失败: {ex.Message}", "错误")
+                                              MessageBox.Show($"Ошибка вставки изображения: {ex.Message}", "Ошибка")
                                           End Try
                                       End Sub)
                     Catch ex As Exception
                         Me.Invoke(Sub()
-                                      MessageBox.Show($"下载图片失败: {ex.Message}", "错误")
+                                      MessageBox.Show($"Ошибка загрузки изображения: {ex.Message}", "Ошибка")
                                   End Sub)
                     End Try
                 End Sub)
 
 
         Catch ex As Exception
-            MessageBox.Show($"处理图片时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке изображения: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -267,13 +267,13 @@ Public Class WebDataCapturePane
             ' 获取活动文档
             Dim doc = Globals.ThisAddIn.Application.ActiveDocument
             If doc Is Nothing Then
-                MessageBox.Show("请先打开一个Word文档", "提示")
+                MessageBox.Show("Сначала откройте документ Word", "Подсказка")
                 Return
             End If
 
             Dim selection = doc.Application.Selection
             If selection Is Nothing Then
-                MessageBox.Show("无法获取当前选择位置", "错误")
+                MessageBox.Show("Не удалось получить текущую позицию выделения", "Ошибка")
                 Return
             End If
 
@@ -287,7 +287,7 @@ Public Class WebDataCapturePane
             ' 插入视频信息文本
             selection.Font.Bold = True
             selection.Font.Color = RGB(0, 100, 200)
-            selection.TypeText("🎬 视频内容")
+            selection.TypeText("🎬 Видео")
             selection.Font.Bold = False
             selection.Font.Color = RGB(0, 0, 0)
             selection.TypeText(vbCrLf)
@@ -303,29 +303,29 @@ Public Class WebDataCapturePane
                 .AllowAutoFit = True
 
                 ' 设置表头
-                .Cell(1, 1).Range.Text = "属性"
-                .Cell(1, 2).Range.Text = "值"
+                .Cell(1, 1).Range.Text = "Свойство"
+                .Cell(1, 2).Range.Text = "Значение"
                 .Rows(1).Range.Bold = True
 
                 ' 填充数据
-                .Cell(2, 1).Range.Text = "视频链接"
+                .Cell(2, 1).Range.Text = "Ссылка на видео"
                 .Cell(2, 2).Range.Text = videoUrl
 
-                .Cell(3, 1).Range.Text = "时长"
-                .Cell(3, 2).Range.Text = $"{duration} 秒"
+                .Cell(3, 1).Range.Text = "Длительность"
+                .Cell(3, 2).Range.Text = $"{duration} с"
 
-                .Cell(4, 1).Range.Text = "尺寸"
+                .Cell(4, 1).Range.Text = "Размер"
                 .Cell(4, 2).Range.Text = $"{width} × {height}"
 
-                .Cell(5, 1).Range.Text = "预览图"
-                .Cell(5, 2).Range.Text = If(String.IsNullOrEmpty(poster), "无", poster)
+                .Cell(5, 1).Range.Text = "Превью"
+                .Cell(5, 2).Range.Text = If(String.IsNullOrEmpty(poster), "Нет", poster)
 
                 ' 设置视频链接为超链接
                 If Not String.IsNullOrEmpty(videoUrl) Then
                     doc.Hyperlinks.Add(
                     Anchor:= .Cell(2, 2).Range,
                     Address:=videoUrl,
-                    TextToDisplay:="点击观看视频")
+                    TextToDisplay:="Смотреть видео")
                 End If
             End With
 
@@ -378,7 +378,7 @@ Public Class WebDataCapturePane
 
                                               If shape IsNot Nothing Then
                                                   With shape
-                                                      .AlternativeText = "视频预览图"
+                                                      .AlternativeText = "Превью видео"
                                                       If .Width > 300 Then
                                                           .Width = 300
                                                       End If
@@ -388,7 +388,7 @@ Public Class WebDataCapturePane
                                                   selection.TypeText(vbCrLf)
                                                   selection.Font.Italic = True
                                                   selection.Font.Size = 9
-                                                  selection.TypeText("视频预览图")
+                                                  selection.TypeText("Превью видео")
                                                   selection.Font.Italic = False
                                                   selection.Font.Size = 11
                                                   selection.TypeText(vbCrLf & vbCrLf)
@@ -411,7 +411,7 @@ Public Class WebDataCapturePane
             'MessageBox.Show("视频信息已插入", "成功")
 
         Catch ex As Exception
-            MessageBox.Show($"处理视频内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке видео: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -421,13 +421,13 @@ Public Class WebDataCapturePane
             ' 获取活动文档
             Dim doc = Globals.ThisAddIn.Application.ActiveDocument
             If doc Is Nothing Then
-                MessageBox.Show("请先打开一个Word文档", "提示")
+                MessageBox.Show("Сначала откройте документ Word", "Подсказка")
                 Return
             End If
 
             Dim selection = doc.Application.Selection
             If selection Is Nothing Then
-                MessageBox.Show("无法获取当前选择位置", "错误")
+                MessageBox.Show("Не удалось получить текущую позицию выделения", "Ошибка")
                 Return
             End If
 
@@ -441,7 +441,7 @@ Public Class WebDataCapturePane
             ' 插入音频信息
             selection.Font.Bold = True
             selection.Font.Color = RGB(255, 140, 0)
-            selection.TypeText("🎵 音频内容")
+            selection.TypeText("🎵 Аудио")
             selection.Font.Bold = False
             selection.Font.Color = RGB(0, 0, 0)
             selection.TypeText(vbCrLf)
@@ -456,22 +456,22 @@ Public Class WebDataCapturePane
                 .Style = "网格型"
                 .AllowAutoFit = True
 
-                .Cell(1, 1).Range.Text = "属性"
-                .Cell(1, 2).Range.Text = "值"
+                .Cell(1, 1).Range.Text = "Свойство"
+                .Cell(1, 2).Range.Text = "Значение"
                 .Rows(1).Range.Bold = True
 
-                .Cell(2, 1).Range.Text = "音频链接"
+                .Cell(2, 1).Range.Text = "Ссылка на аудио"
                 .Cell(2, 2).Range.Text = audioUrl
 
-                .Cell(3, 1).Range.Text = "时长"
-                .Cell(3, 2).Range.Text = $"{duration} 秒"
+                .Cell(3, 1).Range.Text = "Длительность"
+                .Cell(3, 2).Range.Text = $"{duration} с"
 
                 ' 设置音频链接为超链接
                 If Not String.IsNullOrEmpty(audioUrl) Then
                     doc.Hyperlinks.Add(
                     Anchor:= .Cell(2, 2).Range,
                     Address:=audioUrl,
-                    TextToDisplay:="点击播放音频")
+                    TextToDisplay:="Воспроизвести аудио")
                 End If
             End With
 
@@ -482,7 +482,7 @@ Public Class WebDataCapturePane
             'MessageBox.Show("音频信息已插入", "成功")
 
         Catch ex As Exception
-            MessageBox.Show($"处理音频内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке аудио: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -492,20 +492,20 @@ Public Class WebDataCapturePane
             ' 获取活动文档
             Dim doc = Globals.ThisAddIn.Application.ActiveDocument
             If doc Is Nothing Then
-                MessageBox.Show("请先打开一个Word文档", "提示")
+                MessageBox.Show("Сначала откройте документ Word", "Подсказка")
                 Return
             End If
 
             Dim selection = doc.Application.Selection
             If selection Is Nothing Then
-                MessageBox.Show("无法获取当前选择位置", "错误")
+                MessageBox.Show("Не удалось получить текущую позицию выделения", "Ошибка")
                 Return
             End If
 
             ' 插入容器标题
             selection.Font.Bold = True
             selection.Font.Color = RGB(233, 30, 99)
-            selection.TypeText("📦 媒体容器内容")
+            selection.TypeText("📦 Содержимое медиаконтейнера")
             selection.Font.Bold = False
             selection.Font.Color = RGB(0, 0, 0)
             selection.TypeText(vbCrLf & vbCrLf)
@@ -513,7 +513,7 @@ Public Class WebDataCapturePane
             ' 如果有文本内容，先插入文本
             If Not String.IsNullOrWhiteSpace(text) Then
                 selection.Font.Bold = True
-                selection.TypeText("文本内容:")
+                selection.TypeText("Текстовое содержимое:")
                 selection.Font.Bold = False
                 selection.TypeText(vbCrLf)
                 selection.TypeText(text.Trim())
@@ -523,7 +523,7 @@ Public Class WebDataCapturePane
             ' 处理包含的媒体元素
             If containedMedia IsNot Nothing AndAlso containedMedia.Count > 0 Then
                 selection.Font.Bold = True
-                selection.TypeText($"包含的媒体元素 ({containedMedia.Count} 个):")
+                selection.TypeText($"Вложенные медиаэлементы ({containedMedia.Count}):")
                 selection.Font.Bold = False
                 selection.TypeText(vbCrLf & vbCrLf)
 
@@ -538,11 +538,11 @@ Public Class WebDataCapturePane
                     .AllowAutoFit = True
 
                     ' 设置表头
-                    .Cell(1, 1).Range.Text = "类型"
-                    .Cell(1, 2).Range.Text = "链接"
-                    .Cell(1, 3).Range.Text = "描述"
-                    .Cell(1, 4).Range.Text = "宽度"
-                    .Cell(1, 5).Range.Text = "高度"
+                    .Cell(1, 1).Range.Text = "Тип"
+                    .Cell(1, 2).Range.Text = "Ссылка"
+                    .Cell(1, 3).Range.Text = "Описание"
+                    .Cell(1, 4).Range.Text = "Ширина"
+                    .Cell(1, 5).Range.Text = "Высота"
                     .Rows(1).Range.Bold = True
 
                     ' 填充媒体数据
@@ -578,7 +578,7 @@ Public Class WebDataCapturePane
                                 doc.Hyperlinks.Add(
                                 Anchor:= .Cell(rowIndex, 2).Range,
                                 Address:=mediaSrc,
-                                TextToDisplay:="查看媒体")
+                                TextToDisplay:="Открыть медиа")
                             Catch
                                 ' 如果添加超链接失败，忽略错误
                             End Try
@@ -593,8 +593,8 @@ Public Class WebDataCapturePane
                 ' 询问是否下载图片
                 Dim imageCount = containedMedia.Where(Function(m) m("tag")?.ToString() = "img").Count()
                 If imageCount > 0 Then
-                    Dim result = MessageBox.Show($"发现 {imageCount} 张图片，是否下载并插入到文档中？",
-                                           "下载图片",
+                    Dim result = MessageBox.Show($"Найдено изображений: {imageCount}. Загрузить и вставить их в документ?",
+                                           "Загрузка изображений",
                                            MessageBoxButtons.YesNo,
                                            MessageBoxIcon.Question)
 
@@ -607,7 +607,7 @@ Public Class WebDataCapturePane
             'MessageBox.Show("媒体容器内容已插入", "成功")
 
         Catch ex As Exception
-            MessageBox.Show($"处理媒体容器时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке медиаконтейнера: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -615,13 +615,13 @@ Public Class WebDataCapturePane
     Private Function GetMediaTypeIcon(mediaType As String) As String
         Select Case mediaType.ToLower()
             Case "img"
-                Return "📷 图片"
+                Return "📷 Изображение"
             Case "video"
-                Return "🎬 视频"
+                Return "🎬 Видео"
             Case "audio"
-                Return "🎵 音频"
+                Return "🎵 Аудио"
             Case Else
-                Return "📄 媒体"
+                Return "📄 Медиа"
         End Select
     End Function
 
@@ -681,7 +681,7 @@ Public Class WebDataCapturePane
                           SaveWithDocument:=True)
                                                   Catch pictureEx As Exception
                                                       Debug.WriteLine($"AddPicture失败: {pictureEx.Message}")
-                                                      MessageBox.Show($"无法插入图片: {pictureEx.Message}", "错误")
+                                                      MessageBox.Show($"Не удалось вставить изображение: {pictureEx.Message}", "Ошибка")
                                                       Return
                                                   End Try
 
@@ -701,7 +701,7 @@ Public Class WebDataCapturePane
                                                           selection.TypeText(vbCrLf)
                                                           selection.Font.Italic = True
                                                           selection.Font.Size = 9
-                                                          selection.TypeText($"图片说明: {alt}")
+                                                          selection.TypeText($"Подпись к изображению: {alt}")
                                                           selection.Font.Italic = False
                                                           selection.Font.Size = 11
                                                           selection.TypeText(vbCrLf & vbCrLf)
@@ -713,7 +713,7 @@ Public Class WebDataCapturePane
                                                       End Try
                                                   Else
                                                       Debug.WriteLine("AddPicture返回了Nothing")
-                                                      MessageBox.Show("图片插入失败：返回对象为空", "错误")
+                                                      MessageBox.Show("Ошибка вставки изображения: объект пуст", "Ошибка")
                                                   End If
 
                                                   ' 清理临时文件
@@ -723,7 +723,7 @@ Public Class WebDataCapturePane
 
                                               Catch ex As Exception
                                                   Debug.WriteLine($"插入图片失败: {ex.Message}")
-                                                  MessageBox.Show($"插入图片失败: {ex.Message}", "错误")
+                                                  MessageBox.Show($"Ошибка вставки изображения: {ex.Message}", "Ошибка")
                                           End Try
                                       End Sub)
                         End If
@@ -736,7 +736,7 @@ Public Class WebDataCapturePane
             ' 显示完成消息
             Me.Invoke(Sub()
                           If imageCount > 0 Then
-                              MessageBox.Show($"成功下载并插入 {imageCount} 张图片", "完成")
+                              MessageBox.Show($"Успешно загружено и вставлено изображений: {imageCount}", "Готово")
                           End If
                       End Sub)
         End Sub)

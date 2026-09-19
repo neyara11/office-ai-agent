@@ -23,7 +23,7 @@ Namespace Design
                         Return ToolResult.Failed(toolId,
                                                  "CreateSlides preview must be a boolean",
                                                  errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                                 userMessage:="preview 必须是 true 或 false",
+                                                 userMessage:="preview должен быть true или false",
                                                  recoverable:=True)
                     End If
                     previewRequested = previewRequested OrElse params.Value(Of Boolean)("preview")
@@ -33,7 +33,7 @@ Namespace Design
                     Return ToolResult.Failed(toolId,
                                              "No active PowerPoint presentation",
                                              errorCode:=ExceptionClassifier.CodeDocMissing,
-                                             userMessage:="请先打开或新建一个 PowerPoint 演示文稿",
+                                             userMessage:="Сначала откройте или создайте презентацию PowerPoint",
                                              recoverable:=False)
                 End If
                 Return ExecuteInternal(params, presentation, previewRequested)
@@ -52,25 +52,25 @@ Namespace Design
             If spec.Slides.Count = 0 Then
                 Return ToolResult.Failed(toolId, "CreateSlides requires at least one slide spec",
                                          errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                         userMessage:="没有可创建的幻灯片设计规格", recoverable:=True)
+                                         userMessage:="Нет спецификаций дизайна слайдов для создания", recoverable:=True)
             End If
             If spec.Slides.Count > 50 Then
                 Return ToolResult.Failed(toolId, "CreateSlides supports at most 50 slides per run",
                                          errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                         userMessage:="单次最多创建 50 张幻灯片", recoverable:=True)
+                                         userMessage:="За один раз можно создать не более 50 слайдов", recoverable:=True)
             End If
             For index = 0 To spec.Slides.Count - 1
                 If String.IsNullOrWhiteSpace(spec.Slides(index).Title) Then
                     Return ToolResult.Failed(toolId, $"Slide {index + 1} is missing a title",
                                              errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                             userMessage:=$"第 {index + 1} 张幻灯片缺少标题", recoverable:=True)
+                                             userMessage:=$"У слайда {index + 1} отсутствует заголовок", recoverable:=True)
                 End If
                 Dim sceneError = ValidateSceneSpec(spec.Slides(index))
                 If Not String.IsNullOrWhiteSpace(sceneError) Then
                     Return ToolResult.Failed(toolId,
                                              $"Slide {index + 1}: {sceneError}",
                                              errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                             userMessage:=$"第 {index + 1} 张幻灯片的 Scene 信息不足：{sceneError}",
+                                             userMessage:=$"Недостаточно информации Scene для слайда {index + 1}: {sceneError}",
                                              recoverable:=True)
                 End If
             Next
@@ -79,7 +79,7 @@ Namespace Design
                 Return ToolResult.Failed(toolId,
                                          $"Unknown designSystem '{spec.DesignSystem}' without designTokens",
                                          errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                         userMessage:="未知设计系统必须提供完整 designTokens，或改用已注册的设计系统",
+                                         userMessage:="Для неизвестной системы дизайна нужно предоставить полный designTokens или использовать зарегистрированную систему дизайна",
                                          recoverable:=True)
             End If
 
@@ -131,7 +131,7 @@ Namespace Design
                                                        deckPreflightReports(preflightIndex), Nothing,
                                                        "LAYOUT_VERIFY_FAILED"))
                     Return BuildFailure(presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                        "专业布局预检未通过", ExceptionClassifier.CodeVerifyFailed)
+                                        "Предпроверка профессионального макета не пройдена", ExceptionClassifier.CodeVerifyFailed)
                 End If
             Next
 
@@ -145,7 +145,7 @@ Namespace Design
                                                        If(report.Passed, "", "DECK_COMPOSITION_VERIFY_FAILED")))
                 Next
                 Return BuildFailure(presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                    "整套演示文稿的构图变化节奏未通过",
+                                    "Ритм композиционных изменений презентации не прошёл проверку",
                                     ExceptionClassifier.CodeVerifyFailed)
             End If
 
@@ -169,7 +169,7 @@ Namespace Design
                 If Not preflight.Passed Then
                     slideResults.Add(BuildSlideResult(index, slideSpec, "failed", preflight, Nothing, "LAYOUT_VERIFY_FAILED"))
                     Return BuildFailure(presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                        "专业布局预检未通过", ExceptionClassifier.CodeVerifyFailed)
+                                        "Предпроверка профессионального макета не пройдена", ExceptionClassifier.CodeVerifyFailed)
                 End If
 
                 Dim renderResult As SceneRenderResult = Nothing
@@ -212,7 +212,7 @@ Namespace Design
                         Return BuildFailureWithVisualEvidence(CaptureVisualEvidence(renderResult.Slide, index + 1,
                                                                                      slideWidth, slideHeight),
                                                               presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                            "渲染后的视觉质量检查未通过", ExceptionClassifier.CodeVerifyFailed)
+                                            "Проверка визуального качества после отрисовки не пройдена", ExceptionClassifier.CodeVerifyFailed)
                     End If
                 Catch ex As Exception
                     Dim classified = ExceptionClassifier.Classify(ex)
@@ -240,7 +240,7 @@ Namespace Design
                     {"targetRefs", JArray.FromObject(targetRefs)}, {"slideResults", slideResults.DeepClone()}
                 }
                 Return ToolResult.Succeed("CreateSlides",
-                                          $"已使用 {tokens.Name} 设计系统创建 {createdCount} 张专业幻灯片",
+                                          $"С использованием системы дизайна {tokens.Name} создано профессиональных слайдов: {createdCount}",
                                           data:=data, observation:=observation,
                                           artifacts:=New JObject From {{"slides", JArray.FromObject(targetRefs)}})
             Catch ex As Exception
@@ -257,7 +257,7 @@ Namespace Design
 
 
         Private Shared Function ValidateSceneSpec(spec As SlideDesignSpec) As String
-            If spec Is Nothing Then Return "Scene 为空"
+            If spec Is Nothing Then Return "Scene пуст"
             If Not spec.SlideTypeRecognized Then
                 Return $"Unsupported slideType '{spec.RequestedSlideType}'; select a registered Scene archetype"
             End If
@@ -265,75 +265,75 @@ Namespace Design
             If Not String.IsNullOrWhiteSpace(variantError) Then Return variantError
             If Not String.IsNullOrWhiteSpace(spec.ImagePath) AndAlso
                spec.SlideType <> "cover" AndAlso spec.SlideType <> "content" Then
-                Return $"{spec.SlideType} 页面尚未消费 imagePath；请改用 cover/content 图文构图，或移除该页未使用的 imagePath"
+                Return $"Страница {spec.SlideType} не использует imagePath; используйте макет cover/content с изображением либо удалите неиспользуемый imagePath"
             End If
             If spec.Chart IsNot Nothing Then
-                If spec.SlideType <> "content" Then Return "chart 当前必须用于 content 页面"
+                If spec.SlideType <> "content" Then Return "chart сейчас допустим только на странице content"
                 If Not String.IsNullOrWhiteSpace(spec.ImagePath) OrElse spec.Table IsNot Nothing Then
-                    Return "同一 content 页面只能声明 imagePath、chart、table 中的一种主视觉"
+                    Return "Одна страница content может объявлять только один основной визуальный элемент из imagePath, chart, table"
                 End If
                 Dim chartError = ValidateChartSpec(spec.Chart)
                 If Not String.IsNullOrWhiteSpace(chartError) Then Return chartError
             End If
             If spec.Table IsNot Nothing Then
-                If spec.SlideType <> "content" Then Return "table 当前必须用于 content 页面"
+                If spec.SlideType <> "content" Then Return "table сейчас допустим только на странице content"
                 If Not String.IsNullOrWhiteSpace(spec.ImagePath) OrElse spec.Chart IsNot Nothing Then
-                    Return "同一 content 页面只能声明 imagePath、chart、table 中的一种主视觉"
+                    Return "Одна страница content может объявлять только один основной визуальный элемент из imagePath, chart, table"
                 End If
                 Dim tableError = ValidateTableSpec(spec.Table)
                 If Not String.IsNullOrWhiteSpace(tableError) Then Return tableError
             End If
             Select Case spec.SlideType
                 Case "statement"
-                    If spec.Items.Count > 3 Then Return "statement 页面最多容纳 3 条证据；请拆页或改用 content"
+                    If spec.Items.Count > 3 Then Return "Страница statement вмещает не более 3 доказательств; разбейте страницу или используйте content"
                 Case "content"
-                    If spec.Items.Count < 1 Then Return "content 页面至少需要 1 个 item"
-                    If spec.Items.Count > 6 Then Return "content 页面最多容纳 6 个 items；请拆分页面"
+        If spec.Items.Count < 1 Then Return "Странице content нужен хотя бы 1 item"
+        If spec.Items.Count > 6 Then Return "Страница content вмещает не более 6 items; разбейте страницу"
                     If spec.Chart IsNot Nothing AndAlso spec.Items.Count > 4 Then
-                        Return "带 chart 的 content 页面最多容纳 4 个洞察 items"
+                        Return "Страница content с chart вмещает не более 4 items-выводов"
                     End If
                     If spec.Table IsNot Nothing AndAlso spec.Items.Count > 4 Then
-                        Return "带 table 的 content 页面最多容纳 4 个洞察 items"
+                        Return "Страница content с table вмещает не более 4 items-выводов"
                     End If
                     If Not String.IsNullOrWhiteSpace(spec.ImagePath) AndAlso spec.Items.Count > 4 Then
-                        Return "带 imagePath 的 content 页面最多容纳 4 个 items"
+                        Return "Страница content с imagePath вмещает не более 4 items"
                     End If
                     If (String.Equals(spec.LayoutVariant, "feature-left", StringComparison.OrdinalIgnoreCase) OrElse
                         spec.Items.Any(Function(item) item.Emphasis)) AndAlso spec.Items.Count > 5 Then
-                        Return "feature-left content 页面最多容纳 5 个 items"
+                        Return "Страница feature-left content вмещает не более 5 items"
                     End If
                 Case "two-column"
-                    If spec.Items.Count <> 2 Then Return "two-column 页面必须恰好包含 2 个 items"
+                    If spec.Items.Count <> 2 Then Return "Страница two-column должна содержать ровно 2 items"
                 Case "comparison"
                     Dim isTable = spec.Items.Count >= 3 AndAlso
                                   spec.Items.All(Function(item) item.Features IsNot Nothing AndAlso item.Features.Count >= 2)
-                    If isTable AndAlso spec.Items.Count > 5 Then Return "comparison 表格最多容纳 5 行；请拆分页面"
+                    If isTable AndAlso spec.Items.Count > 5 Then Return "Таблица comparison вмещает не более 5 строк; разбейте страницу"
                     If isTable AndAlso (spec.ColumnHeaders Is Nothing OrElse spec.ColumnHeaders.Count <> 3 OrElse
                                         spec.ColumnHeaders.Any(Function(header) String.IsNullOrWhiteSpace(header))) Then
-                        Return "comparison 表格必须提供 3 个非空 columnHeaders：[比较维度, 左侧方案, 右侧方案]"
+                        Return "Таблица comparison должна содержать 3 непустых columnHeaders: [критерий сравнения, левый вариант, правый вариант]"
                     End If
-                    If Not isTable AndAlso spec.Items.Count <> 2 Then Return "comparison 页面需要恰好 2 个对比对象，或 3-5 行双列 features"
+                    If Not isTable AndAlso spec.Items.Count <> 2 Then Return "Странице comparison нужно ровно 2 объекта сравнения или 3-5 строк двухколоночных features"
                 Case "kpi"
-                    If spec.Metrics.Count < 2 AndAlso spec.Items.Count < 2 Then Return "kpi 页面至少需要 2 个 metrics"
-                    If spec.Metrics.Count > 4 OrElse spec.Items.Count > 4 Then Return "kpi 页面最多容纳 4 个指标；请拆分页面"
+        If spec.Metrics.Count < 2 AndAlso spec.Items.Count < 2 Then Return "Странице kpi нужно не менее 2 metrics"
+        If spec.Metrics.Count > 4 OrElse spec.Items.Count > 4 Then Return "Страница kpi вмещает не более 4 показателей; разбейте страницу"
                     If spec.Metrics.Count >= 2 AndAlso
                        spec.Metrics.Any(Function(metric) String.IsNullOrWhiteSpace(metric.Value) OrElse String.IsNullOrWhiteSpace(metric.Label)) Then
-                        Return "kpi metrics 必须同时包含 value 和 label；不要用占位符伪造指标"
+                        Return "kpi metrics должны содержать и value, и label; не подменяйте показатели заглушками"
                     End If
                     If spec.Metrics.Count = 0 AndAlso
                        spec.Items.Any(Function(item) String.IsNullOrWhiteSpace(item.Value) OrElse String.IsNullOrWhiteSpace(item.Title)) Then
-                        Return "kpi items 必须同时包含 value 和 title；没有可靠数值时应改用 content/statement"
+                        Return "kpi items должны содержать и value, и title; при отсутствии надёжных чисел используйте content/statement"
                     End If
                 Case "process"
-                    If spec.Items.Count < 3 Then Return "process 页面至少需要 3 个步骤"
-                    If spec.Items.Count > 6 Then Return "process 页面最多容纳 6 个步骤；请拆分流程"
+        If spec.Items.Count < 3 Then Return "Странице process нужно не менее 3 шагов"
+        If spec.Items.Count > 6 Then Return "Страница process вмещает не более 6 шагов; разбейте процесс"
                 Case "architecture"
-                    If spec.Items.Count < 2 Then Return "architecture 页面至少需要 2 个层级"
-                    If spec.Items.Count > 5 Then Return "architecture 页面最多容纳 5 个层级；请拆分架构"
+        If spec.Items.Count < 2 Then Return "Странице architecture нужно не менее 2 уровней"
+        If spec.Items.Count > 5 Then Return "Страница architecture вмещает не более 5 уровней; разбейте архитектуру"
                 Case "matrix"
-                    If spec.Items.Count <> 4 Then Return "matrix 页面必须恰好包含 4 个象限 items"
+                    If spec.Items.Count <> 4 Then Return "Страница matrix должна содержать ровно 4 items-квадранта"
                     If String.IsNullOrWhiteSpace(spec.XAxisLabel) OrElse String.IsNullOrWhiteSpace(spec.YAxisLabel) Then
-                        Return "matrix 页面必须提供 xAxisLabel 和 yAxisLabel，不能假设固定业务维度"
+                        Return "Страница matrix должна предоставлять xAxisLabel и yAxisLabel; нельзя предполагать фиксированные бизнес-измерения"
                     End If
             End Select
             Return ""
@@ -363,52 +363,52 @@ Namespace Design
             If chart Is Nothing Then Return ""
             Dim chartType = If(chart.ChartType, "column").Trim().ToLowerInvariant()
             If chartType <> "column" AndAlso chartType <> "line" Then
-                Return "chart.chartType 仅支持 column 或 line"
+                Return "chart.chartType поддерживает только column или line"
             End If
             If chart.Categories.Count < 2 OrElse chart.Categories.Count > 8 Then
-                Return "chart.categories 必须包含 2-8 个分类"
+                Return "chart.categories должны содержать 2-8 категорий"
             End If
             If chart.Categories.Any(Function(category) String.IsNullOrWhiteSpace(category)) Then
-                Return "chart.categories 不能包含空标签"
+                Return "chart.categories не должны содержать пустые метки"
             End If
             If chart.Series.Count < 1 OrElse chart.Series.Count > 3 Then
-                Return "chart.series 必须包含 1-3 个序列"
+                Return "chart.series должны содержать 1-3 серии"
             End If
             If chart.Series.Count > 1 AndAlso chart.Series.Any(Function(series) String.IsNullOrWhiteSpace(series.Name)) Then
-                Return "多序列 chart 的每个 series 都必须包含 name"
+                Return "Каждая series многосерийного chart должна содержать name"
             End If
             Dim hasNonZeroValue As Boolean = False
             For Each series In chart.Series
                 If series.Values.Count <> chart.Categories.Count Then
-                    Return "每个 chart series 的 values 数量必须与 categories 一致"
+                    Return "Количество values в каждой chart series должно совпадать с categories"
                 End If
                 For Each value In series.Values
                     If Double.IsNaN(value) OrElse Double.IsInfinity(value) Then
-                        Return "chart values 必须是有限数字"
+                        Return "chart values должны быть конечными числами"
                     End If
                     If Math.Abs(value) > 0.000001R Then hasNonZeroValue = True
                 Next
             Next
-            If Not hasNonZeroValue Then Return "chart 至少需要一个非零数值"
+            If Not hasNonZeroValue Then Return "chart требует хотя бы одно ненулевое значение"
             Return ""
         End Function
 
         Private Shared Function ValidateTableSpec(table As DesignTable) As String
             If table Is Nothing Then Return ""
             If table.Headers.Count < 2 OrElse table.Headers.Count > 5 Then
-                Return "table.headers 必须包含 2-5 列"
+                Return "table.headers должны содержать 2-5 столбцов"
             End If
             If table.Headers.Any(Function(header) String.IsNullOrWhiteSpace(header)) Then
-                Return "table.headers 不能包含空标题"
+                Return "table.headers не должны содержать пустые заголовки"
             End If
             If table.Rows.Count < 1 OrElse table.Rows.Count > 6 Then
-                Return "table.rows 必须包含 1-6 行"
+                Return "table.rows должны содержать 1-6 строк"
             End If
             If table.Rows.Any(Function(row) row Is Nothing OrElse row.Count <> table.Headers.Count) Then
-                Return "table 每行单元格数量必须与 headers 一致"
+                Return "Количество ячеек в каждой строке table должно совпадать с headers"
             End If
             If table.HighlightColumn < -1 OrElse table.HighlightColumn >= table.Headers.Count Then
-                Return "table.highlightColumn 必须是有效的零基列索引"
+                Return "table.highlightColumn должен быть допустимым нулевым индексом столбца"
             End If
             Return ""
         End Function

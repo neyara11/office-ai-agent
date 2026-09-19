@@ -15,7 +15,7 @@ Public Class DeepseekControl
             Debug.WriteLine("DeepseekControl 初始化完成")
         Catch ex As Exception
             SimpleLogger.LogError("DeepseekControl 构造异常", ex)
-            MessageBox.Show("DeepseekControl 加载失败: " & ex.Message)
+            MessageBox.Show("Ошибка загрузки DeepseekControl: " & ex.Message)
         End Try
 
         ' 确保WebView2控件可以正常交互
@@ -119,7 +119,7 @@ Public Class DeepseekControl
             VBAxceptionHandle(ex)
             Return False
         Catch ex As Exception
-            MessageBox.Show("执行代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -175,12 +175,12 @@ Public Class DeepseekControl
                     Dim newValue As Object = excel.Evaluate(formula)
 
                     ' 创建预览对话框
-                    Dim previewMsg As String = $"将要在单元格 {targetCell} 中应用公式:" & vbCrLf & vbCrLf &
+                    Dim previewMsg As String = $"В ячейку {targetCell} будет применена формула:" & vbCrLf & vbCrLf &
                                           $"={formula}" & vbCrLf & vbCrLf &
-                                          $"当前值: {If(currentValue Is Nothing, "(空)", currentValue)}" & vbCrLf &
-                                          $"新值: {If(newValue Is Nothing, "(空)", newValue)}"
+                                          $"Текущее значение: {If(currentValue Is Nothing, "(пусто)", currentValue)}" & vbCrLf &
+                                          $"Новое значение: {If(newValue Is Nothing, "(пусто)", newValue)}"
 
-                    Dim result As DialogResult = MessageBox.Show(previewMsg, "Excel公式预览",
+                    Dim result As DialogResult = MessageBox.Show(previewMsg, "Предпросмотр формулы Excel",
                                                           MessageBoxButtons.OKCancel,
                                                           MessageBoxIcon.Information)
 
@@ -193,7 +193,7 @@ Public Class DeepseekControl
                 Dim range As Object = Globals.ThisAddIn.Application.Range(targetCell)
                 range.Formula = "=" & formula
 
-                GlobalStatusStrip.ShowInfo($"公式 '={formula}' 已应用到单元格 {targetCell}")
+                GlobalStatusStrip.ShowInfo($"Формула '={formula}' применена к ячейке {targetCell}")
                 Return True
             Else
                 ' 普通公式计算 (不包含赋值)
@@ -207,20 +207,20 @@ Public Class DeepseekControl
 
                 ' 如果需要预览，显示计算结果
                 If preview Then
-                    Dim previewMsg As String = $"公式计算结果:" & vbCrLf & vbCrLf &
+                    Dim previewMsg As String = $"Результат вычисления формулы:" & vbCrLf & vbCrLf &
                                          $"={formulaCode}" & vbCrLf & vbCrLf &
-                                         $"结果: {If(result Is Nothing, "(空)", result)}"
+                                         $"Результат: {If(result Is Nothing, "(пусто)", result)}"
 
-                    MessageBox.Show(previewMsg, "Excel公式结果", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    MessageBox.Show(previewMsg, "Результат формулы Excel", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Else
                     ' 显示结果
-                    GlobalStatusStrip.ShowInfo($"公式 '={formulaCode}' 的计算结果: {result}")
+                    GlobalStatusStrip.ShowInfo($"Результат формулы '={formulaCode}': {result}")
                 End If
 
                 Return True
             End If
         Catch ex As Exception
-            MessageBox.Show("执行Excel公式时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении формулы Excel: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function

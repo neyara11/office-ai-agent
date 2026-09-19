@@ -151,7 +151,7 @@ Public Class ExcelDirectOperationService
             End If
 
             If String.IsNullOrEmpty(targetRange) OrElse data Is Nothing Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("WriteData缺少必要参数：targetRange/startCell 和 data")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("WriteData: отсутствуют обязательные параметры targetRange/startCell и data")
                 Return False
             End If
 
@@ -171,7 +171,7 @@ Public Class ExcelDirectOperationService
                     ' 工作表不存在，创建新的
                     ws = _excelApp.Worksheets.Add()
                     ws.Name = sheetName
-                    ShareRibbon.GlobalStatusStrip.ShowInfo($"已创建新工作表: {sheetName}")
+                    ShareRibbon.GlobalStatusStrip.ShowInfo($"Создан новый лист: {sheetName}")
                 End Try
             Else
                 ws = _excelApp.ActiveSheet
@@ -200,12 +200,12 @@ Public Class ExcelDirectOperationService
                 range.Value2 = data.ToString()
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"数据已写入 {targetRange}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Данные записаны в {targetRange}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteWriteData 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"写入数据失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось записать данные: {ex.Message}")
             Return False
         Finally
             ' 释放 COM 对象
@@ -308,7 +308,7 @@ Public Class ExcelDirectOperationService
                 range.Formula = formula
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"公式已应用到 {targetRange}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Формула применена к {targetRange}")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ApplySingleFormula 出错: {ex.Message}")
@@ -333,7 +333,7 @@ Public Class ExcelDirectOperationService
             End If
 
             If String.IsNullOrEmpty(targetRange) Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("FormatRange: 缺少 range 参数")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("FormatRange: отсутствует параметр range")
                 Return False
             End If
 
@@ -356,7 +356,7 @@ Public Class ExcelDirectOperationService
                 Try
                     range = ws.Range(targetRange)
                 Catch ex As Exception
-                    ShareRibbon.GlobalStatusStrip.ShowWarning($"FormatRange: 无法找到范围 '{targetRange}': {ex.Message}")
+                    ShareRibbon.GlobalStatusStrip.ShowWarning($"FormatRange: не удалось найти диапазон '{targetRange}': {ex.Message}")
                     Return False
                 End Try
 
@@ -415,13 +415,13 @@ Public Class ExcelDirectOperationService
                     End If
                 End If
 
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"格式已应用到 {targetRange}")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Формат применён к {targetRange}")
                 Return True
             End If
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteFormatRange 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"格式化失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка форматирования: {ex.Message}")
             Return False
         End Try
     End Function
@@ -535,12 +535,12 @@ Public Class ExcelDirectOperationService
                 End If
             End With
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"图表格式已应用")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Формат диаграммы применён")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteFormatChart 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"格式化图表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка форматирования диаграммы: {ex.Message}")
             Return False
         End Try
     End Function
@@ -560,7 +560,7 @@ Public Class ExcelDirectOperationService
             Dim plotBy = params("plotBy")?.ToString()
 
             If String.IsNullOrEmpty(dataRange) Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("CreateChart: 缺少 dataRange 参数")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("CreateChart: отсутствует параметр dataRange")
                 Return False
             End If
 
@@ -568,7 +568,7 @@ Public Class ExcelDirectOperationService
             Dim ws As Worksheet = Nothing
             Dim rangeAddress As String = ""
             If Not ParseExcelRange(dataRange, ws, rangeAddress) Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("CreateChart: 无法解析数据范围")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("CreateChart: не удалось разобрать диапазон данных")
                 Return False
             End If
 
@@ -719,12 +719,12 @@ Public Class ExcelDirectOperationService
                 End If
             End With
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo("图表已创建")
+            ShareRibbon.GlobalStatusStrip.ShowInfo("Диаграмма создана")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteCreateChart 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"创建图表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось создать диаграмму: {ex.Message}")
             Return False
         End Try
     End Function
@@ -783,7 +783,7 @@ Public Class ExcelDirectOperationService
                     End If
             End Select
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"数据清洗已完成: {operation}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Очистка данных завершена: {operation}")
             Return True
 
         Catch ex As Exception
@@ -873,7 +873,7 @@ Public Class ExcelDirectOperationService
                     Return MergeColumns(source, targetRange, params)
             End Select
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"数据转换已完成: {operation}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Преобразование данных завершено: {operation}")
             Return True
 
         Catch ex As Exception
@@ -911,7 +911,7 @@ Public Class ExcelDirectOperationService
                 End Try
             Else
                 targetWs = _excelApp.Worksheets.Add()
-                targetWs.Name = "报表_" & DateTime.Now.ToString("yyyyMMdd_HHmmss")
+                targetWs.Name = "Отчет_" & DateTime.Now.ToString("yyyyMMdd_HHmmss")
             End If
 
             ' 添加标题
@@ -949,7 +949,7 @@ Public Class ExcelDirectOperationService
             End If
 
             targetWs.Activate()
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"报表已生成: {targetWs.Name}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Отчёт сформирован: {targetWs.Name}")
             Return True
 
         Catch ex As Exception
@@ -984,12 +984,12 @@ Public Class ExcelDirectOperationService
                 Order1:=order,
                 Header:=If(hasHeader, XlYesNoGuess.xlYes, XlYesNoGuess.xlNo))
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"数据排序完成: {range}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Сортировка данных завершена: {range}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteSortData 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"排序失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка сортировки: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1007,7 +1007,7 @@ Public Class ExcelDirectOperationService
                 If ws.AutoFilterMode Then
                     ws.AutoFilterMode = False
                 End If
-                ShareRibbon.GlobalStatusStrip.ShowInfo("筛选已清除")
+                ShareRibbon.GlobalStatusStrip.ShowInfo("Фильтр снят")
                 Return True
             End If
 
@@ -1023,12 +1023,12 @@ Public Class ExcelDirectOperationService
 
             dataRange.AutoFilter(Field:=column.Value, Criteria1:=criteria)
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"筛选已应用: 列{column} {criteria}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Фильтр применён: столбец {column} {criteria}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteFilterData 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"筛选失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка фильтрации: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1065,12 +1065,12 @@ Public Class ExcelDirectOperationService
 
             dataRange.RemoveDuplicates(Columns:=cols, Header:=If(hasHeader, XlYesNoGuess.xlYes, XlYesNoGuess.xlNo))
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"重复项已删除: {range}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Дубликаты удалены: {range}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteRemoveDuplicates 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"删除重复项失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось удалить дубликаты: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1114,12 +1114,12 @@ Public Class ExcelDirectOperationService
                     dataRange.FormatConditions.AddIconSetCondition()
             End Select
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"条件格式已应用: {range}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Условное форматирование применено: {range}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteConditionalFormat 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"条件格式失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка условного форматирования: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1142,17 +1142,17 @@ Public Class ExcelDirectOperationService
 
             If unmerge Then
                 dataRange.UnMerge()
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"已取消合并: {range}")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Объединение отменено: {range}")
             Else
                 dataRange.Merge()
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"已合并单元格: {range}")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Ячейки объединены: {range}")
             End If
 
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteMergeCells 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"合并单元格失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось объединить ячейки: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1182,12 +1182,12 @@ Public Class ExcelDirectOperationService
                     dataRange.Rows.AutoFit()
             End Select
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"自动调整完成: {range}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Автоподбор завершён: {range}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteAutoFit 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"自动调整失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка автоподбора: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1222,12 +1222,12 @@ Public Class ExcelDirectOperationService
                 LookAt:=If(matchEntireCell, XlLookAt.xlWhole, XlLookAt.xlPart),
                 MatchCase:=matchCase)
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"查找替换完成: {findText} -> {replaceText}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Поиск и замена завершены: {findText} -> {replaceText}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteFindReplace 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"查找替换失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка поиска и замены: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1252,7 +1252,7 @@ Public Class ExcelDirectOperationService
 
             ' 创建新工作表放置透视表
             Dim pivotWs As Worksheet = _excelApp.Worksheets.Add()
-            pivotWs.Name = "透视表_" & DateTime.Now.ToString("HHmmss")
+            pivotWs.Name = "Сводная_" & DateTime.Now.ToString("HHmmss")
 
             Dim pivotCache As PivotCache = _excelApp.ActiveWorkbook.PivotCaches.Create(
                 SourceType:=XlPivotTableSourceType.xlDatabase,
@@ -1287,12 +1287,12 @@ Public Class ExcelDirectOperationService
             End If
 
             pivotWs.Activate()
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"透视表已创建: {pivotWs.Name}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Сводная таблица создана: {pivotWs.Name}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteCreatePivotTable 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"创建透视表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось создать сводную таблицу: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1325,12 +1325,12 @@ Public Class ExcelDirectOperationService
 
             newSheet.Name = name
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"工作表已创建: {name}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Лист создан: {name}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteCreateSheet 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"创建工作表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось создать лист: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1350,13 +1350,13 @@ Public Class ExcelDirectOperationService
             _excelApp.Worksheets(name).Delete()
             _excelApp.DisplayAlerts = True
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"工作表已删除: {name}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Лист удалён: {name}")
             Return True
 
         Catch ex As Exception
             _excelApp.DisplayAlerts = True
             Debug.WriteLine($"ExecuteDeleteSheet 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"删除工作表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось удалить лист: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1375,12 +1375,12 @@ Public Class ExcelDirectOperationService
 
             _excelApp.Worksheets(oldName).Name = newName
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"工作表已重命名: {oldName} -> {newName}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Лист переименован: {oldName} -> {newName}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteRenameSheet 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"重命名工作表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось переименовать лист: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1404,12 +1404,12 @@ Public Class ExcelDirectOperationService
             Dim newWs As Worksheet = _excelApp.ActiveSheet
             newWs.Name = newName
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"工作表已复制: {sourceName} -> {newName}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Лист скопирован: {sourceName} -> {newName}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteCopySheet 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"复制工作表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось скопировать лист: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1438,12 +1438,12 @@ Public Class ExcelDirectOperationService
                 End If
             Next
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"已插入 {count} {If(type = "row", "行", "列")}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Вставлено {count} {If(type = "row", "строк", "столбцов")}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteInsertRowCol 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"插入失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка вставки: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1471,12 +1471,12 @@ Public Class ExcelDirectOperationService
                 ws.Columns($"{position}:{GetColumnOffset(position, count - 1)}").Delete(Shift:=XlDeleteShiftDirection.xlShiftToLeft)
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"已删除 {count} {If(type = "row", "行", "列")}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Удалено {count} {If(type = "row", "строк", "столбцов")}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteDeleteRowCol 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"删除失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка удаления: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1503,12 +1503,12 @@ Public Class ExcelDirectOperationService
                 ws.Columns(position).Hidden = Not unhide
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"已{If(unhide, "显示", "隐藏")}{If(type = "row", "行", "列")}: {position}")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"{(If(unhide, "Показаны", "Скрыты"))} {If(type = "row", "строки", "столбцы")}: {position}")
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteHideRowCol 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"隐藏/显示失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка скрытия/показа: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1531,17 +1531,17 @@ Public Class ExcelDirectOperationService
 
             If unprotect Then
                 ws.Unprotect(Password:=password)
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"工作表保护已取消: {ws.Name}")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Защита листа снята: {ws.Name}")
             Else
                 ws.Protect(Password:=password)
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"工作表已保护: {ws.Name}")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Лист защищён: {ws.Name}")
             End If
 
             Return True
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteProtectSheet 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"保护工作表失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Не удалось защитить лист: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1554,7 +1554,7 @@ Public Class ExcelDirectOperationService
             Dim code = params("code")?.ToString()
 
             If String.IsNullOrEmpty(code) Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("ExecuteVBA: 缺少code参数")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("ExecuteVBA: отсутствует параметр code")
                 Return False
             End If
 
@@ -1566,12 +1566,12 @@ Public Class ExcelDirectOperationService
             Try
                 vbProj = _excelApp.VBE.ActiveVBProject
             Catch ex As Exception
-                ShareRibbon.GlobalStatusStrip.ShowWarning("无法访问VBA项目，请在信任中心设置中启用'信任对VBA项目对象模型的访问'")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Нет доступа к проекту VBA. Включите «Доверять доступ к объектной модели проектов VBA» в настройках центра управления безопасностью")
                 Return False
             End Try
 
             If vbProj Is Nothing Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("无法获取VBA项目")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Не удалось получить проект VBA")
                 Return False
             End If
 
@@ -1601,11 +1601,11 @@ Public Class ExcelDirectOperationService
                     _excelApp.Run(tempModuleName & ".Auto_Run")
                 End If
 
-                ShareRibbon.GlobalStatusStrip.ShowInfo("VBA代码执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo("Код VBA выполнен успешно")
                 Return True
 
             Catch ex As Exception
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"VBA执行失败: {ex.Message}")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения VBA: {ex.Message}")
                 Return False
             Finally
                 ' 删除临时模块
@@ -1619,7 +1619,7 @@ Public Class ExcelDirectOperationService
 
         Catch ex As Exception
             Debug.WriteLine($"ExecuteVBA 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"VBA执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения VBA: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1721,13 +1721,13 @@ Public Class ExcelDirectOperationService
             target = ResolveTargetRange(source, targetRange, 2)
 
             ' 添加摘要标题
-            target.Value = "数据摘要"
+            target.Value = "Сводка данных"
             target.Font.Bold = True
 
             ' 统计信息
-            target.Offset(1, 0).Value = "行数"
+            target.Offset(1, 0).Value = "Строк"
             target.Offset(1, 1).Value = source.Rows.Count
-            target.Offset(2, 0).Value = "列数"
+            target.Offset(2, 0).Value = "Столбцов"
             target.Offset(2, 1).Value = source.Columns.Count
 
             ' 对数值列计算统计
@@ -1735,16 +1735,16 @@ Public Class ExcelDirectOperationService
             For col = 1 To source.Columns.Count
                 Dim colRange = source.Columns(col)
                 If _excelApp.WorksheetFunction.IsNumber(colRange.Cells(2, 1).Value) Then
-                    target.Offset(row, 0).Value = $"列{col}合计"
+                    target.Offset(row, 0).Value = $"Итого по столбцу {col}"
                     target.Offset(row, 1).Formula = $"=SUM({colRange.Address})"
                     row += 1
-                    target.Offset(row, 0).Value = $"列{col}平均"
+                    target.Offset(row, 0).Value = $"Среднее по столбцу {col}"
                     target.Offset(row, 1).Formula = $"=AVERAGE({colRange.Address})"
                     row += 1
                 End If
             Next
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo("统计摘要已生成")
+            ShareRibbon.GlobalStatusStrip.ShowInfo("Сводка статистики сформирована")
             Return True
 
         Catch ex As Exception
@@ -1789,7 +1789,7 @@ Public Class ExcelDirectOperationService
 
             For row = 2 To source.Rows.Count
                 Dim keyObj = source.Cells(row, groupCol).Value
-                Dim key = If(keyObj Is Nothing OrElse String.IsNullOrWhiteSpace(keyObj.ToString()), "(空)", keyObj.ToString())
+                Dim key = If(keyObj Is Nothing OrElse String.IsNullOrWhiteSpace(keyObj.ToString()), "(пусто)", keyObj.ToString())
                 Dim numericValue As Double = 0
                 Dim rawValue = source.Cells(row, valueCol).Value
                 If rawValue IsNot Nothing Then Double.TryParse(rawValue.ToString(), numericValue)
@@ -1802,12 +1802,12 @@ Public Class ExcelDirectOperationService
                 counts(key) += 1
             Next
 
-            Dim target = ResolveAnalysisTarget(source, targetRange, "分组汇总")
-            target.Value = "分组汇总"
+            Dim target = ResolveAnalysisTarget(source, targetRange, "Групповая сводка")
+            target.Value = "Групповая сводка"
             target.Font.Bold = True
-            target.Offset(1, 0).Value = GetHeaderName(source, groupCol, "分组")
+            target.Offset(1, 0).Value = GetHeaderName(source, groupCol, "Группировка")
             target.Offset(1, 1).Value = aggregate
-            target.Offset(1, 2).Value = "数量"
+            target.Offset(1, 2).Value = "Количество"
 
             Dim outputRow = 2
             For Each key In sums.Keys
@@ -1825,11 +1825,11 @@ Public Class ExcelDirectOperationService
             Next
 
             target.CurrentRegion.Columns.AutoFit()
-            ShareRibbon.GlobalStatusStrip.ShowInfo("分组汇总已生成")
+            ShareRibbon.GlobalStatusStrip.ShowInfo("Групповая сводка сформирована")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"GroupByAnalysis 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"分组汇总失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка групповой сводки: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1855,7 +1855,7 @@ Public Class ExcelDirectOperationService
             Dim items As New List(Of Tuple(Of String, Double))()
             For row = 2 To source.Rows.Count
                 Dim labelObj = source.Cells(row, labelCol).Value
-                Dim label = If(labelObj Is Nothing OrElse String.IsNullOrWhiteSpace(labelObj.ToString()), $"第{row}行", labelObj.ToString())
+                Dim label = If(labelObj Is Nothing OrElse String.IsNullOrWhiteSpace(labelObj.ToString()), $"Строка {row}", labelObj.ToString())
                 Dim numericValue As Double = 0
                 Dim rawValue = source.Cells(row, valueCol).Value
                 If rawValue IsNot Nothing AndAlso Double.TryParse(rawValue.ToString(), numericValue) Then
@@ -1870,12 +1870,12 @@ Public Class ExcelDirectOperationService
                            Return left.Item2.CompareTo(right.Item2)
                        End Function)
 
-            Dim target = ResolveAnalysisTarget(source, targetRange, "排名分析")
-            target.Value = "排名分析"
+            Dim target = ResolveAnalysisTarget(source, targetRange, "Анализ ранжирования")
+            target.Value = "Анализ ранжирования"
             target.Font.Bold = True
-            target.Offset(1, 0).Value = "排名"
-            target.Offset(1, 1).Value = GetHeaderName(source, labelCol, "对象")
-            target.Offset(1, 2).Value = GetHeaderName(source, valueCol, "数值")
+            target.Offset(1, 0).Value = "Ранг"
+            target.Offset(1, 1).Value = GetHeaderName(source, labelCol, "Объект")
+            target.Offset(1, 2).Value = GetHeaderName(source, valueCol, "Значение")
 
             Dim maxRows = Math.Min(topN, items.Count)
             For i = 0 To maxRows - 1
@@ -1885,11 +1885,11 @@ Public Class ExcelDirectOperationService
             Next
 
             target.CurrentRegion.Columns.AutoFit()
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"排名分析已生成: {maxRows} 条")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Анализ ранжирования сформирован: строк {maxRows}")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"RankingAnalysis 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"排名分析失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка анализа ранжирования: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1989,7 +1989,7 @@ Public Class ExcelDirectOperationService
                 target.Offset(row - 1, 0).Formula = formula.ToString()
             Next
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo("列合并已完成")
+            ShareRibbon.GlobalStatusStrip.ShowInfo("Объединение столбцов завершено")
             Return True
 
         Catch ex As Exception

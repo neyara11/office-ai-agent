@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\Services\ChatContextBuilder.vb
+﻿' ShareRibbon\Controls\Services\ChatContextBuilder.vb
 ' 分层上下文组装：[0]～[6]
 
 Imports System.Collections.Generic
@@ -58,20 +58,20 @@ Public Class ChatContextBuilder
 
         ' [0] 角色与基础指令
         If Not String.IsNullOrWhiteSpace(baseSystemPrompt) Then
-            sysParts.Add("### 角色与基础指令" & vbCrLf & baseSystemPrompt.Trim())
+            sysParts.Add("### Роль и базовые инструкции" & vbCrLf & baseSystemPrompt.Trim())
         End If
 
         ' [1] 场景能力（数据库场景提示词）
         Dim systemPromptFromDb = PromptTemplateRepository.GetSystemPrompt(scenarioNorm)
         If Not String.IsNullOrWhiteSpace(systemPromptFromDb) Then
-            sysParts.Add("### 场景能力" & vbCrLf & PromptTemplateRepository.ReplaceVariables(systemPromptFromDb.Trim(), vars))
+            sysParts.Add("### Возможности сценария" & vbCrLf & PromptTemplateRepository.ReplaceVariables(systemPromptFromDb.Trim(), vars))
         End If
 
         ' [1b] 可用技能（Skills 渐进式披露）
         Dim skillsCatalog = SkillsService.GetSkillsCatalog()
         If skillsCatalog IsNot Nothing AndAlso skillsCatalog.Count > 0 Then
             Dim skillParts As New List(Of String)()
-            skillParts.Add("### 可用技能")
+            skillParts.Add("### Доступные навыки")
 
             Dim catalogMessage = SkillsService.BuildSkillsCatalogMessage(skillsCatalog)
             If Not String.IsNullOrWhiteSpace(catalogMessage) Then
@@ -83,15 +83,15 @@ Public Class ChatContextBuilder
                 For Each indexedSkill In indexedSkills
                     Dim detailMessage = SkillsService.BuildSkillDetailMessage(indexedSkill)
                     If Not String.IsNullOrWhiteSpace(detailMessage) Then
-                        skillParts.Add("#### 推荐技能（基于索引召回）")
+                        skillParts.Add("#### Рекомендуемые навыки (по индексному отбору)")
                         skillParts.Add(detailMessage)
                     End If
                     AppendSkillScriptInfo(skillParts, indexedSkill)
-                    skillParts.Add($"> 当前推荐: {indexedSkill.Name}")
+                    skillParts.Add($"> Текущая рекомендация: {indexedSkill.Name}")
                     trace.Skills.Add(New ChatContextSkillTrace With {
                         .Name = indexedSkill.Name,
                         .Source = "index",
-                        .Reason = "基于当前查询召回"
+                        .Reason = "по текущему запросу"
                     })
                     Debug.WriteLine($"[ChatContextBuilder] 索引召回Skill: {indexedSkill.Name}")
                 Next
@@ -105,7 +105,7 @@ Public Class ChatContextBuilder
 
                         Dim detailMessage = SkillsService.BuildSkillDetailMessage(topSkillDetail)
                         If Not String.IsNullOrWhiteSpace(detailMessage) Then
-                            skillParts.Add("#### 推荐技能（基于当前查询）")
+                            skillParts.Add("#### Рекомендуемые навыки (по текущему запросу)")
                             skillParts.Add(detailMessage)
                         End If
 
@@ -113,21 +113,21 @@ Public Class ChatContextBuilder
                         AppendSkillScriptInfo(skillParts, topSkillDetail)
 
                         Dim metaHints As New List(Of String)()
-                        metaHints.Add($"当前推荐: {topSkillDetail.Name}")
+                        metaHints.Add($"Текущая рекомендация: {topSkillDetail.Name}")
                         If topSkillDetail.Tags IsNot Nothing AndAlso topSkillDetail.Tags.Count > 0 Then
-                            metaHints.Add($"标签: {String.Join(", ", topSkillDetail.Tags)}")
+                            metaHints.Add($"Теги: {String.Join(", ", topSkillDetail.Tags)}")
                         End If
                         If Not String.IsNullOrWhiteSpace(topSkillDetail.Compatibility) Then
-                            metaHints.Add($"兼容性: {topSkillDetail.Compatibility}")
+                            metaHints.Add($"Совместимость: {topSkillDetail.Compatibility}")
                         End If
                         If topSkill.MatchedKeywords.Count > 0 Then
-                            metaHints.Add($"匹配关键词: {String.Join(", ", topSkill.MatchedKeywords)}")
+                            metaHints.Add($"Совпавшие ключевые слова: {String.Join(", ", topSkill.MatchedKeywords)}")
                         End If
                         skillParts.Add("> " & String.Join(" | ", metaHints))
                         trace.Skills.Add(New ChatContextSkillTrace With {
                             .Name = topSkillDetail.Name,
                             .Source = "keyword",
-                            .Reason = If(topSkill.MatchedKeywords.Count > 0, String.Join(", ", topSkill.MatchedKeywords), "基于当前查询匹配")
+                            .Reason = If(topSkill.MatchedKeywords.Count > 0, String.Join(", ", topSkill.MatchedKeywords), "по текущему запросу")
                         })
 
                         Debug.WriteLine($"[ChatContextBuilder] 匹配到Skill: {topSkillDetail.Name}, 分数: {topSkill.MatchScore:F1}, 关键词: {String.Join(", ", topSkill.MatchedKeywords)}")
@@ -144,13 +144,13 @@ Public Class ChatContextBuilder
         If enableMemory Then
             Debug.WriteLine("[ChatContextBuilder] 启用记忆，开始检索...")
             Dim memParts As New List(Of String)()
-            memParts.Add("### 用户上下文")
+            memParts.Add("### Пользовательский контекст")
 
             Dim userProfile = MemoryService.GetUserProfile()
             If Not String.IsNullOrWhiteSpace(userProfile) Then
                 Debug.WriteLine("[ChatContextBuilder] 找到用户画像")
                 trace.UserProfileInjected = True
-                memParts.Add("#### 用户画像" & vbCrLf & userProfile.Trim())
+                memParts.Add("#### Профиль пользователя" & vbCrLf & userProfile.Trim())
             End If
 
             Dim structuredMemories = MemoryService.GetRelevantStructuredMemories(currentQuery, Nothing, appNorm)
@@ -163,7 +163,7 @@ Public Class ChatContextBuilder
                 ragCountOut = structuredMemories.Count
                 Debug.WriteLine($"[ChatContextBuilder] 找到 {structuredMemories.Count} 条结构化记忆")
                 Dim memLines As New List(Of String)()
-                memLines.Add("#### 相关记忆")
+                memLines.Add("#### Связанные воспоминания")
                 For Each m In structuredMemories
                     Dim label = If(String.IsNullOrWhiteSpace(m.MemoryType), "memory", m.MemoryType)
                     memLines.Add($"- [{label}] {m.Content}")
@@ -188,7 +188,7 @@ Public Class ChatContextBuilder
                     ragCountOut = memories.Count
                     Debug.WriteLine($"[ChatContextBuilder] 找到 {memories.Count} 条原子记忆")
                     Dim memLines As New List(Of String)()
-                    memLines.Add("#### 相关记忆")
+                    memLines.Add("#### Связанные воспоминания")
                     For Each m In memories
                         memLines.Add("- " & m.Content)
                         trace.Memories.Add(New ChatContextMemoryTrace With {
@@ -217,7 +217,7 @@ Public Class ChatContextBuilder
             If summaries IsNot Nothing AndAlso summaries.Count > 0 Then
                 Debug.WriteLine($"[ChatContextBuilder] 找到 {summaries.Count} 条相关近期会话")
                 Dim sumLines As New List(Of String)()
-                sumLines.Add("#### 相关近期会话")
+                sumLines.Add("#### Связанные недавние сессии")
                 For Each s In summaries
                     sumLines.Add($"- {s.Title}: {s.Snippet}")
                     trace.RecentSessions.Add(New ChatContextSessionTrace With {
@@ -243,9 +243,14 @@ Public Class ChatContextBuilder
         ' 将所有 system 层合并为单一消息，节之间用 --- 分隔
         If sysParts.Count > 0 Then
             Dim sep = vbCrLf & vbCrLf & "---" & vbCrLf & vbCrLf
+            Dim sysContent = String.Join(sep, sysParts)
+            If Not sysContent.Contains("Отвечай только на русском языке") Then
+                sysContent &= sep & "### Языковой контракт" & vbCrLf &
+                    "Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть."
+            End If
             result.Insert(0, New HistoryMessage With {
                 .role = "system",
-                .content = String.Join(sep, sysParts)
+                .content = sysContent
             })
         End If
 
@@ -350,14 +355,14 @@ Public Class ChatContextBuilder
         If skill Is Nothing OrElse skill.Scripts Is Nothing OrElse skill.Scripts.Count = 0 Then Return
 
         Dim scriptInfo As New List(Of String)()
-        scriptInfo.Add("**可执行脚本：**")
+        scriptInfo.Add("**Исполняемые скрипты:**")
         For Each script In skill.Scripts
             scriptInfo.Add($"- `{script.FileName}` ({script.ScriptType})" &
                 If(Not String.IsNullOrEmpty(script.Description), $" - {script.Description}", ""))
         Next
 
         scriptInfo.Add("")
-        scriptInfo.Add("**脚本调用格式：**")
+        scriptInfo.Add("**Формат вызова скрипта:**")
         scriptInfo.Add("```json")
         scriptInfo.Add($"{{""command"": ""skill_script.{skill.Name}.{skill.Scripts(0).FileName}"", ""params"": {{""arg1"": ""value1""}}}}")
         scriptInfo.Add("```")

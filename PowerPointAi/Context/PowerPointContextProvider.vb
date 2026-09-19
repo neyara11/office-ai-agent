@@ -38,7 +38,7 @@ Namespace Context
                     End Try
 
                     ' 选区信息
-                    Dim selectionInfo As String = $"幻灯片 {currentSlideIndex}/{slideCount}"
+                    Dim selectionInfo As String = $"Слайд {currentSlideIndex}/{slideCount}"
                     Dim selectedShapeCount As Integer = 0
                     Dim formatDesc As String = ""
 
@@ -51,7 +51,7 @@ Namespace Context
 
                                 If selectedShapeCount > 0 Then
                                     Dim shape = sel.ShapeRange(1)
-                                    selectionInfo = $"幻灯片 {currentSlideIndex}/{slideCount}, 选中 {selectedShapeCount} 个对象"
+                                    selectionInfo = $"Слайд {currentSlideIndex}/{slideCount}, выбрано объектов: {selectedShapeCount}"
 
                                     ' 如果是文本框，获取格式信息
                                     If shape.HasTextFrame Then
@@ -62,9 +62,9 @@ Namespace Context
                                             Dim isBold As Boolean = (textRange.Font.Bold = -1)
                                             Dim isItalic As Boolean = (textRange.Font.Italic = -1)
 
-                                            formatDesc = $"字号: {fontSize}pt, 字体: {fontName}"
-                                            If isBold Then formatDesc &= ", 加粗"
-                                            If isItalic Then formatDesc &= ", 斜体"
+                                            formatDesc = $"Размер шрифта: {fontSize}pt, шрифт: {fontName}"
+                                            If isBold Then formatDesc &= ", полужирный"
+                                            If isItalic Then formatDesc &= ", курсив"
 
                                             ' 文本内容预览
                                             Dim textContent As String = textRange.Text
@@ -72,7 +72,7 @@ Namespace Context
                                                 If textContent.Length > 50 Then
                                                     textContent = textContent.Substring(0, 50) & "..."
                                                 End If
-                                                formatDesc &= $"{vbCrLf}内容: {textContent}"
+                                                formatDesc &= $"{vbCrLf}Содержимое: {textContent}"
                                             End If
 
                                         Catch formatEx As Exception
@@ -89,13 +89,13 @@ Namespace Context
                     ctx.Selection = New SelectionInfo With {
                         .Address = selectionInfo,
                         .ItemCount = selectedShapeCount,
-                        .DataType = If(selectedShapeCount > 0, "形状/文本框", "幻灯片"),
+                        .DataType = If(selectedShapeCount > 0, "Фигуры/текстовое поле", "Слайд"),
                         .Preview = formatDesc
                     }
 
                     ' 文档结构信息
                     ctx.DocStructure = New DocumentStructure With {
-                        .Summary = $"PowerPoint 演示文稿，共 {slideCount} 张幻灯片，当前第 {currentSlideIndex} 张"
+                        .Summary = $"Презентация PowerPoint, слайдов: {slideCount}, текущий: {currentSlideIndex}"
                     }
                 End If
 

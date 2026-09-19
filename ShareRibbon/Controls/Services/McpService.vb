@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\Services\McpService.vb
+﻿' ShareRibbon\Controls\Services\McpService.vb
 ' MCP 服务：处理 MCP 连接管理和工具调用
 
 Imports System.Linq
@@ -51,10 +51,10 @@ Public Class McpService
             Dim enabledList As List(Of String) = jsonDoc("enabledList").ToObject(Of List(Of String))()
             Dim chatSettings As New ChatSettings(_getApplication())
             chatSettings.SaveEnabledMcpList(enabledList)
-            GlobalStatusStrip.ShowInfo("MCP设置已保存")
+            GlobalStatusStrip.ShowInfo("Настройки MCP сохранены")
         Catch ex As Exception
             Debug.WriteLine($"保存MCP设置失败: {ex.Message}")
-            GlobalStatusStrip.ShowWarning("保存MCP设置失败")
+            GlobalStatusStrip.ShowWarning("Не удалось сохранить настройки MCP")
         End Try
     End Sub
 

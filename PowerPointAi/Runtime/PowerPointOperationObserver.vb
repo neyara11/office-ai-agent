@@ -96,7 +96,7 @@ Namespace OfficeRuntime
                                     Not String.Equals(operation.Action, "get", StringComparison.OrdinalIgnoreCase))
             Return New JObject From {
                 {"kind", "office_operation_batch"},
-                {"summary", $"PowerPoint 声明式操作完成 {succeededCount}/{totalCount} 项"},
+                {"summary", $"Декларативные операции PowerPoint выполнены: {succeededCount}/{totalCount}"},
                 {"changed", changed},
                 {"writeExpected", writeExpected},
                 {"appType", "PowerPoint"},

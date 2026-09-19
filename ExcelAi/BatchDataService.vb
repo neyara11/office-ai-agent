@@ -17,7 +17,7 @@ Public Class BatchDataService
         ' 复用翻译功能的 AI 平台配置，避免要求用户单独配置第二套 key
         Dim cfg = ConfigManager.ConfigData.FirstOrDefault(Function(c) c.translateSelected)
         If cfg Is Nothing OrElse cfg.model Is Nothing OrElse cfg.model.Count = 0 Then
-            GlobalStatusStripAll.ShowWarning("未配置 AI 平台，请在「翻译」配置中选择平台和模型")
+            GlobalStatusStripAll.ShowWarning("Платформа ИИ не настроена. Выберите платформу и модель в настройках «Перевод»")
             Return Nothing
         End If
 
@@ -47,7 +47,7 @@ Public Class BatchDataService
         Dim raw = Await LLMUtil.SendHttpRequest(cfg.url, cfg.key, requestBody)
 
         If String.IsNullOrEmpty(raw) OrElse raw.StartsWith("错误:") Then
-            GlobalStatusStripAll.ShowWarning(If(String.IsNullOrEmpty(raw), "AI 请求失败，请检查配置", raw))
+            GlobalStatusStripAll.ShowWarning(If(String.IsNullOrEmpty(raw), "Запрос к ИИ не удался. Проверьте настройки", raw))
             Return Nothing
         End If
 

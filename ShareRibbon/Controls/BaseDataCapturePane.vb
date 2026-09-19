@@ -209,7 +209,7 @@ Public MustInherit Class BaseDataCapturePane
         SetNavigationState(False)  ' 停止计时器并恢复按钮状态
         If Not args.IsSuccess Then
             Debug.WriteLine($"Navigation failed, source: {ChatBrowser.CoreWebView2.Source}")
-            GlobalStatusStrip.ShowWarning("页面加载失败，请检查网络连接或 URL")
+            GlobalStatusStrip.ShowWarning("Не удалось загрузить страницу. Проверьте подключение к сети или URL")
         Else
             Debug.WriteLine("页面加载成功")
         End If
@@ -334,13 +334,13 @@ Public MustInherit Class BaseDataCapturePane
                 ChatBrowser.CoreWebView2.Navigate(url)
             Else
                 Debug.WriteLine("Navigation failed: CoreWebView2 is null")
-                MessageBox.Show("WebView2 组件未就绪", "错误",
+                MessageBox.Show("Компонент WebView2 не готов", "Ошибка",
                               MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
 
         Catch ex As Exception
             Debug.WriteLine($"Navigation error: {ex.Message}")
-            MessageBox.Show($"导航失败: {ex.Message}", "错误",
+            MessageBox.Show($"Ошибка навигации: {ex.Message}", "Ошибка",
                           MessageBoxButtons.OK, MessageBoxIcon.Error)
             ' 确保在发生错误时恢复按钮状态
             SetNavigationState(False)
@@ -348,18 +348,18 @@ Public MustInherit Class BaseDataCapturePane
     End Sub
     Private Async Sub CaptureButton_Click(sender As Object, e As EventArgs)
         If isCapturing Then
-            MessageBox.Show("正在抓取中，请稍候...", "提示")
+            MessageBox.Show("Идёт захват, подождите...", "Подсказка")
             Return
         End If
 
         Try
             ' 显示抓取类型选择对话框
             Dim captureTypeResult = MessageBox.Show(
-            "请选择抓取内容类型：" & vbCrLf & vbCrLf &
-            "【是】- 抓取文本内容（智能解析，保持格式）" & vbCrLf &
-            "【否】- 抓取HTML代码（包含完整标签结构）" & vbCrLf &
-            "【取消】- 取消操作",
-            "选择抓取类型",
+            "Выберите тип захватываемого содержимого:" & vbCrLf & vbCrLf &
+            "[Да] — захватить текст (умный разбор с сохранением форматирования)" & vbCrLf &
+            "[Нет] — захватить HTML-код (с полной структурой тегов)" & vbCrLf &
+            "[Отмена] — отменить операцию",
+            "Выбор типа захвата",
             MessageBoxButtons.YesNoCancel,
             MessageBoxIcon.Question,
             MessageBoxDefaultButton.Button1)
@@ -378,7 +378,7 @@ Public MustInherit Class BaseDataCapturePane
 
         Catch ex As Exception
             Debug.WriteLine($"抓取内容时出错: {ex.Message}")
-            MessageBox.Show($"抓取内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при захвате содержимого: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -386,7 +386,7 @@ Public MustInherit Class BaseDataCapturePane
     Private Async Function CaptureTextContent() As Task
         Try
             isCapturing = True
-            CaptureButton.Text = "抓取文本中..."
+            CaptureButton.Text = "Захват текста..."
             CaptureButton.Enabled = False
 
             ' 等待页面完全渲染（对Vue/React等SPA很重要）
@@ -416,15 +416,15 @@ Public MustInherit Class BaseDataCapturePane
                 Debug.WriteLine($"成功抓取文本内容，长度: {finalContent.Length} 字符")
                 'MessageBox.Show("文本内容抓取完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Else
-                MessageBox.Show("未能获取到有效的文本内容", "提示")
+                MessageBox.Show("Не удалось получить корректный текст", "Подсказка")
             End If
 
         Catch ex As Exception
             Debug.WriteLine($"抓取文本内容时出错: {ex.Message}")
-            MessageBox.Show($"抓取文本内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при захвате текста: {ex.Message}", "Ошибка")
         Finally
             isCapturing = False
-            CaptureButton.Text = "抓取内容"
+            CaptureButton.Text = "Захватить"
             CaptureButton.Enabled = True
         End Try
     End Function
@@ -521,7 +521,7 @@ Public MustInherit Class BaseDataCapturePane
                 images.forEach(img => {{
                     const alt = img.getAttribute('alt') || '';
                     const src = img.getAttribute('src') || '';
-                    img.outerHTML = `[图片: ${{alt || '无描述'}}]${{src ? ' - ' + src : ''}}`;
+                    img.outerHTML = `[Изображение: ${{alt || 'без описания'}}]${{src ? ' - ' + src : ''}}`;
                 }});
                 
                 return clone.innerText || clone.textContent || '';
@@ -648,7 +648,7 @@ Public MustInherit Class BaseDataCapturePane
                         case 'img':
                             const alt = element.getAttribute('alt') || '';
                             const src = element.getAttribute('src') || '';
-                            result += `[图片: ${alt || '无描述'}]${src ? ` - ${src}` : ''}\n`;
+                            result += `[Изображение: ${alt || 'без описания'}]${src ? ` - ${src}` : ''}\n`;
                             break;
                             
                         case 'div':
@@ -738,19 +738,19 @@ Public MustInherit Class BaseDataCapturePane
         Try
             Dim script = "
         (function() {
-            const title = document.title || '无标题';
+            const title = document.title || 'без заголовка';
             const url = window.location.href;
             const description = document.querySelector('meta[name=""description""]')?.content || '';
             const author = document.querySelector('meta[name=""author""]')?.content || '';
             const publishDate = document.querySelector('meta[property=""article:published_time""]')?.content || 
                                document.querySelector('meta[name=""date""]')?.content || '';
             
-            let info = `页面标题: ${title}\n`;
-            info += `页面链接: ${url}\n`;
-            if (description) info += `页面描述: ${description}\n`;
-            if (author) info += `作者: ${author}\n`;
-            if (publishDate) info += `发布时间: ${publishDate}\n`;
-            info += `抓取时间: ${new Date().toLocaleString('zh-CN')}\n`;
+            let info = `Заголовок страницы: ${title}\n`;
+            info += `Ссылка страницы: ${url}\n`;
+            if (description) info += `Описание страницы: ${description}\n`;
+            if (author) info += `Автор: ${author}\n`;
+            if (publishDate) info += `Дата публикации: ${publishDate}\n`;
+            info += `Время захвата: ${new Date().toLocaleString('ru-RU')}\n`;
             info += '----------------------------------------';
             
             return info;
@@ -762,11 +762,11 @@ Public MustInherit Class BaseDataCapturePane
                 Return JsonConvert.DeserializeObject(Of String)(result)
             End If
 
-            Return "页面信息获取失败"
+            Return "Не удалось получить информацию о странице"
 
         Catch ex As Exception
             Debug.WriteLine($"获取页面信息时出错: {ex.Message}")
-            Return "页面信息获取失败"
+            Return "Не удалось получить информацию о странице"
         End Try
     End Function
 
@@ -795,7 +795,7 @@ Public MustInherit Class BaseDataCapturePane
 
             ' 限制最大长度（防止内容过长）
             If cleaned.Length > 50000 Then
-                cleaned = cleaned.Substring(0, 50000) & vbCrLf & vbCrLf & "... [内容过长，已截断]"
+                cleaned = cleaned.Substring(0, 50000) & vbCrLf & vbCrLf & "... [содержимое слишком длинное, усечено]"
             End If
 
             Return cleaned
@@ -810,7 +810,7 @@ Public MustInherit Class BaseDataCapturePane
     Private Async Function CaptureHtmlContent() As Task
         Try
             isCapturing = True
-            CaptureButton.Text = "抓取HTML中..."
+            CaptureButton.Text = "Захват HTML..."
             CaptureButton.Enabled = False
 
             ' 等待页面完全渲染
@@ -833,11 +833,11 @@ Public MustInherit Class BaseDataCapturePane
                 ' 检查内容大小，决定处理方式
                 If htmlContent.Length > 200000 Then ' 200KB
                     Dim choice = MessageBox.Show(
-                    $"HTML内容很大 ({htmlContent.Length:N0} 字符)，选择处理方式：" & vbCrLf & vbCrLf &
-                    "【是】- 完整显示（可能较慢）" & vbCrLf &
-                    "【否】- 保存到文件" & vbCrLf &
-                    "【取消】- 截断显示",
-                    "大文件处理",
+                    $"HTML-содержимое очень большое ({htmlContent.Length:N0} символов). Выберите способ обработки:" & vbCrLf & vbCrLf &
+                    "[Да] — показать полностью (может быть медленно)" & vbCrLf &
+                    "[Нет] — сохранить в файл" & vbCrLf &
+                    "[Отмена] — показать усечённо",
+                    "Обработка большого файла",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question)
 
@@ -858,15 +858,15 @@ Public MustInherit Class BaseDataCapturePane
                 End If
 
             Else
-                MessageBox.Show("未能获取到有效的HTML内容", "提示")
+                MessageBox.Show("Не удалось получить корректное HTML-содержимое", "Подсказка")
             End If
 
         Catch ex As Exception
             Debug.WriteLine($"抓取HTML内容时出错: {ex.Message}")
-            MessageBox.Show($"抓取HTML内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при захвате HTML-содержимого: {ex.Message}", "Ошибка")
         Finally
             isCapturing = False
-            CaptureButton.Text = "抓取内容"
+            CaptureButton.Text = "Захватить"
             CaptureButton.Enabled = True
         End Try
     End Function
@@ -884,16 +884,16 @@ Public MustInherit Class BaseDataCapturePane
             ' 添加页面信息头部
             Dim pageInfo = Await GetPageMetaInfo()
             Dim finalContent = pageInfo & vbCrLf & vbCrLf &
-                          "========== 大型HTML代码内容 ==========" & vbCrLf &
-                          $"原始大小: {htmlContent.Length:N0} 字符" & vbCrLf &
-                          $"格式化后: {formattedHtml.Length:N0} 字符" & vbCrLf & vbCrLf &
+                          "========== Большое HTML-содержимое ==========" & vbCrLf &
+                          $"Исходный размер: {htmlContent.Length:N0} символов" & vbCrLf &
+                          $"После форматирования: {formattedHtml.Length:N0} символов" & vbCrLf & vbCrLf &
                           formattedHtml
 
             HandleExtractedContent(finalContent)
-            MessageBox.Show("大型HTML内容处理完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Большое HTML-содержимое обработано!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
-            MessageBox.Show($"处理大型HTML内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке большого HTML-содержимого: {ex.Message}", "Ошибка")
         End Try
     End Function
 
@@ -901,7 +901,7 @@ Public MustInherit Class BaseDataCapturePane
     Private Async Function SaveHtmlToFile(htmlContent As String) As Task
         Try
             Using saveDialog As New SaveFileDialog()
-                saveDialog.Filter = "HTML文件 (*.html)|*.html|所有文件 (*.*)|*.*"
+                saveDialog.Filter = "HTML-файлы (*.html)|*.html|Все файлы (*.*)|*.*"
                 saveDialog.DefaultExt = "html"
                 saveDialog.FileName = $"captured_page_{DateTime.Now:yyyyMMdd_HHmmss}.html"
 
@@ -914,18 +914,18 @@ Public MustInherit Class BaseDataCapturePane
                     ' 同时在文档中插入文件信息
                     Dim pageInfo = Await GetPageMetaInfo()
                     Dim fileInfo = $"{pageInfo}{vbCrLf}{vbCrLf}" &
-                              "========== HTML文件已保存 ==========" & vbCrLf &
-                              $"文件路径: {saveDialog.FileName}" & vbCrLf &
-                              $"文件大小: {htmlContent.Length:N0} 字符" & vbCrLf &
-                              $"保存时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}" & vbCrLf
+                              "========== HTML-файл сохранён ==========" & vbCrLf &
+                              $"Путь к файлу: {saveDialog.FileName}" & vbCrLf &
+                              $"Размер файла: {htmlContent.Length:N0} символов" & vbCrLf &
+                              $"Время сохранения: {DateTime.Now:yyyy-MM-dd HH:mm:ss}" & vbCrLf
 
                     HandleExtractedContent(fileInfo)
-                    MessageBox.Show($"HTML内容已保存到：{vbCrLf}{saveDialog.FileName}", "保存成功")
+                    MessageBox.Show($"HTML-содержимое сохранено в:{vbCrLf}{saveDialog.FileName}", "Сохранено")
                 End If
             End Using
 
         Catch ex As Exception
-            MessageBox.Show($"保存HTML文件时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при сохранении HTML-файла: {ex.Message}", "Ошибка")
         End Try
     End Function
 
@@ -938,17 +938,17 @@ Public MustInherit Class BaseDataCapturePane
 
             Dim pageInfo = Await GetPageMetaInfo()
             Dim finalContent = pageInfo & vbCrLf & vbCrLf &
-                          "========== HTML代码内容（已截断） ==========" & vbCrLf &
-                          $"原始大小: {htmlContent.Length:N0} 字符" & vbCrLf &
-                          $"显示大小: {formattedHtml.Length:N0} 字符" & vbCrLf & vbCrLf &
+                          "========== HTML-содержимое (усечено) ==========" & vbCrLf &
+                          $"Исходный размер: {htmlContent.Length:N0} символов" & vbCrLf &
+                          $"Размер отображения: {formattedHtml.Length:N0} символов" & vbCrLf & vbCrLf &
                           formattedHtml & vbCrLf & vbCrLf &
-                          "... [内容过长，已截断，完整内容请选择保存到文件]"
+                          "... [содержимое слишком длинное, усечено; чтобы получить полное содержимое, выберите сохранение в файл]"
 
             HandleExtractedContent(finalContent)
-            MessageBox.Show("HTML内容已截断显示！", "完成", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("HTML-содержимое показано усечённо!", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
-            MessageBox.Show($"处理截断HTML内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке усечённого HTML-содержимого: {ex.Message}", "Ошибка")
         End Try
     End Function
 
@@ -958,14 +958,14 @@ Public MustInherit Class BaseDataCapturePane
             Dim formattedHtml = FormatHtmlContent(htmlContent)
             Dim pageInfo = Await GetPageMetaInfo()
             Dim finalContent = pageInfo & vbCrLf & vbCrLf &
-                          "========== HTML代码内容 ==========" & vbCrLf & vbCrLf &
+                          "========== HTML-содержимое ==========" & vbCrLf & vbCrLf &
                           formattedHtml
 
             HandleExtractedContent(finalContent)
             'MessageBox.Show("HTML代码抓取完成！", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
 
         Catch ex As Exception
-            MessageBox.Show($"处理HTML内容时出错: {ex.Message}", "错误")
+            MessageBox.Show($"Ошибка при обработке HTML-содержимого: {ex.Message}", "Ошибка")
         End Try
     End Function
 
@@ -1056,12 +1056,12 @@ Public MustInherit Class BaseDataCapturePane
             If contentSize > 2000000 Then ' 2MB
                 ' 内容太大，提示用户
                 Dim choice = MessageBox.Show(
-                $"HTML内容非常大 ({contentSize:N0} 字符)，可能会导致传输问题。" & vbCrLf & vbCrLf &
-                "建议选择：" & vbCrLf &
-                "【是】- 尝试完整传输（可能失败）" & vbCrLf &
-                "【否】- 使用简化HTML" & vbCrLf &
-                "【取消】- 取消操作",
-                "内容过大警告",
+                $"HTML-содержимое очень большое ({contentSize:N0} символов), возможны проблемы с передачей." & vbCrLf & vbCrLf &
+                "Рекомендуется выбрать:" & vbCrLf &
+                "[Да] — попробовать передать полностью (может не получиться)" & vbCrLf &
+                "[Нет] — использовать упрощённый HTML" & vbCrLf &
+                "[Отмена] — отменить операцию",
+                "Предупреждение о размере содержимого",
                 MessageBoxButtons.YesNoCancel,
                 MessageBoxIcon.Warning)
 
@@ -1131,16 +1131,16 @@ Public MustInherit Class BaseDataCapturePane
             Dim simplified = $"<!DOCTYPE html>
 <html>
 <head>
-    <title>页面内容（简化版）</title>
+    <title>Содержимое страницы (упрощённо)</title>
     <meta charset='utf-8'>
 </head>
 <body>
-    <h1>页面内容（简化版）</h1>
-    <p>原始页面过大，这是简化版本</p>
-    <p>页面URL: {ChatBrowser.CoreWebView2?.Source}</p>
-    <p>页面标题: {ChatBrowser.CoreWebView2?.DocumentTitle}</p>
+    <h1>Содержимое страницы (упрощённо)</h1>
+    <p>Исходная страница слишком большая, это упрощённая версия</p>
+    <p>URL страницы: {ChatBrowser.CoreWebView2?.Source}</p>
+    <p>Заголовок страницы: {ChatBrowser.CoreWebView2?.DocumentTitle}</p>
     <hr>
-    <div>由于原始HTML内容过大，无法完整传输。请考虑使用文本抓取模式或保存到文件。</div>
+    <div>Исходное HTML-содержимое слишком большое и не может быть передано полностью. Используйте текстовый режим захвата или сохранение в файл.</div>
 </body>
 </html>"
 
@@ -1148,7 +1148,7 @@ Public MustInherit Class BaseDataCapturePane
 
         Catch ex As Exception
             Debug.WriteLine($"创建简化HTML时出错: {ex.Message}")
-            Return "<!DOCTYPE html><html><head><title>错误</title></head><body><h1>HTML抓取失败</h1><p>无法获取页面内容</p></body></html>"
+            Return "<!DOCTYPE html><html><head><title>Ошибка</title></head><body><h1>Не удалось захватить HTML</h1><p>Не удалось получить содержимое страницы</p></body></html>"
         End Try
     End Function
     ' 简化版HTML提取（移除大部分内容）
@@ -1163,10 +1163,10 @@ Public MustInherit Class BaseDataCapturePane
                     <meta charset='utf-8'>
                 </head>
                 <body>
-                    <h1>页面内容（简化版）</h1>
-                    <p>原始页面过大，这是简化版本</p>
-                    <p>页面URL: ${window.location.href}</p>
-                    <p>页面标题: ${document.title}</p>
+                    <h1>Содержимое страницы (упрощённо)</h1>
+                    <p>Исходная страница слишком большая, это упрощённая версия</p>
+                    <p>URL страницы: ${window.location.href}</p>
+                    <p>Заголовок страницы: ${document.title}</p>
                     <hr>
                     <div>${document.body.innerText.substring(0, 5000)}</div>
                 </body>
@@ -1338,11 +1338,11 @@ Public MustInherit Class BaseDataCapturePane
                         border: 1px solid rgba(255, 255, 255, 0.2);
                     `;
                     tip.innerHTML = `
-                        <div style='margin-bottom: 8px; font-weight: bold; color: #FFD700;'>🎯 智能元素选择器</div>
-                        <div style='margin-bottom: 4px;'>• 点击选择元素</div>
-                        <div style='margin-bottom: 4px;'>• Shift + 点击：选择父元素</div>
-                        <div style='margin-bottom: 4px;'>• Alt + 滚轮：调整父元素层级</div>
-                        <div style='color: #90EE90;'>• 支持抓取图片和视频</div>
+                        <div style='margin-bottom: 8px; font-weight: bold; color: #FFD700;'>🎯 Умный выбор элемента</div>
+                        <div style='margin-bottom: 4px;'>• Клик — выбрать элемент</div>
+                        <div style='margin-bottom: 4px;'>• Shift + клик — выбрать родительский элемент</div>
+                        <div style='margin-bottom: 4px;'>• Alt + колесо — изменить уровень родителя</div>
+                        <div style='color: #90EE90;'>• Поддерживается захват изображений и видео</div>
                     `;
                     document.body.appendChild(tip);
                     this.tip = tip;
@@ -1573,7 +1573,7 @@ Public MustInherit Class BaseDataCapturePane
                         info.innerHTML = `
                             <div style='font-size: 16px; margin-bottom: 8px; color: #FFD700;'>
                                 ${this.getElementIcon(elementType)} &lt;${tag}${id}${classes}&gt;
-                                ${isParent ? ` (父元素层级: ${level + 1})` : ''}
+                                ${isParent ? ` (уровень родителя: ${level + 1})` : ''}
                             </div>
                             ${mediaInfo ? `<div style='margin-bottom: 8px; color: #90EE90;'>${mediaInfo}</div>` : ''}
                             <div style='font-size: 13px; opacity: 0.9; margin-bottom: 8px;'>
@@ -1615,21 +1615,21 @@ Public MustInherit Class BaseDataCapturePane
                         if (tag === 'img') {
                             const width = element.naturalWidth || element.width || 0;
                             const height = element.naturalHeight || element.height || 0;
-                            const alt = (element.alt || '无描述').substring(0, 20);
-                            info = `📷 图片: ${alt} (${width}×${height})`;
+                            const alt = (element.alt || 'без описания').substring(0, 20);
+                            info = `📷 Изображение: ${alt} (${width}×${height})`;
                         } else if (tag === 'video') {
                             const width = element.videoWidth || element.width || 0;
                             const height = element.videoHeight || element.height || 0;
-                            const duration = element.duration ? Math.round(element.duration) + 's' : '未知';
-                            info = `🎬 视频: ${duration} (${width}×${height})`;
+                            const duration = element.duration ? Math.round(element.duration) + 's' : 'неизвестно';
+                            info = `🎬 Видео: ${duration} (${width}×${height})`;
                         } else if (tag === 'audio') {
-                            const duration = element.duration ? Math.round(element.duration) + 's' : '未知';
-                            info = `🎵 音频: ${duration}`;
+                            const duration = element.duration ? Math.round(element.duration) + 's' : 'неизвестно';
+                            info = `🎵 Аудио: ${duration}`;
                         } else if (element.querySelectorAll) {
                             // 限制查询范围以防止性能问题
                             const mediaElements = element.querySelectorAll('img, video, audio');
                             if (mediaElements.length > 0 && mediaElements.length < 50) {
-                                info = `📦 包含 ${mediaElements.length} 个媒体元素`;
+                                info = `📦 Содержит медиаэлементов: ${mediaElements.length}`;
                             }
                         }
         
@@ -1649,27 +1649,27 @@ Public MustInherit Class BaseDataCapturePane
                         
                         if (tag === 'img') {
                             const src = element.src || '';
-                            const alt = element.alt || '无描述';
+                            const alt = element.alt || 'без описания';
                             const width = element.naturalWidth || element.width || 0;
                             const height = element.naturalHeight || element.height || 0;
-                            info = `📷 图片: ${alt} (${width}×${height})`;
+                            info = `📷 Изображение: ${alt} (${width}×${height})`;
                         } else if (tag === 'video') {
                             const src = element.src || (element.querySelector && element.querySelector('source') ? element.querySelector('source').src : '');
-                            const duration = element.duration ? Math.round(element.duration) + 's' : '未知';
+                            const duration = element.duration ? Math.round(element.duration) + 's' : 'неизвестно';
                             const width = element.videoWidth || element.width || 0;
                             const height = element.videoHeight || element.height || 0;
-                            info = `🎬 视频: ${duration} (${width}×${height})`;
+                            info = `🎬 Видео: ${duration} (${width}×${height})`;
                         } else if (tag === 'audio') {
                             const src = element.src || (element.querySelector && element.querySelector('source') ? element.querySelector('source').src : '');
-                            const duration = element.duration ? Math.round(element.duration) + 's' : '未知';
-                            info = `🎵 音频: ${duration}`;
+                            const duration = element.duration ? Math.round(element.duration) + 's' : 'неизвестно';
+                            info = `🎵 Аудио: ${duration}`;
                         }
                         
                         // 检查是否包含媒体元素
                         if (!info && element.querySelectorAll) {
                             const mediaElements = element.querySelectorAll('img, video, audio');
                             if (mediaElements.length > 0) {
-                                info = `📦 包含 ${mediaElements.length} 个媒体元素`;
+                                info = `📦 Содержит медиаэлементов: ${mediaElements.length}`;
                             }
                         }
                         
@@ -1699,18 +1699,18 @@ Public MustInherit Class BaseDataCapturePane
                 // 获取操作提示
                 getActionHint: function(elementType, isParent) {
                     if (isParent) {
-                        return '🔄 Alt+滚轮调整层级，点击确认选择';
+                        return '🔄 Alt+колесо — изменить уровень, клик — подтвердить выбор';
                     }
                     
                     const hints = {
-                        image: '🖼️ 将保存图片到文档',
-                        video: '🎬 将保存视频信息和链接',
-                        audio: '🎵 将保存音频信息和链接',
-                        table: '📊 将转换为Word表格',
-                        'media-container': '📦 将保存所有媒体内容',
-                        text: '📄 将保存文本内容'
+                        image: '🖼️ Изображение будет сохранено в документ',
+                        video: '🎬 Будут сохранены информация и ссылка на видео',
+                        audio: '🎵 Будут сохранены информация и ссылка на аудио',
+                        table: '📊 Будет преобразовано в таблицу Word',
+                        'media-container': '📦 Будет сохранено всё медиасодержимое',
+                        text: '📄 Будет сохранён текст'
                     };
-                    return hints[elementType] || '点击选择此元素';
+                    return hints[elementType] || 'Нажмите, чтобы выбрать этот элемент';
                 },
 
                 // 智能定位信息框
@@ -2068,7 +2068,7 @@ Public MustInherit Class BaseDataCapturePane
 
         Catch ex As Exception
             Debug.WriteLine($"DOM选择器错误: {ex.Message}")
-            MessageBox.Show($"初始化选择器失败: {ex.Message}", "错误")
+            MessageBox.Show($"Не удалось инициализировать селектор: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -2122,7 +2122,7 @@ Public MustInherit Class BaseDataCapturePane
         End If
         Catch ex As Exception
             Debug.WriteLine($"处理消息错误: {ex.Message}")
-            MessageBox.Show($"处理选择消息失败: {ex.Message}", "错误")
+            MessageBox.Show($"Не удалось обработать сообщение выбора: {ex.Message}", "Ошибка")
         End Try
     End Sub
 
@@ -2134,10 +2134,10 @@ Public MustInherit Class BaseDataCapturePane
         Dim height = If(mediaInfo("height")?.ToString(), "0")
 
 
-        Dim message = $"🖼️ 发现图片元素{vbCrLf}描述: {alt}{vbCrLf}尺寸: {width}×{height}{vbCrLf}链接: {src}"
+        Dim message = $"🖼️ Найден элемент изображения{vbCrLf}Описание: {alt}{vbCrLf}Размер: {width}×{height}{vbCrLf}Ссылка: {src}"
 
-        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "是否要抓取此图片？",
-                                "图片选择确认",
+        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "Захватить это изображение?",
+                                "Подтверждение выбора изображения",
                                 MessageBoxButtons.YesNoCancel,
                                 MessageBoxIcon.Question)
 
@@ -2145,7 +2145,7 @@ Public MustInherit Class BaseDataCapturePane
             Case DialogResult.Yes
                 DownloadAndInsertImage(src, alt)
             Case DialogResult.No
-                OnAiChatRequested($"图片信息: {message}")
+                OnAiChatRequested($"Информация об изображении: {message}")
             Case DialogResult.Cancel
                 selectedDomPath = ""
         End Select
@@ -2159,10 +2159,10 @@ Public MustInherit Class BaseDataCapturePane
         Dim width = If(mediaInfo("width")?.ToString(), "0")
         Dim height = If(mediaInfo("height")?.ToString(), "0")
 
-        Dim message = $"🎬 发现视频元素{vbCrLf}时长: {duration}秒{vbCrLf}尺寸: {width}×{height}{vbCrLf}链接: {src}"
+        Dim message = $"🎬 Найден элемент видео{vbCrLf}Длительность: {duration} с{vbCrLf}Размер: {width}×{height}{vbCrLf}Ссылка: {src}"
 
-        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "是否要抓取此视频信息？",
-                                "视频选择确认",
+        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "Захватить информацию об этом видео?",
+                                "Подтверждение выбора видео",
                                 MessageBoxButtons.YesNoCancel,
                                 MessageBoxIcon.Question)
 
@@ -2170,7 +2170,7 @@ Public MustInherit Class BaseDataCapturePane
             Case DialogResult.Yes
                 HandleVideoContent(src, poster, duration, width, height)
             Case DialogResult.No
-                OnAiChatRequested($"视频信息: {message}")
+                OnAiChatRequested($"Информация о видео: {message}")
             Case DialogResult.Cancel
                 selectedDomPath = ""
         End Select
@@ -2181,10 +2181,10 @@ Public MustInherit Class BaseDataCapturePane
         Dim src = If(mediaInfo("src")?.ToString(), "")
         Dim duration = If(mediaInfo("duration")?.ToString(), "0")
 
-        Dim message = $"🎵 发现音频元素{vbCrLf}时长: {duration}秒{vbCrLf}链接: {src}"
+        Dim message = $"🎵 Найден элемент аудио{vbCrLf}Длительность: {duration} с{vbCrLf}Ссылка: {src}"
 
-        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "是否要抓取此音频信息？",
-                                "音频选择确认",
+        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "Захватить информацию об этом аудио?",
+                                "Подтверждение выбора аудио",
                                 MessageBoxButtons.YesNoCancel,
                                 MessageBoxIcon.Question)
 
@@ -2192,7 +2192,7 @@ Public MustInherit Class BaseDataCapturePane
             Case DialogResult.Yes
                 HandleAudioContent(src, duration)
             Case DialogResult.No
-                OnAiChatRequested($"音频信息: {message}")
+                OnAiChatRequested($"Информация об аудио: {message}")
             Case DialogResult.Cancel
                 selectedDomPath = ""
         End Select
@@ -2201,10 +2201,10 @@ Public MustInherit Class BaseDataCapturePane
     ' 处理包含媒体的容器
     Private Sub HandleMediaContainerSelection(containedMedia As JArray, html As String, text As String, path As String)
         Dim mediaCount = If(containedMedia?.Count, 0)
-        Dim message = $"📦 发现包含 {mediaCount} 个媒体元素的容器{vbCrLf}内容预览: {text.Substring(0, Math.Min(text.Length, 100))}"
+        Dim message = $"📦 Найден контейнер с медиаэлементами ({mediaCount}){vbCrLf}Предпросмотр содержимого: {text.Substring(0, Math.Min(text.Length, 100))}"
 
-        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "是否要抓取此容器及其媒体内容？",
-                                "媒体容器选择确认",
+        Dim result = MessageBox.Show(message & vbCrLf & vbCrLf & "Захватить этот контейнер и его медиасодержимое?",
+                                "Подтверждение выбора медиаконтейнера",
                                 MessageBoxButtons.YesNoCancel,
                                 MessageBoxIcon.Question)
 
@@ -2212,7 +2212,7 @@ Public MustInherit Class BaseDataCapturePane
             Case DialogResult.Yes
                 HandleMediaContainerContent(containedMedia, text)
             Case DialogResult.No
-                OnAiChatRequested($"媒体容器信息: {message}")
+                OnAiChatRequested($"Информация о медиаконтейнере: {message}")
             Case DialogResult.Cancel
                 selectedDomPath = ""
         End Select

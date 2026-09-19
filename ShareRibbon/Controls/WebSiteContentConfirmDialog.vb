@@ -1,4 +1,4 @@
-Imports System.Drawing
+ï»¿Imports System.Drawing
 Imports System.Windows.Forms
 
 Public Class WebSiteContentConfirmDialog
@@ -17,25 +17,25 @@ Public Class WebSiteContentConfirmDialog
         End Sub
 
         Private Sub InitializeUI()
-            Text = "È·ÈÏÑ¡Ôñ"
+            Text = "ĞŸĞ¾Ğ´Ñ‚Ğ²ĞµÑ€Ğ¶Ğ´ĞµĞ½Ğ¸Ğµ Ğ²Ñ‹Ğ±Ğ¾Ñ€Ğ°"
             StartPosition = FormStartPosition.CenterScreen
             Size = New Size(500, 300)
             MinimizeBox = False
             MaximizeBox = False
             FormBorderStyle = FormBorderStyle.FixedDialog
 
-            ' ´´½¨Ô¤ÀÀÎÄ±¾¿ò
+            ' åˆ›å»ºé¢„è§ˆæ–‡æœ¬æ¡†
             Dim previewBox As New TextBox With {
                 .Multiline = True,
                 .ReadOnly = True,
                 .ScrollBars = ScrollBars.Vertical,
                 .Dock = DockStyle.Top,
                 .Height = 180,
-                .Text = $"ÒÑÑ¡ÔñÔªËØ: <{_tag}>{Environment.NewLine}Â·¾¶: {_path}{Environment.NewLine}Ô¤ÀÀ: {_content}"
+                .Text = $"Ğ’Ñ‹Ğ±Ñ€Ğ°Ğ½Ğ½Ñ‹Ğ¹ ÑĞ»ĞµĞ¼ĞµĞ½Ñ‚: <{_tag}>{Environment.NewLine}ĞŸÑƒÑ‚ÑŒ: {_path}{Environment.NewLine}ĞŸÑ€ĞµĞ´Ğ¿Ñ€Ğ¾ÑĞ¼Ğ¾Ñ‚Ñ€: {_content}"
             }
             Controls.Add(previewBox)
 
-            ' ´´½¨°´Å¥Ãæ°å
+            ' åˆ›å»ºæŒ‰é’®é¢æ¿
             Dim buttonPanel As New FlowLayoutPanel With {
                 .Dock = DockStyle.Bottom,
                 .FlowDirection = FlowDirection.RightToLeft,
@@ -43,26 +43,26 @@ Public Class WebSiteContentConfirmDialog
                 .Padding = New Padding(5)
             }
 
-            ' ´´½¨Èı¸ö°´Å¥
+            ' åˆ›å»ºä¸‰ä¸ªæŒ‰é’®
             Dim btnCancel As New Button With {
-                .Text = "È¡Ïû²Ù×÷",
+                .Text = "ĞÑ‚Ğ¼ĞµĞ½Ğ°",
                 .DialogResult = DialogResult.Cancel,
                 .Width = 100
             }
 
             Dim btnUseContent As New Button With {
-                .Text = "Ö±½ÓÊ¹ÓÃÄÚÈİ",
+                .Text = "Ğ˜ÑĞ¿Ğ¾Ğ»ÑŒĞ·Ğ¾Ğ²Ğ°Ñ‚ÑŒ ÑĞ¾Ğ´ĞµÑ€Ğ¶Ğ¸Ğ¼Ğ¾Ğµ",
                 .DialogResult = DialogResult.Yes,
                 .Width = 120
             }
 
             Dim btnAiChat As New Button With {
-                .Text = "µ÷ÓÃAIÁÄÌì",
+                .Text = "ĞÑ‚Ğ¿Ñ€Ğ°Ğ²Ğ¸Ñ‚ÑŒ Ğ² AI-Ñ‡Ğ°Ñ‚",
                 .DialogResult = DialogResult.No,
                 .Width = 100
             }
 
-            ' Ìí¼Ó°´Å¥µ½Ãæ°å
+            ' æ·»åŠ æŒ‰é’®åˆ°é¢æ¿
             buttonPanel.Controls.Add(btnCancel)
             buttonPanel.Controls.Add(btnUseContent)
             buttonPanel.Controls.Add(btnAiChat)

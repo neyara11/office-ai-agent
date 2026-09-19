@@ -1,4 +1,4 @@
-Imports System.Threading.Tasks
+﻿Imports System.Threading.Tasks
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
 
@@ -36,7 +36,7 @@ Public Class HistorySessionService
             For Each s In summaries
                 list.Add(New With {
                     .sessionId = s.SessionId,
-                    .title = If(String.IsNullOrEmpty(s.Title), "会话", s.Title),
+                    .title = If(String.IsNullOrEmpty(s.Title), "Сессия", s.Title),
                     .snippet = If(String.IsNullOrEmpty(s.Snippet), "", s.Snippet),
                     .createdAt = s.CreatedAt,
                     .fileName = s.Title,
@@ -73,7 +73,7 @@ Public Class HistorySessionService
             Await _executeScript($"setChatMessages({jsonResult});")
         Catch ex As Exception
             Debug.WriteLine("HandleLoadSession 失败: " & ex.Message)
-            GlobalStatusStrip.ShowWarning("加载会话失败")
+            GlobalStatusStrip.ShowWarning("Не удалось загрузить сессию")
         End Try
     End Sub
 
@@ -84,7 +84,7 @@ Public Class HistorySessionService
         Try
             _chatStateService.StartNewSession()
             Await _executeScript("if(typeof clearChatContent==='function')clearChatContent();")
-            GlobalStatusStrip.ShowInfo("已新建会话")
+            GlobalStatusStrip.ShowInfo("Создана новая сессия")
         Catch ex As Exception
             Debug.WriteLine("HandleNewSession 失败: " & ex.Message)
         End Try

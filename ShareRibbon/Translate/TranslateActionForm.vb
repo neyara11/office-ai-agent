@@ -65,16 +65,16 @@ Public Class TranslateActionForm
 
     Private targetLanguages As String() = {"en", "zh", "ja", "ko", "fr", "de", "es", "ru", "pt", "it"}
     Private languageNames As Dictionary(Of String, String) = New Dictionary(Of String, String) From {
-        {"en", "英语"}, {"zh", "中文"}, {"ja", "日语"}, {"ko", "韩语"},
-        {"fr", "法语"}, {"de", "德语"}, {"es", "西班牙语"}, {"ru", "俄语"},
-        {"pt", "葡萄牙语"}, {"it", "意大利语"}
+        {"en", "Английский"}, {"zh", "Китайский"}, {"ja", "Японский"}, {"ko", "Корейский"},
+        {"fr", "Французский"}, {"de", "Немецкий"}, {"es", "Испанский"}, {"ru", "Русский"},
+        {"pt", "Португальский"}, {"it", "Итальянский"}
     }
 
     Public Sub New(hasSelection As Boolean, appType As String)
         _hasSelection = hasSelection
         _appType = appType
 
-        Me.Text = "一键翻译"
+        Me.Text = "Перевод"
         Me.Size = New Size(500, 560)
         Me.StartPosition = FormStartPosition.CenterParent
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -90,13 +90,13 @@ Public Class TranslateActionForm
 
         ' ========== 翻译平台和模型 ==========
         grpModel = New GroupBox() With {
-            .Text = "翻译平台",
+            .Text = "Платформа перевода",
             .Location = New Point(10, yPos),
             .Size = New Size(465, 70)
         }
         Me.Controls.Add(grpModel)
 
-        Dim lblPlatform As New Label() With {.Text = "平台:", .Location = New Point(15, 25), .AutoSize = True}
+        Dim lblPlatform As New Label() With {.Text = "Платформа:", .Location = New Point(15, 25), .AutoSize = True}
         grpModel.Controls.Add(lblPlatform)
 
         cbPlatform = New ComboBox() With {
@@ -107,7 +107,7 @@ Public Class TranslateActionForm
         AddHandler cbPlatform.SelectedIndexChanged, AddressOf PlatformChanged
         grpModel.Controls.Add(cbPlatform)
 
-        Dim lblModel As New Label() With {.Text = "模型:", .Location = New Point(220, 25), .AutoSize = True}
+        Dim lblModel As New Label() With {.Text = "Модель:", .Location = New Point(220, 25), .AutoSize = True}
         grpModel.Controls.Add(lblModel)
 
         cbModel = New ComboBox() With {
@@ -121,13 +121,13 @@ Public Class TranslateActionForm
 
         ' ========== 语言和领域 ==========
         grpLanguage = New GroupBox() With {
-            .Text = "翻译设置",
+            .Text = "Параметры перевода",
             .Location = New Point(10, yPos),
             .Size = New Size(465, 75)
         }
         Me.Controls.Add(grpLanguage)
 
-        Dim lblTarget As New Label() With {.Text = "翻译为:", .Location = New Point(15, 28), .AutoSize = True}
+        Dim lblTarget As New Label() With {.Text = "Перевести на:", .Location = New Point(15, 28), .AutoSize = True}
         grpLanguage.Controls.Add(lblTarget)
 
         cbTargetLang = New ComboBox() With {
@@ -141,7 +141,7 @@ Public Class TranslateActionForm
         cbTargetLang.SelectedIndex = 1 ' 默认中文
         grpLanguage.Controls.Add(cbTargetLang)
 
-        Dim lblDomain As New Label() With {.Text = "领域:", .Location = New Point(185, 28), .AutoSize = True}
+        Dim lblDomain As New Label() With {.Text = "Область:", .Location = New Point(185, 28), .AutoSize = True}
         grpLanguage.Controls.Add(lblDomain)
 
         cbDomain = New ComboBox() With {
@@ -157,7 +157,7 @@ Public Class TranslateActionForm
         grpLanguage.Controls.Add(cbDomain)
 
         btnEditDomain = New Button() With {
-            .Text = "编辑",
+            .Text = "Изменить",
             .Location = New Point(385, 23),
             .Size = New Size(65, 26)
         }
@@ -168,14 +168,14 @@ Public Class TranslateActionForm
 
         ' ========== 翻译范围 ==========
         grpScope = New GroupBox() With {
-            .Text = "翻译范围",
+            .Text = "Диапазон перевода",
             .Location = New Point(10, yPos),
             .Size = New Size(465, 55)
         }
         Me.Controls.Add(grpScope)
 
         rbAll = New RadioButton() With {
-            .Text = If(_appType = "Word", "整个文档", If(_appType = "Excel", "所有单元格", "所有幻灯片")),
+            .Text = If(_appType = "Word", "Весь документ", If(_appType = "Excel", "Все ячейки", "Все слайды")),
             .Location = New Point(15, 22),
             .AutoSize = True,
             .Checked = True
@@ -183,7 +183,7 @@ Public Class TranslateActionForm
         grpScope.Controls.Add(rbAll)
 
         rbSelection = New RadioButton() With {
-            .Text = If(_hasSelection, If(_appType = "Excel", "仅选中的单元格", "仅选中内容"), If(_appType = "Excel", "仅选中的单元格（未选中）", "仅选中内容（未选中）")),
+            .Text = If(_hasSelection, If(_appType = "Excel", "Только выделенные ячейки", "Только выделенное"), If(_appType = "Excel", "Только выделенные ячейки (нет выделения)", "Только выделенное (нет выделения)")),
             .Location = New Point(150, 22),
             .AutoSize = True,
             .Enabled = _hasSelection
@@ -194,7 +194,7 @@ Public Class TranslateActionForm
 
         ' ========== 输出方式 ==========
         grpOutput = New GroupBox() With {
-            .Text = "输出方式",
+            .Text = "Способ вывода",
             .Location = New Point(10, yPos),
             .Size = New Size(465, 80)
         }
@@ -203,7 +203,7 @@ Public Class TranslateActionForm
         If _appType = "Excel" Then
             ' Excel只有3个选项：替换原文、右侧单元格（新增列）、下方单元格（新增行）
             rbReplace = New RadioButton() With {
-                .Text = "替换原文",
+                .Text = "Заменить оригинал",
                 .Location = New Point(15, 22),
                 .AutoSize = True,
                 .Checked = True
@@ -212,7 +212,7 @@ Public Class TranslateActionForm
             grpOutput.Controls.Add(rbReplace)
 
             rbImmersive = New RadioButton() With {
-                .Text = "译文放在右侧单元格（自动新增一列）",
+                .Text = "Перевод в ячейке справа (с автоматическим добавлением столбца)",
                 .Location = New Point(15, 48),
                 .AutoSize = True
             }
@@ -220,7 +220,7 @@ Public Class TranslateActionForm
             grpOutput.Controls.Add(rbImmersive)
 
             rbNewDoc = New RadioButton() With {
-                .Text = "译文放在下方单元格（自动新增一行）",
+                .Text = "Перевод в ячейке снизу (с автоматическим добавлением строки)",
                 .Location = New Point(250, 22),
                 .AutoSize = True
             }
@@ -233,7 +233,7 @@ Public Class TranslateActionForm
             ' Word/PowerPoint的原有选项
             ' 沉浸式翻译作为默认选项
             rbImmersive = New RadioButton() With {
-                .Text = If(_appType = "Word", "沉浸式翻译（译文放在每段后面）", "沉浸式翻译（译文放在每页后面）"),
+                .Text = If(_appType = "Word", "Встроенный перевод (перевод после каждого абзаца)", "Встроенный перевод (перевод после каждого слайда)"),
                 .Location = New Point(15, 22),
                 .AutoSize = True,
                 .Checked = (_appType = "Word") ' Word默认选沉浸式
@@ -242,7 +242,7 @@ Public Class TranslateActionForm
             grpOutput.Controls.Add(rbImmersive)
 
             rbSidePanel = New RadioButton() With {
-                .Text = "仅显示在侧栏（不修改原文）",
+                .Text = "Только на боковой панели (без изменения оригинала)",
                 .Location = New Point(15, 48),
                 .AutoSize = True,
                 .Checked = (_appType = "PowerPoint") ' PowerPoint默认选侧栏
@@ -251,7 +251,7 @@ Public Class TranslateActionForm
             grpOutput.Controls.Add(rbSidePanel)
 
             rbReplace = New RadioButton() With {
-                .Text = "替换原文",
+                .Text = "Заменить оригинал",
                 .Location = New Point(280, 22),
                 .AutoSize = True
             }
@@ -259,7 +259,7 @@ Public Class TranslateActionForm
             grpOutput.Controls.Add(rbReplace)
 
             rbNewDoc = New RadioButton() With {
-                .Text = If(_appType = "Word", "创建新文档", "创建新演示文稿"),
+                .Text = If(_appType = "Word", "Создать новый документ", "Создать новую презентацию"),
                 .Location = New Point(280, 48),
                 .AutoSize = True
             }
@@ -279,7 +279,7 @@ Public Class TranslateActionForm
 
         ' 保持格式选项
         chkPreserveFormat = New CheckBox() With {
-            .Text = "保持原文格式（译文继承原文样式）",
+            .Text = "Сохранять формат оригинала (перевод наследует стиль оригинала)",
             .Location = New Point(5, 8),
             .AutoSize = True,
             .Checked = True
@@ -287,7 +287,7 @@ Public Class TranslateActionForm
         AddHandler chkPreserveFormat.CheckedChanged, AddressOf PreserveFormatChanged
         pnlImmersiveStyle.Controls.Add(chkPreserveFormat)
 
-        Dim lblStyle As New Label() With {.Text = "自定义译文样式:", .Location = New Point(5, 38), .AutoSize = True}
+        Dim lblStyle As New Label() With {.Text = "Свой стиль перевода:", .Location = New Point(5, 38), .AutoSize = True}
         pnlImmersiveStyle.Controls.Add(lblStyle)
 
         btnColor = New Button() With {
@@ -295,14 +295,14 @@ Public Class TranslateActionForm
             .Size = New Size(70, 26),
             .BackColor = selectedColor,
             .FlatStyle = FlatStyle.Flat,
-            .Text = "颜色",
+            .Text = "Цвет",
             .Enabled = False
         }
         AddHandler btnColor.Click, AddressOf ColorButton_Click
         pnlImmersiveStyle.Controls.Add(btnColor)
 
         chkItalic = New CheckBox() With {
-            .Text = "斜体",
+            .Text = "Курсив",
             .Location = New Point(205, 37),
             .AutoSize = True,
             .Checked = True,
@@ -332,7 +332,7 @@ Public Class TranslateActionForm
 
         ' ========== 按钮 ==========
         btnTranslate = New Button() With {
-            .Text = "开始翻译",
+            .Text = "Начать перевод",
             .Location = New Point(280, yPos),
             .Size = New Size(90, 35),
             .DialogResult = DialogResult.OK
@@ -342,7 +342,7 @@ Public Class TranslateActionForm
         Me.AcceptButton = btnTranslate
 
         btnCancel = New Button() With {
-            .Text = "取消",
+            .Text = "Отмена",
             .Location = New Point(380, yPos),
             .Size = New Size(90, 35),
             .DialogResult = DialogResult.Cancel
@@ -370,7 +370,7 @@ Public Class TranslateActionForm
         Next
 
         If Not hasValidated Then
-            cbPlatform.Items.Add("（请先配置API）")
+            cbPlatform.Items.Add("（Сначала настройте API）")
             cbPlatform.SelectedIndex = 0
             cbPlatform.Enabled = False
             cbModel.Enabled = False

@@ -70,7 +70,7 @@ Namespace Design
                                                        If(report.Passed, "", "LAYOUT_VERIFY_FAILED")))
                     If Not report.Passed Then
                         Return BuildPreviewFailure(spec, tokens, initialCount, slideResults, warnings,
-                                                   "专业布局预检未通过",
+                                                   "Предпроверка профессионального макета не пройдена",
                                                    ExceptionClassifier.CodeVerifyFailed)
                     End If
                 Catch ex As Exception
@@ -96,7 +96,7 @@ Namespace Design
                                                        If(report.Passed, "", "DECK_COMPOSITION_VERIFY_FAILED")))
                 Next
                 Return BuildPreviewFailure(spec, tokens, initialCount, slideResults, warnings,
-                                           "整套演示文稿的构图变化节奏未通过",
+                                           "Ритм композиционных изменений презентации не прошёл проверку",
                                            ExceptionClassifier.CodeVerifyFailed)
             End If
 
@@ -107,7 +107,7 @@ Namespace Design
                 {"slideResults", slideResults.DeepClone()}
             }
             Return ToolResult.Succeed(toolId,
-                                      $"已完成 {spec.Slides.Count} 张专业幻灯片的 Scene 预检，未写入演示文稿",
+                                      $"Предпроверка Scene профессиональных слайдов выполнена: {spec.Slides.Count}; презентация не изменялась",
                                       data:=data, observation:=observation)
         End Function
 
@@ -125,7 +125,7 @@ Namespace Design
                                          {"slideResults", slideResults.DeepClone()}
                                      },
                                      errorCode:=errorCode,
-                                     userMessage:="专业幻灯片预检未通过，Agent 将根据视觉检查结果修复 Scene",
+                                     userMessage:="Предпроверка профессиональных слайдов не пройдена; Agent исправит Scene по результатам визуальной проверки",
                                      recoverable:=True,
                                      observation:=BuildPreviewObservation(spec, initialCount, slideResults,
                                                                           warnings, False))
@@ -144,8 +144,8 @@ Namespace Design
             Return New JObject From {
                 {"kind", "preview"},
                 {"summary", If(success,
-                    $"已预检 {spec.Slides.Count} 张专业幻灯片 Scene，未写入演示文稿",
-                    $"专业幻灯片 Scene 预检失败，已检查 {slideResults.Count}/{spec.Slides.Count} 张")},
+                    $"Проверено Scene профессиональных слайдов: {spec.Slides.Count}; презентация не изменялась",
+                    $"Сбой предпроверки Scene профессиональных слайдов; проверено {slideResults.Count}/{spec.Slides.Count}")},
                 {"changed", False}, {"preview", True}, {"rendered", False},
                 {"slideCountBefore", initialCount}, {"slideCountAfter", initialCount},
                 {"targetRefs", New JArray()}, {"slideResults", slideResults.DeepClone()},
@@ -196,7 +196,7 @@ Namespace Design
                 {"error", rollbackError}
             }
             If rolledBack AndAlso detectedCreatedCount > 0 Then
-                failureObservation("summary") = $"专业幻灯片生成失败，本轮新增的 {detectedCreatedCount} 张幻灯片已全部回滚"
+                failureObservation("summary") = $"Сбой генерации профессиональных слайдов; все {detectedCreatedCount} слайдов, добавленные в этом раунде, откачены"
             End If
             Dim interfaceUnavailable = String.Equals(errorCode, ExceptionClassifier.CodeCom, StringComparison.OrdinalIgnoreCase) AndAlso
                 ExceptionClassifier.IsComInterfaceUnavailableMessage(message)
@@ -212,8 +212,8 @@ Namespace Design
                                      },
                                      errorCode:=errorCode,
                                      userMessage:=If(interfaceUnavailable,
-                                                     "当前 PowerPoint/WPS 缺少所需 COM 接口，已停止重复执行",
-                                                     "专业幻灯片生成未全部完成，Agent 将根据视觉检查结果修复"),
+                                                     "В текущем PowerPoint/WPS отсутствует требуемый COM-интерфейс; повторное выполнение остановлено",
+                                                     "Генерация профессиональных слайдов выполнена не полностью; Agent исправит по результатам визуальной проверки"),
                                      recoverable:=Not interfaceUnavailable,
                                      observation:=failureObservation)
         End Function
@@ -424,7 +424,7 @@ Namespace Design
             Dim minimumScore = If(scores.Count = 0, 0, scores.Min())
             Return New JObject From {
                 {"kind", "write"},
-                {"summary", If(success, $"专业设计引擎创建 {createdCount} 张幻灯片并完成视觉检查", $"专业设计引擎创建 {createdCount}/{spec.Slides.Count} 张幻灯片")},
+                {"summary", If(success, $"Профессиональный движок дизайна создал слайдов: {createdCount}, визуальная проверка выполнена", $"Профессиональный движок дизайна создал слайдов: {createdCount}/{spec.Slides.Count}")},
                 {"changed", createdCount > 0}, {"designSystem", spec.DesignSystem},
                 {"slideCountBefore", initialCount}, {"slideCountAfter", initialCount + createdCount},
                 {"targetRefs", JArray.FromObject(targetRefs)}, {"slideResults", slideResults.DeepClone()},

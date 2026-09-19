@@ -54,14 +54,14 @@ Public MustInherit Class BaseOfficeRibbon
     ' 使用递归删除子目录（包含 SQLite 数据库、日志、chat 历史等子目录），并对失败项做明细反馈
     Private Sub ClearCacheConfig_Click_1(sender As Object, e As RibbonControlEventArgs) Handles ClearCacheButton.Click
         ' 弹出确认框
-        Dim result = MessageBox.Show("将彻底删除‘文档\" & ConfigSettings.OfficeAiAppDataFolder & "’目录下所有的配置，历史聊天记录信息，清理后不可恢复，您确定要清理吗？", "确认操作", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
+        Dim result = MessageBox.Show("Будут безвозвратно удалены все настройки и история чатов в каталоге «Документы\" & ConfigSettings.OfficeAiAppDataFolder & "». Продолжить?", "Подтверждение", MessageBoxButtons.OKCancel, MessageBoxIcon.Question)
         If result <> DialogResult.OK Then
             Return
         End If
 
         Dim appDataPath As String = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) & "\" & ConfigSettings.OfficeAiAppDataFolder
         If Not System.IO.Directory.Exists(appDataPath) Then
-            MsgBox("缓存目录不存在！")
+            MsgBox("Каталог кэша не существует!")
             Return
         End If
 
@@ -86,13 +86,13 @@ Public MustInherit Class BaseOfficeRibbon
             Next
 
             If failedItems.Count = 0 Then
-                MsgBox("缓存配置已清理，请重启Office相关应用！")
+                MsgBox("Кэш конфигурации очищен. Перезапустите приложения Office!")
             Else
-                Dim msg As String = "缓存清理已完成，但以下项未能删除（可能被进程占用，建议关闭所有 Office 应用后重试）：" & Environment.NewLine & String.Join(Environment.NewLine, failedItems)
+                Dim msg As String = "Очистка кэша завершена, но следующие элементы удалить не удалось (возможно, они заняты процессом; закройте все приложения Office и повторите):" & Environment.NewLine & String.Join(Environment.NewLine, failedItems)
                 MsgBox(msg, vbExclamation)
             End If
         Catch ex As Exception
-            MsgBox("清理缓存配置时出错：" & ex.Message, vbCritical)
+            MsgBox("Ошибка при очистке кэша конфигурации: " & ex.Message, vbCritical)
         End Try
     End Sub
 
@@ -110,26 +110,37 @@ Public MustInherit Class BaseOfficeRibbon
         End Using
     End Sub
 
-    ' 教学文档按钮点击事件 - 根据应用类型跳转不同URL
+    ' Кнопка справки — открывает локальную HTML-справку, без внешних ссылок
     Private Sub StudyButton_Click(sender As Object, e As RibbonControlEventArgs) Handles StudyButton.Click
         Dim appInfo = GetApplication()
-        Dim url As String = "https://www.officeso.cn/study/"
+        Dim page As String
 
         Select Case appInfo.Type
             Case OfficeApplicationType.Word
-                url &= "word"
+                page = "word"
             Case OfficeApplicationType.Excel
-                url &= "excel"
+                page = "excel"
             Case OfficeApplicationType.PowerPoint
-                url &= "ppt"
+                page = "ppt"
             Case Else
-                url &= "word"
+                page = "index"
         End Select
 
         Try
-            System.Diagnostics.Process.Start(url)
+            Dim wwwRoot As String = ResourceExtractor.ExtractResources()
+            If String.IsNullOrEmpty(wwwRoot) Then
+                MessageBox.Show("Не удалось подготовить локальную справку: " & ResourceExtractor.LastError, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                Return
+            End If
+
+            Dim helpPath As String = System.IO.Path.Combine(wwwRoot, "help", "ru", page & ".html")
+            If System.IO.File.Exists(helpPath) Then
+                System.Diagnostics.Process.Start(helpPath)
+            Else
+                MessageBox.Show("Файл справки не найден: " & helpPath, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            End If
         Catch ex As Exception
-            MessageBox.Show("无法打开教学文档链接: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Не удалось открыть справку: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 

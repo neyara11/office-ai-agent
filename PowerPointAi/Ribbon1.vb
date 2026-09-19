@@ -37,7 +37,7 @@ Public Class Ribbon1
         Globals.ThisAddIn.ShowDoubaoTaskPane()
     End Sub
     Protected Overrides Sub BatchDataGenButton_Click(sender As Object, e As RibbonControlEventArgs)
-        MessageBox.Show("批量数据生成功能仅适用于 Excel。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        MessageBox.Show("Функция пакетной генерации данных доступна только в Excel.", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
     ' MCPButton_Click 已在 BaseOfficeRibbon 中提供共用实现，PowerPoint 不需要差异化逻辑，故不再重写。
@@ -55,7 +55,7 @@ Public Class Ribbon1
 
             Dim chatCtrl = ThisAddIn.chatControl
             If chatCtrl Is Nothing Then
-                MessageBox.Show("无法获取聊天控件实例，请确认 Chat 面板已打开。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Не удалось получить экземпляр чата. Убедитесь, что панель Chat открыта.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 Return
             End If
 
@@ -63,7 +63,7 @@ Public Class Ribbon1
             chatCtrl.EnterReformatTemplateMode()
 
         Catch ex As Exception
-            MessageBox.Show("进入排版模式出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при входе в режим форматирования: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -101,7 +101,7 @@ Public Class Ribbon1
             settings.Save()
 
             ' 显示进度
-            ShareRibbon.GlobalStatusStripAll.ShowProgress("正在准备翻译... " & translateService.GetStatistics())
+            ShareRibbon.GlobalStatusStripAll.ShowProgress("Подготовка перевода... " & translateService.GetStatistics())
 
             ' 绑定进度事件 - 使用ShowProgress避免翻译过程中频繁弹窗
             AddHandler translateService.ProgressChanged, Sub(s, args)
@@ -126,7 +126,7 @@ Public Class Ribbon1
                 If chatCtrl IsNot Nothing Then
                     Dim displayText = translateService.FormatResultsForDisplay(results, True)
                     Dim responseUuid As String = Guid.NewGuid().ToString()
-                    Dim aiName As String = "AI翻译助手"
+                    Dim aiName As String = "ИИ-переводчик"
                     Dim jsCreate As String = $"createChatSection('{aiName}', formatDateTime(new Date()), '{responseUuid}');"
                     Await chatCtrl.ExecuteJavaScriptAsyncJS(jsCreate)
 
@@ -144,10 +144,10 @@ Public Class Ribbon1
                 End If
             End If
 
-            ShareRibbon.GlobalStatusStripAll.ShowProgress($"翻译完成，共处理 {results.Count} 个文本块")
+            ShareRibbon.GlobalStatusStripAll.ShowProgress($"Перевод завершён, обработано текстовых блоков: {results.Count}")
 
         Catch ex As Exception
-            MessageBox.Show("翻译过程出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при переводе: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -162,7 +162,7 @@ Public Class Ribbon1
             ' 获取ChatControl并触发续写（自动模式，显示对话框）
             Dim chatCtrl = ThisAddIn.chatControl
             If chatCtrl Is Nothing Then
-                MessageBox.Show("请先打开AI助手面板", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Сначала откройте панель ИИ-помощника", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Return
             End If
 
@@ -173,7 +173,7 @@ Public Class Ribbon1
             ' 再触发续写对话框
             Await chatCtrl.ExecuteJavaScriptAsyncJS("triggerContinuation(true);")
         Catch ex As Exception
-            MessageBox.Show("触发AI续写时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при запуске ИИ-продолжения: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -182,8 +182,8 @@ Public Class Ribbon1
         Try
             ' 1. 打开文件对话框选择模板文件
             Using openDialog As New OpenFileDialog()
-                openDialog.Title = "选择PowerPoint模板文件"
-                openDialog.Filter = "PowerPoint文件|*.pptx;*.ppt|所有文件|*.*"
+                openDialog.Title = "Выберите файл шаблона PowerPoint"
+                openDialog.Filter = "Файлы PowerPoint|*.pptx;*.ppt|Все файлы|*.*"
                 openDialog.FilterIndex = 1
 
                 If openDialog.ShowDialog() <> DialogResult.OK Then Return
@@ -209,7 +209,7 @@ Public Class Ribbon1
                 End Try
 
                 If templateJson Is Nothing Then
-                    MessageBox.Show("无法解析模板文件内容。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show("Не удалось разобрать содержимое файла шаблона.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
                     Return
                 End If
 
@@ -225,15 +225,15 @@ Public Class Ribbon1
                     Dim jsCall = $"enterTemplateMode(`{JsUtil.EscapeForJs(templateContent)}`, `{JsUtil.EscapeForJs(templateName)}`);"
                     Await chatCtrl.ExecuteJavaScriptAsyncJS(jsCall)
 
-                    MessageBox.Show("已进入模板渲染模式！" & vbCrLf & vbCrLf &
-                                    "模板结构已解析完成（包含幻灯片、文本、样式、图片等信息）。" & vbCrLf &
-                                    "现在您可以在Chat中输入内容需求，AI将按照模板格式生成内容。" & vbCrLf &
-                                    "生成完成后可选择插入位置将内容插入到演示文稿中。",
-                                    "模板模式已激活", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                    MessageBox.Show("Режим отрисовки по шаблону активирован!" & vbCrLf & vbCrLf &
+                                    "Структура шаблона разобрана (включая слайды, текст, стили, изображения и другие данные)." & vbCrLf &
+                                    "Теперь введите в чат требования к содержимому — ИИ сгенерирует его по формату шаблона." & vbCrLf &
+                                    "После генерации можно выбрать позицию вставки и вставить содержимое в презентацию.",
+                                    "Режим шаблона активирован", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 End If
             End Using
         Catch ex As Exception
-            MessageBox.Show("加载模板时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при загрузке шаблона: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -377,14 +377,14 @@ Public Class Ribbon1
 
     Private Function GetLayoutName(layout As Microsoft.Office.Interop.PowerPoint.PpSlideLayout) As String
         Select Case layout
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutTitle : Return "标题幻灯片"
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutTitleOnly : Return "仅标题"
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutText : Return "标题和内容"
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutTwoColumnText : Return "两栏内容"
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutBlank : Return "空白"
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutContentWithCaption : Return "内容与标题"
-            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutPictureWithCaption : Return "图片与标题"
-            Case Else : Return "自定义"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutTitle : Return "Титульный слайд"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutTitleOnly : Return "Только заголовок"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutText : Return "Заголовок и содержимое"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutTwoColumnText : Return "Две колонки"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutBlank : Return "Пустой"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutContentWithCaption : Return "Содержимое и заголовок"
+            Case Microsoft.Office.Interop.PowerPoint.PpSlideLayout.ppLayoutPictureWithCaption : Return "Изображение и заголовок"
+            Case Else : Return "Настраиваемый"
         End Select
     End Function
 
@@ -400,16 +400,16 @@ Public Class Ribbon1
 
     Private Function GetPlaceholderTypeName(shape As Microsoft.Office.Interop.PowerPoint.Shape) As String
         Try
-            If shape.PlaceholderFormat Is Nothing Then Return "文本框"
+            If shape.PlaceholderFormat Is Nothing Then Return "Текстовое поле"
             Select Case shape.PlaceholderFormat.Type
-                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderTitle : Return "标题"
-                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderCenterTitle : Return "居中标题"
-                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderSubtitle : Return "副标题"
-                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderBody : Return "正文"
-                Case Else : Return "内容"
+                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderTitle : Return "Заголовок"
+                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderCenterTitle : Return "Заголовок по центру"
+                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderSubtitle : Return "Подзаголовок"
+                Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderBody : Return "Основной текст"
+                Case Else : Return "Содержимое"
             End Select
         Catch
-            Return "文本"
+            Return "Текст"
         End Try
     End Function
 
@@ -420,14 +420,14 @@ Public Class Ribbon1
 
             Dim chatCtrl = ThisAddIn.chatControl
             If chatCtrl Is Nothing Then
-                GlobalStatusStripAll.ShowWarning("无法获取 AI 助手面板")
+                GlobalStatusStripAll.ShowWarning("Не удалось получить панель ИИ-помощника")
                 Return
             End If
 
             Dim requestJson = JsonConvert.SerializeObject(request)
             Await chatCtrl.ExecuteJavaScriptAsyncJS($"sendMessageToServer({{ type: 'startAgent', request: {requestJson} }});")
         Catch ex As Exception
-            GlobalStatusStripAll.ShowWarning($"启动 AI Agent 失败: {ex.Message}")
+            GlobalStatusStripAll.ShowWarning($"Не удалось запустить AI Agent: {ex.Message}")
         End Try
     End Function
 End Class

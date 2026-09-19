@@ -82,11 +82,11 @@ Protected Overloads Async Function InitializeWebView2() As Task
 
                 Debug.WriteLine($"WebView2初始化完成，开始导航到{ChatUrl}")
             Else
-                MessageBox.Show("WebView2初始化失败，CoreWebView2不可用。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                MessageBox.Show("Не удалось инициализировать WebView2: CoreWebView2 недоступен.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             End If
         Catch ex As Exception
-            Dim errorMessage As String = $"初始化失败: {ex.Message}{Environment.NewLine}类型: {ex.GetType().Name}{Environment.NewLine}堆栈:{ex.StackTrace}"
-            MessageBox.Show(errorMessage, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Dim errorMessage As String = $"Ошибка инициализации: {ex.Message}{Environment.NewLine}Тип: {ex.GetType().Name}{Environment.NewLine}Стек: {ex.StackTrace}"
+            MessageBox.Show(errorMessage, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Function
 
@@ -411,7 +411,7 @@ Protected Overloads Async Function InitializeWebView2() As Task
             el.style.marginRight = '4px';
             el.style.cursor = 'pointer';
             el.style.userSelect = 'none';
-            el.innerHTML = '<div class=""ds-button__icon""><div class=""ds-icon"" style=""font-size:16px;width:16px;"">▶</div></div><span class=""code-info-button-text"">执行</span>';
+            el.innerHTML = '<div class=""ds-button__icon""><div class=""ds-icon"" style=""font-size:16px;width:16px;"">▶</div></div><span class=""code-info-button-text"">Выполнить</span>';
             return el;
         }
 
@@ -563,7 +563,7 @@ Protected Overloads Async Function InitializeWebView2() As Task
             ' 获取Office应用对象
             Dim appObject As Object = GetOfficeApplicationObject()
             If appObject Is Nothing Then
-                GlobalStatusStrip.ShowWarning("无法获取Office应用程序对象")
+                GlobalStatusStrip.ShowWarning("Не удалось получить объект приложения Office")
                 Return False
             End If
 
@@ -642,7 +642,7 @@ Protected Overloads Async Function InitializeWebView2() As Task
             },
             // 日志函数
             log: function(message) { 
-                return '输出: ' + message; 
+                return 'Вывод: ' + message; 
             }
         };
         
@@ -653,10 +653,10 @@ Protected Overloads Async Function InitializeWebView2() As Task
                 try {
                     return codeFunc(workbook);
                 } catch(e) {
-                    return 'Office JS API 执行错误: ' + e.message;
+                    return 'Ошибка выполнения Office JS API: ' + e.message;
                 }
             }
-            return 'Invalid function';
+            return 'Недопустимая функция';
         }
         "
 
@@ -677,9 +677,9 @@ Protected Overloads Async Function InitializeWebView2() As Task
                 
                 // 使用适配器执行
                 executeOfficeJsApi(userFunc);
-                return 'Office JS API 代码执行成功';
+                return 'Код Office JS API выполнен успешно';
             } catch(e) {
-                return 'Office JS API 执行错误: ' + e.message;
+                return 'Ошибка выполнения Office JS API: ' + e.message;
             }
             "
             Else
@@ -689,9 +689,9 @@ Protected Overloads Async Function InitializeWebView2() As Task
                 // 用户代码开始
                 " & jsCode & "
                 // 用户代码结束
-                return '代码执行成功';
+                return 'Код выполнен успешно';
             } catch(e) {
-                return '执行错误: ' + e.message;
+                return 'Ошибка выполнения: ' + e.message;
             }
             "
             End If
@@ -702,7 +702,7 @@ Protected Overloads Async Function InitializeWebView2() As Task
 
             Return True
         Catch ex As Exception
-            MessageBox.Show("执行JavaScript代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода JavaScript: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -764,18 +764,18 @@ Protected Overloads Async Function InitializeWebView2() As Task
        ex.Message.Contains("Programmatic access to Visual Basic Project is not trusted") Then
             VBATrustShowBox()
         Else
-            MessageBox.Show("执行 VBA 代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода VBA: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End If
     End Sub
 
     Private Shared Sub VBATrustShowBox()
         MessageBox.Show(
-                        "无法执行 VBA 代码，请按以下步骤设置：" & vbCrLf & vbCrLf &
-                        "1. 点击 '文件' -> '选项' -> '信任中心'" & vbCrLf &
-                        "2. 点击 '信任中心设置'" & vbCrLf &
-                        "3. 选择 '宏设置'" & vbCrLf &
-                        "4. 勾选 '信任对 VBA 项目对象模型的访问'",
-                        "需要设置信任中心权限",
+                        "Не удалось выполнить код VBA. Настройте параметры следующим образом:" & vbCrLf & vbCrLf &
+                        "1. Откройте «Файл» -> «Параметры» -> «Центр управления безопасностью»" & vbCrLf &
+                        "2. Нажмите «Параметры центра управления безопасностью»" & vbCrLf &
+                        "3. Выберите «Параметры макросов»" & vbCrLf &
+                        "4. Установите флажок «Доверять доступ к объектной модели проектов VBA»",
+                        "Требуется настроить доступ к объектной модели VBA",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Warning)
     End Sub

@@ -134,7 +134,7 @@ Public Class WordContinuationService
 
         Try
             _document.Application.ScreenUpdating = False
-            _document.Application.UndoRecord.StartCustomRecord("AI续写")
+            _document.Application.UndoRecord.StartCustomRecord("AI-продолжение")
 
             Dim sel = _wordApp.Selection
             Dim insertRange As Range

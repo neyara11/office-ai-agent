@@ -1,4 +1,4 @@
-' ShareRibbon\Controls\Services\HttpStreamService.vb
+﻿' ShareRibbon\Controls\Services\HttpStreamService.vb
 ' HTTP 流式请求服务：发送请求、处理流数据、MCP 工具调用
 
 Imports System.IO
@@ -205,7 +205,7 @@ Public Class HttpStreamService
                 Await _executeScript(jsSetMapping)
 
                 ' 显示"正在思考"提示
-                _currentMarkdownBuffer.Append("<br/>*正在思考中...*<br/>")
+                _currentMarkdownBuffer.Append("<br/>*Думаю...*<br/>")
                 Await FlushBufferAsync("content", responseUuid)
 
                 ' 发送非流式请求
@@ -221,7 +221,7 @@ Public Class HttpStreamService
             StopStream = True
         Catch ex As Exception
             Debug.WriteLine($"[NonStreaming] 请求失败: {ex.Message}")
-            _currentMarkdownBuffer.Append($"<br/>**请求失败: {ex.Message}**<br/>")
+            _currentMarkdownBuffer.Append($"<br/>**Ошибка запроса: {ex.Message}**<br/>")
             _catchException = ex
         Finally
             UnregisterRequestCancellation(requestUuid, requestCts)
@@ -404,7 +404,7 @@ Public Class HttpStreamService
 
         Catch ex As Exception
             Debug.WriteLine($"[NonStreaming] 处理响应失败: {ex.Message}")
-            _currentMarkdownBuffer.Append($"<br/>**处理响应失败: {ex.Message}**<br/>")
+            _currentMarkdownBuffer.Append($"<br/>**Ошибка обработки ответа: {ex.Message}**<br/>")
             _catchException = ex
         End Try
 
@@ -781,7 +781,7 @@ Public Class HttpStreamService
             ' BaseChatControl 负责完整的历史保存逻辑
             FinalizeCallback.Invoke(addHistory, originQuestion)
         ElseIf addHistory Then
-            _stateService.AddMessage("assistant", $"这是大模型基于用户问题的答复作为历史参考：{_stateService.MarkdownBuffer.ToString()}")
+            _stateService.AddMessage("assistant", $"Это ответ модели на вопрос пользователя, сохранённый как история: {_stateService.MarkdownBuffer.ToString()}")
         End If
 
         _stateService.ClearBuffers()
@@ -1035,12 +1035,12 @@ Public Class HttpStreamService
                 End Try
 
                 If parseError Then
-                    _currentMarkdownBuffer.Append($"<br/>**工具调用参数解析错误：**<br/>工具名称: {toolName}<br/>")
+                    _currentMarkdownBuffer.Append($"<br/>**Ошибка разбора параметров вызова инструмента:**<br/>Имя инструмента: {toolName}<br/>")
                     Await FlushBufferAsync("content", uuid)
                     Continue For
                 End If
 
-                _currentMarkdownBuffer.Append($"<br/>**正在调用工具: {toolName}**<br/>参数: `{argumentsObj.ToString(Newtonsoft.Json.Formatting.None)}`<br/>")
+                _currentMarkdownBuffer.Append($"<br/>**Вызывается инструмент: {toolName}**<br/>Параметры: `{argumentsObj.ToString(Newtonsoft.Json.Formatting.None)}`<br/>")
                 Await FlushBufferAsync("content", uuid)
 
                 ' 获取 MCP 连接
@@ -1078,11 +1078,11 @@ Public Class HttpStreamService
                     allToolResults.Add(result)
 
                     If result("isError") IsNot Nothing AndAlso CBool(result("isError")) Then
-                        _currentMarkdownBuffer.Append($"<br/>**工具调用失败：**<br/>")
+                        _currentMarkdownBuffer.Append($"<br/>**Ошибка вызова инструмента:**<br/>")
                         Await FlushBufferAsync("content", uuid)
                     End If
                 Else
-                    _currentMarkdownBuffer.Append("<br/>**配置错误：**<br/>没有启用的MCP连接<br/>")
+                    _currentMarkdownBuffer.Append("<br/>**Ошибка конфигурации:**<br/>нет включённых подключений MCP<br/>")
                     Await FlushBufferAsync("content", uuid)
                 End If
             Next
@@ -1110,14 +1110,14 @@ Public Class HttpStreamService
             Dim connection = connections.FirstOrDefault(Function(c) c.Name = mcpConnectionName AndAlso c.IsActive)
 
             If connection Is Nothing Then
-                Return CreateErrorResponse($"MCP连接 '{mcpConnectionName}' 未找到或未启用")
+                Return CreateErrorResponse($"Подключение MCP '{mcpConnectionName}' не найдено или отключено")
             End If
 
             Dim pooled = Await McpConnectionPool.Instance.GetOrCreateConnectionAsync(connection)
             Dim result = Await pooled.CallToolAsync(toolName, arguments)
 
             If result.IsError Then
-                Return CreateErrorResponse($"调用MCP工具失败: {result.ErrorMessage}")
+                Return CreateErrorResponse($"Ошибка вызова инструмента MCP: {result.ErrorMessage}")
             End If
 
             Dim responseObj = New JObject()
@@ -1137,7 +1137,7 @@ Public Class HttpStreamService
             responseObj("content") = contentArray
             Return responseObj
         Catch ex As Exception
-            Return CreateErrorResponse($"MCP工具调用异常: {ex.Message}")
+            Return CreateErrorResponse($"Исключение при вызове инструмента MCP: {ex.Message}")
         End Try
     End Function
 
@@ -1313,7 +1313,7 @@ Public Class HttpStreamService
             StopStream = True
         Catch ex As Exception
             Debug.WriteLine($"[ReAct] 工具结果回注失败: {ex.Message}")
-            _currentMarkdownBuffer.Append($"<br/>**工具结果回注失败: {ex.Message}**<br/>")
+            _currentMarkdownBuffer.Append($"<br/>**Не удалось вернуть результаты инструментов: {ex.Message}**<br/>")
             _catchException = ex
         Finally
             UnregisterRequestCancellation(reactRequestUuid, requestCts)

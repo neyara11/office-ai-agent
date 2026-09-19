@@ -1,5 +1,5 @@
 ' WordAi\Services\FormattingIntentCompiler.vb
-' 将自然语言排版/格式指令编译为结构化计划；不直接访问 Word COM。
+' 将自然语言排版/格式指令编译为结构化计划; 不直接访问 Word COM。
 
 Imports System.Text
 Imports System.Text.RegularExpressions
@@ -70,7 +70,7 @@ Namespace Services
             Try
                 plan = FromJson(json)
                 If plan Is Nothing Then
-                    errorMessage = "JSON 未生成格式计划"
+                    errorMessage = "JSON не сформировал план форматирования"
                     Return False
                 End If
                 If plan.Operations Is Nothing Then plan.Operations = New List(Of FormattingOperation)()
@@ -91,53 +91,53 @@ Namespace Services
         End Function
 
         Public Function ToHumanReadableSummary() As String
-            If Not HasOperations Then Return "未识别到可执行格式操作"
+            If Not HasOperations Then Return "Исполняемые операции форматирования не распознаны"
 
             Dim sb As New StringBuilder()
-            sb.Append($"范围: {ScopeToText(Scope)}；操作: ")
+            sb.Append($"Диапазон: {ScopeToText(Scope)}; операции: ")
             Dim parts As New List(Of String)()
             For Each op In Operations
                 parts.Add(OperationToText(op))
             Next
-            sb.Append(String.Join("，", parts))
+            sb.Append(String.Join(", ", parts))
             Return sb.ToString()
         End Function
 
         Private Shared Function ScopeToText(scope As FormattingTargetScope) As String
             Select Case scope
-                Case FormattingTargetScope.Selection : Return "当前选区"
-                Case FormattingTargetScope.Document : Return "全文"
-                Case FormattingTargetScope.CurrentParagraph : Return "当前段落"
-                Case FormattingTargetScope.Headings : Return "标题段落"
-                Case FormattingTargetScope.Body : Return "正文段落"
-                Case Else : Return "自动"
+                Case FormattingTargetScope.Selection : Return "Текущее выделение"
+                Case FormattingTargetScope.Document : Return "Весь документ"
+                Case FormattingTargetScope.CurrentParagraph : Return "Текущий абзац"
+                Case FormattingTargetScope.Headings : Return "Абзацы-заголовки"
+                Case FormattingTargetScope.Body : Return "Абзацы основного текста"
+                Case Else : Return "Автоматически"
             End Select
         End Function
 
         Private Shared Function OperationToText(op As FormattingOperation) As String
             Select Case op.Kind
                 Case FormattingOperationKind.FontSizeDelta
-                    Return $"字号{If(op.NumericValue >= 0, "+", "")}{op.NumericValue}pt"
+                    Return $"Размер шрифта {If(op.NumericValue >= 0, "+", "")}{op.NumericValue}pt"
                 Case FormattingOperationKind.FontSizeGradeDelta
-                    Return $"字号等级{If(op.NumericValue >= 0, "+", "")}{op.NumericValue}"
+                    Return $"Уровень размера шрифта {If(op.NumericValue >= 0, "+", "")}{op.NumericValue}"
                 Case FormattingOperationKind.FontSizeAbsolute
-                    Return $"字号设为 {op.NumericValue}pt"
+                    Return $"Размер шрифта: {op.NumericValue}pt"
                 Case FormattingOperationKind.FontFamily
-                    Return $"字体设为 {op.TextValue}"
+                    Return $"Шрифт: {op.TextValue}"
                 Case FormattingOperationKind.Bold
-                    Return If(op.BooleanValue, "加粗", "取消加粗")
+                    Return If(op.BooleanValue, "Полужирный", "Отменить полужирный")
                 Case FormattingOperationKind.Italic
-                    Return If(op.BooleanValue, "斜体", "取消斜体")
+                    Return If(op.BooleanValue, "Курсив", "Отменить курсив")
                 Case FormattingOperationKind.Underline
-                    Return "下划线"
+                    Return "Подчёркивание"
                 Case FormattingOperationKind.FontColor
-                    Return $"颜色 {op.TextValue}"
+                    Return $"Цвет {op.TextValue}"
                 Case FormattingOperationKind.Alignment
-                    Return $"对齐 {op.TextValue}"
+                    Return $"Выравнивание {op.TextValue}"
                 Case FormattingOperationKind.LineSpacing
-                    Return $"行距 {op.NumericValue}"
+                    Return $"Межстрочный интервал {op.NumericValue}"
                 Case FormattingOperationKind.FirstLineIndent
-                    Return $"首行缩进 {op.NumericValue} 字符"
+                    Return $"Отступ первой строки {op.NumericValue} симв."
                 Case Else
                     Return op.Kind.ToString()
             End Select
@@ -153,19 +153,19 @@ Namespace Services
 
         Public Function ToHumanReadableSummary() As String
             If Plan Is Nothing Then
-                Return If(String.IsNullOrWhiteSpace(ErrorMessage), "未生成可执行格式计划", ErrorMessage)
+                Return If(String.IsNullOrWhiteSpace(ErrorMessage), "Исполняемый план форматирования не сформирован", ErrorMessage)
             End If
 
             Dim summary = Plan.ToHumanReadableSummary()
             If Success Then
-                Return $"{summary}；已应用到 {AppliedRangeCount} 个范围，执行 {AppliedOperationCount} 个操作"
+                Return $"{summary}; применено к диапазонам: {AppliedRangeCount}, выполнено операций: {AppliedOperationCount}"
             End If
 
             If Not String.IsNullOrWhiteSpace(ErrorMessage) Then
-                Return $"{summary}；未应用：{ErrorMessage}"
+                Return $"{summary}; не применено: {ErrorMessage}"
             End If
 
-            Return $"{summary}；未找到可应用目标"
+            Return $"{summary}; цели для применения не найдены"
         End Function
     End Class
 
@@ -194,7 +194,7 @@ Namespace Services
 
             plan.Confidence = If(plan.HasOperations, 0.86, 0.1)
             If plan.Scope = FormattingTargetScope.Document AndAlso message.Contains("统一") Then
-                plan.Notes.Add("检测到统一，默认作用于全文。")
+                plan.Notes.Add("Обнаружено «унифицировать»; по умолчанию применяется ко всему документу.")
             End If
 
             Return plan

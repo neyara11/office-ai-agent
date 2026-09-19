@@ -127,13 +127,13 @@ Public Class ChatControl
             End Try
 
             If selectedShapes.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("请先选中需要排版的幻灯片或文本框。")
+                GlobalStatusStrip.ShowWarning("Сначала выберите слайды или текстовые поля для форматирования.")
                 Return
             End If
 
             ' 统计形状类型
-            Dim titleCount = shapeTypes.Where(Function(t) t.Contains("标题")).Count()
-            Dim bodyCount = shapeTypes.Where(Function(t) t = "正文" OrElse t = "文本框").Count()
+            Dim titleCount = shapeTypes.Where(Function(t) t.Contains("Заголовок")).Count()
+            Dim bodyCount = shapeTypes.Where(Function(t) t = "Основной текст" OrElse t = "Текстовое поле").Count()
 
             ' 采样策略：只取代表性样本（最多5个）
             Dim sampleBlocks As New Newtonsoft.Json.Linq.JArray()
@@ -177,17 +177,17 @@ Public Class ChatControl
 
             ' 构建带模板的系统提示
             Dim systemPrompt As New System.Text.StringBuilder()
-            systemPrompt.AppendLine("你是PowerPoint排版助手。用户选择了「" & template.Name & "」模板进行排版。")
+            systemPrompt.AppendLine("Ты — помощник по форматированию PowerPoint. Пользователь выбрал шаблон «" & template.Name & "» для форматирования.")
             systemPrompt.AppendLine()
-            systemPrompt.AppendLine("【模板配置】")
-            systemPrompt.AppendLine($"模板名称：{template.Name}")
-            systemPrompt.AppendLine($"模板分类：{template.Category}")
-            systemPrompt.AppendLine($"模板描述：{template.Description}")
+            systemPrompt.AppendLine("【Конфигурация шаблона】")
+            systemPrompt.AppendLine($"Название шаблона: {template.Name}")
+            systemPrompt.AppendLine($"Категория шаблона: {template.Category}")
+            systemPrompt.AppendLine($"Описание шаблона: {template.Description}")
             systemPrompt.AppendLine()
 
             ' 版式配置
             If template.Layout IsNot Nothing AndAlso template.Layout.Elements IsNot Nothing AndAlso template.Layout.Elements.Count > 0 Then
-                systemPrompt.AppendLine("版式骨架元素：")
+                systemPrompt.AppendLine("Элементы макета (скелет):")
                 For Each el In template.Layout.Elements
                     systemPrompt.AppendLine($"  - {el.Name}: {el.Font?.FontNameCN} {el.Font?.FontSize}pt, {el.Paragraph?.Alignment}")
                 Next
@@ -196,7 +196,7 @@ Public Class ChatControl
 
             ' 正文样式
             If template.BodyStyles IsNot Nothing AndAlso template.BodyStyles.Count > 0 Then
-                systemPrompt.AppendLine("正文样式规则：")
+                systemPrompt.AppendLine("Правила стиля основного текста:")
                 For Each style In template.BodyStyles
                     systemPrompt.AppendLine($"  - {style.RuleName}: {style.Font?.FontNameCN} {style.Font?.FontSize}pt")
                 Next
@@ -205,42 +205,44 @@ Public Class ChatControl
 
             ' AI说明
             If Not String.IsNullOrEmpty(template.AiGuidance) Then
-                systemPrompt.AppendLine("【模板说明】")
+                systemPrompt.AppendLine("【Пояснения к шаблону】")
                 systemPrompt.AppendLine(template.AiGuidance)
                 systemPrompt.AppendLine()
             End If
 
-            systemPrompt.AppendLine("【文档信息】")
-            systemPrompt.AppendLine($"演示文稿共有{totalCount}个文本框（{titleCount}个标题，{bodyCount}个正文/文本框）。")
-            systemPrompt.AppendLine($"我发送了{sampleIndices.Count}个代表性样本给你。")
+            systemPrompt.AppendLine("【Информация о документе】")
+            systemPrompt.AppendLine($"В презентации {totalCount} текстовых полей ({titleCount} заголовков, {bodyCount} основного текста/текстовых полей).")
+            systemPrompt.AppendLine($"Тебе отправлено представительных образцов: {sampleIndices.Count}.")
             systemPrompt.AppendLine()
 
-            systemPrompt.AppendLine("【任务要求】")
-            systemPrompt.AppendLine("请根据模板配置和文本框样本，返回具体的排版规则JSON。格式如下：")
+            systemPrompt.AppendLine("【Требования к задаче】")
+            systemPrompt.AppendLine("На основе конфигурации шаблона и образцов текстовых полей верни JSON с конкретными правилами форматирования. Формат:")
             systemPrompt.AppendLine("```json")
             systemPrompt.AppendLine("{")
             systemPrompt.AppendLine("  ""rules"": [{""type"": ""title"", ""matchCondition"": ""..."", ""formatting"": {""fontNameCN"": ""黑体"", ""fontSize"": 36, ""bold"": true, ""alignment"": ""center""}}],")
             systemPrompt.AppendLine("  ""sampleClassification"": [{""sampleIndex"": 0, ""appliedRule"": ""title""}],")
-            systemPrompt.AppendLine("  ""summary"": ""排版策略说明""")
+            systemPrompt.AppendLine("  ""summary"": ""Пояснение стратегии форматирования""")
             systemPrompt.AppendLine("}")
             systemPrompt.AppendLine("```")
             systemPrompt.AppendLine()
-            systemPrompt.AppendLine("formatting字段说明：fontNameCN(中文字体), fontNameEN(英文字体), fontSize(字号pt), bold(加粗), alignment(对齐left/center/right)")
+            systemPrompt.AppendLine("Пояснение к полям formatting: fontNameCN(китайский шрифт), fontNameEN(латинский шрифт), fontSize(размер шрифта, pt), bold(полужирный), alignment(выравнивание left/center/right)")
             systemPrompt.AppendLine()
-            systemPrompt.AppendLine("以下是采样的文本框样本：")
+            systemPrompt.AppendLine("Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть.")
+            systemPrompt.AppendLine()
+            systemPrompt.AppendLine("Ниже приведены образцы текстовых полей:")
             systemPrompt.AppendLine(sampleBlocks.ToString(Newtonsoft.Json.Formatting.Indented))
 
             ' 保存上下文用于后续应用
             SetReformatContext(selectedShapes.Cast(Of Object).ToList(), shapeTypes)
 
             ' 发送请求
-            Await Send("请使用「" & template.Name & "」模板对选中内容进行排版。", systemPrompt.ToString(), False, "reformat")
+            Await Send("Выполни форматирование выбранного содержимого по шаблону «" & template.Name & "».", systemPrompt.ToString(), False, "reformat")
 
-            GlobalStatusStrip.ShowInfo("正在使用「" & template.Name & "」模板排版...")
+            GlobalStatusStrip.ShowInfo("Форматирование по шаблону «" & template.Name & "»...")
 
         Catch ex As Exception
             Debug.WriteLine($"ApplyReformatWithTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"排版失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка форматирования: {ex.Message}")
         End Try
     End Sub
 
@@ -253,16 +255,16 @@ Public Class ChatControl
                 Select Case shp.PlaceholderFormat.Type
                     Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderTitle,
                          Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderCenterTitle
-                        Return "标题"
+                        Return "Заголовок"
                     Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderSubtitle
-                        Return "副标题"
+                        Return "Подзаголовок"
                     Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderBody
-                        Return "正文"
+                        Return "Основной текст"
                 End Select
             End If
         Catch
         End Try
-        Return "文本框"
+        Return "Текстовое поле"
     End Function
 
     ''' <summary>
@@ -324,7 +326,7 @@ Public Class ChatControl
                         content = sb.ToString()
                     Else
                         ' 处理普通形状
-                        content = "[已选中 " & shapeRange.Count & " 个形状]"
+                        content = "[Выбрано фигур: " & shapeRange.Count & "]"
                         For i = 1 To shapeRange.Count
                             If shapeRange(i).HasTextFrame = Microsoft.Office.Core.MsoTriState.msoTrue Then
                                 content &= vbCrLf & shapeRange(i).TextFrame.TextRange.Text
@@ -339,7 +341,7 @@ Public Class ChatControl
 
             ElseIf selection.Type = Microsoft.Office.Interop.PowerPoint.PpSelectionType.ppSelectionSlides Then
                 ' 处理幻灯片选择
-                content = "[已选中 " & selection.SlideRange.Count & " 张幻灯片]"
+                content = "[Выбрано слайдов: " & selection.SlideRange.Count & "]"
             End If
 
             If Not String.IsNullOrEmpty(content) Then
@@ -384,7 +386,7 @@ Public Class ChatControl
             VBAxceptionHandle(ex)
             Return False
         Catch ex As Exception
-            MessageBox.Show("执行代码时出错: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Ошибка при выполнении кода: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
             Return False
         End Try
     End Function
@@ -443,8 +445,8 @@ Public Class ChatControl
                     WithWindow:=Microsoft.Office.Core.MsoTriState.msoFalse)
 
                 Dim contentBuilder As New StringBuilder()
-                contentBuilder.AppendLine($"文件: {Path.GetFileName(filePath)}")
-                contentBuilder.AppendLine($"共 {presentation.Slides.Count} 张幻灯片")
+                contentBuilder.AppendLine($"Файл: {Path.GetFileName(filePath)}")
+                contentBuilder.AppendLine($"Всего слайдов: {presentation.Slides.Count}")
                 contentBuilder.AppendLine()
 
                 ' 限制处理的幻灯片数量
@@ -455,7 +457,7 @@ Public Class ChatControl
                     Dim shapes As Microsoft.Office.Interop.PowerPoint.Shapes = Nothing
                     Try
                         slide = presentation.Slides(slideIndex)
-                        contentBuilder.AppendLine($"=== 幻灯片 {slideIndex} ===")
+                        contentBuilder.AppendLine($"=== Слайд {slideIndex} ===")
 
                         ' 遍历幻灯片中的形状
                         shapes = slide.Shapes
@@ -473,16 +475,16 @@ Public Class ChatControl
                                             Dim text As String = textRange.Text.Trim()
                                             If Not String.IsNullOrEmpty(text) Then
                                                 ' 判断形状类型
-                                                Dim shapeType As String = "文本"
+                                                Dim shapeType As String = "Текст"
                                                 If shape.PlaceholderFormat IsNot Nothing Then
                                                     Select Case shape.PlaceholderFormat.Type
                                                         Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderTitle,
                                                              Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderCenterTitle
-                                                            shapeType = "标题"
+                                                            shapeType = "Заголовок"
                                                         Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderSubtitle
-                                                            shapeType = "副标题"
+                                                            shapeType = "Подзаголовок"
                                                         Case Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderBody
-                                                            shapeType = "正文"
+                                                            shapeType = "Основной текст"
                                                     End Select
                                                 End If
                                                 contentBuilder.AppendLine($"  [{shapeType}] {text}")
@@ -498,7 +500,7 @@ Public Class ChatControl
                                     Dim table As Microsoft.Office.Interop.PowerPoint.Table = Nothing
                                     Try
                                         table = shape.Table
-                                        contentBuilder.AppendLine($"  [表格 {table.Rows.Count}行×{table.Columns.Count}列]")
+                                        contentBuilder.AppendLine($"  [Таблица {table.Rows.Count} строк × {table.Columns.Count} столбцов]")
                                         ' 读取表格内容（限制行数）
                                         Dim maxRows = Math.Min(table.Rows.Count, 10)
                                         For rowIdx = 1 To maxRows
@@ -542,7 +544,7 @@ Public Class ChatControl
                 Next
 
                 If presentation.Slides.Count > maxSlides Then
-                    contentBuilder.AppendLine($"... 共 {presentation.Slides.Count} 张幻灯片，仅显示前 {maxSlides} 张")
+                    contentBuilder.AppendLine($"... всего слайдов: {presentation.Slides.Count}, показаны только первые {maxSlides}")
                 End If
 
                 Return New FileContentResult With {
@@ -566,7 +568,7 @@ Public Class ChatControl
             Return New FileContentResult With {
                 .FileName = Path.GetFileName(filePath),
                 .FileType = "PowerPoint",
-                .ParsedContent = $"[解析PowerPoint文件时出错: {ex.Message}]"
+                .ParsedContent = $"[Ошибка при разборе файла PowerPoint: {ex.Message}]"
             }
         End Try
     End Function
@@ -585,13 +587,13 @@ Public Class ChatControl
 
             ' 创建内容构建器，格式化选中内容
             Dim contentBuilder As New StringBuilder()
-            contentBuilder.AppendLine(vbCrLf & "--- 用户选中的 PowerPoint 内容 ---")
+            contentBuilder.AppendLine(vbCrLf & "--- Выбранное пользователем содержимое PowerPoint ---")
 
             ' 添加演示文稿信息
             Dim activePresentation = Globals.ThisAddIn.Application.ActivePresentation
             If activePresentation IsNot Nothing Then
-                contentBuilder.AppendLine($"演示文稿: {Path.GetFileName(activePresentation.FullName)}")
-                contentBuilder.AppendLine($"当前幻灯片: {Globals.ThisAddIn.Application.ActiveWindow.View.Slide.SlideIndex}")
+                contentBuilder.AppendLine($"Презентация: {Path.GetFileName(activePresentation.FullName)}")
+                contentBuilder.AppendLine($"Текущий слайд: {Globals.ThisAddIn.Application.ActiveWindow.View.Slide.SlideIndex}")
             End If
 
             ' 根据选择类型处理内容
@@ -599,15 +601,15 @@ Public Class ChatControl
                 Case Microsoft.Office.Interop.PowerPoint.PpSelectionType.ppSelectionShapes
                     ' 处理形状选择（包括表格）
                     Dim shapeRange = selection.ShapeRange
-                    contentBuilder.AppendLine($"选择类型: 形状 (共 {shapeRange.Count} 个)")
+                    contentBuilder.AppendLine($"Тип выделения: фигуры (всего {shapeRange.Count})")
 
                     For i = 1 To shapeRange.Count
-                        contentBuilder.AppendLine($"形状 {i}:")
+                        contentBuilder.AppendLine($"Фигура {i}:")
 
                         ' 检查是否是表格
                         If shapeRange(i).HasTable = Microsoft.Office.Core.MsoTriState.msoTrue Then
                             Dim table = shapeRange(i).Table
-                            contentBuilder.AppendLine($"  表格: {table.Rows.Count} 行 × {table.Columns.Count} 列")
+                            contentBuilder.AppendLine($"  Таблица: {table.Rows.Count} строк × {table.Columns.Count} столбцов")
 
                             ' 添加表格内容
                             Dim maxRows As Integer = Math.Min(table.Rows.Count, 20)
@@ -673,11 +675,11 @@ Public Class ChatControl
 
                             ' 添加表格说明
                             If table.Rows.Count > maxRows Then
-                                contentBuilder.AppendLine($"  ... 共有 {table.Rows.Count} 行，仅显示前 {maxRows} 行")
+                                contentBuilder.AppendLine($"  ... всего строк: {table.Rows.Count}, показаны только первые {maxRows}")
                             End If
 
                             If table.Columns.Count > maxCols Then
-                                contentBuilder.AppendLine($"  ... 共有 {table.Columns.Count} 列，仅显示前 {maxCols} 列")
+                                contentBuilder.AppendLine($"  ... всего столбцов: {table.Columns.Count}, показаны только первые {maxCols}")
                             End If
                         ElseIf shapeRange(i).HasTextFrame = Microsoft.Office.Core.MsoTriState.msoTrue Then
                             ' 处理文本框
@@ -686,23 +688,23 @@ Public Class ChatControl
                                 Dim text = textFrame.TextRange.Text.Trim()
                                 ' 限制文本长度
                                 If text.Length > 500 Then
-                                    contentBuilder.AppendLine($"  文本: {text.Substring(0, 500)}...")
-                                    contentBuilder.AppendLine($"  [文本太长，仅显示前500个字符，总计: {text.Length}个字符]")
+                                    contentBuilder.AppendLine($"  Текст: {text.Substring(0, 500)}...")
+                                    contentBuilder.AppendLine($"  [Текст слишком длинный, показаны только первые 500 символов, всего: {text.Length}]")
                                 Else
-                                    contentBuilder.AppendLine($"  文本: {text}")
+                                    contentBuilder.AppendLine($"  Текст: {text}")
                                 End If
                             Else
-                                contentBuilder.AppendLine("  [空文本框]")
+                                contentBuilder.AppendLine("  [Пустое текстовое поле]")
                             End If
                         ElseIf shapeRange(i).Type = Microsoft.Office.Core.MsoShapeType.msoPicture Then
                             ' 处理图片
-                            contentBuilder.AppendLine("  [图片]")
+                            contentBuilder.AppendLine("  [Изображение]")
                             If shapeRange(i).AlternativeText <> "" Then
-                                contentBuilder.AppendLine($"  替代文本: {shapeRange(i).AlternativeText}")
+                                contentBuilder.AppendLine($"  Альтернативный текст: {shapeRange(i).AlternativeText}")
                             End If
                         Else
                             ' 其他类型的形状
-                            contentBuilder.AppendLine($"  [形状类型: {shapeRange(i).Type}]")
+                            contentBuilder.AppendLine($"  [Тип фигуры: {shapeRange(i).Type}]")
                         End If
 
                         ' 在形状之间添加分隔线
@@ -711,7 +713,7 @@ Public Class ChatControl
 
                 Case Microsoft.Office.Interop.PowerPoint.PpSelectionType.ppSelectionText
                     ' 处理文本选择
-                    contentBuilder.AppendLine("选择类型: 文本")
+                    contentBuilder.AppendLine("Тип выделения: текст")
 
                     Dim textRange = selection.TextRange
                     If textRange IsNot Nothing Then
@@ -719,18 +721,18 @@ Public Class ChatControl
                         ' 限制文本长度
                         If text.Length > 1000 Then
                             contentBuilder.AppendLine(text.Substring(0, 1000) & "...")
-                            contentBuilder.AppendLine($"[文本太长，仅显示前1000个字符，总计: {text.Length}个字符]")
+                            contentBuilder.AppendLine($"[Текст слишком длинный, показаны только первые 1000 символов, всего: {text.Length}]")
                         Else
                             contentBuilder.AppendLine(text)
                         End If
                     Else
-                        contentBuilder.AppendLine("[无法获取文本内容]")
+                        contentBuilder.AppendLine("[Не удалось получить текстовое содержимое]")
                     End If
 
                 Case Microsoft.Office.Interop.PowerPoint.PpSelectionType.ppSelectionSlides
                     ' 处理幻灯片选择
                     Dim slideRange = selection.SlideRange
-                    contentBuilder.AppendLine($"选择类型: 幻灯片 (共 {slideRange.Count} 张)")
+                    contentBuilder.AppendLine($"Тип выделения: слайды (всего {slideRange.Count})")
 
                     ' 限制处理的幻灯片数量
                     Dim maxSlides = Math.Min(slideRange.Count, 5)
@@ -739,13 +741,13 @@ Public Class ChatControl
                         Dim slide As Microsoft.Office.Interop.PowerPoint.Slide = Nothing
                         Try
                             slide = slideRange(i)
-                            contentBuilder.AppendLine($"幻灯片 {slide.SlideIndex}:")
+                            contentBuilder.AppendLine($"Слайд {slide.SlideIndex}:")
 
                             Dim title = GetSlideTitle(slide)
-                            If title <> "[无标题]" Then
-                                contentBuilder.AppendLine($"  标题: {title}")
+                            If title <> "[Без заголовка]" Then
+                                contentBuilder.AppendLine($"  Заголовок: {title}")
                             Else
-                                contentBuilder.AppendLine("  [无标题]")
+                                contentBuilder.AppendLine("  [Без заголовка]")
                             End If
 
                             contentBuilder.Append(GetSlideContent(slide))
@@ -757,15 +759,15 @@ Public Class ChatControl
 
                     ' 如果有更多幻灯片未显示，添加提示
                     If slideRange.Count > maxSlides Then
-                        contentBuilder.AppendLine($"[共选中 {slideRange.Count} 张幻灯片，仅显示前 {maxSlides} 张]")
+                        contentBuilder.AppendLine($"[Выбрано слайдов: {slideRange.Count}, показаны только первые {maxSlides}]")
                     End If
 
                 Case Else
-                    contentBuilder.AppendLine($"选择类型: 未知 ({selection.Type})")
-                    contentBuilder.AppendLine("[无法识别的选择类型]")
+                    contentBuilder.AppendLine($"Тип выделения: неизвестно ({selection.Type})")
+                    contentBuilder.AppendLine("[Нераспознанный тип выделения]")
             End Select
 
-            contentBuilder.AppendLine("--- 选中内容结束 ---" & vbCrLf)
+            contentBuilder.AppendLine("--- Конец выбранного содержимого ---" & vbCrLf)
 
             ' 返回原始消息加上选中内容
             Return message & contentBuilder.ToString()
@@ -829,10 +831,10 @@ Public Class ChatControl
                 ComObjectHelper.ReleaseComObject(shapes)
             End Try
 
-            Return "[无标题]"
+            Return "[Без заголовка]"
         Catch ex As Exception
             Debug.WriteLine($"获取幻灯片标题时出错: {ex.Message}")
-            Return "[获取标题出错]"
+            Return "[Ошибка получения заголовка]"
         End Try
     End Function
 
@@ -863,7 +865,7 @@ Public Class ChatControl
                        shape.TextFrame.HasText = Microsoft.Office.Core.MsoTriState.msoTrue Then
 
                             If processedTextShapes >= maxTextShapes Then
-                                contentBuilder.AppendLine("  [更多文本内容未显示...]")
+                                contentBuilder.AppendLine("  [Дополнительное текстовое содержимое не показано...]")
                                 Exit For
                             End If
 
@@ -872,27 +874,27 @@ Public Class ChatControl
                             If Not String.IsNullOrEmpty(text) Then
                                 ' 限制文本长度
                                 If text.Length > 200 Then
-                                    contentBuilder.AppendLine($"  文本: {text.Substring(0, 200)}...")
+                                    contentBuilder.AppendLine($"  Текст: {text.Substring(0, 200)}...")
                                 Else
-                                    contentBuilder.AppendLine($"  文本: {text}")
+                                    contentBuilder.AppendLine($"  Текст: {text}")
                                 End If
                                 processedTextShapes += 1
                             End If
                             ' 处理表格形状
                         ElseIf shape.HasTable = Microsoft.Office.Core.MsoTriState.msoTrue Then
-                            contentBuilder.AppendLine("  [包含表格]")
+                            contentBuilder.AppendLine("  [Содержит таблицу]")
                             ' 处理图片形状
                         ElseIf shape.Type = Microsoft.Office.Core.MsoShapeType.msoPicture Then
-                            contentBuilder.AppendLine("  [包含图片]")
+                            contentBuilder.AppendLine("  [Содержит изображение]")
                             If shape.AlternativeText <> "" Then
-                                contentBuilder.AppendLine($"  图片说明: {shape.AlternativeText}")
+                                contentBuilder.AppendLine($"  Описание изображения: {shape.AlternativeText}")
                             End If
                             ' 处理图表形状
                         ElseIf shape.Type = Microsoft.Office.Core.MsoShapeType.msoChart Then
-                            contentBuilder.AppendLine("  [包含图表]")
+                            contentBuilder.AppendLine("  [Содержит диаграмму]")
                             ' 处理SmartArt形状
                         ElseIf shape.Type = Microsoft.Office.Core.MsoShapeType.msoSmartArt Then
-                            contentBuilder.AppendLine("  [包含SmartArt图形]")
+                            contentBuilder.AppendLine("  [Содержит графику SmartArt]")
                         End If
                     Finally
                         ComObjectHelper.ReleaseComObject(textRange)
@@ -905,13 +907,13 @@ Public Class ChatControl
 
             ' 如果没有找到任何内容
             If contentBuilder.Length = 0 Then
-                Return "  [幻灯片无可提取的文本内容]"
+                Return "  [На слайде нет извлекаемого текстового содержимого]"
             End If
 
             Return contentBuilder.ToString()
         Catch ex As Exception
             Debug.WriteLine($"获取幻灯片内容时出错: {ex.Message}")
-            Return $"  [获取内容出错: {ex.Message}]"
+            Return $"  [Ошибка получения содержимого: {ex.Message}]"
         End Try
     End Function
 
@@ -937,11 +939,11 @@ Public Class ChatControl
                 UndoManagerExtension.CreateAIOperationUndoPoint(
                     "PowerPoint",
                     Globals.ThisAddIn.Application,
-                    "AI操作",
-                    "AI 生成内容")
+                    "AI-операция",
+                    "Содержимое, созданное ИИ")
             End Sub,
             "PowerPointAi.ChatControl",
-            "创建撤销点")
+            "Создание точки отмены")
 
         ' 尝试检测并生成幻灯片 - 使用 ErrorHandler 包装
         ErrorHandlerExtension.SafeExecute(
@@ -957,16 +959,16 @@ Public Class ChatControl
                         UndoManagerExtension.CreateAIOperationUndoPoint(
                             "PowerPoint",
                             Globals.ThisAddIn.Application,
-                            "AI幻灯片生成",
-                            "生成AI幻灯片")
+                            "AI-генерация слайдов",
+                            "Генерация слайдов ИИ")
 
                         PptGenerationHandlerExtension.TryGenerateSlides(aiResponse, Globals.ThisAddIn.Application)
                     End If
                 End If
             End Sub,
             "PowerPointAi.ChatControl",
-            "幻灯片生成",
-            "生成幻灯片时出错，请检查大纲格式。")
+            "Генерация слайдов",
+            "Ошибка генерации слайдов; проверьте формат структуры.")
 
         ' 调用基类处理续写模式
         MyBase.CheckAndCompleteProcessingHook(_finalUuid, allPlainMarkdownBuffer)
@@ -1002,7 +1004,7 @@ Public Class ChatControl
 
             ' 检查是否可以续写
             If Not _continuationService.CanContinue() Then
-                GlobalStatusStrip.ShowWarning("无法获取演示文稿信息，请确保文档已打开")
+                GlobalStatusStrip.ShowWarning("Не удалось получить информацию о презентации. Убедитесь, что документ открыт")
                 Return
             End If
 
@@ -1012,17 +1014,17 @@ Public Class ChatControl
             If isContinuationMode AndAlso _cachedContinuationContext IsNot Nothing Then
                 ' 多轮续写：使用缓存的上下文，但style作为新的调整要求
                 context = _cachedContinuationContext
-                GlobalStatusStrip.ShowInfo("继续续写...")
+                GlobalStatusStrip.ShowInfo("Продолжаем генерацию...")
             Else
                 ' 首次续写或非续写模式：重新获取上下文
                 context = _continuationService.GetCursorContext(3, 3)
                 If context Is Nothing Then
-                    GlobalStatusStrip.ShowWarning("无法获取幻灯片上下文")
+                    GlobalStatusStrip.ShowWarning("Не удалось получить контекст слайда")
                     Return
                 End If
                 ' 缓存上下文
                 _cachedContinuationContext = context
-                GlobalStatusStrip.ShowInfo("正在分析上下文并生成续写内容...")
+                GlobalStatusStrip.ShowInfo("Анализ контекста и генерация продолжения...")
             End If
 
             ' 发送续写请求（带上风格参数）
@@ -1030,7 +1032,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleTriggerContinuation 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"触发续写时出错: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка при запуске продолжения: {ex.Message}")
         End Try
     End Sub
 
@@ -1043,7 +1045,7 @@ Public Class ChatControl
             Dim positionStr As String = If(jsonDoc("position") IsNot Nothing, jsonDoc("position").ToString(), "current")
 
             If String.IsNullOrWhiteSpace(content) Then
-                GlobalStatusStrip.ShowWarning("续写内容为空")
+                GlobalStatusStrip.ShowWarning("Содержимое продолжения пусто")
                 Return
             End If
 
@@ -1066,7 +1068,7 @@ Public Class ChatControl
             ' 插入续写内容
             _continuationService.InsertContinuation(content, insertPos)
 
-            GlobalStatusStrip.ShowInfo("续写内容已插入幻灯片")
+            GlobalStatusStrip.ShowInfo("Продолжение вставлено в слайд")
 
             ' 通知前端移除操作按钮
             Dim uuid As String = If(jsonDoc("uuid") IsNot Nothing, jsonDoc("uuid").ToString(), String.Empty)
@@ -1076,7 +1078,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleApplyContinuation 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"插入续写内容时出错: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка при вставке продолжения: {ex.Message}")
         End Try
     End Sub
 
@@ -1089,7 +1091,7 @@ Public Class ChatControl
             Dim positionStr As String = If(jsonDoc("position") IsNot Nothing, jsonDoc("position").ToString(), "current")
 
             If String.IsNullOrWhiteSpace(content) Then
-                GlobalStatusStrip.ShowWarning("模板内容为空")
+                GlobalStatusStrip.ShowWarning("Содержимое шаблона пусто")
                 Return
             End If
 
@@ -1112,7 +1114,7 @@ Public Class ChatControl
             ' 插入模板内容
             _continuationService.InsertContinuation(content, insertPos)
 
-            GlobalStatusStrip.ShowInfo("模板内容已插入幻灯片")
+            GlobalStatusStrip.ShowInfo("Содержимое шаблона вставлено в слайд")
 
             ' 通知前端移除操作按钮
             Dim uuid As String = If(jsonDoc("uuid") IsNot Nothing, jsonDoc("uuid").ToString(), String.Empty)
@@ -1122,7 +1124,7 @@ Public Class ChatControl
 
         Catch ex As Exception
             Debug.WriteLine($"HandleApplyTemplateContent 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"插入模板内容时出错: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Ошибка при вставке содержимого шаблона: {ex.Message}")
         End Try
     End Sub
 
@@ -1233,7 +1235,7 @@ Public Class ChatControl
                 Debug.WriteLine($"PPT JSON格式验证失败: {errorMessage}")
                 Debug.WriteLine($"原始JSON: {jsonCode.Substring(0, Math.Min(200, jsonCode.Length))}...")
                 
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON格式不符合规范: {errorMessage}")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Формат JSON не соответствует спецификации: {errorMessage}")
                 Return False
             End If
             
@@ -1250,14 +1252,14 @@ Public Class ChatControl
                 Return ExecutePPTSingleCommand(jsonObj, jsonCode, preview)
             End If
             
-            ShareRibbon.GlobalStatusStrip.ShowWarning("无效的JSON格式")
+            ShareRibbon.GlobalStatusStrip.ShowWarning("Недопустимый формат JSON")
             Return False
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"JSON格式无效: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Недопустимый формат JSON: {ex.Message}")
             Return False
         Catch ex As Exception
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1278,11 +1280,11 @@ Public Class ChatControl
                 Return Agent.ToolResult.Failed("CreateSlides",
                                                "Professional CreateSlides must be the only command in its envelope",
                                                errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
-                                               userMessage:="专业整套幻灯片生成必须作为独立 CreateSlides 调用，请将后续图片、图表或对象操作拆成下一步",
+                                               userMessage:="Профессиональная генерация всей презентации должна быть отдельным вызовом CreateSlides; разбейте последующие операции с изображениями, диаграммами или объектами на следующий шаг",
                                                recoverable:=True,
                                                observation:=New JObject From {
                                                    {"kind", "write"},
-                                                   {"summary", "CreateSlides 未执行：检测到混合命令数组"},
+                                                    {"summary", "CreateSlides не выполнен: обнаружен массив смешанных команд"},
                                                    {"changed", False},
                                                    {"warnings", New JArray("mixed_create_slides_envelope")}
                                                })
@@ -1304,7 +1306,7 @@ Public Class ChatControl
             Dim success = ExecuteJsonCommandCore(jsonCode, preview)
             Dim afterSnapshot = CapturePowerPointCommandSnapshot(envelope)
             Dim observation = BuildPowerPointCommandObservation(toolId, success, beforeSnapshot, afterSnapshot)
-            Dim summary = If(observation?("summary")?.ToString(), $"{toolId} 执行完成")
+            Dim summary = If(observation?("summary")?.ToString(), $"{toolId}: выполнение завершено")
 
             If success Then
                 Return Agent.ToolResult.Succeed(toolId,
@@ -1413,7 +1415,7 @@ Public Class ChatControl
         If slideIndex > 0 Then targetRefs.Add($"PowerPoint:Slide/{slideIndex}") Else targetRefs.Add("PowerPoint:Presentation")
 
         Dim warnings As New JArray()
-        If success AndAlso Not changed Then warnings.Add("命令已处理，但幻灯片快照未检测到变化；可能为用户取消、格式等价或 noop")
+        If success AndAlso Not changed Then warnings.Add("Команда обработана, но снимок слайдов не обнаружил изменений; возможны отмена пользователем, эквивалентный формат или noop")
         If afterSnapshot?("captureError") IsNot Nothing Then warnings.Add(afterSnapshot("captureError"))
 
         Dim diff As New JObject From {
@@ -1423,7 +1425,7 @@ Public Class ChatControl
 
         Return New JObject From {
             {"kind", "write"},
-            {"summary", If(success, $"PowerPoint 工具 {toolId} 已执行", $"PowerPoint 工具 {toolId} 执行失败")},
+            {"summary", If(success, $"Инструмент PowerPoint {toolId} выполнен", $"Сбой выполнения инструмента PowerPoint {toolId}")},
             {"targetRefs", targetRefs},
             {"changed", changed},
             {"before", beforeSnapshot},
@@ -1498,13 +1500,13 @@ Public Class ChatControl
         Try
             Dim commands = CType(commandsArray, JArray)
             If commands.Count = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowWarning("命令数组为空")
+                ShareRibbon.GlobalStatusStrip.ShowWarning("Массив команд пуст")
                 Return False
             End If
 
             ' 预览所有命令 - 使用增强的预览表单
             If preview Then
-                If Not ShareRibbon.CommandPreviewForm.ShowPreview($"PPT命令预览 - 共 {commands.Count} 个命令", commandsArray) Then
+                If Not ShareRibbon.CommandPreviewForm.ShowPreview($"Предпросмотр команд PPT — всего {commands.Count}", commandsArray) Then
                     ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                     Return True
                 End If
@@ -1526,16 +1528,16 @@ Public Class ChatControl
             Next
 
             If failCount = 0 Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"所有 {successCount} 个命令执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Все команды выполнены успешно: {successCount}")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"执行完成: {successCount} 成功, {failCount} 失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Выполнено: успешно {successCount}, с ошибкой {failCount}")
             End If
 
             Return failCount = 0
 
         Catch ex As Exception
             Debug.WriteLine($"ExecutePPTCommandsArray 出错: {ex.Message}")
-            ShareRibbon.GlobalStatusStrip.ShowWarning($"批量执行失败: {ex.Message}")
+            ShareRibbon.GlobalStatusStrip.ShowWarning($"Ошибка пакетного выполнения: {ex.Message}")
             Return False
         End Try
     End Function
@@ -1549,7 +1551,7 @@ Public Class ChatControl
             
             ' 预览 - 使用增强的预览表单
             If preview Then
-                If Not ShareRibbon.CommandPreviewForm.ShowPreview("PPT命令预览", commandJson) Then
+                If Not ShareRibbon.CommandPreviewForm.ShowPreview("Предпросмотр команд PPT", commandJson) Then
                     ExecuteJavaScriptAsyncJS("handleExecutionCancelled('')")
                     Return True
                 End If
@@ -1559,9 +1561,9 @@ Public Class ChatControl
             Dim success = ExecutePPTCommand(commandJson, preview)
 
             If success Then
-                ShareRibbon.GlobalStatusStrip.ShowInfo($"命令 '{command}' 执行成功")
+                ShareRibbon.GlobalStatusStrip.ShowInfo($"Команда '{command}' выполнена успешно")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"命令 '{command}' 执行失败")
+                ShareRibbon.GlobalStatusStrip.ShowWarning($"Команда '{command}' выполнена с ошибкой")
             End If
 
             Return success
@@ -1617,13 +1619,13 @@ Public Class ChatControl
                 Case "executevba"
                     Dim vbaCode = params("code")?.ToString()
                     If String.IsNullOrEmpty(vbaCode) Then
-                        GlobalStatusStrip.ShowWarning("ExecuteVBA 缺少 code 参数")
+                        GlobalStatusStrip.ShowWarning("ExecuteVBA: отсутствует параметр code")
                         Return False
                     End If
                     Return CodeExecutionService.ExecuteVBACode(vbaCode, False)
                 Case Else
                     Debug.WriteLine($"不支持的PPT命令: {command}")
-                    GlobalStatusStrip.ShowWarning($"暂不支持的PPT命令: {command}")
+                    GlobalStatusStrip.ShowWarning($"Неподдерживаемая команда PPT: {command}")
                     Return False
             End Select
 
@@ -1851,7 +1853,7 @@ Public Class ChatControl
                 End Try
             Next
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"成功创建 {slidesArray.Count} 张幻灯片")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Создано слайдов: {slidesArray.Count}")
             Return True
 
         Catch ex As Exception
@@ -2091,7 +2093,7 @@ Public Class ChatControl
                 End Try
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"已为 {processedCount} 张幻灯片应用切换效果")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Переходы применены к слайдам: {processedCount}")
             Return True
 
         Catch ex As Exception
@@ -2159,7 +2161,7 @@ Public Class ChatControl
                 End Try
             End If
 
-            ShareRibbon.GlobalStatusStrip.ShowInfo($"已美化 {processedCount} 张幻灯片")
+            ShareRibbon.GlobalStatusStrip.ShowInfo($"Оформлено слайдов: {processedCount}")
             Return True
 
         Catch ex As Exception
@@ -2269,15 +2271,15 @@ Public Class ChatControl
                 slideIndex = Globals.ThisAddIn.Application.ActiveWindow.View.Slide.SlideIndex
             End If
             If pres.Slides.Count <= 1 Then
-                GlobalStatusStrip.ShowWarning("无法删除：演示文稿必须至少保留一张幻灯片")
+                GlobalStatusStrip.ShowWarning("Невозможно удалить: в презентации должен остаться хотя бы один слайд")
                 Return False
             End If
             If slideIndex < 1 OrElse slideIndex > pres.Slides.Count Then
-                GlobalStatusStrip.ShowWarning($"幻灯片索引 {slideIndex} 超出范围（共 {pres.Slides.Count} 张）")
+                GlobalStatusStrip.ShowWarning($"Индекс слайда {slideIndex} вне диапазона (всего {pres.Slides.Count})")
                 Return False
             End If
             pres.Slides(slideIndex).Delete()
-            GlobalStatusStrip.ShowInfo($"已删除第 {slideIndex} 张幻灯片")
+            GlobalStatusStrip.ShowInfo($"Удалён слайд {slideIndex}")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ExecuteDeleteSlide 出错: {ex.Message}")
@@ -2297,7 +2299,7 @@ Public Class ChatControl
             If slideIndex < 1 OrElse slideIndex > pres.Slides.Count Then Return False
             pres.Slides(slideIndex).Copy()
             pres.Slides.Paste(slideIndex + 1)
-            GlobalStatusStrip.ShowInfo($"已复制第 {slideIndex} 张幻灯片")
+            GlobalStatusStrip.ShowInfo($"Скопирован слайд {slideIndex}")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ExecuteDuplicateSlide 出错: {ex.Message}")
@@ -2315,7 +2317,7 @@ Public Class ChatControl
             If fromIndex < 1 OrElse fromIndex > pres.Slides.Count Then Return False
             If toIndex < 1 OrElse toIndex > pres.Slides.Count Then Return False
             pres.Slides(fromIndex).MoveTo(toIndex)
-            GlobalStatusStrip.ShowInfo($"已将幻灯片从第 {fromIndex} 移到第 {toIndex}")
+            GlobalStatusStrip.ShowInfo($"Слайд перемещён с позиции {fromIndex} на {toIndex}")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ExecuteMoveSlide 出错: {ex.Message}")
@@ -2363,7 +2365,7 @@ Public Class ChatControl
             If Not String.IsNullOrEmpty(themeFile) AndAlso IO.File.Exists(themeFile) Then
                 pres.ApplyTheme(themeFile)
             ElseIf Not String.IsNullOrEmpty(themeName) Then
-                GlobalStatusStrip.ShowInfo($"内置主题 '{themeName}' 请通过 WPS/PPT 设计菜单手动应用")
+                GlobalStatusStrip.ShowInfo($"Встроенную тему '{themeName}' примените вручную через меню дизайна WPS/PPT")
             End If
             Return True
         Catch ex As Exception
@@ -2388,7 +2390,7 @@ Public Class ChatControl
                 Return False
             End If
             targetSlide.NotesPage.Shapes(2).TextFrame.TextRange.Text = notes
-            GlobalStatusStrip.ShowInfo("已添加演讲备注")
+            GlobalStatusStrip.ShowInfo("Заметки докладчика добавлены")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ExecuteAddSpeakerNotes 出错: {ex.Message}")
@@ -2412,11 +2414,11 @@ Public Class ChatControl
             End If
 
             ' 无效格式
-            GlobalStatusStrip.ShowWarning("排版响应格式无效")
+            GlobalStatusStrip.ShowWarning("Недопустимый формат ответа форматирования")
 
         Catch ex As Exception
             Debug.WriteLine("HandleApplyDocumentPlanItem 错误: " & ex.Message)
-            GlobalStatusStrip.ShowWarning("排版应用出错: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка применения форматирования: " & ex.Message)
         End Try
     End Sub
 
@@ -2429,7 +2431,7 @@ Public Class ChatControl
             Dim sampleClassification = jsonDoc("sampleClassification")?.ToObject(Of List(Of JObject))()
 
             If rules Is Nothing OrElse rules.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("没有收到有效的排版规则")
+                GlobalStatusStrip.ShowWarning("Не получены допустимые правила форматирования")
                 Return
             End If
 
@@ -2444,7 +2446,7 @@ Public Class ChatControl
 
             ' 检查上下文
             If _reformatShapes Is Nothing OrElse _reformatShapes.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("排版上下文丢失，请重新选择内容并排版")
+                GlobalStatusStrip.ShowWarning("Контекст форматирования потерян. Выберите содержимое и запустите форматирование заново")
                 Return
             End If
 
@@ -2487,14 +2489,14 @@ Public Class ChatControl
                         ruleToApply = sampleRuleMap(i)
                     Else
                         ' 基于形状类型推断规则
-                        If shapeType.Contains("标题") Then
+                            If shapeType.Contains("Заголовок") Then
                             For Each key In ruleDict.Keys
                                 If key.ToLower().Contains("title") OrElse key = "标题" Then
                                     ruleToApply = key
                                     Exit For
                                 End If
                             Next
-                        ElseIf shapeType.Contains("副标题") Then
+                            ElseIf shapeType.Contains("Подзаголовок") Then
                             For Each key In ruleDict.Keys
                                 If key.ToLower().Contains("subtitle") OrElse key = "副标题" Then
                                     ruleToApply = key
@@ -2518,11 +2520,11 @@ Public Class ChatControl
             ' 保留 _reformatShapes/_reformatTypes 用于撤销快照恢复
             ' 撤销或新排版开始时会重新设置
 
-            GlobalStatusStrip.ShowInfo($"排版完成，共处理 {appliedCount} 个文本框")
+            GlobalStatusStrip.ShowInfo($"Форматирование завершено, обработано текстовых полей: {appliedCount}")
 
         Catch ex As Exception
             Debug.WriteLine("ApplyReformatRules 错误: " & ex.Message)
-            GlobalStatusStrip.ShowWarning("应用排版规则出错: " & ex.Message)
+            GlobalStatusStrip.ShowWarning("Ошибка применения правил форматирования: " & ex.Message)
         End Try
     End Sub
 
@@ -2632,7 +2634,7 @@ Public Class ChatControl
         If _reformatUndoSnapshots IsNot Nothing AndAlso _reformatUndoSnapshots.Count > 0 Then
             Try
                 RestoreFormattingSnapshots()
-                GlobalStatusStrip.ShowInfo("已撤销排版操作")
+                GlobalStatusStrip.ShowInfo("Форматирование отменено")
                 Return
             Catch ex As Exception
                 Debug.WriteLine($"快照恢复失败，回退到Undo: {ex.Message}")

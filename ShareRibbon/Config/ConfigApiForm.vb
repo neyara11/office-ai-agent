@@ -94,7 +94,7 @@ Public Class ConfigApiForm
     ''' 初始化窗体
     ''' </summary>
     Private Sub InitializeForm()
-        Me.Text = "配置大模型API"
+        Me.Text = "Настройка API моделей"
         Me.Size = New Size(1050, 800)
         Me.StartPosition = FormStartPosition.CenterScreen
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -108,13 +108,13 @@ Public Class ConfigApiForm
 
         ' 创建云端模型Tab
         cloudTab = New TabPage()
-        cloudTab.Text = "云端模型"
+        cloudTab.Text = "Облачные модели"
         cloudTab.Padding = New Padding(10)
         mainTabControl.TabPages.Add(cloudTab)
 
         ' 创建本地模型Tab
         localTab = New TabPage()
-        localTab.Text = "本地模型"
+        localTab.Text = "Локальные модели"
         localTab.Padding = New Padding(10)
         mainTabControl.TabPages.Add(localTab)
 
@@ -126,7 +126,7 @@ Public Class ConfigApiForm
 
         ' 创建记忆管理Tab
         memoryTab = New TabPage()
-        memoryTab.Text = "记忆管理"
+        memoryTab.Text = "Управление памятью"
         memoryTab.Padding = New Padding(10)
         mainTabControl.TabPages.Add(memoryTab)
     End Sub
@@ -137,7 +137,7 @@ Public Class ConfigApiForm
     Private Sub InitializeCloudTab()
         ' 左侧：服务商列表
         Dim providerLabel As New Label()
-        providerLabel.Text = "服务商列表："
+        providerLabel.Text = "Список провайдеров:"
         providerLabel.Location = New Point(10, 10)
         providerLabel.AutoSize = True
         cloudTab.Controls.Add(providerLabel)
@@ -150,7 +150,7 @@ Public Class ConfigApiForm
 
         ' 添加新服务按钮
         Dim cloudAddButton As New Button()
-        cloudAddButton.Text = "添加新服务"
+        cloudAddButton.Text = "Добавить сервис"
         cloudAddButton.Location = New Point(10, 515)
         cloudAddButton.Size = New Size(180, 30)
         AddHandler cloudAddButton.Click, AddressOf CloudAddButton_Click
@@ -175,7 +175,7 @@ Public Class ConfigApiForm
 
         ' API URL
         Dim urlTitleLabel As New Label()
-        urlTitleLabel.Text = "API端点："
+        urlTitleLabel.Text = "Конечная точка API:"
         urlTitleLabel.Location = New Point(rightX, 45)
         urlTitleLabel.AutoSize = True
         cloudTab.Controls.Add(urlTitleLabel)
@@ -194,7 +194,7 @@ Public Class ConfigApiForm
 
         ' API Key
         Dim apiKeyLabel As New Label()
-        apiKeyLabel.Text = "API Key："
+        apiKeyLabel.Text = "API Key:"
         apiKeyLabel.Location = New Point(rightX, 95)
         apiKeyLabel.AutoSize = True
         cloudTab.Controls.Add(apiKeyLabel)
@@ -209,7 +209,7 @@ Public Class ConfigApiForm
 
         ' 获取ApiKey按钮
         cloudGetApiKeyButton = New Button()
-        cloudGetApiKeyButton.Text = "获取Key"
+        cloudGetApiKeyButton.Text = "Получить ключ"
         cloudGetApiKeyButton.Location = New Point(rightX + 500, 113)
         cloudGetApiKeyButton.Size = New Size(90, 27)
         AddHandler cloudGetApiKeyButton.Click, AddressOf CloudGetApiKeyButton_Click
@@ -217,7 +217,7 @@ Public Class ConfigApiForm
 
         ' 对话模型列表标题
         Dim chatModelLabel As New Label()
-        chatModelLabel.Text = "对话模型："
+        chatModelLabel.Text = "Модели диалога:"
         chatModelLabel.Location = New Point(rightX, 150)
         chatModelLabel.AutoSize = True
         cloudTab.Controls.Add(chatModelLabel)
@@ -233,7 +233,7 @@ Public Class ConfigApiForm
         cloudTab.Controls.Add(cloudChatModelCheckedListBox)
 
         Dim cloudReasoningLabel As New Label()
-        cloudReasoningLabel.Text = "推理设置："
+        cloudReasoningLabel.Text = "Настройки рассуждений:"
         cloudReasoningLabel.Location = New Point(rightX + 310, 175)
         cloudReasoningLabel.AutoSize = True
         cloudTab.Controls.Add(cloudReasoningLabel)
@@ -242,12 +242,12 @@ Public Class ConfigApiForm
         cloudReasoningModeComboBox.Location = New Point(rightX + 310, 200)
         cloudReasoningModeComboBox.Size = New Size(265, 25)
         cloudReasoningModeComboBox.DropDownStyle = ComboBoxStyle.DropDownList
-        cloudReasoningModeComboBox.Items.AddRange(New Object() {"默认（不传参数）", "开启推理", "关闭推理"})
+        cloudReasoningModeComboBox.Items.AddRange(New Object() {"По умолчанию (без параметров)", "Включить рассуждения", "Отключить рассуждения"})
         AddHandler cloudReasoningModeComboBox.SelectedIndexChanged, AddressOf CloudReasoningModeComboBox_SelectedIndexChanged
         cloudTab.Controls.Add(cloudReasoningModeComboBox)
 
         cloudReasoningTipLabel = New Label()
-        cloudReasoningTipLabel.Text = "选择模型后设置。开启/关闭会在请求中发送 enable_thinking。"
+        cloudReasoningTipLabel.Text = "Настраивается после выбора модели. Включение/отключение отправляет enable_thinking в запросе."
         cloudReasoningTipLabel.Location = New Point(rightX + 310, 232)
         cloudReasoningTipLabel.Size = New Size(265, 55)
         cloudReasoningTipLabel.ForeColor = Color.Gray
@@ -256,7 +256,7 @@ Public Class ConfigApiForm
 
         ' 刷新模型按钮（对话模型标题右侧，与标题同行）
         cloudRefreshModelsButton = New Button()
-        cloudRefreshModelsButton.Text = "刷新列表"
+        cloudRefreshModelsButton.Text = "Обновить список"
         cloudRefreshModelsButton.Location = New Point(rightX + 400, 148)
         cloudRefreshModelsButton.Size = New Size(85, 25)
         AddHandler cloudRefreshModelsButton.Click, AddressOf CloudRefreshModelsButton_Click
@@ -264,7 +264,7 @@ Public Class ConfigApiForm
 
         ' 手动添加模型按钮（刷新列表右侧，同行排列）
         cloudAddModelButton = New Button()
-        cloudAddModelButton.Text = "添加模型"
+        cloudAddModelButton.Text = "Добавить модель"
         cloudAddModelButton.Location = New Point(rightX + 490, 148)
         cloudAddModelButton.Size = New Size(85, 25)
         AddHandler cloudAddModelButton.Click, AddressOf CloudAddModelButton_Click
@@ -272,14 +272,14 @@ Public Class ConfigApiForm
 
         ' 用于翻译复选框
         cloudTranslateCheckBox = New CheckBox()
-        cloudTranslateCheckBox.Text = "用于翻译"
+        cloudTranslateCheckBox.Text = "Для перевода"
         cloudTranslateCheckBox.Location = New Point(rightX, 365)
         cloudTranslateCheckBox.AutoSize = True
         cloudTab.Controls.Add(cloudTranslateCheckBox)
 
         ' 翻译提示
         Dim cloudTranslateTip As New Label()
-        cloudTranslateTip.Text = "勾选后，翻译功能将使用该模型"
+        cloudTranslateTip.Text = "Если включено, функция перевода будет использовать эту модель"
         cloudTranslateTip.Location = New Point(rightX + 85, 367)
         cloudTranslateTip.ForeColor = Color.Gray
         cloudTranslateTip.Font = New Font(Me.Font.FontFamily, 8)
@@ -296,7 +296,7 @@ Public Class ConfigApiForm
 
         ' 验证并保存按钮
         cloudSaveButton = New Button()
-        cloudSaveButton.Text = "验证并保存"
+        cloudSaveButton.Text = "Проверить и сохранить"
         cloudSaveButton.Location = New Point(rightX + 320, 410)
         cloudSaveButton.Size = New Size(130, 35)
         AddHandler cloudSaveButton.Click, AddressOf CloudSaveButton_Click
@@ -304,7 +304,7 @@ Public Class ConfigApiForm
 
         ' 删除按钮（初始禁用，选中非预置配置时启用）
         cloudDeleteButton = New Button()
-        cloudDeleteButton.Text = "删除"
+        cloudDeleteButton.Text = "Удалить"
         cloudDeleteButton.Location = New Point(rightX + 460, 410)
         cloudDeleteButton.Size = New Size(130, 35)
         cloudDeleteButton.Enabled = False
@@ -318,7 +318,7 @@ Public Class ConfigApiForm
     Private Sub InitializeLocalTab()
         ' 左侧：服务商列表
         Dim providerLabel As New Label()
-        providerLabel.Text = "本地服务列表："
+        providerLabel.Text = "Список локальных сервисов:"
         providerLabel.Location = New Point(10, 10)
         providerLabel.AutoSize = True
         localTab.Controls.Add(providerLabel)
@@ -331,7 +331,7 @@ Public Class ConfigApiForm
 
         ' 添加新服务按钮
         localAddButton = New Button()
-        localAddButton.Text = "添加新服务"
+        localAddButton.Text = "Добавить сервис"
         localAddButton.Location = New Point(10, 515)
         localAddButton.Size = New Size(180, 30)
         AddHandler localAddButton.Click, AddressOf LocalAddButton_Click
@@ -342,7 +342,7 @@ Public Class ConfigApiForm
 
         ' 服务名称
         Dim platformLabel As New Label()
-        platformLabel.Text = "服务名称："
+        platformLabel.Text = "Название сервиса:"
         platformLabel.Location = New Point(rightX, 10)
         platformLabel.AutoSize = True
         localTab.Controls.Add(platformLabel)
@@ -354,7 +354,7 @@ Public Class ConfigApiForm
 
         ' API URL
         Dim urlLabel As New Label()
-        urlLabel.Text = "API端点 (可编辑)："
+        urlLabel.Text = "Конечная точка API (редактируемая):"
         urlLabel.Location = New Point(rightX, 65)
         urlLabel.AutoSize = True
         localTab.Controls.Add(urlLabel)
@@ -366,7 +366,7 @@ Public Class ConfigApiForm
 
         ' API Key
         Dim apiKeyLabel As New Label()
-        apiKeyLabel.Text = "API Key (大多数本地服务可留空)："
+        apiKeyLabel.Text = "API Key (для большинства локальных сервисов можно оставить пустым):"
         apiKeyLabel.Location = New Point(rightX, 120)
         apiKeyLabel.AutoSize = True
         localTab.Controls.Add(apiKeyLabel)
@@ -386,7 +386,7 @@ Public Class ConfigApiForm
 
         ' 对话模型列表标题
         Dim chatModelLabel As New Label()
-        chatModelLabel.Text = "对话模型："
+        chatModelLabel.Text = "Модели диалога:"
         chatModelLabel.Location = New Point(rightX, 195)
         chatModelLabel.AutoSize = True
         localTab.Controls.Add(chatModelLabel)
@@ -402,7 +402,7 @@ Public Class ConfigApiForm
         localTab.Controls.Add(localChatModelCheckedListBox)
 
         Dim localReasoningLabel As New Label()
-        localReasoningLabel.Text = "推理设置："
+        localReasoningLabel.Text = "Настройки рассуждений:"
         localReasoningLabel.Location = New Point(rightX + 310, 220)
         localReasoningLabel.AutoSize = True
         localTab.Controls.Add(localReasoningLabel)
@@ -411,12 +411,12 @@ Public Class ConfigApiForm
         localReasoningModeComboBox.Location = New Point(rightX + 310, 245)
         localReasoningModeComboBox.Size = New Size(265, 25)
         localReasoningModeComboBox.DropDownStyle = ComboBoxStyle.DropDownList
-        localReasoningModeComboBox.Items.AddRange(New Object() {"默认（不传参数）", "开启推理", "关闭推理"})
+        localReasoningModeComboBox.Items.AddRange(New Object() {"По умолчанию (без параметров)", "Включить рассуждения", "Отключить рассуждения"})
         AddHandler localReasoningModeComboBox.SelectedIndexChanged, AddressOf LocalReasoningModeComboBox_SelectedIndexChanged
         localTab.Controls.Add(localReasoningModeComboBox)
 
         localReasoningTipLabel = New Label()
-        localReasoningTipLabel.Text = "选择模型后设置。开启/关闭会在请求中发送 enable_thinking。"
+        localReasoningTipLabel.Text = "Настраивается после выбора модели. Включение/отключение отправляет enable_thinking в запросе."
         localReasoningTipLabel.Location = New Point(rightX + 310, 277)
         localReasoningTipLabel.Size = New Size(265, 55)
         localReasoningTipLabel.ForeColor = Color.Gray
@@ -425,7 +425,7 @@ Public Class ConfigApiForm
 
         ' 刷新模型按钮（对话模型标题右侧，与标题同行）
         localRefreshModelsButton = New Button()
-        localRefreshModelsButton.Text = "刷新列表"
+        localRefreshModelsButton.Text = "Обновить список"
         localRefreshModelsButton.Location = New Point(rightX + 400, 193)
         localRefreshModelsButton.Size = New Size(85, 25)
         AddHandler localRefreshModelsButton.Click, AddressOf LocalRefreshModelsButton_Click
@@ -433,7 +433,7 @@ Public Class ConfigApiForm
 
         ' 手动添加模型按钮（刷新列表右侧，同行排列）
         localAddModelButton = New Button()
-        localAddModelButton.Text = "添加模型"
+        localAddModelButton.Text = "Добавить модель"
         localAddModelButton.Location = New Point(rightX + 490, 193)
         localAddModelButton.Size = New Size(85, 25)
         AddHandler localAddModelButton.Click, AddressOf LocalAddModelButton_Click
@@ -441,14 +441,14 @@ Public Class ConfigApiForm
 
         ' 用于翻译复选框
         localTranslateCheckBox = New CheckBox()
-        localTranslateCheckBox.Text = "用于翻译"
+        localTranslateCheckBox.Text = "Для перевода"
         localTranslateCheckBox.Location = New Point(rightX, 360)
         localTranslateCheckBox.AutoSize = True
         localTab.Controls.Add(localTranslateCheckBox)
 
         ' 翻译提示
         Dim localTranslateTip As New Label()
-        localTranslateTip.Text = "勾选后，翻译功能将使用该模型"
+        localTranslateTip.Text = "Если включено, функция перевода будет использовать эту модель"
         localTranslateTip.Location = New Point(rightX + 85, 362)
         localTranslateTip.ForeColor = Color.Gray
         localTranslateTip.Font = New Font(Me.Font.FontFamily, 8)
@@ -465,7 +465,7 @@ Public Class ConfigApiForm
 
         ' 保存按钮
         localSaveButton = New Button()
-        localSaveButton.Text = "验证并保存"
+        localSaveButton.Text = "Проверить и сохранить"
         localSaveButton.Location = New Point(rightX + 320, 410)
         localSaveButton.Size = New Size(130, 35)
         AddHandler localSaveButton.Click, AddressOf LocalSaveButton_Click
@@ -473,7 +473,7 @@ Public Class ConfigApiForm
 
         ' 删除按钮（初始禁用，选中非预置配置时启用）
         localDeleteButton = New Button()
-        localDeleteButton.Text = "删除"
+        localDeleteButton.Text = "Удалить"
         localDeleteButton.Location = New Point(rightX + 460, 410)
         localDeleteButton.Size = New Size(130, 35)
         localDeleteButton.Enabled = False
@@ -531,7 +531,7 @@ Public Class ConfigApiForm
     Private Sub InitializeSkillsTab()
         ' 顶部说明
         Dim lblInfo As New Label() With {
-            .Text = "Skills目录：Documents\OfficeAiAppData\Skills，将符合Claude规范的Skills目录拷贝到此即可",
+            .Text = "Каталог Skills: Documents\OfficeAiAppData\Skills. Скопируйте сюда каталоги Skills, соответствующие спецификации Claude",
             .Location = New Point(12, 12),
             .Size = New Size(1080, 24),
             .ForeColor = Color.Gray,
@@ -553,7 +553,7 @@ Public Class ConfigApiForm
 
         ' 左侧：Skills列表
         Dim lblList As New Label() With {
-            .Text = "已安装的Skills：",
+            .Text = "Установленные Skills:",
             .Location = New Point(0, 0),
             .Size = New Size(245, 24),
             .Font = New Font(Me.Font.FontFamily, 9.5)
@@ -591,7 +591,7 @@ Public Class ConfigApiForm
         skillsRightSplit.Panel1.Controls.Add(topContentPanel)
 
         Dim lblContent As New Label() With {
-            .Text = "内容：",
+            .Text = "Содержимое:",
             .Dock = DockStyle.Top,
             .Height = 28,
             .Font = New Font(Me.Font.FontFamily, 9.5)
@@ -612,7 +612,7 @@ Public Class ConfigApiForm
 
         ' 名称
         Dim lblName As New Label() With {
-            .Text = "名称：",
+            .Text = "Имя:",
             .Location = New Point(12, detailY),
             .Size = New Size(85, 24),
             .Font = New Font(Me.Font.FontFamily, 9.5, FontStyle.Bold)
@@ -630,7 +630,7 @@ Public Class ConfigApiForm
 
         ' 描述
         Dim lblDescription As New Label() With {
-            .Text = "描述：",
+            .Text = "Описание:",
             .Location = New Point(12, detailY),
             .Size = New Size(85, 24),
             .Font = New Font(Me.Font.FontFamily, 9.5)
@@ -655,7 +655,7 @@ Public Class ConfigApiForm
         bottomDetailPanel.Controls.Add(metadataPanel)
 
         Dim lblLicense As New Label() With {
-            .Text = "许可证：",
+            .Text = "Лицензия:",
             .Location = New Point(8, 8),
             .Size = New Size(72, 22),
             .ForeColor = Color.Gray,
@@ -672,7 +672,7 @@ Public Class ConfigApiForm
         metadataPanel.Controls.Add(txtLicense)
 
         Dim lblAuthor As New Label() With {
-            .Text = "作者：",
+            .Text = "Автор:",
             .Location = New Point(8, 34),
             .Size = New Size(72, 22),
             .ForeColor = Color.Gray,
@@ -689,7 +689,7 @@ Public Class ConfigApiForm
         metadataPanel.Controls.Add(txtAuthor)
 
         Dim lblVersion As New Label() With {
-            .Text = "版本：",
+            .Text = "Версия:",
             .Location = New Point(380, 34),
             .Size = New Size(60, 22),
             .ForeColor = Color.Gray,
@@ -721,7 +721,7 @@ Public Class ConfigApiForm
         }
         filesContainerPanel.Controls.Add(scriptsPanel)
         Dim lblScripts As New Label() With {
-            .Text = "scripts：",
+            .Text = "scripts:",
             .Location = New Point(0, 0),
             .Size = New Size(255, 22),
             .Font = New Font(Me.Font.FontFamily, 9)
@@ -744,7 +744,7 @@ Public Class ConfigApiForm
         }
         filesContainerPanel.Controls.Add(referencesPanel)
         Dim lblReferences As New Label() With {
-            .Text = "references：",
+            .Text = "references:",
             .Location = New Point(0, 0),
             .Size = New Size(255, 22),
             .Font = New Font(Me.Font.FontFamily, 9)
@@ -767,7 +767,7 @@ Public Class ConfigApiForm
         }
         filesContainerPanel.Controls.Add(assetsPanel)
         Dim lblAssets As New Label() With {
-            .Text = "assets：",
+            .Text = "assets:",
             .Location = New Point(0, 0),
             .Size = New Size(255, 22),
             .Font = New Font(Me.Font.FontFamily, 9)
@@ -790,7 +790,7 @@ Public Class ConfigApiForm
 
         ' 底部按钮
         Dim btnOpenDir As New Button() With {
-            .Text = "打开Skills目录",
+            .Text = "Открыть каталог Skills",
             .Location = New Point(12, 620),
             .Size = New Size(145, 34),
             .BackColor = Color.FromArgb(70, 130, 180),
@@ -802,7 +802,7 @@ Public Class ConfigApiForm
         skillsTab.Controls.Add(btnOpenDir)
 
         Dim btnRefresh As New Button() With {
-            .Text = "刷新列表",
+            .Text = "Обновить список",
             .Location = New Point(167, 620),
             .Size = New Size(120, 34),
             .Font = New Font(Me.Font.FontFamily, 9.5)
@@ -923,11 +923,11 @@ Public Class ConfigApiForm
             Next
 
             If skillsListBox.Items.Count = 0 Then
-                skillsListBox.Items.Add("(暂无Skills，请打开Skills目录添加)")
+                skillsListBox.Items.Add("(Навыков нет. Откройте каталог Skills и добавьте.)")
             End If
         Catch ex As Exception
             skillsListBox.Items.Clear()
-            skillsListBox.Items.Add("(加载失败: " & ex.Message & ")")
+            skillsListBox.Items.Add("(Ошибка загрузки: " & ex.Message & ")")
         End Try
     End Sub
 
@@ -954,7 +954,7 @@ Public Class ConfigApiForm
         If txtName IsNot Nothing Then txtName.Text = skill.Name
 
         Dim txtDescription = Me.Controls.Find("SkillsTxtDescription", True).FirstOrDefault()
-        If txtDescription IsNot Nothing Then txtDescription.Text = If(String.IsNullOrWhiteSpace(skill.Description), "(无描述)", skill.Description)
+        If txtDescription IsNot Nothing Then txtDescription.Text = If(String.IsNullOrWhiteSpace(skill.Description), "(нет описания)", skill.Description)
 
         Dim txtLicense = Me.Controls.Find("SkillsTxtLicense", True).FirstOrDefault()
         If txtLicense IsNot Nothing Then txtLicense.Text = If(String.IsNullOrWhiteSpace(skill.License), "-", skill.License)
@@ -1048,7 +1048,7 @@ Public Class ConfigApiForm
     ''' </summary>
     Private Sub ShowMarkdownInWebView2(markdown As String)
         If String.IsNullOrWhiteSpace(markdown) Then
-            markdown = "(无内容)"
+            markdown = "(нет содержимого)"
         End If
 
         Try
@@ -1274,14 +1274,14 @@ Public Class ConfigApiForm
 
     Private Sub CloudGetApiKeyButton_Click(sender As Object, e As EventArgs)
         If currentCloudConfig Is Nothing OrElse String.IsNullOrEmpty(currentCloudConfig.registerUrl) Then
-            MessageBox.Show("该服务商暂无注册链接", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("У этого провайдера нет ссылки для регистрации", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
         Try
             Process.Start(New ProcessStartInfo(currentCloudConfig.registerUrl) With {.UseShellExecute = True})
         Catch ex As Exception
-            MessageBox.Show($"无法打开浏览器: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Не удалось открыть браузер: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -1290,18 +1290,18 @@ Public Class ConfigApiForm
 
         Dim apiKey = cloudApiKeyTextBox.Text
         If String.IsNullOrEmpty(apiKey) Then
-            MessageBox.Show("请先输入API Key", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Сначала введите ключ API", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
         Dim apiUrl = If(currentCloudConfig.isPreset, currentCloudConfig.url, cloudUrlTextBox.Text)
         If String.IsNullOrEmpty(apiUrl) Then
-            MessageBox.Show("请先输入API端点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Сначала введите конечную точку API", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
         cloudRefreshModelsButton.Enabled = False
-        cloudRefreshModelsButton.Text = "刷新中..."
+        cloudRefreshModelsButton.Text = "Обновление..."
         Cursor = Cursors.WaitCursor
 
         If Not currentCloudConfig.isPreset Then
@@ -1325,15 +1325,15 @@ Public Class ConfigApiForm
                 Next
 
                 RefreshCloudModelLists()
-                MessageBox.Show($"已获取 {models.Count} 个模型", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show($"Получено моделей: {models.Count}", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Else
-                MessageBox.Show("未获取到模型列表，请检查API Key是否正确", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Не удалось получить список моделей. Проверьте правильность ключа API", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Catch ex As Exception
-            MessageBox.Show($"刷新模型列表失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Не удалось обновить список моделей: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             cloudRefreshModelsButton.Enabled = True
-            cloudRefreshModelsButton.Text = "刷新列表"
+            cloudRefreshModelsButton.Text = "Обновить список"
             Cursor = Cursors.Default
         End Try
     End Sub
@@ -1373,19 +1373,19 @@ Public Class ConfigApiForm
             apiUrl = cloudUrlTextBox.Text
 
             If String.IsNullOrEmpty(platformName) Then
-                MessageBox.Show("请输入服务名称", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Введите название сервиса", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 Return
             End If
 
             If String.IsNullOrEmpty(apiUrl) OrElse Not (apiUrl.StartsWith("http://") OrElse apiUrl.StartsWith("https://")) Then
-                MessageBox.Show("请输入有效的API端点 (以http://或https://开头)", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Введите корректную конечную точку API (начинающуюся с http:// или https://)", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
                 Return
             End If
         End If
 
         Dim apiKey = cloudApiKeyTextBox.Text
         If String.IsNullOrEmpty(apiKey) Then
-            MessageBox.Show("请输入API Key", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Введите ключ API", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
@@ -1399,12 +1399,12 @@ Public Class ConfigApiForm
         Next
 
         If String.IsNullOrEmpty(selectedChatModelName) Then
-            MessageBox.Show("请选择一个对话模型", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Выберите модель диалога", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
         cloudSaveButton.Enabled = False
-        cloudSaveButton.Text = "验证中..."
+        cloudSaveButton.Text = "Проверка..."
         Cursor = Cursors.WaitCursor
 
         If Not currentCloudConfig.isPreset Then
@@ -1454,32 +1454,32 @@ Public Class ConfigApiForm
 
                 SaveConfig()
 
-                MessageBox.Show("配置已保存", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Конфигурация сохранена", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Me.DialogResult = DialogResult.OK
                 Me.Close()
             Else
-                MessageBox.Show("API验证失败，请检查API Key和模型名称是否正确", "验证失败", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Проверка API не удалась. Проверьте правильность ключа API и имени модели", "Ошибка проверки", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Catch ex As Exception
-            MessageBox.Show($"验证失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Ошибка проверки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             cloudSaveButton.Enabled = True
-            cloudSaveButton.Text = "验证并保存"
+            cloudSaveButton.Text = "Проверить и сохранить"
             Cursor = Cursors.Default
         End Try
     End Sub
 
     Private Sub CloudDeleteButton_Click(sender As Object, e As EventArgs)
         If currentCloudConfig Is Nothing Then
-            GlobalStatusStripAll.ShowWarning("请先在列表中选择要删除的配置")
+            GlobalStatusStripAll.ShowWarning("Сначала выберите конфигурацию для удаления в списке")
             Return
         End If
         If currentCloudConfig.isPreset Then
-            GlobalStatusStripAll.ShowWarning("预置配置不可删除")
+            GlobalStatusStripAll.ShowWarning("Предустановленную конфигурацию нельзя удалить")
             Return
         End If
 
-        If MessageBox.Show($"确定要删除 {currentCloudConfig.platform} 吗？", "确认删除", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show($"Удалить {currentCloudConfig.platform}?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             ConfigData.Remove(currentCloudConfig)
             SaveConfig()
             LoadDataToUI()
@@ -1506,14 +1506,14 @@ Public Class ConfigApiForm
     Private Sub CloudAddModelButton_Click(sender As Object, e As EventArgs)
         If currentCloudConfig Is Nothing Then Return
 
-        Dim modelName = InputBox("请输入模型名称：", "手动添加模型", "")
+        Dim modelName = InputBox("Введите имя модели:", "Ручное добавление модели", "")
         If String.IsNullOrWhiteSpace(modelName) Then Return
 
         modelName = modelName.Trim()
 
         Dim existing = currentCloudConfig.model.FirstOrDefault(Function(m) m.modelName = modelName)
         If existing IsNot Nothing Then
-            MessageBox.Show("该模型已存在", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Такая модель уже существует", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
@@ -1525,7 +1525,7 @@ Public Class ConfigApiForm
 
         RefreshCloudModelLists()
         SaveConfig()
-        MessageBox.Show($"已添加模型：{modelName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        MessageBox.Show($"Модель добавлена: {modelName}", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
     ''' <summary>
@@ -1538,7 +1538,7 @@ Public Class ConfigApiForm
         If index < 0 OrElse index >= list.Items.Count Then Return
 
         Dim model = CType(list.Items(index), ConfigItemModel)
-        Dim result = MessageBox.Show($"确定删除模型「{model.modelName}」？", "删除模型", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        Dim result = MessageBox.Show($"Удалить модель «{model.modelName}»?", "Удаление модели", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If result <> DialogResult.Yes Then Return
 
         If currentCloudConfig IsNot Nothing Then
@@ -1558,7 +1558,7 @@ Public Class ConfigApiForm
         If index < 0 OrElse index >= list.Items.Count Then Return
 
         Dim model = CType(list.Items(index), ConfigItemModel)
-        Dim result = MessageBox.Show($"确定删除模型「{model.modelName}」？", "删除模型", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        Dim result = MessageBox.Show($"Удалить модель «{model.modelName}»?", "Удаление модели", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If result <> DialogResult.Yes Then Return
 
         If currentLocalConfig IsNot Nothing Then
@@ -1580,7 +1580,7 @@ Public Class ConfigApiForm
         localPlatformTextBox.Text = currentLocalConfig.platform
         localUrlTextBox.Text = currentLocalConfig.url
         localApiKeyTextBox.Text = If(String.IsNullOrEmpty(currentLocalConfig.key), "", currentLocalConfig.key)
-        localDefaultKeyLabel.Text = If(String.IsNullOrEmpty(currentLocalConfig.defaultApiKey), "", $"提示: 默认APIKey为 '{currentLocalConfig.defaultApiKey}'，大多数情况可留空")
+        localDefaultKeyLabel.Text = If(String.IsNullOrEmpty(currentLocalConfig.defaultApiKey), "", $"Подсказка: API Key по умолчанию — '{currentLocalConfig.defaultApiKey}', в большинстве случаев можно оставить пустым")
         localTranslateCheckBox.Checked = currentLocalConfig.translateSelected
         localAllowInsecureTlsCheckBox.Checked = currentLocalConfig.allowInsecureTls
 
@@ -1617,12 +1617,12 @@ Public Class ConfigApiForm
 
         Dim apiUrl = localUrlTextBox.Text
         If String.IsNullOrEmpty(apiUrl) Then
-            MessageBox.Show("请先输入API端点", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Сначала введите конечную точку API", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
         localRefreshModelsButton.Enabled = False
-        localRefreshModelsButton.Text = "刷新中..."
+        localRefreshModelsButton.Text = "Обновление..."
         Cursor = Cursors.WaitCursor
 
         currentLocalConfig.platform = localPlatformTextBox.Text
@@ -1644,15 +1644,15 @@ Public Class ConfigApiForm
                 Next
 
                 RefreshLocalModelLists()
-                MessageBox.Show($"已获取 {models.Count} 个模型", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show($"Получено моделей: {models.Count}", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Else
-                MessageBox.Show("未获取到模型列表，请检查API端点是否正确", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Не удалось получить список моделей. Проверьте правильность конечной точки API", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Catch ex As Exception
-            MessageBox.Show($"刷新模型列表失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Не удалось обновить список моделей: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             localRefreshModelsButton.Enabled = True
-            localRefreshModelsButton.Text = "刷新列表"
+            localRefreshModelsButton.Text = "Обновить список"
             Cursor = Cursors.Default
         End Try
     End Sub
@@ -1685,12 +1685,12 @@ Public Class ConfigApiForm
         Dim platformName = localPlatformTextBox.Text
         Dim apiUrl = localUrlTextBox.Text
         If String.IsNullOrEmpty(platformName) Then
-            MessageBox.Show("请输入服务名称", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Введите название сервиса", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
         If String.IsNullOrEmpty(apiUrl) OrElse Not (apiUrl.StartsWith("http://") OrElse apiUrl.StartsWith("https://")) Then
-            MessageBox.Show("请输入有效的API端点 (以http://或https://开头)", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Введите корректную конечную точку API (начинающуюся с http:// или https://)", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
@@ -1709,12 +1709,12 @@ Public Class ConfigApiForm
         Next
 
         If String.IsNullOrEmpty(selectedChatModelName) Then
-            MessageBox.Show("请选择一个对话模型", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Выберите модель диалога", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
 
         localSaveButton.Enabled = False
-        localSaveButton.Text = "验证中..."
+        localSaveButton.Text = "Проверка..."
         Cursor = Cursors.WaitCursor
 
         currentLocalConfig.platform = platformName
@@ -1759,32 +1759,32 @@ Public Class ConfigApiForm
 
                 SaveConfig()
 
-                MessageBox.Show("配置已保存", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                MessageBox.Show("Конфигурация сохранена", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
                 Me.DialogResult = DialogResult.OK
                 Me.Close()
             Else
-                MessageBox.Show("API验证失败，请检查API Key和模型名称是否正确", "验证失败", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+                MessageBox.Show("Проверка API не удалась. Проверьте правильность ключа API и имени модели", "Ошибка проверки", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             End If
         Catch ex As Exception
-            MessageBox.Show($"验证失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Ошибка проверки: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         Finally
             localSaveButton.Enabled = True
-            localSaveButton.Text = "验证并保存"
+            localSaveButton.Text = "Проверить и сохранить"
             Cursor = Cursors.Default
         End Try
     End Sub
 
     Private Sub LocalDeleteButton_Click(sender As Object, e As EventArgs)
         If currentLocalConfig Is Nothing Then
-            GlobalStatusStripAll.ShowWarning("请先在列表中选择要删除的配置")
+            GlobalStatusStripAll.ShowWarning("Сначала выберите конфигурацию для удаления в списке")
             Return
         End If
         If currentLocalConfig.isPreset Then
-            GlobalStatusStripAll.ShowWarning("预置配置不可删除")
+            GlobalStatusStripAll.ShowWarning("Предустановленную конфигурацию нельзя удалить")
             Return
         End If
 
-        If MessageBox.Show($"确定要删除 {currentLocalConfig.platform} 吗？", "确认删除", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show($"Удалить {currentLocalConfig.platform}?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             ConfigData.Remove(currentLocalConfig)
             SaveConfig()
             LoadDataToUI()
@@ -1812,14 +1812,14 @@ Public Class ConfigApiForm
     Private Sub LocalAddModelButton_Click(sender As Object, e As EventArgs)
         If currentLocalConfig Is Nothing Then Return
 
-        Dim modelName = InputBox("请输入模型名称：", "手动添加模型", "")
+        Dim modelName = InputBox("Введите имя модели:", "Ручное добавление модели", "")
         If String.IsNullOrWhiteSpace(modelName) Then Return
 
         modelName = modelName.Trim()
 
         Dim existing = currentLocalConfig.model.FirstOrDefault(Function(m) m.modelName = modelName)
         If existing IsNot Nothing Then
-            MessageBox.Show("该模型已存在", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Такая модель уже существует", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
             Return
         End If
 
@@ -1831,7 +1831,7 @@ Public Class ConfigApiForm
 
         RefreshLocalModelLists()
         SaveConfig()
-        MessageBox.Show($"已添加模型：{modelName}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+        MessageBox.Show($"Модель добавлена: {modelName}", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
     End Sub
 
 #End Region
@@ -1902,11 +1902,11 @@ Public Class ConfigApiForm
 
             If tipLabel IsNot Nothing Then
                 If model Is Nothing Then
-                    tipLabel.Text = "选择模型后设置。开启/关闭会在请求中发送 enable_thinking。"
+                    tipLabel.Text = "Настраивается после выбора модели. Включение/отключение отправляет enable_thinking в запросе."
                 ElseIf model.isReasoningModel Then
-                    tipLabel.Text = "该模型标记为推理模型。默认不附加参数；开启/关闭会发送 enable_thinking。"
+                    tipLabel.Text = "Модель помечена как рассуждающая. По умолчанию параметры не добавляются; включение/отключение отправляет enable_thinking."
                 Else
-                    tipLabel.Text = "适用于支持 enable_thinking 的模型。默认不附加参数。"
+                    tipLabel.Text = "Применимо к моделям, поддерживающим enable_thinking. По умолчанию параметры не добавляются."
                 End If
             End If
         Finally
@@ -1963,7 +1963,7 @@ Public Class ConfigApiForm
         Try
             ConfigManager.SaveConfig()
         Catch ex As Exception
-            MessageBox.Show($"保存配置失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show($"Не удалось сохранить конфигурацию: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -2062,7 +2062,7 @@ Public Class ConfigApiForm
 
         ' 左侧：记忆配置
         Dim lblConfigTitle As New Label() With {
-            .Text = "记忆配置",
+            .Text = "Настройки памяти",
             .Location = New Point(10, 10),
             .Size = New Size(260, 20),
             .Font = New Font(Me.Font.FontFamily, 10, FontStyle.Bold)
@@ -2071,7 +2071,7 @@ Public Class ConfigApiForm
 
         Dim y As Integer = 40
         chkUseContextBuilder = New CheckBox() With {
-            .Text = "使用 ContextBuilder（分层组装 Memory/Skills）",
+            .Text = "Использовать ContextBuilder (многоуровневая сборка Memory/Skills)",
             .Location = New Point(10, y),
             .Size = New Size(260, 24),
             .Checked = MemoryConfig.UseContextBuilder
@@ -2080,7 +2080,7 @@ Public Class ConfigApiForm
         y += 32
 
         chkEnableUserProfile = New CheckBox() With {
-            .Text = "启用用户画像",
+            .Text = "Включить профиль пользователя",
             .Location = New Point(10, y),
             .Size = New Size(200, 24),
             .Checked = MemoryConfig.EnableUserProfile
@@ -2091,7 +2091,7 @@ Public Class ConfigApiForm
         _memorySplitContainer.Panel1.Controls.Add(chkEnableUserProfile)
         y += 28
 
-        Dim lblRag As New Label() With {.Text = "RAG 检索条数 (1-20)：", .Location = New Point(10, y + 2), .Size = New Size(160, 20)}
+        Dim lblRag As New Label() With {.Text = "Число результатов RAG (1-20):", .Location = New Point(10, y + 2), .Size = New Size(160, 20)}
         _memorySplitContainer.Panel1.Controls.Add(lblRag)
         numRagTopN = New NumericUpDown() With {
             .Location = New Point(175, y),
@@ -2103,7 +2103,7 @@ Public Class ConfigApiForm
         _memorySplitContainer.Panel1.Controls.Add(numRagTopN)
         y += 32
 
-        Dim lblAtomic As New Label() With {.Text = "记忆片段最大长度 (10-2000)：", .Location = New Point(10, y + 2), .Size = New Size(160, 20)}
+        Dim lblAtomic As New Label() With {.Text = "Макс. длина фрагмента памяти (10-2000):", .Location = New Point(10, y + 2), .Size = New Size(160, 20)}
         _memorySplitContainer.Panel1.Controls.Add(lblAtomic)
         numAtomicMaxLen = New NumericUpDown() With {
             .Location = New Point(175, y),
@@ -2115,7 +2115,7 @@ Public Class ConfigApiForm
         _memorySplitContainer.Panel1.Controls.Add(numAtomicMaxLen)
         y += 32
 
-        Dim lblSummary As New Label() With {.Text = "近期会话摘要条数 (1-15)：", .Location = New Point(10, y + 2), .Size = New Size(160, 20)}
+        Dim lblSummary As New Label() With {.Text = "Число сводок недавних сессий (1-15):", .Location = New Point(10, y + 2), .Size = New Size(160, 20)}
         _memorySplitContainer.Panel1.Controls.Add(lblSummary)
         numSessionSummaryLimit = New NumericUpDown() With {
             .Location = New Point(175, y),
@@ -2128,7 +2128,7 @@ Public Class ConfigApiForm
         y += 32
 
         chkEnableAgenticSearch = New CheckBox() With {
-            .Text = "启用 MCP 记忆搜索（Agentic Search）",
+            .Text = "Включить поиск по памяти MCP (Agentic Search)",
             .Location = New Point(10, y),
             .Size = New Size(260, 24),
             .Checked = MemoryConfig.EnableAgenticSearch
@@ -2137,7 +2137,7 @@ Public Class ConfigApiForm
         y += 40
 
         ' 用户画像编辑区
-        Dim lblProfile As New Label() With {.Text = "用户画像内容：", .Location = New Point(10, y), .Size = New Size(200, 20)}
+        Dim lblProfile As New Label() With {.Text = "Содержимое профиля пользователя:", .Location = New Point(10, y), .Size = New Size(200, 20)}
         _memorySplitContainer.Panel1.Controls.Add(lblProfile)
         y += 22
         txtUserProfile = New TextBox() With {
@@ -2152,7 +2152,7 @@ Public Class ConfigApiForm
 
         ' 保存配置按钮
         Dim btnSaveConfig As New Button() With {
-            .Text = "保存配置",
+            .Text = "Сохранить конфигурацию",
             .Location = New Point(10, y),
             .Size = New Size(120, 30),
             .BackColor = Color.FromArgb(70, 130, 180),
@@ -2168,7 +2168,7 @@ Public Class ConfigApiForm
         }
 
         ' Tab 1: 记忆片段（可拖拽分隔条）
-        Dim tabMemory As New TabPage("记忆片段")
+        Dim tabMemory As New TabPage("Фрагменты памяти")
         _memoryListSplitContainer = New SplitContainer() With {
             .Location = New Point(0, 0),
             .Size = New Size(640, 440),          ' 合理非零大小
@@ -2178,7 +2178,7 @@ Public Class ConfigApiForm
             .Dock = DockStyle.Fill
         }
 
-        Dim lblList As New Label() With {.Text = "记忆片段列表（最近 100 条）", .Location = New Point(5, 5), .Size = New Size(200, 20)}
+        Dim lblList As New Label() With {.Text = "Список фрагментов памяти (последние 100)", .Location = New Point(5, 5), .Size = New Size(200, 20)}
         _memoryListSplitContainer.Panel1.Controls.Add(lblList)
         listMemory = New ListBox() With {
             .Location = New Point(5, 28),
@@ -2198,13 +2198,13 @@ Public Class ConfigApiForm
             .ReadOnly = True
         }
         _memoryListSplitContainer.Panel2.Controls.Add(txtMemoryContent)
-        Dim btnRefreshMemory As New Button() With {.Text = "刷新", .Location = New Point(5, 390), .Size = New Size(70, 28)}
+        Dim btnRefreshMemory As New Button() With {.Text = "Обновить", .Location = New Point(5, 390), .Size = New Size(70, 28)}
         AddHandler btnRefreshMemory.Click, AddressOf LoadMemories
         _memoryListSplitContainer.Panel2.Controls.Add(btnRefreshMemory)
-        Dim btnDeleteMemory As New Button() With {.Text = "删除选中", .Location = New Point(85, 390), .Size = New Size(80, 28)}
+        Dim btnDeleteMemory As New Button() With {.Text = "Удалить выбранное", .Location = New Point(85, 390), .Size = New Size(80, 28)}
         AddHandler btnDeleteMemory.Click, AddressOf BtnDeleteMemoryClick
         _memoryListSplitContainer.Panel2.Controls.Add(btnDeleteMemory)
-        Dim btnCopyMemory As New Button() With {.Text = "复制选中", .Location = New Point(175, 390), .Size = New Size(70, 28)}
+        Dim btnCopyMemory As New Button() With {.Text = "Копировать выбранное", .Location = New Point(175, 390), .Size = New Size(70, 28)}
         AddHandler btnCopyMemory.Click, Sub(s, ev)
                                             If listMemory.SelectedItem IsNot Nothing Then
                                                 Try
@@ -2260,9 +2260,9 @@ Public Class ConfigApiForm
             If chkEnableUserProfile.Checked Then
                 MemoryRepository.UpdateUserProfile(txtUserProfile.Text)
             End If
-            MessageBox.Show("记忆配置已保存", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information)
+            MessageBox.Show("Конфигурация памяти сохранена", "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information)
         Catch ex As Exception
-            MessageBox.Show("保存失败: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Не удалось сохранить: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -2281,7 +2281,7 @@ Public Class ConfigApiForm
             Next
         Catch ex As Exception
             listMemory.Items.Clear()
-            listMemory.Items.Add("(加载失败: " & ex.Message & ")")
+            listMemory.Items.Add("(Ошибка загрузки: " & ex.Message & ")")
         End Try
     End Sub
 
@@ -2303,15 +2303,15 @@ Public Class ConfigApiForm
     Private Sub BtnDeleteMemoryClick(sender As Object, e As EventArgs)
         Dim item = TryCast(listMemory.SelectedItem, MemoryItem)
         If item Is Nothing Then
-            MessageBox.Show("请先选择一条记录", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("Сначала выберите запись", "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Warning)
             Return
         End If
-        If MessageBox.Show("确定删除此条记忆片段？", "确认", MessageBoxButtons.YesNo) <> DialogResult.Yes Then Return
+        If MessageBox.Show("Удалить этот фрагмент памяти?", "Подтверждение", MessageBoxButtons.YesNo) <> DialogResult.Yes Then Return
         Try
             MemoryRepository.DeleteAtomicMemory(item.Record.Id)
             LoadMemories()
         Catch ex As Exception
-            MessageBox.Show("删除失败: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Не удалось удалить: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 

@@ -1,4 +1,4 @@
-' ShareRibbon\Services\Reformat\ReformatCoordinator.vb
+﻿' ShareRibbon\Services\Reformat\ReformatCoordinator.vb
 ' 排版协调器 - 编排"临时文档 → OpenXML排版 → 预览 → 合并"完整流程
 ' 核心设计：所有排版操作在临时文档上进行，原文档不受影响
 
@@ -75,7 +75,7 @@ Public Class ReformatCoordinator
             result.GeneratedInstructions = instructions
 
             If instructions.Count = 0 Then
-                result.ErrorMessage = "未生成任何排版指令"
+                result.ErrorMessage = "Не сформировано ни одной инструкции форматирования"
                 TempDocumentService.Cleanup(tempDocPath)
                 Return result
             End If
@@ -98,7 +98,7 @@ Public Class ReformatCoordinator
                     Dim mergeCount = MergeToSourceDocument(sourceDoc, taggedParagraphs, mapping, sourceParagraphs, sourceParagraphTypes)
                     result.Success = True
                     result.ModifiedCount = mergeCount
-                    GlobalStatusStrip.ShowInfo($"排版完成: 已修改 {mergeCount} 个段落")
+                    GlobalStatusStrip.ShowInfo($"Форматирование завершено: изменено абзацев — {mergeCount}")
 
                 Case ReformatUserDecision.SaveAs
                     ' 另存为新文档
@@ -106,21 +106,21 @@ Public Class ReformatCoordinator
                     If Not String.IsNullOrEmpty(savePath) Then
                         result.Success = True
                         result.TempDocPath = savePath
-                        GlobalStatusStrip.ShowInfo($"已另存为: {Path.GetFileName(savePath)}")
+                        GlobalStatusStrip.ShowInfo($"Сохранено как: {Path.GetFileName(savePath)}")
                     Else
                         result.Success = False
-                        result.ErrorMessage = "用户取消了保存"
+                        result.ErrorMessage = "Пользователь отменил сохранение"
                     End If
 
                 Case ReformatUserDecision.Reject
                     result.Success = False
-                    result.ErrorMessage = "用户取消了排版"
-                    GlobalStatusStrip.ShowInfo("已取消排版")
+                    result.ErrorMessage = "Пользователь отменил форматирование"
+                    GlobalStatusStrip.ShowInfo("Форматирование отменено")
             End Select
 
         Catch ex As Exception
             result.Success = False
-            result.ErrorMessage = $"排版流程异常: {ex.Message}"
+            result.ErrorMessage = $"Ошибка процесса форматирования: {ex.Message}"
             Debug.WriteLine($"[ReformatCoordinator] 异常: {ex}")
         Finally
             ' 清理临时文件（如果用户不是"另存为"）
@@ -390,16 +390,16 @@ Public Class ReformatCoordinator
                 Catch
                 End Try
 
-                Dim msg = $"排版预览{vbCrLf}{vbCrLf}" &
-                          $"文档: {docName}{vbCrLf}" &
-                          $"模板: {templateName}{vbCrLf}" &
-                          $"成功: {execResult.SuccessCount} 条指令{vbCrLf}" &
-                          $"失败: {execResult.FailureCount} 条指令{vbCrLf}{vbCrLf}" &
-                          $"将启动Word打开临时文档供预览。{vbCrLf}" &
-                          $"确认后将应用排版到原文档（支持Ctrl+Z撤销）。"
+                Dim msg = $"Предпросмотр форматирования{vbCrLf}{vbCrLf}" &
+                          $"Документ: {docName}{vbCrLf}" &
+                          $"Шаблон: {templateName}{vbCrLf}" &
+                          $"Успешно: {execResult.SuccessCount} инструкций{vbCrLf}" &
+                          $"Ошибок: {execResult.FailureCount} инструкций{vbCrLf}{vbCrLf}" &
+                          $"Будет запущен Word и открыт временный документ для предпросмотра.{vbCrLf}" &
+                          $"После подтверждения форматирование будет применено к исходному документу (отмена по Ctrl+Z)."
 
                 If execResult.Errors.Count > 0 Then
-                    msg &= $"{vbCrLf}{vbCrLf}警告:{vbCrLf}{String.Join(vbCrLf, execResult.Errors.Take(3))}"
+                    msg &= $"{vbCrLf}{vbCrLf}Предупреждение:{vbCrLf}{String.Join(vbCrLf, execResult.Errors.Take(3))}"
                 End If
 
                 ' 在当前 Word 进程中打开临时文档供预览（避免新进程的文件占用冲突）
@@ -420,7 +420,7 @@ Public Class ReformatCoordinator
                 Dim result = MessageBox.Show(
                     Nothing,
                     msg,
-                    "AI排版预览",
+                    "Предпросмотр форматирования ИИ",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
                     MessageBoxDefaultButton.Button1)
@@ -475,15 +475,15 @@ Public Class ReformatCoordinator
     ''' </summary>
     Private Function PromptSaveAs(tempDocPath As String) As String
         Using dlg As New SaveFileDialog()
-            dlg.Filter = "Word文档 (*.docx)|*.docx"
-            dlg.FileName = Path.GetFileNameWithoutExtension(tempDocPath) & "_排版后"
+            dlg.Filter = "Документ Word (*.docx)|*.docx"
+            dlg.FileName = Path.GetFileNameWithoutExtension(tempDocPath) & "_отформатировано"
             dlg.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
             If dlg.ShowDialog() = DialogResult.OK Then
                 Try
                     File.Copy(tempDocPath, dlg.FileName, overwrite:=True)
                     Return dlg.FileName
                 Catch ex As Exception
-                    MessageBox.Show($"保存失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+                    MessageBox.Show($"Не удалось сохранить: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
                 End Try
             End If
         End Using
@@ -511,7 +511,7 @@ Public Class ReformatCoordinator
             wordApp.ScreenUpdating = False
             screenUpdatingChanged = True
             Try
-                wordApp.UndoRecord.StartCustomRecord("AI排版")
+                wordApp.UndoRecord.StartCustomRecord("Форматирование ИИ")
                 undoRecordStarted = True
             Catch ex As Exception
                 Debug.WriteLine($"[ReformatCoordinator] StartCustomRecord failed: {ex.Message}")

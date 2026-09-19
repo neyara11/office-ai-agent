@@ -25,9 +25,9 @@ Namespace Context
                     Dim textLength As Integer = If(selectedText IsNot Nothing, selectedText.Length, 0)
 
                     ctx.Selection = New SelectionInfo With {
-                        .Address = $"选中 {textLength} 个字符",
+                        .Address = $"Выбрано символов: {textLength}",
                         .ItemCount = textLength,
-                        .DataType = If(textLength > 0, "文本", "光标位置")
+                        .DataType = If(textLength > 0, "Текст", "Позиция курсора")
                     }
 
                     ' 格式信息
@@ -42,21 +42,21 @@ Namespace Context
                             Try
                                 styleName = sel.Style.NameLocal
                             Catch
-                                styleName = "正文"
+                                styleName = "Основной текст"
                             End Try
 
-                            Dim formatDesc As String = $"字号: {fontSize}pt, 字体: {fontName}"
-                            If isBold Then formatDesc &= ", 加粗"
-                            If isItalic Then formatDesc &= ", 斜体"
-                            If isUnderline Then formatDesc &= ", 下划线"
-                            If Not String.IsNullOrEmpty(styleName) Then formatDesc &= $", 样式: {styleName}"
+                            Dim formatDesc As String = $"Размер шрифта: {fontSize}pt, шрифт: {fontName}"
+                            If isBold Then formatDesc &= ", полужирный"
+                            If isItalic Then formatDesc &= ", курсив"
+                            If isUnderline Then formatDesc &= ", подчёркивание"
+                            If Not String.IsNullOrEmpty(styleName) Then formatDesc &= $", стиль: {styleName}"
 
                             Dim preview As String = selectedText
                             If preview.Length > 100 Then
                                 preview = preview.Substring(0, 100) & "..."
                             End If
 
-                            ctx.Selection.Preview = $"内容: {preview}{vbCrLf}格式: {formatDesc}"
+                            ctx.Selection.Preview = $"Содержимое: {preview}{vbCrLf}Формат: {formatDesc}"
 
                         Catch formatEx As Exception
                             Debug.WriteLine("获取格式信息失败: " & formatEx.Message)
@@ -66,7 +66,7 @@ Namespace Context
 
                 ' === 2. 获取文档结构（即使没有选中，也要提供上下文） ===
                 Dim structureInfo As New Text.StringBuilder()
-                structureInfo.AppendLine($"Word 文档，共 {doc.Paragraphs.Count} 段")
+                structureInfo.AppendLine($"Документ Word, абзацев: {doc.Paragraphs.Count}")
 
                 ' 获取标题结构
                 Dim headings As New List(Of String)()
@@ -87,7 +87,7 @@ Namespace Context
 
                     If headings.Count > 0 Then
                         structureInfo.AppendLine()
-                        structureInfo.AppendLine("文档标题:")
+                        structureInfo.AppendLine("Заголовки документа:")
                         For Each heading In headings
                             structureInfo.AppendLine(heading)
                         Next
@@ -111,9 +111,9 @@ Namespace Context
                         Next
 
                         structureInfo.AppendLine()
-                        structureInfo.AppendLine($"当前位置: 第 {paraIndex} 段")
+                        structureInfo.AppendLine($"Текущая позиция: абзац {paraIndex}")
                         structureInfo.AppendLine()
-                        structureInfo.AppendLine("上下文:")
+                        structureInfo.AppendLine("Контекст:")
 
                         ' 前2段
                         For i As Integer = Math.Max(1, paraIndex - 2) To paraIndex - 1
@@ -129,7 +129,7 @@ Namespace Context
                         ' 当前段
                         Dim currentText As String = currentPara.Range.Text.Trim()
                         If currentText.Length > 50 Then currentText = currentText.Substring(0, 50) & "..."
-                        structureInfo.AppendLine($"→ [{paraIndex}] {currentText} (当前)")
+                        structureInfo.AppendLine($"→ [{paraIndex}] {currentText} (текущий)")
 
                         ' 后2段
                         For i As Integer = paraIndex + 1 To Math.Min(doc.Paragraphs.Count, paraIndex + 2)

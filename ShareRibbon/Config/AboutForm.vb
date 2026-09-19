@@ -21,7 +21,7 @@ Public Class AboutForm
     End Sub
 
     Private Sub InitializeComponents()
-        Me.Text = "关于 Office MOSS 助手"
+        Me.Text = "О программе Office MOSS"
         Me.Size = New Size(450, 420)
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
@@ -31,7 +31,7 @@ Public Class AboutForm
 
         ' 标题
         lblTitle = New Label()
-        lblTitle.Text = "Office MOSS 助手"
+        lblTitle.Text = "Помощник Office MOSS"
         lblTitle.Font = New Font("微软雅黑", 16, FontStyle.Bold)
         lblTitle.ForeColor = Color.FromArgb(74, 111, 165)
         lblTitle.Location = New Point(20, 20)
@@ -40,12 +40,13 @@ Public Class AboutForm
 
         ' 描述
         lblDescription = New Label()
-        lblDescription.Text = "大家好，我是B站的君哥，账号【君哥聊编程】。" & vbCrLf & vbCrLf &
-                             "该插件的灵感来自一位B站粉丝，他从事银行审计工作，" & vbCrLf &
-                             "经常与表格打交道。很多时候表格中的数据无法通过" & vbCrLf &
-                             "固定的公式来计算，但在人类理解上具有相同的意义，" & vbCrLf &
-                             "所以 Office MOSS 诞生了。" & vbCrLf & vbCrLf &
-                             "插件持续优化中，欢迎留言或评论，不断完善该插件。"
+        lblDescription.Text = "Привет! Я Цзюньгэ с Bilibili, мой канал — «君哥聊编程»." & vbCrLf & vbCrLf &
+                             "Идея плагина пришла от подписчика на Bilibili, который работает" & vbCrLf &
+                             "банковским аудитором и постоянно имеет дело с таблицами." & vbCrLf &
+                             "Часто данные в таблицах невозможно вычислить по фиксированным" & vbCrLf &
+                             "формулам, хотя для человека они имеют одинаковый смысл." & vbCrLf &
+                             "Так появился Office MOSS." & vbCrLf & vbCrLf &
+                             "Плагин продолжает развиваться — оставляйте комментарии и предложения, чтобы мы вместе делали его лучше."
         lblDescription.Font = New Font("微软雅黑", 9)
         lblDescription.ForeColor = Color.FromArgb(80, 80, 80)
         lblDescription.Location = New Point(20, 55)
@@ -54,7 +55,7 @@ Public Class AboutForm
 
         ' 数据路径
         lblDataPath = New Label()
-        lblDataPath.Text = "数据存放目录: 我的文档\" & ConfigSettings.OfficeAiAppDataFolder
+        lblDataPath.Text = "Каталог данных: Документы\" & ConfigSettings.OfficeAiAppDataFolder
         lblDataPath.Font = New Font("微软雅黑", 9)
         lblDataPath.ForeColor = Color.Gray
         lblDataPath.Location = New Point(20, 190)
@@ -63,7 +64,7 @@ Public Class AboutForm
 
         ' 开源地址标题
         Dim lblOpenSource As New Label()
-        lblOpenSource.Text = "开源地址:"
+        lblOpenSource.Text = "Открытый исходный код:"
         lblOpenSource.Font = New Font("微软雅黑", 9, FontStyle.Bold)
         lblOpenSource.Location = New Point(20, 225)
         lblOpenSource.AutoSize = True
@@ -101,7 +102,7 @@ Public Class AboutForm
 
         ' 关闭按钮
         btnClose = New Button()
-        btnClose.Text = "关闭"
+        btnClose.Text = "Закрыть"
         btnClose.Size = New Size(80, 30)
         btnClose.Location = New Point(350, 330)
         btnClose.FlatStyle = FlatStyle.Flat
@@ -117,14 +118,14 @@ Public Class AboutForm
         Try
             System.Diagnostics.Process.Start("https://www.bilibili.com/video/BV17vNRz1ELn")
         Catch ex As Exception
-            MessageBox.Show("无法打开链接: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Не удалось открыть ссылку: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
     Private Sub Gitee_LinkClicked(sender As Object, e As LinkLabelLinkClickedEventArgs)
         Try
             System.Diagnostics.Process.Start("https://gitee.com/it235/office-ai-agent")
         Catch ex As Exception
-            MessageBox.Show("无法打开链接: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Не удалось открыть ссылку: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 
@@ -132,7 +133,7 @@ Public Class AboutForm
         Try
             System.Diagnostics.Process.Start("https://github.com/it235/office-ai-agent")
         Catch ex As Exception
-            MessageBox.Show("无法打开链接: " & ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            MessageBox.Show("Не удалось открыть ссылку: " & ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
     End Sub
 

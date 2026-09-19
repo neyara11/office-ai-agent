@@ -84,105 +84,105 @@ Partial Class BaseOfficeRibbon
         Me.TabAI.Groups.Add(Me.GroupAbout)      ' 7. 关于与设置
         Me.TabAI.Groups.Add(Me.GroupHelp)       ' 8. 帮助与学习
 
-        Me.TabAI.Label = "AI助手"
+        Me.TabAI.Label = "AI-ассистент"
         Me.TabAI.Name = "TabAI"
 
         ' ========== Group 1: 免费强化版 ==========
         Me.GroupDeepseek.Items.Add(Me.DeepseekButton)
         Me.GroupDeepseek.Items.Add(Me.DoubaoButton)
-        Me.GroupDeepseek.Label = "免费强化版"
+        Me.GroupDeepseek.Label = "Бесплатные сервисы"
         Me.GroupDeepseek.Name = "GroupDeepseek"
 
         Me.DeepseekButton.Label = "Deepseek"
         Me.DeepseekButton.Name = "DeepseekButton"
         Me.DeepseekButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.DeepseekButton.ShowImage = True
-        Me.DeepseekButton.ScreenTip = "免费增强版"
-        Me.DeepseekButton.SuperTip = "在原有对话基础上，增加Agent执行能力"
+        Me.DeepseekButton.ScreenTip = "Бесплатная расширенная версия"
+        Me.DeepseekButton.SuperTip = "Добавляет возможности агента к обычному диалогу"
 
         Me.DoubaoButton.Label = "Doubao"
         Me.DoubaoButton.Name = "DoubaoButton"
         Me.DoubaoButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.DoubaoButton.ShowImage = True
-        Me.DoubaoButton.ScreenTip = "豆包智能助手"
-        Me.DoubaoButton.SuperTip = "基于豆包的智能对话助手，支持代码执行"
+        Me.DoubaoButton.ScreenTip = "Умный помощник Doubao"
+        Me.DoubaoButton.SuperTip = "Диалоговый помощник на базе Doubao с поддержкой выполнения кода"
 
         ' ========== Group 2: 大模型配置 ==========
         Me.GroupConfig.Items.Add(Me.ConfigApiButton)
         Me.GroupConfig.Items.Add(Me.PromptConfigButton)
-        Me.GroupConfig.Label = "大模型配置"
+        Me.GroupConfig.Label = "Настройка моделей"
         Me.GroupConfig.Name = "GroupConfig"
 
-        Me.ConfigApiButton.Label = "配置API"
+        Me.ConfigApiButton.Label = "Настройка API"
         Me.ConfigApiButton.Name = "ConfigApiButton"
         Me.ConfigApiButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.ConfigApiButton.ShowImage = True
-        Me.ConfigApiButton.ScreenTip = "配置大模型API"
-        Me.ConfigApiButton.SuperTip = "使用AI功能前需要配置apiKey"
+        Me.ConfigApiButton.ScreenTip = "Настроить API языковой модели"
+        Me.ConfigApiButton.SuperTip = "Перед использованием AI-функций укажите apiKey"
 
-        Me.PromptConfigButton.Label = "提示词"
+        Me.PromptConfigButton.Label = "Промпты"
         Me.PromptConfigButton.Name = "PromptConfigButton"
         Me.PromptConfigButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.PromptConfigButton.ShowImage = True
-        Me.PromptConfigButton.ScreenTip = "配置提示词"
-        Me.PromptConfigButton.SuperTip = "管理和配置AI对话的系统提示词"
+        Me.PromptConfigButton.ScreenTip = "Настроить промпты"
+        Me.PromptConfigButton.SuperTip = "Управление системными промптами AI-диалога"
 
         ' ========== Group 3: AI对话 ==========
         Me.GroupChat.Items.Add(Me.ChatButton)
         Me.GroupChat.Items.Add(Me.TranslateButton)
-        Me.GroupChat.Label = "AI对话"
+        Me.GroupChat.Label = "AI-диалог"
         Me.GroupChat.Name = "GroupChat"
 
-        Me.ChatButton.Label = "Chat AI"
+        Me.ChatButton.Label = "AI-чат"
         Me.ChatButton.Name = "ChatButton"
         Me.ChatButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.ChatButton.ShowImage = True
-        Me.ChatButton.ScreenTip = "AI对话助手"
-        Me.ChatButton.SuperTip = "打开AI对话面板，支持多轮对话和代码执行"
+        Me.ChatButton.ScreenTip = "Помощник AI-диалога"
+        Me.ChatButton.SuperTip = "Открыть панель AI-диалога: многоходовые беседы и выполнение кода"
 
-        Me.TranslateButton.Label = "AI翻译"
+        Me.TranslateButton.Label = "AI-перевод"
         Me.TranslateButton.Name = "TranslateButton"
         Me.TranslateButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.TranslateButton.ShowImage = True
-        Me.TranslateButton.ScreenTip = "一键翻译文档内容"
-        Me.TranslateButton.SuperTip = "支持全文翻译、选区翻译、沉浸式翻译等多种模式"
+        Me.TranslateButton.ScreenTip = "Перевести содержимое документа одним щелчком"
+        Me.TranslateButton.SuperTip = "Полный текст, выделение, иммерсивный режим и другие режимы перевода"
 
         ' ========== Group 4: AI内容提效 ==========
         Me.GroupAIContent.Items.Add(Me.ContinuationButton)
         Me.GroupAIContent.Items.Add(Me.ProofreadButton)
         Me.GroupAIContent.Items.Add(Me.ReformatButton)
         Me.GroupAIContent.Items.Add(Me.TemplateFormatButton)
-        Me.GroupAIContent.Label = "AI内容提效"
+        Me.GroupAIContent.Label = "AI-обработка текста"
         Me.GroupAIContent.Name = "GroupAIContent"
 
-        Me.ContinuationButton.Label = "续写"
+        Me.ContinuationButton.Label = "Продолжить"
         Me.ContinuationButton.Name = "ContinuationButton"
         Me.ContinuationButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.ContinuationButton.ShowImage = True
-        Me.ContinuationButton.ScreenTip = "AI智能续写"
-        Me.ContinuationButton.SuperTip = "根据光标位置的上下文智能续写内容"
+        Me.ContinuationButton.ScreenTip = "Умное продолжение текста"
+        Me.ContinuationButton.SuperTip = "Продолжает текст с учётом контекста позиции курсора"
 
-        Me.ProofreadButton.Label = "校对"
+        Me.ProofreadButton.Label = "Вычитка"
         Me.ProofreadButton.Name = "ProofreadButton"
         Me.ProofreadButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.ProofreadButton.ShowImage = True
-        Me.ProofreadButton.ScreenTip = "对选中或全文进行语言校对"
-        Me.ProofreadButton.SuperTip = "校正语法、拼写并返回可解析的修订JSON"
+        Me.ProofreadButton.ScreenTip = "Языковая проверка выделения или всего текста"
+        Me.ProofreadButton.SuperTip = "Исправляет грамматику и орфографию, возвращает разбираемый JSON правок"
 
-        Me.ReformatButton.Label = "排版"
+        Me.ReformatButton.Label = "Форматирование"
         Me.ReformatButton.Name = "ReformatButton"
         Me.ReformatButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.ReformatButton.ShowImage = True
-        Me.ReformatButton.ScreenTip = "智能排版：自动识别文档类型并套用国标格式"
-        Me.ReformatButton.SuperTip = "自动检测文档类型（公文/论文/报告等），匹配GB/T 9704等标准，一键排版。支持对话式微调和范文克隆。"
+        Me.ReformatButton.ScreenTip = "Умное форматирование: определяет тип документа и применяет стандарт"
+        Me.ReformatButton.SuperTip = "Автоматически определяет тип документа (служебный/научный/отчёт и т. п.), подбирает стандарт (например, ГОСТ) и форматирует одним щелчком. Поддерживает правки в диалоге и клонирование по образцу."
 
-        Me.TemplateFormatButton.Label = "模板排版"
+        Me.TemplateFormatButton.Label = "Формат по шаблону"
         Me.TemplateFormatButton.Name = "TemplateFormatButton"
         Me.TemplateFormatButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.TemplateFormatButton.ShowImage = True
         Me.TemplateFormatButton.Visible = False
-        Me.TemplateFormatButton.ScreenTip = "使用模板格式排版"
-        Me.TemplateFormatButton.SuperTip = "选择格式模板，AI生成内容时将参考模板中的字体、字号、段落等格式（已合并到智能排版，此按钮隐藏）"
+        Me.TemplateFormatButton.ScreenTip = "Форматирование по шаблону"
+        Me.TemplateFormatButton.SuperTip = "Выберите шаблон оформления: AI учтёт шрифт, размер и абзацы шаблона (объединено с умным форматированием, кнопка скрыта)"
 
 
         ' ========== Group 5: 工具箱 (Excel专用) ==========
@@ -190,74 +190,74 @@ Partial Class BaseOfficeRibbon
         Me.GroupTools.Items.Add(Me.WebCaptureButton)
         Me.GroupTools.Items.Add(Me.SpotlightButton)
         Me.GroupTools.Items.Add(Me.BatchDataGenButton)
-        Me.GroupTools.Label = "工具箱"
+        Me.GroupTools.Label = "Инструменты"
         Me.GroupTools.Name = "GroupTools"
 
-        Me.DataAnalysisButton.Label = "数据分析"
+        Me.DataAnalysisButton.Label = "Анализ данных"
         Me.DataAnalysisButton.Name = "DataAnalysisButton"
         Me.DataAnalysisButton.ShowImage = True
-        Me.DataAnalysisButton.ScreenTip = "智能数据分析"
-        Me.DataAnalysisButton.SuperTip = "AI辅助分析Excel数据"
+        Me.DataAnalysisButton.ScreenTip = "Умный анализ данных"
+        Me.DataAnalysisButton.SuperTip = "AI-помощь в анализе данных Excel"
 
-        Me.WebCaptureButton.Label = "抓取网页"
+        Me.WebCaptureButton.Label = "Захват страниц"
         Me.WebCaptureButton.Name = "WebCaptureButton"
         Me.WebCaptureButton.ShowImage = True
-        Me.WebCaptureButton.SuperTip = "打开网页捕获工具"
+        Me.WebCaptureButton.SuperTip = "Открыть инструмент захвата веб-страниц"
 
-        Me.SpotlightButton.Label = "聚光灯"
+        Me.SpotlightButton.Label = "Подсветка"
         Me.SpotlightButton.Name = "SpotlightButton"
         Me.SpotlightButton.ShowImage = True
-        Me.SpotlightButton.SuperTip = "高亮选中单元格所在的行和列"
+        Me.SpotlightButton.SuperTip = "Подсвечивает строку и столбец выбранной ячейки"
 
-        Me.BatchDataGenButton.Label = "批量生成"
+        Me.BatchDataGenButton.Label = "Пакетная генерация"
         Me.BatchDataGenButton.Name = "BatchDataGenButton"
         Me.BatchDataGenButton.ShowImage = True
-        Me.BatchDataGenButton.ScreenTip = "配置和生成批量数据"
-        Me.BatchDataGenButton.SuperTip = "配置字段、列关系并生成数据到工作簿"
+        Me.BatchDataGenButton.ScreenTip = "Настройка и генерация пакетных данных"
+        Me.BatchDataGenButton.SuperTip = "Настройте поля и связи столбцов и сгенерируйте данные в книгу"
 
         ' ========== Group 6: MCP连接 ==========
         Me.GroupMCP.Items.Add(Me.MCPButton)
-        Me.GroupMCP.Label = "MCP连接"
+        Me.GroupMCP.Label = "Подключение MCP"
         Me.GroupMCP.Name = "GroupMCP"
 
         Me.MCPButton.Label = "MCP"
         Me.MCPButton.Name = "MCPButton"
         Me.MCPButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.MCPButton.ShowImage = True
-        Me.MCPButton.ScreenTip = "MCP服务器配置"
-        Me.MCPButton.SuperTip = "配置MCP服务器并作为客户端调用大模型"
+        Me.MCPButton.ScreenTip = "Настройка MCP-серверов"
+        Me.MCPButton.SuperTip = "Настройте MCP-сервер и вызывайте модель как клиент"
 
         ' ========== Group 7: 关于与设置 ==========
         Me.GroupAbout.Items.Add(Me.AboutButton)
         Me.GroupAbout.Items.Add(Me.ClearCacheButton)
-        Me.GroupAbout.Label = "关于与设置"
+        Me.GroupAbout.Label = "О программе и настройки"
         Me.GroupAbout.Name = "GroupAbout"
 
-        Me.AboutButton.Label = "关于"
+        Me.AboutButton.Label = "О программе"
         Me.AboutButton.Name = "AboutButton"
         Me.AboutButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.AboutButton.ShowImage = True
-        Me.AboutButton.ScreenTip = "关于本插件"
-        Me.AboutButton.SuperTip = "查看插件信息和开源地址"
+        Me.AboutButton.ScreenTip = "О плагине"
+        Me.AboutButton.SuperTip = "Информация о плагине и ссылка на исходный код"
 
-        Me.ClearCacheButton.Label = "清理缓存"
+        Me.ClearCacheButton.Label = "Очистить кэш"
         Me.ClearCacheButton.Name = "ClearCacheButton"
         Me.ClearCacheButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.ClearCacheButton.ShowImage = True
-        Me.ClearCacheButton.ScreenTip = "清理配置缓存"
-        Me.ClearCacheButton.SuperTip = "清除所有配置和历史记录"
+        Me.ClearCacheButton.ScreenTip = "Очистить кэш конфигурации"
+        Me.ClearCacheButton.SuperTip = "Удаляет все настройки и историю"
 
         ' ========== Group 8: 帮助与学习 ==========
         Me.GroupHelp.Items.Add(Me.StudyButton)
-        Me.GroupHelp.Label = "帮助与学习"
+        Me.GroupHelp.Label = "Справка и обучение"
         Me.GroupHelp.Name = "GroupHelp"
 
-        Me.StudyButton.Label = "教学文档"
+        Me.StudyButton.Label = "Документация"
         Me.StudyButton.Name = "StudyButton"
         Me.StudyButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge
         Me.StudyButton.ShowImage = True
-        Me.StudyButton.ScreenTip = "查看教学文档"
-        Me.StudyButton.SuperTip = "打开在线教学文档，了解所有功能的使用方法"
+        Me.StudyButton.ScreenTip = "Открыть документацию"
+        Me.StudyButton.SuperTip = "Открывает справку по всем функциям"
 
         ' BaseOfficeRibbon
         Me.Name = "BaseOfficeRibbon"

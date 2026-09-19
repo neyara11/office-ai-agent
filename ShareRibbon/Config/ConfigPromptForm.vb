@@ -44,12 +44,12 @@ Public Class ConfigPromptForm
 
     ' 默认快捷问题（与前端predefinedPrompts保持一致）
     Private Shared ReadOnly DEFAULT_QUICK_QUESTIONS As String() = {
-        "帮我把A列加B列的值写入C列",
-        "帮我把Sheet1和Sheet2的表格按名字合并",
-        "帮我把Sheet1的数据，按照中文名称拆分成多个xlsx文件",
-        "给我将我选中的Word内容格式调整一下",
-        "给我生成一个3页的周报PPT文件",
-        "什么？没有你想要的，点击此处维护吧"
+        "Помоги записать в столбец C сумму значений столбцов A и B",
+        "Объедини таблицы Sheet1 и Sheet2 по именам",
+        "Раздели данные Sheet1 на несколько файлов xlsx по именам",
+        "Приведи в порядок форматирование выделенного содержимого Word",
+        "Создай презентацию PPT с еженедельным отчётом на 3 страницы",
+        "Нет нужного вопроса? Нажмите здесь, чтобы настроить список"
     }
 
     Private Const MAX_QUICK_QUESTIONS As Integer = 6
@@ -60,9 +60,9 @@ Public Class ConfigPromptForm
 
     ' 默认提示词（静态常量，供 LoadConfigStatic 和实例方法共用）
     Private Shared ReadOnly DEFAULT_PROMPTS As New Dictionary(Of String, String) From {
-        {"Excel", "你是一名Excel专家，擅长数据分析、公式计算。如果用户需求明确，返回JSON命令执行操作；如果需求不明确，请先询问澄清。"},
-        {"Word", "你是一名Word文档专家，擅长文档编辑、格式排版和内容生成。如果用户需求明确，返回JSON命令执行操作；如果需求不明确，请先询问澄清。"},
-        {"PowerPoint", "你是一名PowerPoint演示专家，擅长幻灯片设计、动画效果和内容创作。如果用户需求明确，返回JSON命令执行操作；如果需求不明确，请先询问澄清。"}
+        {"Excel", "Ты эксперт по Excel, специализируешься на анализе данных и вычислении формул. Если запрос пользователя ясен, верни JSON-команду для выполнения; если запрос неясен — сначала задай уточняющий вопрос."},
+        {"Word", "Ты эксперт по документам Word, специализируешься на редактировании документов, форматировании и создании содержимого. Если запрос пользователя ясен, верни JSON-команду для выполнения; если запрос неясен — сначала задай уточняющий вопрос."},
+        {"PowerPoint", "Ты эксперт по презентациям PowerPoint, специализируешься на дизайне слайдов, анимации и создании содержимого. Если запрос пользователя ясен, верни JSON-команду для выполнения; если запрос неясен — сначала задай уточняющий вопрос."}
     }
 
     Public Sub New(applicationInfo As ApplicationInfo)
@@ -80,7 +80,7 @@ Public Class ConfigPromptForm
 
     Private Sub InitializeUI()
         ' 窗体设置
-        Me.Text = $"提示词配置 - {_applicationInfo.Type}"
+        Me.Text = $"Настройка промптов - {_applicationInfo.Type}"
         Me.Size = New Size(600, 520)
         Me.StartPosition = FormStartPosition.CenterScreen
         Me.FormBorderStyle = FormBorderStyle.FixedDialog
@@ -95,22 +95,22 @@ Public Class ConfigPromptForm
         }
 
         ' 基础配置页
-        tabBasic = New TabPage("聊天提示词")
+        tabBasic = New TabPage("Промпты чата")
         InitializeBasicTab()
         tabControl.TabPages.Add(tabBasic)
 
         ' Agent 提示词层配置说明
-        tabAgentProfile = New TabPage("Agent 提示词层")
+        tabAgentProfile = New TabPage("Слои промптов Agent")
         InitializeAgentProfileTab()
         tabControl.TabPages.Add(tabAgentProfile)
 
         ' 高级配置页
-        tabAdvanced = New TabPage("JSON格式约束")
+        tabAdvanced = New TabPage("Ограничения формата JSON")
         InitializeAdvancedTab()
         tabControl.TabPages.Add(tabAdvanced)
 
         ' 快捷问题配置页
-        tabQuickQuestions = New TabPage("快捷问题")
+        tabQuickQuestions = New TabPage("Быстрые вопросы")
         InitializeQuickQuestionsTab()
         tabControl.TabPages.Add(tabQuickQuestions)
 
@@ -118,7 +118,7 @@ Public Class ConfigPromptForm
 
         ' 底部关闭按钮
         Dim btnClose As New Button() With {
-            .Text = "关闭",
+            .Text = "Закрыть",
             .Location = New Point(490, 440),
             .Size = New Size(80, 30)
         }
@@ -131,7 +131,7 @@ Public Class ConfigPromptForm
     Private Sub InitializeBasicTab()
         ' 说明标签
         Dim lblDesc As New Label() With {
-            .Text = "提示词为AI设定身份角色，让回答更专业。选择一个提示词后点击「使用」生效。",
+            .Text = "Промпт задаёт роль ИИ и делает ответы профессиональнее. Выберите промпт и нажмите «Использовать».",
             .Location = New Point(10, 10),
             .Size = New Size(530, 20),
             .ForeColor = Color.Gray
@@ -140,7 +140,7 @@ Public Class ConfigPromptForm
 
         ' 左侧：提示词列表
         Dim lblList As New Label() With {
-            .Text = "已保存的提示词：",
+            .Text = "Сохранённые промпты:",
             .Location = New Point(10, 35),
             .AutoSize = True
         }
@@ -156,7 +156,7 @@ Public Class ConfigPromptForm
 
         ' 列表操作按钮
         btnUse = New Button() With {
-            .Text = "使用选中",
+            .Text = "Использовать выбранный",
             .Location = New Point(10, 260),
             .Size = New Size(85, 28),
             .BackColor = Color.FromArgb(70, 130, 180),
@@ -167,7 +167,7 @@ Public Class ConfigPromptForm
         tabBasic.Controls.Add(btnUse)
 
         btnDelete = New Button() With {
-            .Text = "删除",
+            .Text = "Удалить",
             .Location = New Point(105, 260),
             .Size = New Size(85, 28),
             .FlatStyle = FlatStyle.Flat
@@ -177,7 +177,7 @@ Public Class ConfigPromptForm
 
         ' 右侧：编辑区域
         Dim lblName As New Label() With {
-            .Text = "提示词名称：",
+            .Text = "Имя промпта:",
             .Location = New Point(210, 35),
             .AutoSize = True
         }
@@ -190,7 +190,7 @@ Public Class ConfigPromptForm
         tabBasic.Controls.Add(promptNameTextBox)
 
         Dim lblContent As New Label() With {
-            .Text = "提示词内容：",
+            .Text = "Содержимое промпта:",
             .Location = New Point(210, 85),
             .AutoSize = True
         }
@@ -207,7 +207,7 @@ Public Class ConfigPromptForm
 
         ' 编辑操作按钮
         btnAdd = New Button() With {
-            .Text = "新增/保存",
+            .Text = "Добавить/Сохранить",
             .Location = New Point(210, 260),
             .Size = New Size(100, 28),
             .BackColor = Color.FromArgb(60, 179, 113),
@@ -218,7 +218,7 @@ Public Class ConfigPromptForm
         tabBasic.Controls.Add(btnAdd)
 
         Dim btnClear As New Button() With {
-            .Text = "清空输入",
+            .Text = "Очистить поля",
             .Location = New Point(320, 260),
             .Size = New Size(80, 28),
             .FlatStyle = FlatStyle.Flat
@@ -232,7 +232,7 @@ Public Class ConfigPromptForm
 
         ' 当前使用的提示词显示
         Dim lblCurrent As New Label() With {
-            .Text = "当前使用：",
+            .Text = "Текущий:",
             .Location = New Point(10, 300),
             .AutoSize = True,
             .Font = New Font("Microsoft YaHei UI", 9, FontStyle.Bold)
@@ -241,7 +241,7 @@ Public Class ConfigPromptForm
 
         Dim lblCurrentValue As New Label() With {
             .Name = "lblCurrentValue",
-            .Text = If(String.IsNullOrEmpty(ConfigSettings.propmtName), "(未设置)", ConfigSettings.propmtName),
+            .Text = If(String.IsNullOrEmpty(ConfigSettings.propmtName), "(не задан)", ConfigSettings.propmtName),
             .Location = New Point(80, 300),
             .Size = New Size(460, 20),
             .ForeColor = Color.FromArgb(70, 130, 180)
@@ -257,7 +257,7 @@ Public Class ConfigPromptForm
         Dim appScenario = GetCurrentPromptScenario()
 
         Dim lblDesc As New Label() With {
-            .Text = "Agent 会按固定层级组装提示词：系统协议 -> Office上下文 -> 工具/Skill -> 用户偏好 -> 记忆。用户偏好不能覆盖工具协议。",
+            .Text = "Agent собирает промпт по фиксированным слоям: системный протокол -> контекст Office -> инструменты/Skill -> предпочтения пользователя -> память. Предпочтения пользователя не могут переопределять протокол инструментов.",
             .Location = New Point(10, 10),
             .Size = New Size(530, 36),
             .ForeColor = Color.DimGray
@@ -265,7 +265,7 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(lblDesc)
 
         Dim lblSelected As New Label() With {
-            .Text = "当前聊天提示词：",
+            .Text = "Текущий промпт чата:",
             .Location = New Point(10, 55),
             .AutoSize = True,
             .Font = New Font("Microsoft YaHei UI", 9, FontStyle.Bold)
@@ -273,7 +273,7 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(lblSelected)
 
         Dim lblSelectedValue As New Label() With {
-            .Text = If(String.IsNullOrEmpty(ConfigSettings.propmtName), "(未设置)", ConfigSettings.propmtName),
+            .Text = If(String.IsNullOrEmpty(ConfigSettings.propmtName), "(не задан)", ConfigSettings.propmtName),
             .Location = New Point(120, 55),
             .Size = New Size(420, 20),
             .ForeColor = Color.FromArgb(70, 130, 180)
@@ -281,7 +281,7 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(lblSelectedValue)
 
         Dim lblFolder As New Label() With {
-            .Text = "外接提示词目录：",
+            .Text = "Каталог внешних промптов:",
             .Location = New Point(10, 90),
             .AutoSize = True,
             .Font = New Font("Microsoft YaHei UI", 9, FontStyle.Bold)
@@ -297,7 +297,7 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(txtFolder)
 
         Dim btnOpenFolder As New Button() With {
-            .Text = "打开目录",
+            .Text = "Открыть каталог",
             .Location = New Point(450, 110),
             .Size = New Size(90, 28),
             .FlatStyle = FlatStyle.Flat
@@ -306,10 +306,10 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(btnOpenFolder)
 
         Dim lblFiles As New Label() With {
-            .Text = "支持文件：" & Environment.NewLine &
-                    $"common.md / common.txt / common.json：所有 Office 共用" & Environment.NewLine &
-                    $"{appScenario}.md / {appScenario}.txt / {appScenario}.json：当前应用专用" & Environment.NewLine &
-                    $"common\*.md|*.txt|*.json 与 {appScenario}\*.md|*.txt|*.json：可拆分多个领域文件",
+            .Text = "Поддерживаемые файлы:" & Environment.NewLine &
+                    $"common.md / common.txt / common.json: общие для всех приложений Office" & Environment.NewLine &
+                    $"{appScenario}.md / {appScenario}.txt / {appScenario}.json: только для текущего приложения" & Environment.NewLine &
+                    $"common\*.md|*.txt|*.json и {appScenario}\*.md|*.txt|*.json: можно разбить на несколько тематических файлов",
             .Location = New Point(10, 150),
             .Size = New Size(530, 78),
             .ForeColor = Color.DimGray
@@ -317,8 +317,8 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(lblFiles)
 
         Dim lblJson As New Label() With {
-            .Text = "JSON 文件可选字段：enabled、application/appType、content/prompt。示例：" & Environment.NewLine &
-                    "{""enabled"":true,""application"":""" & appScenario & """,""content"":""用简洁、可执行、少追问的风格回答。""}",
+            .Text = "Необязательные поля JSON-файла: enabled, application/appType, content/prompt. Пример:" & Environment.NewLine &
+                    "{""enabled"":true,""application"":""" & appScenario & """,""content"":""Отвечай кратко, по делу, задавай минимум уточняющих вопросов.""}",
             .Location = New Point(10, 235),
             .Size = New Size(530, 48),
             .ForeColor = Color.DimGray
@@ -326,7 +326,7 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(lblJson)
 
         Dim lblPriority As New Label() With {
-            .Text = "优先级说明：本页的个人风格、外接提示词和用户画像只影响表达风格、业务偏好和领域背景；不会覆盖 Harness、Agent Loop、工具 schema、应用边界与执行协议。",
+            .Text = "Приоритет: личный стиль на этой странице, внешние промпты и профиль пользователя влияют только на стиль изложения, бизнес-предпочтения и предметный контекст; они не переопределяют Harness, Agent Loop, схему инструментов, границы приложения и протокол выполнения.",
             .Location = New Point(10, 295),
             .Size = New Size(530, 48),
             .ForeColor = Color.FromArgb(120, 80, 20),
@@ -335,7 +335,7 @@ Public Class ConfigPromptForm
         tabAgentProfile.Controls.Add(lblPriority)
 
         Dim btnCreateExample As New Button() With {
-            .Text = "生成示例 common.md",
+            .Text = "Создать пример common.md",
             .Location = New Point(10, 350),
             .Size = New Size(140, 30),
             .BackColor = Color.FromArgb(60, 179, 113),
@@ -364,7 +364,7 @@ Public Class ConfigPromptForm
             End If
             System.Diagnostics.Process.Start(folderPath)
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning($"打开目录失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось открыть каталог: {ex.Message}")
         End Try
     End Sub
 
@@ -376,31 +376,31 @@ Public Class ConfigPromptForm
 
             Dim examplePath = Path.Combine(folderPath, "common.md")
             If File.Exists(examplePath) Then
-                If MessageBox.Show("common.md 已存在，是否覆盖示例内容？", "确认覆盖", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then
+                If MessageBox.Show("Файл common.md уже существует. Перезаписать содержимое примера?", "Подтверждение перезаписи", MessageBoxButtons.YesNo, MessageBoxIcon.Question) <> DialogResult.Yes Then
                     Return
                 End If
             End If
 
             Dim sb As New StringBuilder()
-            sb.AppendLine("# Office Agent 个人偏好示例")
+            sb.AppendLine("# Пример личных предпочтений Office Agent")
             sb.AppendLine()
-            sb.AppendLine("- 回答优先给出可执行结论，减少泛泛解释。")
-            sb.AppendLine("- 用户提出明确 Office 操作时，优先形成计划、预览和执行，不反复询问可观察信息。")
-            sb.AppendLine("- 输出语气保持专业、简洁，必要时解释做了哪些假设。")
-            sb.AppendLine("- 这些偏好不能覆盖工具 schema、应用边界、Agent Loop 和安全约束。")
+            sb.AppendLine("- В ответах сначала давай практический вывод, меньше общих объяснений.")
+            sb.AppendLine("- Если пользователь явно просит операцию Office, сначала формируй план, предпросмотр и выполнение, не переспрашивай наблюдаемую информацию.")
+            sb.AppendLine("- Тон общения должен оставаться профессиональным и кратким; при необходимости поясняй сделанные допущения.")
+            sb.AppendLine("- Эти предпочтения не могут переопределять схему инструментов, границы приложения, Agent Loop и ограничения безопасности.")
 
             File.WriteAllText(examplePath, sb.ToString(), Encoding.UTF8)
-            GlobalStatusStrip.ShowInfo("已生成外接提示词示例 common.md")
+            GlobalStatusStrip.ShowInfo("Пример внешнего промпта common.md создан")
             OpenExternalPromptDirectory(folderPath)
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning($"生成示例失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось создать пример: {ex.Message}")
         End Try
     End Sub
 
     Private Sub InitializeAdvancedTab()
         ' 说明标签
         Dim lblDesc As New Label() With {
-            .Text = $"JSON格式约束用于规范AI返回的命令格式，确保可正确解析执行。当前应用：{_applicationInfo.Type}",
+            .Text = $"Ограничения формата JSON задают формат команд, возвращаемых ИИ, для их корректного разбора и выполнения. Текущее приложение: {_applicationInfo.Type}",
             .Location = New Point(10, 10),
             .Size = New Size(530, 20),
             .ForeColor = Color.Gray
@@ -408,7 +408,7 @@ Public Class ConfigPromptForm
         tabAdvanced.Controls.Add(lblDesc)
 
         Dim lblWarning As New Label() With {
-            .Text = "⚠ 修改此内容可能导致命令执行失败，请谨慎操作！",
+            .Text = "⚠ Изменение этого содержимого может привести к сбою выполнения команд. Будьте осторожны!",
             .Location = New Point(10, 32),
             .Size = New Size(530, 20),
             .ForeColor = Color.OrangeRed,
@@ -432,7 +432,7 @@ Public Class ConfigPromptForm
 
         ' 操作按钮
         btnSaveSchema = New Button() With {
-            .Text = "保存修改",
+            .Text = "Сохранить изменения",
             .Location = New Point(10, 335),
             .Size = New Size(100, 30),
             .BackColor = Color.FromArgb(60, 179, 113),
@@ -443,7 +443,7 @@ Public Class ConfigPromptForm
         tabAdvanced.Controls.Add(btnSaveSchema)
 
         btnResetSchema = New Button() With {
-            .Text = "恢复默认",
+            .Text = "Сбросить к значениям по умолчанию",
             .Location = New Point(120, 335),
             .Size = New Size(100, 30),
             .FlatStyle = FlatStyle.Flat
@@ -455,9 +455,9 @@ Public Class ConfigPromptForm
     Private Sub LoadJsonSchema()
         Try
             Dim schema = PromptManager.Instance.GetJsonSchemaConstraint(_applicationInfo.Type.ToString())
-            jsonSchemaTextBox.Text = If(String.IsNullOrEmpty(schema), "(无配置)", schema)
+            jsonSchemaTextBox.Text = If(String.IsNullOrEmpty(schema), "(не настроено)", schema)
         Catch ex As Exception
-            jsonSchemaTextBox.Text = $"(加载失败: {ex.Message})"
+            jsonSchemaTextBox.Text = $"(Ошибка загрузки: {ex.Message})"
         End Try
     End Sub
 
@@ -466,21 +466,21 @@ Public Class ConfigPromptForm
             ' 保存到 PromptManager
             PromptManager.Instance.UpdateJsonSchemaConstraint(_applicationInfo.Type.ToString(), jsonSchemaTextBox.Text)
             PromptManager.Instance.SavePromptConfiguration()
-            GlobalStatusStrip.ShowInfo("JSON格式约束已保存！")
+            GlobalStatusStrip.ShowInfo("Ограничения формата JSON сохранены!")
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning($"保存失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось сохранить: {ex.Message}")
         End Try
     End Sub
 
     Private Sub BtnResetSchema_Click(sender As Object, e As EventArgs)
-        If MessageBox.Show("确定要恢复默认的JSON格式约束吗？", "确认", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show("Сбросить ограничения формата JSON к значениям по умолчанию?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             Try
                 PromptManager.Instance.ResetJsonSchemaConstraint(_applicationInfo.Type.ToString())
                 PromptManager.Instance.SavePromptConfiguration()
                 LoadJsonSchema()
-                GlobalStatusStrip.ShowInfo("已恢复默认配置！")
+                GlobalStatusStrip.ShowInfo("Настройки по умолчанию восстановлены!")
             Catch ex As Exception
-                GlobalStatusStrip.ShowWarning($"恢复失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось восстановить: {ex.Message}")
             End Try
         End If
     End Sub
@@ -492,7 +492,7 @@ Public Class ConfigPromptForm
 
         ' 说明标签
         Dim lblDesc As New Label() With {
-            .Text = "快捷问题会在输入框中按 # 键时显示，方便快速选择常用问题。最多可维护6条。",
+            .Text = "Быстрые вопросы появляются при нажатии # в поле ввода для быстрого выбора частых запросов. Можно хранить не более 6.",
             .Location = New Point(10, 10),
             .Size = New Size(530, 20),
             .ForeColor = Color.Gray
@@ -501,7 +501,7 @@ Public Class ConfigPromptForm
 
         ' 左侧：快捷问题列表
         Dim lblList As New Label() With {
-            .Text = "已维护的快捷问题：",
+            .Text = "Сохранённые быстрые вопросы:",
             .Location = New Point(10, 35),
             .AutoSize = True
         }
@@ -517,7 +517,7 @@ Public Class ConfigPromptForm
 
         ' 编辑区域
         Dim lblEdit As New Label() With {
-            .Text = "编辑问题内容：",
+            .Text = "Редактировать текст вопроса:",
             .Location = New Point(10, 215),
             .AutoSize = True
         }
@@ -532,7 +532,7 @@ Public Class ConfigPromptForm
 
         ' 操作按钮行
         btnAddQuestion = New Button() With {
-            .Text = "新增/更新",
+            .Text = "Добавить/Обновить",
             .Location = New Point(10, 270),
             .Size = New Size(90, 28),
             .BackColor = Color.FromArgb(60, 179, 113),
@@ -543,7 +543,7 @@ Public Class ConfigPromptForm
         tabQuickQuestions.Controls.Add(btnAddQuestion)
 
         btnDeleteQuestion = New Button() With {
-            .Text = "删除选中",
+            .Text = "Удалить выбранное",
             .Location = New Point(110, 270),
             .Size = New Size(90, 28),
             .FlatStyle = FlatStyle.Flat
@@ -552,7 +552,7 @@ Public Class ConfigPromptForm
         tabQuickQuestions.Controls.Add(btnDeleteQuestion)
 
         btnSaveQuestions = New Button() With {
-            .Text = "保存配置",
+            .Text = "Сохранить конфигурацию",
             .Location = New Point(350, 270),
             .Size = New Size(90, 28),
             .BackColor = Color.FromArgb(70, 130, 180),
@@ -563,7 +563,7 @@ Public Class ConfigPromptForm
         tabQuickQuestions.Controls.Add(btnSaveQuestions)
 
         btnResetQuestions = New Button() With {
-            .Text = "恢复默认",
+            .Text = "Сбросить к значениям по умолчанию",
             .Location = New Point(450, 270),
             .Size = New Size(90, 28),
             .FlatStyle = FlatStyle.Flat
@@ -573,7 +573,7 @@ Public Class ConfigPromptForm
 
         ' 提示信息
         Dim lblTip As New Label() With {
-            .Text = "💡 提示：保存后，在聊天输入框中按 # 键即可看到最新的快捷问题列表。",
+            .Text = "💡 Подсказка: после сохранения нажмите # в поле ввода чата, чтобы увидеть актуальный список быстрых вопросов.",
             .Location = New Point(10, 310),
             .Size = New Size(530, 20),
             .ForeColor = Color.FromArgb(70, 130, 180),
@@ -594,22 +594,22 @@ Public Class ConfigPromptForm
     Private Sub BtnAddQuestion_Click(sender As Object, e As EventArgs)
         Dim question = quickQuestionTextBox.Text.Trim()
         If String.IsNullOrEmpty(question) Then
-            GlobalStatusStrip.ShowWarning("请输入快捷问题内容！")
+            GlobalStatusStrip.ShowWarning("Введите текст быстрого вопроса!")
             Return
         End If
 
         If quickQuestionsListBox.SelectedIndex >= 0 Then
             ' 更新选中项
             _quickQuestions(quickQuestionsListBox.SelectedIndex) = question
-            GlobalStatusStrip.ShowInfo("已更新快捷问题！")
+            GlobalStatusStrip.ShowInfo("Быстрый вопрос обновлён!")
         Else
             ' 新增
             If _quickQuestions.Count >= MAX_QUICK_QUESTIONS Then
-                GlobalStatusStrip.ShowWarning($"最多只能维护{MAX_QUICK_QUESTIONS}条快捷问题！")
+                GlobalStatusStrip.ShowWarning($"Можно хранить не более {MAX_QUICK_QUESTIONS} быстрых вопросов!")
                 Return
             End If
             _quickQuestions.Add(question)
-            GlobalStatusStrip.ShowInfo("已添加快捷问题！")
+            GlobalStatusStrip.ShowInfo("Быстрый вопрос добавлен!")
         End If
 
         RefreshQuickQuestionsList()
@@ -619,34 +619,34 @@ Public Class ConfigPromptForm
 
     Private Sub BtnDeleteQuestion_Click(sender As Object, e As EventArgs)
         If quickQuestionsListBox.SelectedIndex < 0 Then
-            GlobalStatusStrip.ShowWarning("请先选择要删除的快捷问题！")
+            GlobalStatusStrip.ShowWarning("Сначала выберите быстрый вопрос для удаления!")
             Return
         End If
 
         Dim selectedIndex = quickQuestionsListBox.SelectedIndex
-        If MessageBox.Show($"确定要删除「{_quickQuestions(selectedIndex)}」吗？", "确认删除", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show($"Удалить «{_quickQuestions(selectedIndex)}»?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             _quickQuestions.RemoveAt(selectedIndex)
             RefreshQuickQuestionsList()
             quickQuestionTextBox.Clear()
-            GlobalStatusStrip.ShowInfo("已删除！")
+            GlobalStatusStrip.ShowInfo("Удалено!")
         End If
     End Sub
 
     Private Sub BtnSaveQuestions_Click(sender As Object, e As EventArgs)
         Try
             SaveQuickQuestions()
-            GlobalStatusStrip.ShowInfo("快捷问题配置已保存！重新打开聊天面板后生效。")
+            GlobalStatusStrip.ShowInfo("Конфигурация быстрых вопросов сохранена! Изменения вступят в силу после повторного открытия панели чата.")
         Catch ex As Exception
-            GlobalStatusStrip.ShowWarning($"保存失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось сохранить: {ex.Message}")
         End Try
     End Sub
 
     Private Sub BtnResetQuestions_Click(sender As Object, e As EventArgs)
-        If MessageBox.Show("确定要恢复默认的快捷问题吗？", "确认", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show("Восстановить быстрые вопросы по умолчанию?", "Подтверждение", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             _quickQuestions = DEFAULT_QUICK_QUESTIONS.ToList()
             RefreshQuickQuestionsList()
             SaveQuickQuestions()
-            GlobalStatusStrip.ShowInfo("已恢复默认快捷问题！")
+            GlobalStatusStrip.ShowInfo("Быстрые вопросы восстановлены по умолчанию!")
         End If
     End Sub
 
@@ -750,7 +750,7 @@ Public Class ConfigPromptForm
 
     Private Sub BtnUse_Click(sender As Object, e As EventArgs)
         If promptListBox.SelectedItem Is Nothing Then
-            GlobalStatusStrip.ShowWarning("请先选择一个提示词！")
+            GlobalStatusStrip.ShowWarning("Сначала выберите промпт!")
             Return
         End If
 
@@ -772,7 +772,7 @@ Public Class ConfigPromptForm
             lblCurrentValue.Text = selectedItem.name
         End If
 
-        GlobalStatusStrip.ShowInfo($"已启用提示词：{selectedItem.name}")
+        GlobalStatusStrip.ShowInfo($"Промпт включён: {selectedItem.name}")
     End Sub
 
     Private Sub BtnAdd_Click(sender As Object, e As EventArgs)
@@ -780,12 +780,12 @@ Public Class ConfigPromptForm
         Dim content = promptContentTextBox.Text.Trim()
 
         If String.IsNullOrEmpty(name) Then
-            GlobalStatusStrip.ShowWarning("请输入提示词名称！")
+            GlobalStatusStrip.ShowWarning("Введите имя промпта!")
             Return
         End If
 
         If String.IsNullOrEmpty(content) Then
-            GlobalStatusStrip.ShowWarning("请输入提示词内容！")
+            GlobalStatusStrip.ShowWarning("Введите содержимое промпта!")
             Return
         End If
 
@@ -794,7 +794,7 @@ Public Class ConfigPromptForm
         If existingItem IsNot Nothing Then
             ' 更新
             existingItem.content = content
-            GlobalStatusStrip.ShowInfo($"已更新提示词：{name}")
+            GlobalStatusStrip.ShowInfo($"Промпт обновлён: {name}")
         Else
             ' 新增
             ConfigPromptData.Add(New PromptConfigItem() With {
@@ -802,7 +802,7 @@ Public Class ConfigPromptForm
                 .content = content,
                 .selected = False
             })
-            GlobalStatusStrip.ShowInfo($"已添加提示词：{name}")
+            GlobalStatusStrip.ShowInfo($"Промпт добавлен: {name}")
         End If
 
         SaveConfig()
@@ -811,24 +811,24 @@ Public Class ConfigPromptForm
 
     Private Sub BtnDelete_Click(sender As Object, e As EventArgs)
         If promptListBox.SelectedItem Is Nothing Then
-            GlobalStatusStrip.ShowWarning("请先选择要删除的提示词！")
+            GlobalStatusStrip.ShowWarning("Сначала выберите промпт для удаления!")
             Return
         End If
 
         Dim selectedItem = CType(promptListBox.SelectedItem, PromptConfigItem)
 
         If selectedItem.selected Then
-            GlobalStatusStrip.ShowWarning("不能删除当前正在使用的提示词！")
+            GlobalStatusStrip.ShowWarning("Нельзя удалить используемый промпт!")
             Return
         End If
 
-        If MessageBox.Show($"确定要删除「{selectedItem.name}」吗？", "确认删除", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
+        If MessageBox.Show($"Удалить «{selectedItem.name}»?", "Подтверждение удаления", MessageBoxButtons.YesNo, MessageBoxIcon.Question) = DialogResult.Yes Then
             ConfigPromptData.Remove(selectedItem)
             SaveConfig()
             RefreshPromptList()
             promptNameTextBox.Clear()
             promptContentTextBox.Clear()
-            GlobalStatusStrip.ShowInfo("已删除！")
+            GlobalStatusStrip.ShowInfo("Удалено!")
         End If
     End Sub
 
@@ -885,9 +885,9 @@ Public Class ConfigPromptForm
     ''' 获取默认提示词（静态版本）
     ''' </summary>
     Private Shared Function GetDefaultPromptStatic(appType As String) As PromptConfigItem
-        Dim content = If(DEFAULT_PROMPTS.ContainsKey(appType), DEFAULT_PROMPTS(appType), "你是一名Office办公专家。")
+        Dim content = If(DEFAULT_PROMPTS.ContainsKey(appType), DEFAULT_PROMPTS(appType), "Ты помощник по работе с Office.")
         Return New PromptConfigItem() With {
-            .name = $"{appType}助手",
+            .name = $"{appType} - помощник",
             .content = content,
             .selected = True
         }
@@ -928,10 +928,10 @@ Public Class ConfigPromptForm
 
     Private Function GetDefaultPrompt() As PromptConfigItem
         Dim appType = _applicationInfo.Type.ToString()
-        Dim content = If(DEFAULT_PROMPTS.ContainsKey(appType), DEFAULT_PROMPTS(appType), "你是一名Office办公专家。")
+        Dim content = If(DEFAULT_PROMPTS.ContainsKey(appType), DEFAULT_PROMPTS(appType), "Ты помощник по работе с Office.")
 
         Return New PromptConfigItem() With {
-            .name = $"{appType}助手",
+            .name = $"{appType} - помощник",
             .content = content,
             .selected = True
         }
