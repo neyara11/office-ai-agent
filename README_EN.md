@@ -7,9 +7,9 @@
 [![Platform](https://img.shields.io/badge/platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![Office](https://img.shields.io/badge/office-Excel%20Word%20PowerPoint-green.svg)](https://www.microsoft.com/office)
 
-**🌐 Language / 语言选择**
+**🌐 Language / 语言 / Язык**
 
-[English](README_EN.md) | [中文](README.md)
+[Русский](README.md) | [English](README_EN.md) | [中文](README_ZH.md)
 
 </div>
 
