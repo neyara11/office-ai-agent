@@ -18,43 +18,43 @@ Public Class StyleGuideConverter
     Public Shared Function BuildConversionPrompt(guideContent As String) As String
         Dim sb As New StringBuilder()
 
-        sb.AppendLine("你是文档格式规范解析专家。请从以下格式规范文本中提取格式参数，转换为结构化JSON。")
+        sb.AppendLine("Ты эксперт по разбору стандартов форматирования документов. Извлеки из приведённого текста стандарта параметры формата и преобразуй их в структурированный JSON. Отвечай только на русском языке.")
         sb.AppendLine()
 
         ' 标签体系说明
-        sb.AppendLine("【可用语义标签ID】")
-        sb.AppendLine("- header.org: 发文机关标志")
-        sb.AppendLine("- header.refno: 发文字号")
-        sb.AppendLine("- header.signer: 签发人")
-        sb.AppendLine("- title.main: 文件主标题")
-        sb.AppendLine("- title.recipient: 主送机关")
-        sb.AppendLine("- title.1: 一级标题")
-        sb.AppendLine("- title.2: 二级标题")
-        sb.AppendLine("- title.3: 三级标题")
-        sb.AppendLine("- body.normal: 正文")
-        sb.AppendLine("- body.attachment: 附件说明")
-        sb.AppendLine("- footer.signature: 发文机关署名")
-        sb.AppendLine("- footer.date: 成文日期")
-        sb.AppendLine("- footer.note: 附注")
-        sb.AppendLine("- footer.cc: 抄送机关")
-        sb.AppendLine("- footer.page: 页码")
-        sb.AppendLine("- body.emphasis: 强调段落")
-        sb.AppendLine("- list.ordered: 有序列表")
-        sb.AppendLine("- list.unordered: 无序列表")
-        sb.AppendLine("- quote: 引用")
-        sb.AppendLine("- caption: 图表题注")
+        sb.AppendLine("【Доступные ID семантических тегов】")
+        sb.AppendLine("- header.org: обозначение органа")
+        sb.AppendLine("- header.refno: номер документа")
+        sb.AppendLine("- header.signer: подписант")
+        sb.AppendLine("- title.main: заголовок документа")
+        sb.AppendLine("- title.recipient: адресат")
+        sb.AppendLine("- title.1: заголовок первого уровня")
+        sb.AppendLine("- title.2: заголовок второго уровня")
+        sb.AppendLine("- title.3: заголовок третьего уровня")
+        sb.AppendLine("- body.normal: основной текст")
+        sb.AppendLine("- body.attachment: отметка о приложении")
+        sb.AppendLine("- footer.signature: подпись органа")
+        sb.AppendLine("- footer.date: дата документа")
+        sb.AppendLine("- footer.note: примечание")
+        sb.AppendLine("- footer.cc: рассылка")
+        sb.AppendLine("- footer.page: номер страницы")
+        sb.AppendLine("- body.emphasis: выделенный абзац")
+        sb.AppendLine("- list.ordered: нумерованный список")
+        sb.AppendLine("- list.unordered: маркированный список")
+        sb.AppendLine("- quote: цитата")
+        sb.AppendLine("- caption: подпись к рисунку или таблице")
         sb.AppendLine()
 
         ' 输出格式要求
-        sb.AppendLine("【输出格式要求】")
-        sb.AppendLine("返回纯JSON对象，不要包含markdown代码块标记。格式如下：")
+        sb.AppendLine("【Требования к формату вывода】")
+        sb.AppendLine("Верни чистый JSON-объект без обёртки в markdown-блок кода. Формат:")
         sb.AppendLine("{")
         sb.AppendLine("  ""semanticTags"": [")
         sb.AppendLine("    {")
         sb.AppendLine("      ""tagId"": ""title.1"",")
-        sb.AppendLine("      ""displayName"": ""一级标题"",")
-        sb.AppendLine("      ""matchHint"": ""包含'第X章'开头"",")
-        sb.AppendLine("      ""font"": {""fontNameCN"": ""黑体"", ""fontNameEN"": ""Arial"", ""fontSize"": 22, ""bold"": true},")
+        sb.AppendLine("      ""displayName"": ""Заголовок первого уровня"",")
+        sb.AppendLine("      ""matchHint"": ""начинается с 'Глава X'"",")
+        sb.AppendLine("      ""font"": {""fontNameCN"": ""Times New Roman"", ""fontNameEN"": ""Times New Roman"", ""fontSize"": 22, ""bold"": true},")
         sb.AppendLine("      ""paragraph"": {""alignment"": ""center"", ""firstLineIndent"": 0, ""lineSpacing"": 1.5, ""spaceBefore"": 1, ""spaceAfter"": 0.5},")
         sb.AppendLine("      ""color"": {""fontColor"": ""#000000""}")
         sb.AppendLine("    }")
@@ -66,12 +66,12 @@ Public Class StyleGuideConverter
         sb.AppendLine()
 
         ' 规范原文
-        sb.AppendLine("【格式规范原文】")
+        sb.AppendLine("【Исходный текст стандарта】")
         sb.AppendLine("---BEGIN STYLE GUIDE---")
         sb.AppendLine(guideContent)
         sb.AppendLine("---END STYLE GUIDE---")
         sb.AppendLine()
-        sb.AppendLine("请从以上规范中提取所有格式要求，对应到可用标签。如果规范中未明确某项参数，使用合理的默认值。")
+        sb.AppendLine("Извлеки из стандарта выше все требования к формату и сопоставь их доступным тегам. Если параметр не указан явно, используй разумное значение по умолчанию.")
 
         Return sb.ToString()
     End Function
@@ -161,8 +161,8 @@ Public Class StyleGuideConverter
         ' 确保基础标签
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = SemanticTagRegistry.TAG_BODY_NORMAL) Then
             mapping.SemanticTags.Add(New SemanticTag(
-                SemanticTagRegistry.TAG_BODY_NORMAL, "正文",
-                SemanticTagRegistry.TAG_BODY, 2, "普通正文段落"))
+                SemanticTagRegistry.TAG_BODY_NORMAL, "Основной текст",
+                SemanticTagRegistry.TAG_BODY, 2, "Обычный абзац основного текста"))
         End If
 
         Return mapping
