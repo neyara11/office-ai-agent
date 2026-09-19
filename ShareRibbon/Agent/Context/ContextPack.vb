@@ -29,7 +29,7 @@ Namespace Agent.Context
                 pack.ReaderErrors.Add(New ContextReaderError With {
                     .Reader = "OfficeContext",
                     .ErrorCode = "CONTEXT_MISSING",
-                    .Message = "未获得宿主上下文"
+                    .Message = "Контекст хоста недоступен"
                 })
                 pack.Document.Preview = Truncate(hostContextText, pack.Budget.MaxChars, pack.Budget.Truncated)
                 pack.Budget.UsedChars = pack.Document.Preview.Length

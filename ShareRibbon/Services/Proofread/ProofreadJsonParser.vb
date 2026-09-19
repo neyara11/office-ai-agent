@@ -30,7 +30,7 @@ Public Class ProofreadJsonParser
             If String.IsNullOrWhiteSpace(cleanContent) Then
                 Return New ProofreadParseResult With {
                     .Success = False,
-                    .ErrorMessage = "响应内容为空"
+                    .ErrorMessage = "Ответ пуст"
                 }
             End If
 
@@ -66,7 +66,7 @@ Public Class ProofreadJsonParser
             If issuesArray Is Nothing Then
                 Return New ProofreadParseResult With {
                     .Success = False,
-                    .ErrorMessage = "无法找到issues数组"
+                    .ErrorMessage = "Не удалось найти массив issues"
                 }
             End If
 
@@ -90,12 +90,12 @@ Public Class ProofreadJsonParser
         Catch ex As JsonException
             Return New ProofreadParseResult With {
                 .Success = False,
-                .ErrorMessage = $"JSON解析失败: {ex.Message}"
+                .ErrorMessage = $"Сбой разбора JSON: {ex.Message}"
             }
         Catch ex As Exception
             Return New ProofreadParseResult With {
                 .Success = False,
-                .ErrorMessage = $"解析失败: {ex.Message}"
+                .ErrorMessage = $"Сбой разбора: {ex.Message}"
             }
         End Try
 

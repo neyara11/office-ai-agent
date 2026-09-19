@@ -377,7 +377,7 @@ Public Class SkillsDirectoryService
                                 .FileName = fileName,
                                 .FilePath = scriptPath,
                                 .ScriptType = scriptType,
-                                .Description = $"执行 {fileName} 脚本",
+                                .Description = $"Запуск скрипта {fileName}",
                                 .Executable = True
                             }
 
@@ -398,7 +398,7 @@ Public Class SkillsDirectoryService
                                         Exit For
                                     End If
                                 Next
-                                If script.Description = $"执行 {fileName} 脚本" Then
+                                If script.Description = $"Запуск скрипта {fileName}" Then
                                     ' 如果没有找到标题，使用第一行非空非frontmatter行
                                     For Each line In descLines
                                         If Not line.Trim().StartsWith("---") AndAlso Not line.Trim().StartsWith("#") AndAlso Not String.IsNullOrWhiteSpace(line.Trim()) Then

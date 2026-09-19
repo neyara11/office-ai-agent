@@ -99,7 +99,7 @@ Namespace Agent
                     If toolCall Is Nothing Then
                         noProgressCount += 1
                         planStep.Status = StepStatus.Failed
-                        planStep.ErrorMessage = "无法解析工具调用"
+                        planStep.ErrorMessage = "Не удалось разобрать вызов инструмента"
                         OnStepCompleted?.Invoke(stepIndex, False, "解析失败")
 
                         If noProgressCount >= MaxNoProgress Then Exit While

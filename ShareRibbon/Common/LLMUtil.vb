@@ -85,7 +85,7 @@ Public Class LLMUtil
             Return JsonConvert.SerializeObject(requestObj)
 
         Catch ex As Exception
-            Throw New Exception($"创建请求体时出错: {ex.Message}")
+            Throw New Exception($"Ошибка при формировании тела запроса: {ex.Message}")
         End Try
     End Function
 
@@ -115,7 +115,7 @@ Public Class LLMUtil
                 If Not response.IsSuccessStatusCode Then
                     Dim errorContent As String = Await response.Content.ReadAsStringAsync()
                     Debug.WriteLine($"HTTP错误响应内容: {errorContent}")
-                    Throw New HttpRequestException($"HTTP请求失败: {response.StatusCode} - {response.ReasonPhrase}. 详细信息: {errorContent}")
+                    Throw New HttpRequestException($"Сбой HTTP-запроса: {response.StatusCode} - {response.ReasonPhrase}. Подробности: {errorContent}")
                 End If
 
                 Dim responseContent As String = Await response.Content.ReadAsStringAsync()
