@@ -282,21 +282,39 @@ Namespace Design
             Dim legacyFont As Object = Nothing
             Dim fontColor As Object = Nothing
             Dim paragraph As Object = Nothing
+            Dim frameAvailable As Boolean = False
             Try
                 Dim shapeObject As Object = shape
                 shapeFill = shapeObject.Fill
                 shapeFill.Visible = MsoTriState.msoFalse
                 shapeLine = shapeObject.Line
                 shapeLine.Visible = MsoTriState.msoFalse
-                frame = shapeObject.TextFrame2
-                frame.MarginLeft = 1
-                frame.MarginRight = 1
-                frame.MarginTop = 1
-                frame.MarginBottom = 1
-                frame.WordWrap = MsoTriState.msoTrue
-                frame.AutoSize = MsoAutoSize.msoAutoSizeNone
-                frame.VerticalAnchor = MsoVerticalAnchor.msoAnchorTop
-                range = frame.TextRange
+
+                ' Часть хостов (WPS, отдельные сборки PowerPoint) не отдаёт Office.TextFrame2.
+                ' Тогда работаем через старый TextFrame и пропускаем TextFrame2-настройки.
+                Try
+                    frame = shapeObject.TextFrame2
+                    frameAvailable = frame IsNot Nothing
+                Catch
+                    frame = Nothing
+                    frameAvailable = False
+                End Try
+
+                If frameAvailable Then
+                    frame.MarginLeft = 1
+                    frame.MarginRight = 1
+                    frame.MarginTop = 1
+                    frame.MarginBottom = 1
+                    frame.WordWrap = MsoTriState.msoTrue
+                    frame.AutoSize = MsoAutoSize.msoAutoSizeNone
+                    frame.VerticalAnchor = MsoVerticalAnchor.msoAnchorTop
+                    range = frame.TextRange
+                Else
+                    legacyFrame = shapeObject.TextFrame
+                    legacyRange = legacyFrame.TextRange
+                    range = legacyRange
+                End If
+
                 range.Text = If(node.Text, "")
                 font = range.Font
                 font.Name = tokens.FontFamily
@@ -308,21 +326,26 @@ Namespace Design
                 font.Bold = If(node.Bold, MsoTriState.msoTrue, MsoTriState.msoFalse)
                 ' WPS/部分 PowerPoint 兼容层返回的 Font2.Fill 不支持 Office.FillFormat IID，
                 ' 使用旧文本对象模型设置颜色，避免 E_NOINTERFACE。
-                legacyFrame = shapeObject.TextFrame
-                legacyRange = legacyFrame.TextRange
+                If legacyFrame Is Nothing Then
+                    legacyFrame = shapeObject.TextFrame
+                    legacyRange = legacyFrame.TextRange
+                End If
                 legacyFont = legacyRange.Font
                 fontColor = legacyFont.Color
                 fontColor.RGB = ToOle(node.TextColor, tokens.TextPrimary)
-                paragraph = range.ParagraphFormat
-                Select Case If(node.Alignment, "left").ToLowerInvariant()
-                    Case "center"
-                        paragraph.Alignment = MsoParagraphAlignment.msoAlignCenter
-                    Case "right"
-                        paragraph.Alignment = MsoParagraphAlignment.msoAlignRight
-                    Case Else
-                        paragraph.Alignment = MsoParagraphAlignment.msoAlignLeft
-                End Select
-                paragraph.SpaceWithin = 1.05F
+
+                If frameAvailable Then
+                    paragraph = range.ParagraphFormat
+                    Select Case If(node.Alignment, "left").ToLowerInvariant()
+                        Case "center"
+                            paragraph.Alignment = MsoParagraphAlignment.msoAlignCenter
+                        Case "right"
+                            paragraph.Alignment = MsoParagraphAlignment.msoAlignRight
+                        Case Else
+                            paragraph.Alignment = MsoParagraphAlignment.msoAlignLeft
+                    End Select
+                    paragraph.SpaceWithin = 1.05F
+                End If
             Finally
                 ComObjectHelper.ReleaseComObject(paragraph)
                 ComObjectHelper.ReleaseComObject(fontColor)
@@ -330,7 +353,8 @@ Namespace Design
                 ComObjectHelper.ReleaseComObject(legacyRange)
                 ComObjectHelper.ReleaseComObject(legacyFrame)
                 ComObjectHelper.ReleaseComObject(font)
-                ComObjectHelper.ReleaseComObject(range)
+                ' В fallback-ветке range и legacyRange — один и тот же объект, повторно не освобождаем.
+                If frameAvailable Then ComObjectHelper.ReleaseComObject(range)
                 ComObjectHelper.ReleaseComObject(frame)
                 ComObjectHelper.ReleaseComObject(shapeLine)
                 ComObjectHelper.ReleaseComObject(shapeFill)

@@ -72,12 +72,15 @@ Namespace Design
                         report.RepairCount += 1
                     End While
                     If Not FitsEstimatedText(node) Then
+                        ' Оценка приблизительная; реальное переполнение проверяется после отрисовки,
+                        ' поэтому не валим всю колоду — сообщаем предупреждением и снижаем оценку.
                         report.Issues.Add(New VisualIssue With {
                             .Code = "TEXT_OVERFLOW_PREDICTED",
                             .NodeId = node.Id,
-                            .Severity = "error",
-                            .Message = "Text does not fit at the minimum semantic font size; content or layout repair is required"
+                            .Severity = "warning",
+                            .Message = "Оценочно текст не помещается при минимальном допустимом кегле; требуется сокращение текста или изменение компоновки"
                         })
+                        report.AestheticScore = Math.Min(report.AestheticScore, 80)
                     End If
                     RepairTextContrast(plan, node, report)
                 End If
@@ -321,8 +324,20 @@ Namespace Design
                             Dim actualFrame As TextFrame2 = Nothing
                             Dim actualRange As TextRange2 = Nothing
                             Try
-                                actualFrame = shape.TextFrame2
-                                If actualFrame.HasText = MsoTriState.msoTrue Then
+                                Try
+                                    actualFrame = shape.TextFrame2
+                                Catch textFrameEx As Exception
+                                    ' Часть хостов (WPS, отдельные сборки PowerPoint) не отдаёт Office.TextFrame2.
+                                    ' Это не повод откатывать всю колоду: пропускаем проверку текста с предупреждением.
+                                    report.Issues.Add(New VisualIssue With {
+                                        .Code = "RENDER_TEXT_VERIFY_UNAVAILABLE",
+                                        .NodeId = nodeId,
+                                        .Severity = "warning",
+                                        .Message = "Не удалось прочитать TextFrame2 у фигуры; проверка текста пропущена: " & textFrameEx.Message
+                                    })
+                                    actualFrame = Nothing
+                                End Try
+                                If actualFrame IsNot Nothing AndAlso actualFrame.HasText = MsoTriState.msoTrue Then
                                     RepairTextOverflow(shape, nodeId, report)
                                     actualRange = actualFrame.TextRange
                                     actualTextCharacters += If(actualRange.Text, "").Length
