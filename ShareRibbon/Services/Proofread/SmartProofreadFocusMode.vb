@@ -93,7 +93,7 @@ Public Class SmartProofreadFocusMode
             _state.ProcessedParagraphs = paragraphs
 
             If analysis Is Nothing Then
-                Await ShowParseErrorMessageAsync("校对分析结果为空", "")
+                Await ShowParseErrorMessageAsync("Результат анализа корректуры пуст", "")
                 Await _executeScript("window.proofreadIssueCount = 0;")
                 Return
             End If
@@ -356,7 +356,7 @@ Public Class SmartProofreadFocusMode
         sb.AppendLine("<div class=""proofread-list"">")
         sb.AppendLine("  <div class=""proofread-list-header"">")
         sb.AppendLine("    <span class=""proofread-list-icon"">🔍</span>")
-        sb.AppendLine($"    <span class=""proofread-list-title"">校对结果 ({issues.Count}处问题)</span>")
+        sb.AppendLine($"    <span class=""proofread-list-title"">Результат корректуры ({issues.Count} проблем)</span>")
         sb.AppendLine("  </div>")
         sb.AppendLine("  <div class=""proofread-summary"" id=""proofread-summary""></div>")
         
@@ -368,7 +368,7 @@ Public Class SmartProofreadFocusMode
         ' 高严重程度问题
         If highIssues.Count > 0 Then
             sb.AppendLine("  <div class=""proofread-severity-group"">")
-            sb.AppendLine($"    <div class=""severity-header high"">⚠️ 必须修改 ({highIssues.Count})</div>")
+            sb.AppendLine($"    <div class=""severity-header high"">⚠️ Обязательно исправить ({highIssues.Count})</div>")
             For Each issue In highIssues
                 sb.AppendLine(GenerateIssueItemHtml(issue))
             Next
@@ -378,7 +378,7 @@ Public Class SmartProofreadFocusMode
         ' 中等严重程度问题
         If mediumIssues.Count > 0 Then
             sb.AppendLine("  <div class=""proofread-severity-group"">")
-            sb.AppendLine($"    <div class=""severity-header medium"">💡 建议修改 ({mediumIssues.Count})</div>")
+            sb.AppendLine($"    <div class=""severity-header medium"">💡 Рекомендуется исправить ({mediumIssues.Count})</div>")
             For Each issue In mediumIssues
                 sb.AppendLine(GenerateIssueItemHtml(issue))
             Next
@@ -388,20 +388,20 @@ Public Class SmartProofreadFocusMode
         ' 低严重程度问题
         If lowIssues.Count > 0 Then
             sb.AppendLine("  <div class=""proofread-severity-group"">")
-            sb.AppendLine($"    <div class=""severity-header low"">ℹ️ 可选优化 ({lowIssues.Count})</div>")
+            sb.AppendLine($"    <div class=""severity-header low"">ℹ️ Необязательные улучшения ({lowIssues.Count})</div>")
             For Each issue In lowIssues.Take(5)
                 sb.AppendLine(GenerateIssueItemHtml(issue))
             Next
             If lowIssues.Count > 5 Then
-                sb.AppendLine($"    <div class=""proofread-more"">还有 {lowIssues.Count - 5} 处...</div>")
+                sb.AppendLine($"    <div class=""proofread-more"">Ещё {lowIssues.Count - 5}...</div>")
             End If
             sb.AppendLine("  </div>")
         End If
         
         ' 批量操作按钮
         sb.AppendLine("  <div class=""proofread-list-actions"">")
-        sb.AppendLine("    <button class=""proofread-btn primary"" onclick=""proofreadAcceptAll()"">全部接受</button>")
-        sb.AppendLine("    <button class=""proofread-btn secondary"" onclick=""proofreadExit()"">完成校对</button>")
+        sb.AppendLine("    <button class=""proofread-btn primary"" onclick=""proofreadAcceptAll()"">Принять все</button>")
+        sb.AppendLine("    <button class=""proofread-btn secondary"" onclick=""proofreadExit()"">Завершить корректуру</button>")
         sb.AppendLine("  </div>")
         
         sb.AppendLine("</div>")
@@ -419,23 +419,23 @@ Public Class SmartProofreadFocusMode
         Return $"
         <div class=""proofread-issue-item {severityClass}"" data-issue-id=""{issue.Id}"">
             <div class=""issue-header"">
-                <span class=""issue-location"">第{issue.ParagraphIndex + 1}段</span>
+                <span class=""issue-location"">Абзац {issue.ParagraphIndex + 1}</span>
                 <span class=""issue-type"">{issueTypeName}</span>
             </div>
             <div class=""issue-content"">
                 <div class=""issue-original"">
-                    <span class=""label"">原文:</span>
+                    <span class=""label"">Оригинал:</span>
                     <span class=""text"">{System.Web.HttpUtility.HtmlEncode(TruncateText(issue.Original, 50))}</span>
                 </div>
                 <div class=""issue-suggestion"">
-                    <span class=""label"">建议:</span>
+                    <span class=""label"">Правка:</span>
                     <span class=""text"">{System.Web.HttpUtility.HtmlEncode(TruncateText(issue.Suggestion, 50))}</span>
                 </div>
             </div>
             <div class=""issue-explanation"">{System.Web.HttpUtility.HtmlEncode(TruncateText(issue.Explanation, 100))}</div>
             <div class=""issue-actions"">
-                <button class=""issue-btn accept"" data-issue-id=""{issue.Id}"">接受</button>
-                <button class=""issue-btn ignore"" data-issue-id=""{issue.Id}"">忽略</button>
+                <button class=""issue-btn accept"" data-issue-id=""{issue.Id}"">Принять</button>
+                <button class=""issue-btn ignore"" data-issue-id=""{issue.Id}"">Пропустить</button>
             </div>
         </div>"
     End Function
@@ -445,13 +445,13 @@ Public Class SmartProofreadFocusMode
     ''' </summary>
     Private Function GetIssueTypeName(issueType As IssueType) As String
         Select Case issueType
-            Case IssueType.SpellingError : Return "拼写错误"
-            Case IssueType.WordUsageError : Return "用词错误"
-            Case IssueType.PunctuationError : Return "标点错误"
-            Case IssueType.GrammaticalError : Return "语法错误"
-            Case IssueType.ExpressionError : Return "表达问题"
-            Case IssueType.FormatError : Return "格式问题"
-            Case Else : Return "其他问题"
+            Case IssueType.SpellingError : Return "Орфография"
+            Case IssueType.WordUsageError : Return "Словоупотребление"
+            Case IssueType.PunctuationError : Return "Пунктуация"
+            Case IssueType.GrammaticalError : Return "Грамматика"
+            Case IssueType.ExpressionError : Return "Формулировка"
+            Case IssueType.FormatError : Return "Формат"
+            Case Else : Return "Другое"
         End Select
     End Function
 
@@ -485,7 +485,7 @@ Public Class SmartProofreadFocusMode
     ''' </summary>
     Private Async Function ShowParseErrorMessageAsync(errorMessage As String, rawPreview As String) As Task
         Dim payload As New JObject From {
-            {"errorMessage", If(errorMessage, "AI 返回格式异常，无法生成校对列表。")},
+            {"errorMessage", If(errorMessage, "AI вернул неверный формат, не удалось построить список правок.")},
             {"rawPreview", If(rawPreview, "")}
         }
         Await _executeScript($"showProofreadParseError({payload.ToString(Formatting.None)});")
