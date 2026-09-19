@@ -1,9 +1,9 @@
 {
   "id": "ApplyStyle",
-  "name": "应用样式",
-  "description": "应用Word预设样式",
+  "name": "Применить стиль",
+  "description": "Применить предустановленный стиль Word",
   "appType": "word",
-  "category": "段落和样式",
+  "category": "Абзацы и стили",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "styleName",
       "type": "string",
       "required": true,
-      "description": "样式名称，如 \"标题 1\""
+      "description": "Название стиля, например \"Заголовок 1\""
     },
     {
       "name": "range",
       "type": "string",
       "required": false,
-      "description": "范围：selection/paragraph",
+      "description": "Диапазон: selection/paragraph",
       "defaultValue": "selection"
     }
   ]

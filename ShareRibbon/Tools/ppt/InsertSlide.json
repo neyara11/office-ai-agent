@@ -1,9 +1,9 @@
 {
   "id": "InsertSlide",
-  "name": "插入幻灯片",
-  "description": "在指定位置插入新幻灯片",
+  "name": "Вставить слайд",
+  "description": "Вставить новый слайд в указанную позицию",
   "appType": "ppt",
-  "category": "幻灯片操作",
+  "category": "Работа со слайдами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,26 +11,26 @@
       "name": "position",
       "type": "string",
       "required": false,
-      "description": "插入位置：current/end",
+      "description": "Позиция вставки: current/end",
       "defaultValue": "end"
     },
     {
       "name": "layout",
       "type": "string",
       "required": false,
-      "description": "幻灯片布局"
+      "description": "Макет слайда"
     },
     {
       "name": "title",
       "type": "string",
       "required": false,
-      "description": "幻灯片标题"
+      "description": "Заголовок слайда"
     },
     {
       "name": "content",
       "type": "string",
       "required": false,
-      "description": "幻灯片内容"
+      "description": "Содержимое слайда"
     }
   ]
 }

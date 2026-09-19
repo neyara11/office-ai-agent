@@ -1,9 +1,9 @@
 {
   "id": "SetParagraphFormat",
-  "name": "设置段落格式",
-  "description": "设置指定段落的格式（字号、字体、加粗、斜体、颜色、对齐等）",
+  "name": "Задать формат абзаца",
+  "description": "Задать формат указанного абзаца (размер шрифта, шрифт, полужирный, курсив, цвет, выравнивание и т. д.)",
   "appType": "word",
-  "category": "操作",
+  "category": "Операции",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,55 +11,55 @@
       "name": "paragraphIndex",
       "type": "number",
       "required": true,
-      "description": "段落索引（从1开始）"
+      "description": "Индекс абзаца (начиная с 1)"
     },
     {
       "name": "fontSize",
       "type": "number",
       "required": false,
-      "description": "字号（pt）"
+      "description": "Размер шрифта (пт)"
     },
     {
       "name": "fontName",
       "type": "string",
       "required": false,
-      "description": "字体名称"
+      "description": "Название шрифта"
     },
     {
       "name": "bold",
       "type": "boolean",
       "required": false,
-      "description": "是否加粗"
+      "description": "Полужирный"
     },
     {
       "name": "italic",
       "type": "boolean",
       "required": false,
-      "description": "是否斜体"
+      "description": "Курсив"
     },
     {
       "name": "color",
       "type": "string",
       "required": false,
-      "description": "颜色（red/blue/black等）"
+      "description": "Цвет (red/blue/black и т. д.)"
     },
     {
       "name": "alignment",
       "type": "string",
       "required": false,
-      "description": "对齐方式（left/center/right）"
+      "description": "Выравнивание (left/center/right)"
     }
   ],
   "examples": [
     {
-      "description": "把第1段字号改为28pt",
+      "description": "Изменить размер шрифта 1-го абзаца на 28 пт",
       "params": {
         "paragraphIndex": 1,
         "fontSize": 28
       }
     },
     {
-      "description": "把第3段加粗并居中",
+      "description": "Сделать 3-й абзац полужирным и выровнять по центру",
       "params": {
         "paragraphIndex": 3,
         "bold": true,

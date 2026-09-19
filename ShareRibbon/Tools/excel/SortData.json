@@ -1,9 +1,9 @@
 {
   "id": "SortData",
-  "name": "排序数据",
-  "description": "对指定范围的数据进行排序",
+  "name": "Сортировка данных",
+  "description": "Отсортировать данные в указанном диапазоне",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,26 +11,26 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "要排序的数据范围"
+      "description": "Диапазон данных для сортировки"
     },
     {
       "name": "sortColumn",
       "type": "integer",
       "required": true,
-      "description": "排序列号（从1开始）"
+      "description": "Номер столбца сортировки (начиная с 1)"
     },
     {
       "name": "order",
       "type": "string",
       "required": false,
-      "description": "排序方向：asc/desc",
+      "description": "Направление сортировки: asc/desc",
       "defaultValue": "asc"
     },
     {
       "name": "hasHeader",
       "type": "boolean",
       "required": false,
-      "description": "是否包含表头",
+      "description": "Содержит заголовок",
       "defaultValue": true
     }
   ]

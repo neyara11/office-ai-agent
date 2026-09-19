@@ -1,9 +1,9 @@
 {
   "id": "MergeCells",
-  "name": "合并单元格",
-  "description": "合并或取消合并指定范围的单元格",
+  "name": "Объединить ячейки",
+  "description": "Объединить или разъединить ячейки в указанном диапазоне",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "单元格范围"
+      "description": "Диапазон ячеек"
     },
     {
       "name": "unmerge",
       "type": "boolean",
       "required": false,
-      "description": "是否取消合并",
+      "description": "Разъединить",
       "defaultValue": false
     }
   ]

@@ -1,9 +1,9 @@
 {
   "id": "CreateSheet",
-  "name": "创建工作表",
-  "description": "创建新的工作表",
+  "name": "Создать лист",
+  "description": "Создать новый лист",
   "appType": "excel",
-  "category": "工作表操作",
+  "category": "Работа с листами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,19 +11,19 @@
       "name": "name",
       "type": "string",
       "required": true,
-      "description": "工作表名称"
+      "description": "Имя листа"
     },
     {
       "name": "position",
       "type": "string",
       "required": false,
-      "description": "插入位置：before/after"
+      "description": "Позиция вставки: before/after"
     },
     {
       "name": "referenceSheet",
       "type": "string",
       "required": false,
-      "description": "参考工作表名称"
+      "description": "Имя листа-ориентира"
     }
   ]
 }

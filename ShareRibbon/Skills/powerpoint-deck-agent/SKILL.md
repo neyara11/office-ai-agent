@@ -1,6 +1,6 @@
 ---
 name: powerpoint-deck-agent
-description: Use for PowerPoint tasks that need slide generation, deck structure, layout cleanup, speaker notes, visual consistency, translation, review, or chart/table insertion.
+description: Используйте для задач PowerPoint, требующих генерации слайдов, структуры презентации, исправления макета, заметок докладчика, визуальной согласованности, перевода, проверки или вставки диаграмм/таблиц.
 application: PowerPoint
 default_for_application: true
 tags: powerpoint, ppt, slide, deck, presentation, layout, theme, chart, notes, review
@@ -8,35 +8,35 @@ allowed-tools: CreateSlides, InsertSlide, FormatSlide, InsertText, InsertTable, 
 intent_types: slide_generation, formatting, review, translation, presentation
 ---
 
-# PowerPoint Deck Agent
+# Агент презентаций PowerPoint
 
-Use this skill when the user asks PowerPoint to create or improve slides.
+Используйте этот навык, когда пользователь просит PowerPoint создать или улучшить слайды.
 
-## Operating Rules
+## Правила работы
 
-1. Read current slide index, total slide count, selected shapes, text boxes, slide titles, and visible content before planning.
-2. Treat the selected slide or selected shapes as the primary working area unless the user says the whole deck.
-3. Use registered slide tools. If no registered tool can perform an operation, report a capability gap instead of generating VBA implicitly.
-4. For design work, preserve the user's deck intent and improve readability, hierarchy, consistency, and presentation flow.
-5. After execution, observe slide count, modified slide index, inserted shapes, notes, and text changes.
-6. If the result is not correct, repair the plan using observed slide state.
-7. For a long-tail object capability not covered by a high-level tool, call `DiscoverOfficeCapability` first and use only returned executable `MemberId` values in `OfficeObjectOperation`.
-8. For deck creation, prefer the professional `CreateSlides` Scene contract with one coherent `designSystem` and explicit page archetypes. Do not default every page to title-and-bullets.
+1. Перед планированием прочитайте текущий индекс слайда, общее число слайдов, выделенные фигуры, текстовые поля, заголовки слайдов и видимое содержимое.
+2. Считайте выделенный слайд или выделенные фигуры основной рабочей областью, если пользователь не сказал, что вся презентация.
+3. Используйте зарегистрированные инструменты для слайдов. Если ни один зарегистрированный инструмент не может выполнить операцию, сообщите о пробеле в возможностях вместо неявной генерации VBA.
+4. При работе над дизайном сохраняйте замысел презентации пользователя и улучшайте читаемость, иерархию, согласованность и логику изложения.
+5. После выполнения наблюдайте число слайдов, индекс изменённого слайда, вставленные фигуры, заметки и изменения текста.
+6. Если результат неверен, исправьте план, используя наблюдаемое состояние слайдов.
+7. Для длиннохвостых объектных возможностей, не покрытых высокоуровневым инструментом, сначала вызовите `DiscoverOfficeCapability` и используйте только возвращённые исполняемые значения `MemberId` в `OfficeObjectOperation`.
+8. Для создания презентации предпочитайте профессиональный контракт Scene в `CreateSlides` с одной согласованной `designSystem` и явными архетипами страниц. Не делайте по умолчанию каждую страницу в стиле заголовок-и-маркеры.
 
-## Declarative Object Operations
+## Декларативные операции с объектами
 
-- Use only canonical refs such as `PowerPoint:presentations/active/slides/2/shapes`; never invent a COM object path.
-- Build `OfficeObjectOperation.batch` with `schemaVersion=1.0`, `appType=PowerPoint`, unique operation IDs, and actions limited to `get/set/invoke/create/delete/collection_item`.
-- Copy `MemberId` exactly from the latest `DiscoverOfficeCapability` result. Do not derive or shorten it.
-- For SmartArt, discover and create on the target slide's `shapes` collection. Read the returned `resultRef` from Observation/Data before addressing the created shape.
-- SmartArt node text can be addressed beneath the returned shape as `/smartart/nodes/{1-based-index}/textframe2/textrange`; discover the writable text member and use `action=set` with `arguments.value`.
-- Include `expectedEffects` such as `hasSmartArt`, `nodeCount`, `text`, or `nodeTexts` when the expected state is known. Treat `VERIFY_FAILED` as a signal to observe and repair parameters or refs.
+- Используйте только канонические ссылки, такие как `PowerPoint:presentations/active/slides/2/shapes`; никогда не выдумывайте путь к COM-объекту.
+- Стройте `OfficeObjectOperation.batch` со `schemaVersion=1.0`, `appType=PowerPoint`, уникальными ID операций и действиями, ограниченными `get/set/invoke/create/delete/collection_item`.
+- Копируйте `MemberId` точно из последнего результата `DiscoverOfficeCapability`. Не выводите и не сокращайте его.
+- Для SmartArt выполняйте обнаружение и создание в коллекции `shapes` целевого слайда. Прочитайте возвращённый `resultRef` из Observation/Data, прежде чем адресовать созданную фигуру.
+- Текст узлов SmartArt можно адресовать под возвращённой фигурой как `/smartart/nodes/{1-based-index}/textframe2/textrange`; найдите доступный для записи текстовый член и используйте `action=set` с `arguments.value`.
+- Включайте `expectedEffects`, такие как `hasSmartArt`, `nodeCount`, `text` или `nodeTexts`, когда ожидаемое состояние известно. Рассматривайте `VERIFY_FAILED` как сигнал наблюдать и исправить параметры или ссылки.
 
-## Common Tasks
+## Типовые задачи
 
-- Generate slides from an outline
-- Beautify the current slide or whole deck
-- Rewrite slide text for business reporting
-- Add speaker notes
-- Insert charts or tables
-- Apply consistent theme, spacing, alignment, and transitions
+- Генерировать слайды по плану
+- Оформить текущий слайд или всю презентацию
+- Переписать текст слайдов для делового отчёта
+- Добавить заметки докладчика
+- Вставить диаграммы или таблицы
+- Применить согласованные тему, интервалы, выравнивание и переходы

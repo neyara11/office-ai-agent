@@ -1,9 +1,9 @@
 {
   "id": "CreateSlides",
-  "name": "批量创建幻灯片",
-  "description": "使用专业 SlideScene 设计编译器批量创建幻灯片，支持统一设计系统、确定性布局、PowerPoint 实物验证和失败回滚。",
+  "name": "Массово создать слайды",
+  "description": "Массово создать слайды с помощью профессионального компилятора дизайна SlideScene: единая дизайн-система, детерминированная раскладка, проверка на реальном PowerPoint и откат при ошибке.",
   "appType": "ppt",
-  "category": "幻灯片操作",
+  "category": "Работа со слайдами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,20 +11,20 @@
       "name": "designSystem",
       "type": "string",
       "required": false,
-      "description": "设计系统：modern-tech、executive-light、executive-dark、editorial-warm。默认 executive-light；科技主题可显式选择 modern-tech。",
+      "description": "Дизайн-система: modern-tech, executive-light, executive-dark, editorial-warm. По умолчанию executive-light; для технологичной темы можно явно выбрать modern-tech.",
       "defaultValue": "executive-light"
     },
     {
       "name": "designTokens",
       "type": "object",
       "required": false,
-      "description": "可选品牌覆盖：colors:{background,surface,surfaceAlt,primary,secondary,textPrimary,textSecondary,divider,positive,negative}，typography:{fontFamily,displaySize,titleSize,bodySize,captionSize}。颜色会校验，字号会限制在可读范围。"
+      "description": "Необязательное переопределение бренда: colors:{background,surface,surfaceAlt,primary,secondary,textPrimary,textSecondary,divider,positive,negative}, typography:{fontFamily,displaySize,titleSize,bodySize,captionSize}. Цвета проверяются, размеры шрифта ограничиваются читаемым диапазоном."
     },
     {
       "name": "slides",
       "type": "array",
       "required": true,
-      "description": "页面 Scene 数组，最多 50 页。每项支持 slideType、title、subtitle、eyebrow、keyMessage、body、items、metrics、imagePath、chart、table、notes、source、cta、variant、columnHeaders、xAxisLabel、yAxisLabel。items 支持 title/body/value/emphasis/features；metrics 支持 value/label/delta/description/source。content 页面可带 chart:{chartType:column|line,title,categories,series:[{name,values,color}],valueSuffix,source} 或 table:{title,headers,rows,highlightColumn,source}，并用 1-4 个 items 表达洞察；imagePath、chart、table 只能选择一种主视觉。comparison 表格应传 columnHeaders:[维度,左方案,右方案]；matrix 必须传 xAxisLabel/yAxisLabel；不得补造条目或无来源数据。旧 title/content/layout 输入仍兼容。"
+      "description": "Массив Scene страниц, не более 50. Каждый элемент поддерживает slideType, title, subtitle, eyebrow, keyMessage, body, items, metrics, imagePath, chart, table, notes, source, cta, variant, columnHeaders, xAxisLabel, yAxisLabel. items поддерживает title/body/value/emphasis/features; metrics поддерживает value/label/delta/description/source. Страницы content могут содержать chart:{chartType:column|line,title,categories,series:[{name,values,color}],valueSuffix,source} или table:{title,headers,rows,highlightColumn,source} и использовать 1-4 items для изложения выводов; из imagePath, chart и table можно выбрать только один основной визуальный элемент. Для таблицы comparison следует передавать columnHeaders:[измерение,левый вариант,правый вариант]; для matrix обязательно передавать xAxisLabel/yAxisLabel; нельзя придумывать пункты или данные без источника. Старый формат ввода title/content/layout по-прежнему поддерживается."
     }
   ]
 }

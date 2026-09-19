@@ -1,9 +1,9 @@
 {
   "id": "InsertTable",
-  "name": "插入表格",
-  "description": "插入新表格",
+  "name": "Вставить таблицу",
+  "description": "Вставить новую таблицу",
   "appType": "word",
-  "category": "表格操作",
+  "category": "Работа с таблицами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,19 +11,19 @@
       "name": "rows",
       "type": "integer",
       "required": true,
-      "description": "行数"
+      "description": "Число строк"
     },
     {
       "name": "cols",
       "type": "integer",
       "required": true,
-      "description": "列数"
+      "description": "Число столбцов"
     },
     {
       "name": "data",
       "type": "array",
       "required": false,
-      "description": "表格数据（可选）"
+      "description": "Данные таблицы (необязательно)"
     }
   ]
 }

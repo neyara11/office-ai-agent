@@ -1,9 +1,9 @@
 {
   "id": "DeleteSlide",
-  "name": "删除幻灯片",
-  "description": "删除指定幻灯片",
+  "name": "Удалить слайд",
+  "description": "Удалить указанный слайд",
   "appType": "ppt",
-  "category": "幻灯片操作",
+  "category": "Работа со слайдами",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,7 +11,7 @@
       "name": "slideIndex",
       "type": "integer",
       "required": true,
-      "description": "幻灯片索引，-1表示当前"
+      "description": "Индекс слайда; -1 означает текущий"
     }
   ]
 }

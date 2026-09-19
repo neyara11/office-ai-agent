@@ -1,9 +1,9 @@
 {
   "id": "RemoveDuplicates",
-  "name": "删除重复项",
-  "description": "删除指定范围内的重复行",
+  "name": "Удалить дубликаты",
+  "description": "Удалить повторяющиеся строки в указанном диапазоне",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,19 +11,19 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "数据范围"
+      "description": "Диапазон данных"
     },
     {
       "name": "columns",
       "type": "array",
       "required": false,
-      "description": "检查重复的列号数组"
+      "description": "Массив номеров столбцов для проверки дубликатов"
     },
     {
       "name": "hasHeader",
       "type": "boolean",
       "required": false,
-      "description": "是否包含表头",
+      "description": "Содержит заголовок",
       "defaultValue": true
     }
   ]

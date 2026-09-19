@@ -1,6 +1,6 @@
 ---
 name: excel-table-agent
-description: Use for Excel tasks that need table understanding, cleanup, calculation, formula repair, transpose, pivot tables, charts, reporting, or multi-step spreadsheet automation.
+description: Используйте для задач Excel, требующих понимания таблиц, очистки, вычислений, исправления формул, транспонирования, сводных таблиц, диаграмм, отчётности или многошаговой автоматизации электронных таблиц.
 application: Excel
 default_for_application: true
 tags: excel, spreadsheet, table, formula, chart, pivot, clean, transpose, statistics, data-analysis
@@ -8,52 +8,52 @@ allowed-tools: ApplyFormula, WriteData, FormatRange, CreateChart, CleanData, Sor
 intent_types: data_analysis, formula, chart, table_format, data_clean, transform
 ---
 
-# Excel Table Agent
+# Агент таблиц Excel
 
-Use this skill when the user asks Excel to do real spreadsheet work from natural language, especially:
+Используйте этот навык, когда пользователь просит Excel выполнить реальную работу с электронной таблицей на естественном языке, особенно:
 
-- organize or beautify a table
-- calculate totals, averages, rankings, rates, commissions, KPIs, or custom formulas
-- repair an incorrect formula or algorithm
-- generate a chart from selected data
-- transpose rows and columns
-- clean duplicates, blanks, spaces, inconsistent text, or obvious data quality issues
-- create a pivot table, summary table, or report sheet
+- упорядочить или оформить таблицу
+- вычислить итоги, средние значения, рейтинги, ставки, комиссии, KPI или пользовательские формулы
+- исправить неверную формулу или алгоритм
+- построить диаграмму по выбранным данным
+- транспонировать строки и столбцы
+- очистить дубликаты, пустые значения, пробелы, несогласованный текст или очевидные проблемы качества данных
+- создать сводную таблицу, итоговую таблицу или лист отчёта
 
-## Operating Rules
+## Правила работы
 
-1. First read the current Excel context: workbook, sheet, selection address, used range, headers, sample rows, data types, numeric columns, text columns, formula cells, blanks, duplicates, and candidate target area.
-2. Prefer native JSON tools over VBA. Use `ExecuteVBA` only when registered tools cannot express the task.
-3. If the user selected a range, treat it as the primary working range. If there is no selection, infer the current table from `UsedRange`.
-4. Do not ask the user for data that the add-in can observe from Excel.
-5. For write operations, produce a plan with target ranges and expected effects before acting when the task is medium or risky.
-6. After each operation, observe the sheet state: changed range, formulas, chart count, row/column shape, or generated summary.
-7. If execution fails, repair the tool parameters using the observation. Do not fall back to a long chat explanation unless execution is impossible.
+1. Сначала прочитайте текущий контекст Excel: книгу, лист, адрес выделения, используемый диапазон, заголовки, примеры строк, типы данных, числовые столбцы, текстовые столбцы, ячейки с формулами, пустые значения, дубликаты и предполагаемую целевую область.
+2. Предпочитайте встроенные JSON-инструменты вместо VBA. Используйте `ExecuteVBA` только тогда, когда зарегистрированные инструменты не могут выразить задачу.
+3. Если пользователь выделил диапазон, считайте его основной рабочей областью. Если выделения нет, определите текущую таблицу по `UsedRange`.
+4. Не запрашивайте у пользователя данные, которые надстройка может наблюдать в Excel.
+5. Для операций записи сформируйте план с целевыми диапазонами и ожидаемыми эффектами до выполнения, если задача среднего уровня сложности или рискованна.
+6. После каждой операции наблюдайте состояние листа: изменённый диапазон, формулы, количество диаграмм, форму строк/столбцов или сформированную сводку.
+7. Если выполнение не удалось, исправьте параметры инструмента с учётом наблюдения. Не переходите к длинному объяснению в чате, если только выполнение невозможно.
 
-## Tool Preferences
+## Предпочтения по инструментам
 
-- Table formatting: `FormatRange`, `AutoFit`, `ConditionalFormat`
-- Formula generation or repair: `ApplyFormula`
-- Summary/statistics: `DataAnalysis`, `ApplyFormula`, `CreatePivotTable`
-- Chart generation: `CreateChart` after selecting chart type from data shape
-- Row/column transpose: `TransformData` with `operation=transpose`
-- Cleaning: `CleanData`, `RemoveDuplicates`, `FindReplace`
-- Report output: `GenerateReport`, `WriteData`, `CreateChart`
+- Форматирование таблиц: `FormatRange`, `AutoFit`, `ConditionalFormat`
+- Генерация или исправление формул: `ApplyFormula`
+- Сводка/статистика: `DataAnalysis`, `ApplyFormula`, `CreatePivotTable`
+- Построение диаграмм: `CreateChart` после выбора типа диаграммы по форме данных
+- Транспонирование строк/столбцов: `TransformData` с `operation=transpose`
+- Очистка: `CleanData`, `RemoveDuplicates`, `FindReplace`
+- Вывод отчёта: `GenerateReport`, `WriteData`, `CreateChart`
 
-## Chart Selection Heuristics
+## Эвристики выбора диаграммы
 
-- Trend over time: line chart
-- Category comparison: column or bar chart
-- Share of total with few categories: pie chart
-- Relationship between two numeric columns: scatter chart
-- Multiple numeric series by category: clustered column chart
+- Тренд во времени: линейный график
+- Сравнение категорий: столбчатая или линейчатая диаграмма
+- Доля от общего при небольшом числе категорий: круговая диаграмма
+- Связь между двумя числовыми столбцами: точечная диаграмма
+- Несколько числовых рядов по категориям: кластеризованная столбчатая диаграмма
 
-## Formula Repair Heuristics
+## Эвристики исправления формул
 
-When asked to fix an algorithm or formula:
+Когда просят исправить алгоритм или формулу:
 
-1. Inspect the source columns and the current formula if present.
-2. Identify references, relative/absolute addressing, row offsets, and likely fill-down range.
-3. Generate the corrected formula for the first data row.
-4. Apply it to the target range with fill-down when appropriate.
-5. Observe whether Excel reports formula errors such as `#VALUE!`, `#REF!`, `#N/A`, or empty results.
+1. Изучите исходные столбцы и текущую формулу, если она есть.
+2. Определите ссылки, относительную/абсолютную адресацию, смещения строк и вероятный диапазон протягивания.
+3. Сформируйте исправленную формулу для первой строки данных.
+4. Примените её к целевому диапазону с протягиванием, когда это уместно.
+5. Наблюдайте, сообщает ли Excel об ошибках формул, таких как `#VALUE!`, `#REF!`, `#N/A`, или о пустых результатах.

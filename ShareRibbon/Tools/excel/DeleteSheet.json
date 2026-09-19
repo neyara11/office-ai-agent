@@ -1,9 +1,9 @@
 {
   "id": "DeleteSheet",
-  "name": "删除工作表",
-  "description": "删除指定工作表",
+  "name": "Удалить лист",
+  "description": "Удалить указанный лист",
   "appType": "excel",
-  "category": "工作表操作",
+  "category": "Работа с листами",
   "riskLevel": "risky",
   "isVbaFallback": false,
   "parameters": [
@@ -11,7 +11,7 @@
       "name": "name",
       "type": "string",
       "required": true,
-      "description": "要删除的工作表名称"
+      "description": "Имя удаляемого листа"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "CreateChart",
-  "name": "创建图表",
-  "description": "根据数据范围创建图表",
+  "name": "Создать диаграмму",
+  "description": "Создать диаграмму по диапазону данных",
   "appType": "excel",
-  "category": "基础操作",
+  "category": "Базовые операции",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,43 +11,43 @@
       "name": "dataRange",
       "type": "string",
       "required": true,
-      "description": "图表数据源范围"
+      "description": "Диапазон данных для диаграммы"
     },
     {
       "name": "type",
       "type": "string",
       "required": true,
-      "description": "图表类型：column/line/pie/bar/scatter/area"
+      "description": "Тип диаграммы: column/line/pie/bar/scatter/area"
     },
     {
       "name": "title",
       "type": "string",
       "required": false,
-      "description": "图表标题"
+      "description": "Заголовок диаграммы"
     },
     {
       "name": "position",
       "type": "string",
       "required": false,
-      "description": "图表放置位置"
+      "description": "Место размещения диаграммы"
     },
     {
       "name": "seriesNames",
       "type": "array",
       "required": false,
-      "description": "系列名称数组"
+      "description": "Массив имён рядов"
     },
     {
       "name": "categoryAxis",
       "type": "string",
       "required": false,
-      "description": "分类轴范围"
+      "description": "Диапазон оси категорий"
     },
     {
       "name": "legendPosition",
       "type": "string",
       "required": false,
-      "description": "图例位置：right/left/top/bottom"
+      "description": "Положение легенды: right/left/top/bottom"
     }
   ]
 }

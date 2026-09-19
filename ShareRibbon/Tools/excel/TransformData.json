@@ -1,9 +1,9 @@
 {
   "id": "TransformData",
-  "name": "数据转换",
-  "description": "对 Excel 范围执行转置、拆分列、合并列等结构转换",
+  "name": "Преобразование данных",
+  "description": "Выполнить структурные преобразования диапазона Excel: транспонирование, разделение и объединение столбцов",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,25 +11,25 @@
       "name": "sourceRange",
       "type": "string",
       "required": true,
-      "description": "源数据范围，如 A1:D20 或 {selection}"
+      "description": "Исходный диапазон данных, например A1:D20 или {selection}"
     },
     {
       "name": "operation",
       "type": "string",
       "required": true,
-      "description": "转换操作：transpose/split/merge"
+      "description": "Операция преобразования: transpose/split/merge"
     },
     {
       "name": "targetRange",
       "type": "string",
       "required": false,
-      "description": "输出目标左上角单元格，transpose/merge 推荐填写"
+      "description": "Верхняя левая ячейка результата; рекомендуется указывать для transpose/merge"
     },
     {
       "name": "delimiter",
       "type": "string",
       "required": false,
-      "description": "split/merge 使用的分隔符"
+      "description": "Разделитель для split/merge"
     }
   ]
 }

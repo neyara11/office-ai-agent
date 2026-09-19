@@ -1,9 +1,9 @@
 {
   "id": "FormatSlide",
-  "name": "格式化幻灯片",
-  "description": "设置幻灯片背景、布局等",
+  "name": "Форматировать слайд",
+  "description": "Задать фон, макет и другие параметры слайда",
   "appType": "ppt",
-  "category": "样式和动画",
+  "category": "Стили и анимация",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "background",
       "type": "string",
       "required": false,
-      "description": "背景设置"
+      "description": "Настройки фона"
     },
     {
       "name": "layout",
       "type": "string",
       "required": false,
-      "description": "布局类型"
+      "description": "Тип макета"
     }
   ]
 }

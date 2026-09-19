@@ -1,9 +1,9 @@
 {
   "id": "GetParagraphInfo",
-  "name": "获取段落详情",
-  "description": "获取指定段落的完整信息（内容、字号、字体、样式、对齐方式等），用于确认格式",
+  "name": "Получить сведения об абзаце",
+  "description": "Получить полную информацию об указанном абзаце (содержимое, размер шрифта, шрифт, стиль, выравнивание и т. д.) для проверки формата",
   "appType": "word",
-  "category": "查询",
+  "category": "Запросы",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,12 +11,12 @@
       "name": "paragraphIndex",
       "type": "number",
       "required": true,
-      "description": "段落索引（从1开始）"
+      "description": "Индекс абзаца (начиная с 1)"
     }
   ],
   "examples": [
     {
-      "description": "查看第1段的格式",
+      "description": "Посмотреть формат 1-го абзаца",
       "params": {
         "paragraphIndex": 1
       }

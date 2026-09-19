@@ -1,9 +1,9 @@
 {
   "id": "FilterData",
-  "name": "筛选数据",
-  "description": "对数据范围应用或清除筛选",
+  "name": "Фильтровать данные",
+  "description": "Применить или убрать фильтр для диапазона данных",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,25 +11,25 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "要筛选的数据范围"
+      "description": "Диапазон данных для фильтрации"
     },
     {
       "name": "column",
       "type": "integer",
       "required": true,
-      "description": "筛选列号"
+      "description": "Номер столбца для фильтра"
     },
     {
       "name": "criteria",
       "type": "string",
       "required": false,
-      "description": "筛选条件，如 >100"
+      "description": "Условие фильтра, например >100"
     },
     {
       "name": "clearFilter",
       "type": "boolean",
       "required": false,
-      "description": "是否清除筛选",
+      "description": "Убрать фильтр",
       "defaultValue": false
     }
   ]

@@ -1,9 +1,9 @@
 {
   "id": "GenerateTOC",
-  "name": "生成目录",
-  "description": "自动生成文档目录",
+  "name": "Создать оглавление",
+  "description": "Автоматически создать оглавление документа",
   "appType": "word",
-  "category": "文档结构",
+  "category": "Структура документа",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,14 +11,14 @@
       "name": "position",
       "type": "string",
       "required": false,
-      "description": "目录位置：start/cursor",
+      "description": "Позиция оглавления: start/cursor",
       "defaultValue": "cursor"
     },
     {
       "name": "levels",
       "type": "integer",
       "required": false,
-      "description": "目录层级（1-9）",
+      "description": "Уровни оглавления (1–9)",
       "defaultValue": 3
     }
   ]

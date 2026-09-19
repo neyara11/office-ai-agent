@@ -1,9 +1,9 @@
 {
   "id": "ReplaceText",
-  "name": "查找替换",
-  "description": "查找并替换文本内容",
+  "name": "Найти и заменить",
+  "description": "Найти и заменить текст",
   "appType": "word",
-  "category": "基础文本操作",
+  "category": "Базовая работа с текстом",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,19 +11,19 @@
       "name": "find",
       "type": "string",
       "required": true,
-      "description": "查找内容"
+      "description": "Что искать"
     },
     {
       "name": "replace",
       "type": "string",
       "required": true,
-      "description": "替换内容"
+      "description": "Чем заменить"
     },
     {
       "name": "matchCase",
       "type": "boolean",
       "required": false,
-      "description": "是否区分大小写"
+      "description": "Учитывать регистр"
     }
   ]
 }

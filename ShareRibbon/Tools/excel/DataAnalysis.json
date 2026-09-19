@@ -1,9 +1,9 @@
 {
   "id": "DataAnalysis",
-  "name": "数据分析",
-  "description": "基于 Excel 数据范围生成统计摘要、分组汇总、排名分析或透视表",
+  "name": "Анализ данных",
+  "description": "Сформировать по диапазону данных Excel статистическую сводку, группировку, рейтинг или сводную таблицу",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,43 +11,43 @@
       "name": "sourceRange",
       "type": "string",
       "required": true,
-      "description": "源数据范围，如 A1:F100 或 {selection}"
+      "description": "Исходный диапазон данных, например A1:F100 или {selection}"
     },
     {
       "name": "type",
       "type": "string",
       "required": true,
-      "description": "分析类型：summary/pivot/groupby/ranking"
+      "description": "Тип анализа: summary/pivot/groupby/ranking"
     },
     {
       "name": "targetRange",
       "type": "string",
       "required": false,
-      "description": "输出目标左上角单元格"
+      "description": "Верхняя левая ячейка результата"
     },
     {
       "name": "groupBy",
       "type": "string",
       "required": false,
-      "description": "groupby 使用的分组字段名"
+      "description": "Имя поля группировки для groupby"
     },
     {
       "name": "valueField",
       "type": "string",
       "required": false,
-      "description": "统计或排名使用的数值字段名"
+      "description": "Имя числового поля для статистики или рейтинга"
     },
     {
       "name": "aggregate",
       "type": "string",
       "required": false,
-      "description": "聚合方式：sum/count/avg"
+      "description": "Способ агрегации: sum/count/avg"
     },
     {
       "name": "topN",
       "type": "integer",
       "required": false,
-      "description": "ranking 输出的最大条数"
+      "description": "Максимальное число записей для ranking"
     }
   ]
 }

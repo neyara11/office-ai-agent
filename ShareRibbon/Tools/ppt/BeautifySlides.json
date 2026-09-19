@@ -1,9 +1,9 @@
 {
   "id": "BeautifySlides",
-  "name": "美化幻灯片",
-  "description": "一键美化幻灯片样式",
+  "name": "Оформить слайды",
+  "description": "Одним действием оформить стиль слайдов",
   "appType": "ppt",
-  "category": "样式和动画",
+  "category": "Стили и анимация",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,14 +11,14 @@
       "name": "scope",
       "type": "string",
       "required": false,
-      "description": "范围：all/current",
+      "description": "Область: all/current",
       "defaultValue": "all"
     },
     {
       "name": "theme",
       "type": "object",
       "required": false,
-      "description": "主题：{background, titleFont, bodyFont}"
+      "description": "Тема: {background, titleFont, bodyFont}"
     }
   ]
 }

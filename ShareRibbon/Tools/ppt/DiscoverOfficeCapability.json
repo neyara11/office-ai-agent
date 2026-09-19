@@ -1,9 +1,9 @@
 {
   "id": "DiscoverOfficeCapability",
-  "name": "发现 PowerPoint 对象能力",
-  "description": "只读检索当前 PowerPoint 宿主中与目标相关的 Office API 成员。仅返回少量相关成员，不执行写操作。",
+  "name": "Найти возможности объектов PowerPoint",
+  "description": "Только чтение: найти в текущем хосте PowerPoint связанные с целью члены Office API. Возвращает лишь небольшое число подходящих членов и не выполняет запись.",
   "appType": "ppt",
-  "category": "Office 对象能力",
+  "category": "Возможности объектов Office",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,26 +11,26 @@
       "name": "query",
       "type": "string",
       "required": true,
-      "description": "要查找的自然语言能力目标"
+      "description": "Цель поиска возможности на естественном языке"
     },
     {
       "name": "targetType",
       "type": "string",
       "required": false,
-      "description": "可选的目标对象类型，如 Shapes、TextRange、SmartArt"
+      "description": "Необязательный тип целевого объекта, например Shapes, TextRange, SmartArt"
     },
     {
       "name": "includeReadOnly",
       "type": "boolean",
       "required": false,
-      "description": "是否包含只读成员，默认 true",
+      "description": "Включать члены только для чтения, по умолчанию true",
       "defaultValue": true
     },
     {
       "name": "maxResults",
       "type": "integer",
       "required": false,
-      "description": "最多返回成员数，默认 12，最大 20",
+      "description": "Максимум возвращаемых членов, по умолчанию 12, максимум 20",
       "defaultValue": 12
     }
   ]

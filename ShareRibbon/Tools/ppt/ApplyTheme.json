@@ -1,9 +1,9 @@
 {
   "id": "ApplyTheme",
-  "name": "应用主题",
-  "description": "应用预设主题或自定义主题",
+  "name": "Применить тему",
+  "description": "Применить предустановленную или пользовательскую тему",
   "appType": "ppt",
-  "category": "母版和主题",
+  "category": "Шаблоны и темы",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "themeName",
       "type": "string",
       "required": false,
-      "description": "主题名称"
+      "description": "Название темы"
     },
     {
       "name": "themeFile",
       "type": "string",
       "required": false,
-      "description": "主题文件路径"
+      "description": "Путь к файлу темы"
     }
   ]
 }

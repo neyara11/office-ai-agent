@@ -1,9 +1,9 @@
 {
   "id": "RenameSheet",
-  "name": "重命名工作表",
-  "description": "重命名工作表",
+  "name": "Переименовать лист",
+  "description": "Переименовать лист",
   "appType": "excel",
-  "category": "工作表操作",
+  "category": "Работа с листами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "oldName",
       "type": "string",
       "required": true,
-      "description": "原名称"
+      "description": "Старое имя"
     },
     {
       "name": "newName",
       "type": "string",
       "required": true,
-      "description": "新名称"
+      "description": "Новое имя"
     }
   ]
 }

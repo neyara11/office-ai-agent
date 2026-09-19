@@ -1,9 +1,9 @@
 {
   "id": "HideRowCol",
-  "name": "隐藏行列",
-  "description": "隐藏或取消隐藏行或列",
+  "name": "Скрыть строки или столбцы",
+  "description": "Скрыть или показать строки и столбцы",
   "appType": "excel",
-  "category": "高级功能",
+  "category": "Дополнительные функции",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,19 +11,19 @@
       "name": "type",
       "type": "string",
       "required": true,
-      "description": "类型：row/column"
+      "description": "Тип: row/column"
     },
     {
       "name": "position",
       "type": "string",
       "required": true,
-      "description": "位置"
+      "description": "Позиция"
     },
     {
       "name": "unhide",
       "type": "boolean",
       "required": false,
-      "description": "是否取消隐藏",
+      "description": "Показать обратно",
       "defaultValue": false
     }
   ]

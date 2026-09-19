@@ -1,9 +1,9 @@
 {
   "id": "MoveSlide",
-  "name": "移动幻灯片",
-  "description": "移动幻灯片到指定位置",
+  "name": "Переместить слайд",
+  "description": "Переместить слайд в указанную позицию",
   "appType": "ppt",
-  "category": "幻灯片操作",
+  "category": "Работа со слайдами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "fromIndex",
       "type": "integer",
       "required": true,
-      "description": "源位置"
+      "description": "Исходная позиция"
     },
     {
       "name": "toIndex",
       "type": "integer",
       "required": true,
-      "description": "目标位置"
+      "description": "Целевая позиция"
     }
   ]
 }

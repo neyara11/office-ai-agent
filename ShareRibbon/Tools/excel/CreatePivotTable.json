@@ -1,9 +1,9 @@
 {
   "id": "CreatePivotTable",
-  "name": "创建透视表",
-  "description": "从数据源创建数据透视表",
+  "name": "Создать сводную таблицу",
+  "description": "Создать сводную таблицу из источника данных",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,31 +11,31 @@
       "name": "sourceRange",
       "type": "string",
       "required": true,
-      "description": "数据源范围"
+      "description": "Диапазон источника данных"
     },
     {
       "name": "targetCell",
       "type": "string",
       "required": true,
-      "description": "透视表放置位置"
+      "description": "Место размещения сводной таблицы"
     },
     {
       "name": "rowFields",
       "type": "array",
       "required": true,
-      "description": "行字段数组"
+      "description": "Массив полей строк"
     },
     {
       "name": "valueFields",
       "type": "array",
       "required": true,
-      "description": "值字段数组"
+      "description": "Массив полей значений"
     },
     {
       "name": "columnFields",
       "type": "array",
       "required": false,
-      "description": "列字段数组"
+      "description": "Массив полей столбцов"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "FindReplace",
-  "name": "查找替换",
-  "description": "在范围内查找并替换文本",
+  "name": "Найти и заменить",
+  "description": "Найти и заменить текст в диапазоне",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,31 +11,31 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "查找范围，all 表示全部"
+      "description": "Область поиска; all означает весь лист"
     },
     {
       "name": "find",
       "type": "string",
       "required": true,
-      "description": "查找内容"
+      "description": "Что искать"
     },
     {
       "name": "replace",
       "type": "string",
       "required": true,
-      "description": "替换内容"
+      "description": "Чем заменить"
     },
     {
       "name": "matchCase",
       "type": "boolean",
       "required": false,
-      "description": "是否区分大小写"
+      "description": "Учитывать регистр"
     },
     {
       "name": "matchEntireCell",
       "type": "boolean",
       "required": false,
-      "description": "是否全单元格匹配"
+      "description": "Совпадение по всей ячейке"
     }
   ]
 }

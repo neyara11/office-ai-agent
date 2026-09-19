@@ -1,6 +1,6 @@
 ---
 name: word-document-agent
-description: Use for Word tasks that need document context, proofreading, formatting, heading and numbering restructuring, style application, translation, continuation, or multi-step document editing.
+description: Используйте для задач Word, требующих контекста документа, вычитки, форматирования, реструктуризации заголовков и нумерации, применения стилей, перевода, продолжения текста или многошагового редактирования документа.
 application: Word
 default_for_application: true
 tags: word, docx, document, proofread, format, heading, numbering, style, translate, writing
@@ -8,24 +8,24 @@ allowed-tools: ListParagraphs, GetParagraphInfo, SetParagraphFormat, FormatText,
 intent_types: proofread, formatting, numbering, heading, writing, translation
 ---
 
-# Word Document Agent
+# Агент документов Word
 
-Use this skill when the user asks Word to modify the current document rather than merely chat about it.
+Используйте этот навык, когда пользователь просит Word изменить текущий документ, а не просто обсудить его.
 
-## Operating Rules
+## Правила работы
 
-1. Read the current selection, paragraph structure, headings, styles, and nearby context before planning.
-2. If the user selected content, operate on the selection by default; otherwise infer whether the request applies to the whole document.
-3. Do not repeatedly ask for range, style, numbering, or visible text when Word context can provide it.
-4. Prefer structured document tools and Word-specific harnesses over free-form VBA.
-5. For formatting, proofreading, numbering, and heading work, plan, preview or explain, execute, observe, and repair.
-6. Keep `ShareRibbon` generic; Word COM execution belongs in `WordAi`.
+1. Прочитайте текущее выделение, структуру абзацев, заголовки, стили и близлежащий контекст перед планированием.
+2. Если пользователь выделил содержимое, по умолчанию работайте с выделением; в противном случае определите, применяется ли запрос ко всему документу.
+3. Не спрашивайте повторно о диапазоне, стиле, нумерации или видимом тексте, когда контекст Word может их предоставить.
+4. Предпочитайте структурированные инструменты для документов и специализированные для Word harness-механизмы, а не свободный VBA.
+5. Для форматирования, вычитки, нумерации и работы с заголовками: планируйте, предварительно просматривайте или объясняйте, выполняйте, наблюдайте и исправляйте.
+6. Держите `ShareRibbon` универсальным; выполнение Word COM относится к `WordAi`.
 
-## Common Tasks
+## Типовые задачи
 
-- Rebuild headings and numbering
-- Normalize fonts, spacing, indentation, and title hierarchy
-- Proofread typos, punctuation, and formal expression
-- Apply official document, report, or paper styles
-- Generate or update table of contents
-- Continue or rewrite selected content
+- Перестроить заголовки и нумерацию
+- Нормализовать шрифты, интервалы, отступы и иерархию заголовков
+- Вычитать опечатки, пунктуацию и формальные выражения
+- Применить стили официального документа, отчёта или научной работы
+- Создать или обновить оглавление
+- Продолжить или переписать выделенное содержимое

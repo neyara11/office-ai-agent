@@ -1,9 +1,9 @@
 {
   "id": "ApplyTransition",
-  "name": "应用切换效果",
-  "description": "设置幻灯片切换动画",
+  "name": "Применить переход",
+  "description": "Настроить анимацию перехода слайдов",
   "appType": "ppt",
-  "category": "样式和动画",
+  "category": "Стили и анимация",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "transitionType",
       "type": "string",
       "required": true,
-      "description": "切换类型：fade/push/wipe"
+      "description": "Тип перехода: fade/push/wipe"
     },
     {
       "name": "scope",
       "type": "string",
       "required": false,
-      "description": "范围：all/current",
+      "description": "Область: all/current",
       "defaultValue": "all"
     }
   ]

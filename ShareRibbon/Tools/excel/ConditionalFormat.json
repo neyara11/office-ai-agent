@@ -1,9 +1,9 @@
 {
   "id": "ConditionalFormat",
-  "name": "条件格式",
-  "description": "为单元格范围添加条件格式",
+  "name": "Условное форматирование",
+  "description": "Добавить условное форматирование к диапазону ячеек",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,25 +11,25 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "目标范围"
+      "description": "Целевой диапазон"
     },
     {
       "name": "rule",
       "type": "string",
       "required": true,
-      "description": "规则类型：highlight/databar/colorscale/iconset"
+      "description": "Тип правила: highlight/databar/colorscale/iconset"
     },
     {
       "name": "condition",
       "type": "string",
       "required": false,
-      "description": "条件表达式"
+      "description": "Условное выражение"
     },
     {
       "name": "color",
       "type": "string",
       "required": false,
-      "description": "颜色"
+      "description": "Цвет"
     }
   ]
 }

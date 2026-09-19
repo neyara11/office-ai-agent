@@ -1,9 +1,9 @@
 {
   "id": "FormatRange",
-  "name": "格式化范围",
-  "description": "设置单元格的样式格式，包括字体、颜色、边框等",
+  "name": "Форматировать диапазон",
+  "description": "Задать стиль ячеек: шрифт, цвет, границы и т. д.",
   "appType": "excel",
-  "category": "基础操作",
+  "category": "Базовые операции",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,49 +11,49 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "要格式化的单元格范围"
+      "description": "Диапазон ячеек для форматирования"
     },
     {
       "name": "style",
       "type": "string",
       "required": false,
-      "description": "预设样式：header/total/data"
+      "description": "Предустановленный стиль: header/total/data"
     },
     {
       "name": "bold",
       "type": "boolean",
       "required": false,
-      "description": "是否加粗"
+      "description": "Полужирный"
     },
     {
       "name": "italic",
       "type": "boolean",
       "required": false,
-      "description": "是否斜体"
+      "description": "Курсив"
     },
     {
       "name": "fontSize",
       "type": "integer",
       "required": false,
-      "description": "字体大小"
+      "description": "Размер шрифта"
     },
     {
       "name": "backgroundColor",
       "type": "string",
       "required": false,
-      "description": "背景色"
+      "description": "Цвет фона"
     },
     {
       "name": "fontColor",
       "type": "string",
       "required": false,
-      "description": "字体颜色"
+      "description": "Цвет шрифта"
     },
     {
       "name": "borders",
       "type": "string",
       "required": false,
-      "description": "边框样式：true/all/outline/none"
+      "description": "Стиль границ: true/all/outline/none"
     }
   ]
 }

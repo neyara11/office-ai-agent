@@ -1,9 +1,9 @@
 {
   "id": "BeautifyDocument",
-  "name": "美化文档",
-  "description": "一键美化文档整体样式",
+  "name": "Оформить документ",
+  "description": "Одним действием оформить общий стиль документа",
   "appType": "word",
-  "category": "文档美化",
+  "category": "Оформление документа",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "theme",
       "type": "object",
       "required": false,
-      "description": "主题设置：{h1, h2, body}"
+      "description": "Настройки темы: {h1, h2, body}"
     },
     {
       "name": "margins",
       "type": "object",
       "required": false,
-      "description": "页边距：{top, bottom, left, right}"
+      "description": "Поля страницы: {top, bottom, left, right}"
     }
   ]
 }

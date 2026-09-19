@@ -1,9 +1,9 @@
 {
   "id": "ExecuteVBA",
-  "name": "执行VBA",
-  "description": "执行VBA代码作为回退方案，当注册命令无法满足需求时使用",
+  "name": "Выполнить VBA",
+  "description": "Выполнить код VBA как запасной вариант, когда зарегистрированные команды не решают задачу",
   "appType": "excel",
-  "category": "高级功能",
+  "category": "Дополнительные функции",
   "riskLevel": "risky",
   "isVbaFallback": true,
   "parameters": [
@@ -11,7 +11,7 @@
       "name": "code",
       "type": "string",
       "required": true,
-      "description": "完整的VBA Sub或Function代码"
+      "description": "Полный код VBA Sub или Function"
     }
   ]
 }

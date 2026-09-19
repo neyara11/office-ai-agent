@@ -1,9 +1,9 @@
 {
   "id": "SetSlideLayout",
-  "name": "设置幻灯片布局",
-  "description": "更改幻灯片布局",
+  "name": "Задать макет слайда",
+  "description": "Изменить макет слайда",
   "appType": "ppt",
-  "category": "样式和动画",
+  "category": "Стили и анимация",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,7 +11,7 @@
       "name": "layout",
       "type": "string",
       "required": true,
-      "description": "布局：title/titleAndContent/blank"
+      "description": "Макет: title/titleAndContent/blank"
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "ListParagraphs",
-  "name": "列出段落",
-  "description": "列出文档中所有段落的摘要信息（索引、样式、前30字符），用于探索文档结构",
+  "name": "Список абзацев",
+  "description": "Вывести сводку по всем абзацам документа (индекс, стиль, первые 30 символов) для изучения структуры документа",
   "appType": "word",
-  "category": "查询",
+  "category": "Запросы",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,16 +11,16 @@
       "name": "maxCount",
       "type": "number",
       "required": false,
-      "description": "最多返回多少个段落，默认50"
+      "description": "Сколько абзацев вернуть, по умолчанию 50"
     }
   ],
   "examples": [
     {
-      "description": "列出所有段落",
+      "description": "Вывести все абзацы",
       "params": {}
     },
     {
-      "description": "只看前10段",
+      "description": "Показать только первые 10 абзацев",
       "params": {
         "maxCount": 10
       }

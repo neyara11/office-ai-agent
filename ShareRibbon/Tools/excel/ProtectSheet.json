@@ -1,9 +1,9 @@
 {
   "id": "ProtectSheet",
-  "name": "保护工作表",
-  "description": "保护或取消保护工作表",
+  "name": "Защитить лист",
+  "description": "Защитить или снять защиту листа",
   "appType": "excel",
-  "category": "高级功能",
+  "category": "Дополнительные функции",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,19 +11,19 @@
       "name": "sheetName",
       "type": "string",
       "required": false,
-      "description": "工作表名称"
+      "description": "Имя листа"
     },
     {
       "name": "password",
       "type": "string",
       "required": false,
-      "description": "保护密码"
+      "description": "Пароль защиты"
     },
     {
       "name": "unprotect",
       "type": "boolean",
       "required": false,
-      "description": "是否取消保护",
+      "description": "Снять защиту",
       "defaultValue": false
     }
   ]

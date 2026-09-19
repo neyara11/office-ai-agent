@@ -1,9 +1,9 @@
 {
   "id": "CleanData",
-  "name": "数据清洗",
-  "description": "对指定范围进行数据清洗操作",
+  "name": "Очистка данных",
+  "description": "Выполнить очистку данных в указанном диапазоне",
   "appType": "excel",
-  "category": "基础操作",
+  "category": "Базовые операции",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "range",
       "type": "string",
       "required": true,
-      "description": "要清洗的数据范围"
+      "description": "Диапазон данных для очистки"
     },
     {
       "name": "operation",
       "type": "string",
       "required": true,
-      "description": "清洗操作：removeduplicates/fillempty/trim/replace"
+      "description": "Операция очистки: removeduplicates/fillempty/trim/replace"
     }
   ]
 }

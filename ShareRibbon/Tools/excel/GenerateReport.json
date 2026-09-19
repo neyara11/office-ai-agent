@@ -1,9 +1,9 @@
 {
   "id": "GenerateReport",
-  "name": "生成报表",
-  "description": "基于 Excel 数据范围生成分析报表工作表，可包含摘要和图表",
+  "name": "Создать отчёт",
+  "description": "Создать лист аналитического отчёта на основе диапазона данных Excel, возможно со сводкой и диаграммой",
   "appType": "excel",
-  "category": "数据操作",
+  "category": "Работа с данными",
   "riskLevel": "medium",
   "isVbaFallback": false,
   "parameters": [
@@ -11,25 +11,25 @@
       "name": "sourceRange",
       "type": "string",
       "required": true,
-      "description": "源数据范围，如 A1:F100 或 {selection}"
+      "description": "Исходный диапазон данных, например A1:F100 или {selection}"
     },
     {
       "name": "targetSheet",
       "type": "string",
       "required": false,
-      "description": "目标报表工作表名称"
+      "description": "Имя листа отчёта"
     },
     {
       "name": "title",
       "type": "string",
       "required": false,
-      "description": "报表标题"
+      "description": "Заголовок отчёта"
     },
     {
       "name": "includeChart",
       "type": "boolean",
       "required": false,
-      "description": "是否同时生成图表"
+      "description": "Также создать диаграмму"
     }
   ]
 }

@@ -1,42 +1,42 @@
 ---
 name: powerpoint-professional-design-agent
-description: Use when PowerPoint must produce a polished business, consulting, product, strategy, technology, pitch, or executive presentation rather than a basic title-and-bullets deck. 适用于精美、高端、复杂、专业商业汇报和咨询风格 PPT。
+description: Используйте, когда PowerPoint должен создать отполированную деловую, консалтинговую, продуктовую, стратегическую, технологическую, питч- или исполнительную презентацию, а не базовую колоду из заголовков и маркеров.
 application: PowerPoint
-keywords: ppt, 精美, 精致, 好看, 漂亮, 美观, 高级, 高端, 专业设计, 咨询风格, 麦肯锡, 路演, 发布会, polished, beautiful, premium, high-end
+keywords: ppt, 精美, 精致, 好看, 漂亮, 美观, 高级, 高端, 专业设计, 咨询风格, 麦肯锡, 路演, 发布会, polished, beautiful, premium, high-end, презентация, слайды, дизайн, премиум, элитный, консалтинг, питч, защита проекта, красиво, стильно, профессиональный дизайн, дорого
 tags: powerpoint, professional-design, pitch-deck, consulting, executive, architecture, visual-storytelling, premium, 专业, 专业设计, 精美, 精美PPT, 高端, 高端PPT, 复杂, 复杂PPT, 商业汇报, 咨询风格
 allowed-tools: CreateSlides, InsertTable, DiscoverOfficeCapability, OfficeObjectOperation
 intent_types: slide_generation, professional_design, visual_storytelling, pitch_deck, executive_presentation
 ---
 
-# PowerPoint Professional Design Agent
+# Агент профессионального дизайна PowerPoint
 
-Create presentation-ready slides through narrative planning, page archetype selection, one coherent design system, deterministic layout, and visual verification.
+Создавайте готовые к презентации слайды через планирование повествования, выбор архетипа страницы, одну согласованную дизайн-систему, детерминированную компоновку и визуальную проверку.
 
-## Design Process
+## Процесс дизайна
 
-1. Read the current presentation size, theme, slide count, selected slide, existing colors, and available assets.
-2. Convert the user's goal into a narrative arc. Every slide must have one conclusion, not merely a topic label.
-3. Select one page archetype per slide: `cover`, `section`, `statement`, `content`, `two-column`, `comparison`, `kpi`, `process`, `architecture`, `matrix`, `quote`, or `closing`.
-4. Choose one design system for the entire deck: `modern-tech`, `executive-light`, `executive-dark`, or `editorial-warm`.
-   If the current deck or user provides brand colors and fonts, pass them through `designTokens` instead of forcing a preset palette.
-5. Call `CreateSlides` once with a coherent deck-level Scene specification. Do not generate one basic title-and-content command per page.
-6. Put a real accessible `imagePath` in the `CreateSlides` Scene when an image is required. Never create a fake image placeholder.
-7. Use `DiscoverOfficeCapability` and `OfficeObjectOperation` only for long-tail Office objects that the Scene compiler or high-level tools do not cover.
-8. Observe `visualVerification`, `slideResults`, and warnings. Repair overflow, high density, missing artifacts, or failed pages before reporting completion.
-9. Never invent market statistics, customer numbers, benchmarks, or ROI figures. Every external metric must include `source`; if no reliable source is available, omit the number or explicitly label it as an assumption/illustrative estimate.
-10. Do not add generic AI branding, template watermarks, decorative circles, or filler labels unless the user or active brand template requires them.
-11. Never copy titles, numbers, labels, or claims from this Skill's examples. Every visible string must be grounded in the user's request, the active presentation, or an explicitly identified source.
-12. Do not pad `items`, `steps`, `layers`, `metrics`, or other collections to reach a preferred layout count. Select a composition that fits the real information quantity.
-13. For comparison tables, provide `columnHeaders` as `[dimension, left option, right option]`; do not let generic labels imply which alternative is current, traditional, recommended, or AI-driven.
-14. If a visual unit cannot fit at its semantic minimum font size, shorten it, split the slide, or select another composition. Do not solve density by shrinking body text into caption sizes.
-15. For a simple verified column or line chart, put a `chart` object directly on a `content` Scene so it is laid out, rendered, verified, and rolled back with the deck. Use 1-4 `items` for the conclusions the chart proves.
-16. Chart categories must contain 2-8 labels, series must contain 1-3 finite numeric arrays of equal length, and external data must provide `chart.source`. Signed values are supported for change, variance, profit/loss, and other zero-baseline comparisons. Do not convert qualitative claims into invented numbers.
-17. For a compact evidence table, put `table:{title,headers,rows,highlightColumn,source}` on a `content` Scene. Use 2-5 columns, 1-6 rows, a zero-based optional highlight column, and 1-4 conclusion items.
-18. A content Scene may use only one main visual among `imagePath`, `chart`, and `table`. Split the slide when more than one main visual is required.
-19. Every `matrix` Scene must provide concise semantic `xAxisLabel` and `yAxisLabel`; never assume the axes are effort and impact.
-20. Use `architecture.variant: hub-spoke` only when the first item is the real core platform or capability and the remaining 2-4 items are its surrounding capabilities. Use the default architecture stack for actual layers.
+1. Прочитайте текущий размер презентации, тему, число слайдов, выделенный слайд, существующие цвета и доступные ресурсы.
+2. Преобразуйте цель пользователя в повествовательную дугу. Каждый слайд должен содержать один вывод, а не просто метку темы.
+3. Выберите один архетип страницы для каждого слайда: `cover`, `section`, `statement`, `content`, `two-column`, `comparison`, `kpi`, `process`, `architecture`, `matrix`, `quote` или `closing`.
+4. Выберите одну дизайн-систему для всей презентации: `modern-tech`, `executive-light`, `executive-dark` или `editorial-warm`.
+   Если текущая презентация или пользователь задаёт фирменные цвета и шрифты, передайте их через `designTokens` вместо принудительного использования предустановленной палитры.
+5. Вызовите `CreateSlides` один раз с согласованной спецификацией Scene уровня презентации. Не генерируйте по одной базовой команде заголовок-и-содержимое на каждую страницу.
+6. Укажите реальный доступный `imagePath` в Scene `CreateSlides`, когда требуется изображение. Никогда не создавайте фиктивный заполнитель изображения.
+7. Используйте `DiscoverOfficeCapability` и `OfficeObjectOperation` только для длиннохвостых объектов Office, которые не покрываются компилятором Scene или высокоуровневыми инструментами.
+8. Наблюдайте `visualVerification`, `slideResults` и предупреждения. Исправьте переполнение, высокую плотность, отсутствующие артефакты или неудавшиеся страницы, прежде чем сообщить о завершении.
+9. Никогда не выдумывайте рыночную статистику, данные о клиентах, бенчмарки или показатели ROI. Каждая внешняя метрика должна содержать `source`; если надёжный источник недоступен, опустите число или явно обозначьте его как допущение/иллюстративную оценку.
+10. Не добавляйте общий AI-брендинг, водяные знаки шаблонов, декоративные круги или заполняющие метки, если этого не требуют пользователь или активный фирменный шаблон.
+11. Никогда не копируйте заголовки, числа, метки или утверждения из примеров этого навыка. Каждая видимая строка должна основываться на запросе пользователя, активной презентации или явно указанном источнике.
+12. Не дополняйте `items`, `steps`, `layers`, `metrics` или другие коллекции, чтобы достичь предпочтительного количества для компоновки. Выбирайте композицию, соответствующую реальному объёму информации.
+13. Для таблиц сравнения задавайте `columnHeaders` как `[dimension, left option, right option]`; не позволяйте общим меткам подразумевать, какой вариант является текущим, традиционным, рекомендуемым или AI-ориентированным.
+14. Если визуальная единица не помещается при её семантическом минимальном размере шрифта, сократите её, разделите слайд или выберите другую композицию. Не решайте проблему плотности, уменьшая основной текст до размеров подписей.
+15. Для простой проверенной столбчатой или линейной диаграммы поместите объект `chart` непосредственно в Scene `content`, чтобы он компоновался, отображался, проверялся и откатывался вместе с презентацией. Используйте 1-4 `items` для выводов, которые доказывает диаграмма.
+16. Категории диаграммы должны содержать 2-8 меток, ряды должны содержать 1-3 конечных числовых массива одинаковой длины, а внешние данные должны предоставлять `chart.source`. Поддерживаются знаковые значения для изменений, отклонений, прибыли/убытка и других сравнений с нулевой базовой линией. Не преобразовывайте качественные утверждения в выдуманные числа.
+17. Для компактной таблицы доказательств поместите `table:{title,headers,rows,highlightColumn,source}` в Scene `content`. Используйте 2-5 столбцов, 1-6 строк, необязательный столбец выделения с отсчётом от нуля и 1-4 элемента выводов.
+18. Scene `content` может использовать только один основной визуальный элемент среди `imagePath`, `chart` и `table`. Разделите слайд, когда требуется более одного основного визуального элемента.
+19. Каждый Scene `matrix` должен предоставлять краткие семантические `xAxisLabel` и `yAxisLabel`; никогда не предполагайте, что оси — это усилие и влияние.
+20. Используйте `architecture.variant: hub-spoke` только когда первый элемент является реальной основной платформой или возможностью, а остальные 2-4 элемента — её окружающими возможностями. Используйте стек архитектуры по умолчанию для фактических слоёв.
 
-## Slide Scene Contract
+## Контракт Scene слайда
 
 ```json
 {
@@ -73,21 +73,21 @@ Create presentation-ready slides through narrative planning, page archetype sele
 }
 ```
 
-## Visual Standards
+## Визуальные стандарты
 
-- Use conclusion-style titles and 3–5 visual units per slide.
-- Keep one dominant focal point and a clear reading order.
-- Use whitespace deliberately; do not fill every region.
-- Avoid paragraphs longer than roughly 80 Chinese characters or 45 English words per visual unit.
-- Use KPI for metrics, comparison for alternatives, process for sequences, architecture for layered systems, and matrix for two-dimensional prioritization.
-- Use a `content` Scene with `chart.chartType: column|line` for verified quantitative comparisons or trends. Prefer editable Scene charts over screenshots of charts.
-- Use a `content` Scene with `table` for compact evidence grids that need more than the three-column `comparison` contract. Keep cells concise enough to remain readable.
-- Maintain the same colors, typography hierarchy, spacing rhythm, footer, and shape language across the deck.
-- Use `variant: feature-left` or mark one item with `emphasis: true` when a content page needs a dominant focal point instead of an equal-card grid.
-- Mark exactly one comparison item with `emphasis: true` only when the evidence supports a recommended or dominant option; the composition will allocate it stronger visual weight without inventing a verdict.
-- Use `variant: hero-left` for KPI pages when one verified metric is the main conclusion and the remaining metrics are supporting evidence.
-- Use `variant: vertical` for process pages with longer step descriptions; use the default horizontal timeline only when every step is concise.
-- Use `variant: hub-spoke` for a core-and-capabilities architecture; keep the first item as the semantic core rather than selecting it for visual convenience.
-- Vary composition intentionally across adjacent slides. Do not repeat the same card grid, header rhythm, or decorative motif throughout the deck.
-- A successful tool call is not sufficient: the rendered slide must pass visual verification.
-- Prefer real images, charts, logos, and cited data when accessible. If no real asset is available, use a structured information graphic and report the missing asset instead of drawing a fake placeholder.
+- Используйте заголовки в стиле выводов и 3–5 визуальных единиц на слайд.
+- Сохраняйте один доминирующий фокус и чёткий порядок чтения.
+- Используйте пустое пространство осознанно; не заполняйте каждый участок.
+- Избегайте абзацев длиннее примерно 80 китайских иероглифов или 45 английских слов на визуальную единицу.
+- Используйте KPI для метрик, сравнение для альтернатив, процесс для последовательностей, архитектуру для многослойных систем и матрицу для двумерной приоритизации.
+- Используйте Scene `content` с `chart.chartType: column|line` для проверенных количественных сравнений или трендов. Предпочитайте редактируемые диаграммы Scene вместо скриншотов диаграмм.
+- Используйте Scene `content` с `table` для компактных сеток доказательств, которым нужно больше, чем трёхколоночный контракт `comparison`. Держите ячейки достаточно краткими для читаемости.
+- Поддерживайте одинаковые цвета, типографическую иерархию, ритм интервалов, колонтитул и язык форм во всей презентации.
+- Используйте `variant: feature-left` или пометьте один элемент `emphasis: true`, когда странице содержимого нужен доминирующий фокус вместо сетки равных карточек.
+- Помечайте ровно один элемент сравнения `emphasis: true` только когда доказательства поддерживают рекомендуемый или доминирующий вариант; композиция выделит его более сильным визуальным весом, не выдумывая вердикт.
+- Используйте `variant: hero-left` для страниц KPI, когда одна проверенная метрика является основным выводом, а остальные метрики — подтверждающими доказательствами.
+- Используйте `variant: vertical` для страниц процессов с более длинными описаниями шагов; используйте горизонтальную временную шкалу по умолчанию только когда каждый шаг краток.
+- Используйте `variant: hub-spoke` для архитектуры «ядро и возможности»; оставляйте первый элемент семантическим ядром, а не выбирайте его для визуального удобства.
+- Осознанно варьируйте композицию между соседними слайдами. Не повторяйте одну и ту же сетку карточек, ритм заголовков или декоративный мотив во всей презентации.
+- Успешного вызова инструмента недостаточно: отображённый слайд должен пройти визуальную проверку.
+- Предпочитайте реальные изображения, диаграммы, логотипы и данные с указанием источника, когда они доступны. Если реальный ресурс недоступен, используйте структурированную инфографику и сообщите об отсутствующем ресурсе вместо рисования фиктивного заполнителя.

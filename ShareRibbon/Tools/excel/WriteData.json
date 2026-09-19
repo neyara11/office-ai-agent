@@ -1,9 +1,9 @@
 {
   "id": "WriteData",
-  "name": "写入数据",
-  "description": "向指定单元格范围写入数据，支持单值或二维数组",
+  "name": "Запись данных",
+  "description": "Записать данные в указанный диапазон ячеек; поддерживается одно значение или двумерный массив",
   "appType": "excel",
-  "category": "基础操作",
+  "category": "Базовые операции",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "targetRange",
       "type": "string",
       "required": true,
-      "description": "目标单元格范围"
+      "description": "Целевой диапазон ячеек"
     },
     {
       "name": "data",
       "type": "array",
       "required": true,
-      "description": "要写入的数据（单值或二维数组）"
+      "description": "Данные для записи (одно значение или двумерный массив)"
     }
   ]
 }

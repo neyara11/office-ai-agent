@@ -1,9 +1,9 @@
 {
   "id": "CopySheet",
-  "name": "复制工作表",
-  "description": "复制工作表",
+  "name": "Копировать лист",
+  "description": "Скопировать лист",
   "appType": "excel",
-  "category": "工作表操作",
+  "category": "Работа с листами",
   "riskLevel": "safe",
   "isVbaFallback": false,
   "parameters": [
@@ -11,13 +11,13 @@
       "name": "sourceName",
       "type": "string",
       "required": true,
-      "description": "源工作表名称"
+      "description": "Имя исходного листа"
     },
     {
       "name": "newName",
       "type": "string",
       "required": true,
-      "description": "新工作表名称"
+      "description": "Имя нового листа"
     }
   ]
 }
