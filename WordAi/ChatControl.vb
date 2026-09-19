@@ -1377,28 +1377,37 @@ Public Class ChatControl
         Dim topicKeywords As String() = {
             "公文", "国标", "GB/T", "gbt", "标准格式",
             "仿宋", "宋体", "黑体", "楷体", "微软雅黑", "小标宋",
-            "序号", "编号", "标题", "标题层级", "标题编号"
+            "序号", "编号", "标题", "标题层级", "标题编号",
+            "стандарт", "шрифт", "заголовок", "нумерац", "стиль"
         }
 
         Dim msg = message.Trim()
 
         ' 直接包含"排版"动作
         If msg.Contains("排版") Then Return True
+        ' Русские действия форматирования
+        If msg.Contains("отформатир") OrElse msg.Contains("форматировани") OrElse msg.Contains("переформат") OrElse msg.Contains("оформ") Then Return True
         ' "按XX格式/标准" 句式
         If (msg.Contains("按") OrElse msg.Contains("按照") OrElse msg.Contains("参照")) AndAlso
            (msg.Contains("格式") OrElse msg.Contains("标准") OrElse msg.Contains("模板")) Then Return True
+        If msg.Contains("по стандарту") OrElse msg.Contains("по образцу") OrElse msg.Contains("по шаблону") Then Return True
         ' "格式化" 动作
         If msg.Contains("格式化") Then Return True
         ' "套用/应用格式" 动作
         If (msg.Contains("套用") OrElse msg.Contains("应用")) AndAlso msg.Contains("格式") Then Return True
+        If msg.Contains("примен") AndAlso (msg.Contains("формат") OrElse msg.Contains("стил")) Then Return True
         ' 标题/编号结构重构
         If (msg.Contains("重构") OrElse msg.Contains("整理") OrElse msg.Contains("规范") OrElse msg.Contains("优化") OrElse msg.Contains("调整")) AndAlso
            (msg.Contains("序号") OrElse msg.Contains("编号") OrElse msg.Contains("标题") OrElse msg.Contains("层级")) Then Return True
+        If (msg.Contains("нумерац") OrElse msg.Contains("перестро") OrElse msg.Contains("упорядоч") OrElse msg.Contains("нормализ")) AndAlso
+           (msg.Contains("заголов") OrElse msg.Contains("нумерац") OrElse msg.Contains("уровн")) Then Return True
         If msg.Contains("标题") AndAlso (msg.Contains("序号") OrElse msg.Contains("编号") OrElse msg.Contains("层级")) Then Return True
+        If msg.Contains("заголов") AndAlso (msg.Contains("нумерац") OrElse msg.Contains("уровн")) Then Return True
         ' 主题词+动作组合（如"公文标准"、"宋体样式"）
         For Each topic In topicKeywords
             If msg.Contains(topic) AndAlso
-               (msg.Contains("排") OrElse msg.Contains("格式") OrElse msg.Contains("样式") OrElse msg.Contains("规范")) Then
+               (msg.Contains("排") OrElse msg.Contains("格式") OrElse msg.Contains("样式") OrElse msg.Contains("规范") OrElse
+                msg.Contains("форм") OrElse msg.Contains("стил") OrElse msg.Contains("оформ")) Then
                 Return True
             End If
         Next
@@ -2166,7 +2175,7 @@ Public Class ChatControl
 
                         ' 判断是否是标题
                         Dim prefix As String = $"段落{paraIndex}"
-                        If styleName.Contains("标题") OrElse styleName.ToLower().Contains("heading") Then
+                        If styleName.Contains("标题") OrElse styleName.ToLower().Contains("heading") OrElse styleName.ToLower().Contains("заголов") Then
                             prefix = $"[{styleName}]"
                         End If
 
@@ -2762,7 +2771,7 @@ Public Class ChatControl
                         ruleToApply = sampleRuleMap(i)
                     Else
                         ' 基于样式名推断规则
-                        If styleName.Contains("标题") OrElse styleName.ToLower().Contains("heading") Then
+                        If styleName.Contains("标题") OrElse styleName.ToLower().Contains("heading") OrElse styleName.ToLower().Contains("заголов") Then
                             ' 找到第一个标题类规则
                             For Each key In ruleDict.Keys
                                 If key.ToLower().Contains("title") OrElse key.ToLower().Contains("heading") Then
