@@ -38,58 +38,58 @@ Public Class SemanticPromptBuilder
         Dim sb As New StringBuilder()
 
         ' ===== 1. 角色定义 =====
-        sb.AppendLine("你是一位文档结构分析专家，擅长识别中文文档的结构和语义角色。")
-        sb.AppendLine("你的任务是分析文档内容，识别每个段落的语义角色，以便系统自动应用对应的标准格式。")
+        sb.AppendLine("Ты эксперт по анализу структуры документов, хорошо распознаёшь структуру и семантические роли абзацев. Отвечай только на русском языке.")
+        sb.AppendLine("Твоя задача — проанализировать содержимое документа, определить семантическую роль каждого абзаца, чтобы система автоматически применила соответствующий стандартный формат.")
         sb.AppendLine()
 
         ' ===== 2. 任务说明 =====
-        sb.AppendLine("【任务】")
-        sb.AppendLine("请按以下步骤分析文档：")
-        sb.AppendLine("步骤1：判断文档类型和整体结构")
-        sb.AppendLine("步骤2：识别文档中的关键结构元素（标题、正文、署名、日期等）")
-        sb.AppendLine("步骤3：为每个段落分配合适的语义标签")
+        sb.AppendLine("【Задача】")
+        sb.AppendLine("Проанализируй документ в следующем порядке:")
+        sb.AppendLine("Шаг 1: определи тип документа и общую структуру")
+        sb.AppendLine("Шаг 2: распознай ключевые структурные элементы (заголовки, основной текст, подпись, дата и т. п.)")
+        sb.AppendLine("Шаг 3: назначь каждому абзацу подходящую семантическую метку")
         sb.AppendLine()
 
         ' ===== 3. 文档类型上下文 =====
         If Not String.IsNullOrEmpty(documentTypeContext) Then
-            sb.AppendLine("【排版标准】")
+            sb.AppendLine("【Стандарт оформления】")
             sb.AppendLine(documentTypeContext)
             sb.AppendLine()
         End If
 
         ' ===== 4. 输出格式 =====
-        sb.AppendLine("【输出格式】")
-        sb.AppendLine("只输出纯JSON数组，不要输出其他内容（不要使用markdown代码块，不要输出解释）。")
+        sb.AppendLine("【Формат вывода】")
+        sb.AppendLine("Выводи только чистый JSON-массив, без другого содержимого (без markdown-блоков кода, без пояснений).")
         sb.AppendLine("[")
-        sb.AppendLine("  {""paraIndex"":0, ""tag"":""header.org"", ""reason"":""位于文档开头，文本符合发文机关标志模式""},")
-        sb.AppendLine("  {""paraIndex"":1, ""tag"":""header.refno"", ""reason"":""包含发文字号格式""},")
+        sb.AppendLine("  {""paraIndex"":0, ""tag"":""header.org"", ""reason"":""в начале документа, текст соответствует шаблону обозначения органа""},")
+        sb.AppendLine("  {""paraIndex"":1, ""tag"":""header.refno"", ""reason"":""содержит формат номера документа""},")
         sb.AppendLine("  ...")
         sb.AppendLine("]")
-        sb.AppendLine("要求：")
-        sb.AppendLine("- reason字段简短说明判断依据（不超过30字）")
-        sb.AppendLine("- 每个段落必须且只能有一个标签")
-        sb.AppendLine("- paraIndex使用【文档段落】中给出的索引号")
+        sb.AppendLine("Требования:")
+        sb.AppendLine("- поле reason кратко объясняет основание (не более 30 символов)")
+        sb.AppendLine("- у каждого абзаца должна быть ровно одна метка")
+        sb.AppendLine("- paraIndex используй из индексов, указанных в 【Абзацы документа】")
         sb.AppendLine()
 
         ' ===== 5. 可用标签 =====
-        sb.AppendLine("【可用语义标签】")
+        sb.AppendLine("【Доступные семантические метки】")
         For Each tag In mapping.SemanticTags
             sb.Append($"- {tag.TagId}: {tag.DisplayName}")
             If Not String.IsNullOrEmpty(tag.MatchHint) Then
-                sb.Append($"。识别提示：{tag.MatchHint}")
+                sb.Append($". Подсказка распознавания: {tag.MatchHint}")
             End If
             sb.AppendLine()
         Next
         sb.AppendLine()
 
         ' ===== 6. 结构识别指南 =====
-        sb.AppendLine("【结构识别指南】")
-        sb.AppendLine("判断段落角色时，请综合考虑以下线索：")
-        sb.AppendLine("1. 文本内容：是否包含特定模式（发文字号、日期、编号等）")
-        sb.AppendLine("2. 段落位置：在文档开头、中间还是末尾")
-        sb.AppendLine("3. 上下文关系：与前后段落的关系（如标题后面通常跟正文）")
-        sb.AppendLine("4. 格式线索：字号偏大且加粗的短段落通常是标题")
-        sb.AppendLine("5. 不确定时使用最通用的body.normal标签")
+        sb.AppendLine("【Руководство по распознаванию структуры】")
+        sb.AppendLine("Определяя роль абзаца, учитывай следующие признаки:")
+        sb.AppendLine("1. Содержимое текста: есть ли характерный шаблон (номер документа, дата, номер и т. п.)")
+        sb.AppendLine("2. Позиция абзаца: в начале, середине или конце документа")
+        sb.AppendLine("3. Контекстные связи: отношение к предыдущему и следующему абзацу (например, после заголовка обычно идёт основной текст)")
+        sb.AppendLine("4. Форматные признаки: короткий абзац с увеличенным кеглем и полужирным начертанием обычно является заголовком")
+        sb.AppendLine("5. При неуверенности используй наиболее общую метку body.normal")
         sb.AppendLine()
 
         ' ===== 场景化结构识别（从 JSON 加载） =====
@@ -132,22 +132,22 @@ Public Class SemanticPromptBuilder
         sb.AppendLine()
 
         ' ===== 8. 严格要求 =====
-        sb.AppendLine("【严格要求】")
-        sb.AppendLine("1. 仅使用上述可用标签，禁止自创标签")
-        sb.AppendLine("2. 返回纯JSON数组，不要包含markdown代码块标记")
-        sb.AppendLine("3. 每个段落必须且只能有一个标签")
-        sb.AppendLine("4. 层级合理：title.1后可接title.2或body，不能直接跳到title.3")
+        sb.AppendLine("【Строгие требования】")
+        sb.AppendLine("1. Используй только перечисленные выше метки, самодельные метки запрещены")
+        sb.AppendLine("2. Возвращай чистый JSON-массив, без markdown-обёртки")
+        sb.AppendLine("3. У каждого абзаца должна быть ровно одна метка")
+        sb.AppendLine("4. Соблюдай иерархию: после title.1 может идти title.2 или body, нельзя сразу перескакивать на title.3")
         sb.AppendLine()
 
         ' ===== 9. 自动检测结果 =====
         If Not String.IsNullOrEmpty(detectedHeadings) Then
-            sb.AppendLine("【系统自动检测到的标题结构（仅供参考，你可以修正）】")
+            sb.AppendLine("【Автоматически определённая система структура заголовков (справочно, можно исправить)】")
             sb.AppendLine(detectedHeadings)
             sb.AppendLine()
         End If
 
         ' ===== 10. 文档段落（完整文本+上下文） =====
-        sb.AppendLine("【文档段落】")
+        sb.AppendLine("【Абзацы документа】")
         Dim hasStyles = paragraphStyles IsNot Nothing AndAlso paragraphStyles.Count = paragraphs.Count
         Dim hasOrigIdx = originalParaIndices IsNot Nothing AndAlso originalParaIndices.Count = paragraphs.Count
         Dim hasFontSizes = paragraphFontSizes IsNot Nothing AndAlso paragraphFontSizes.Count = paragraphs.Count
@@ -161,15 +161,15 @@ Public Class SemanticPromptBuilder
             ' 位置标签
             Dim positionLabel = ""
             If i = 0 Then
-                positionLabel = " [文档开头]"
+                positionLabel = " [начало документа]"
             ElseIf i >= paragraphs.Count - 3 Then
-                positionLabel = " [文档末尾]"
+                positionLabel = " [конец документа]"
             End If
 
             ' 样式提示（简洁）
             Dim styleHint As String = ""
             If hasStyles AndAlso Not String.IsNullOrEmpty(paragraphStyles(i)) Then
-                styleHint = $" [样式:{paragraphStyles(i)}]"
+                styleHint = $" [стиль:{paragraphStyles(i)}]"
             End If
 
             ' 格式线索（简洁）
@@ -178,10 +178,10 @@ Public Class SemanticPromptBuilder
                 formatHint = $" {paragraphFontSizes(i):F0}pt"
             End If
             If hasBold AndAlso paragraphIsBold(i) Then
-                formatHint &= " 加粗"
+                formatHint &= " полужирный"
             End If
             If formatHint <> "" Then
-                formatHint = $" [格式:{formatHint.Trim()}]"
+                formatHint = $" [формат:{formatHint.Trim()}]"
             End If
 
             ' 上下文：显示前一段落的最后20字
@@ -189,12 +189,12 @@ Public Class SemanticPromptBuilder
             If i > 0 AndAlso Not String.IsNullOrWhiteSpace(paragraphs(i - 1)) Then
                 Dim prevText = paragraphs(i - 1).Trim()
                 If prevText.Length > 20 Then prevText = "..." & prevText.Substring(prevText.Length - 20)
-                contextBefore = $"  ↑上文: {prevText}" & vbCrLf
+                contextBefore = $"  ↑выше: {prevText}" & vbCrLf
             End If
 
             ' 不截断段落文本，但超长段落只取前300字+后缀
             If text.Length > 300 Then
-                text = text.Substring(0, 300) & $"...[全文{text.Length}字]"
+                text = text.Substring(0, 300) & $"...[всего {text.Length} симв.]"
             End If
 
             sb.Append(contextBefore)
@@ -211,67 +211,74 @@ Public Class SemanticPromptBuilder
     ''' <param name="mapping">语义样式映射</param>
     Private Shared Function GetExamplesByDocumentType(documentTypeContext As String, mapping As SemanticStyleMapping) As String
         Dim sb As New StringBuilder()
+        Dim ctx = If(documentTypeContext, "").ToLowerInvariant()
 
-        ' 公文示例
+        ' Официальные документы
         If Not String.IsNullOrEmpty(documentTypeContext) AndAlso
-           (documentTypeContext.Contains("公文") OrElse documentTypeContext.Contains("GB/T 9704")) Then
-            sb.AppendLine("公文文档标注示例：")
-            sb.AppendLine("「XX市人民政府文件」 → header.org（理由：位于文档开头，符合发文机关标志模式）")
-            sb.AppendLine("「×政发〔2024〕15号」 → header.refno（理由：包含发文字号格式〔〕X号）")
-            sb.AppendLine("「签发人：王××」 → header.signer（理由：包含签发人标识）")
-            sb.AppendLine("「关于加强安全生产工作的通知」 → title.main（理由：公文标题，关于…的…格式）")
-            sb.AppendLine("「各区县人民政府，市政府各部门：」 → title.recipient（理由：主送机关，以冒号结尾）")
-            sb.AppendLine("「一、总体要求」 → title.1（理由：一级编号标题）")
-            sb.AppendLine("「（一）基本原则」 → title.2（理由：二级编号标题）")
-            sb.AppendLine("「1. 加强组织领导」 → title.3（理由：三级编号标题）")
-            sb.AppendLine("「为进一步做好安全生产工作，根据...」 → body.normal（理由：正文段落）")
-            sb.AppendLine("「附件：1. 工作方案」 → body.attachment（理由：附件说明）")
-            sb.AppendLine("「XX市人民政府」 → footer.signature（理由：文末机构名称，落款）")
-            sb.AppendLine("「2024年1月15日」 → footer.date（理由：文末日期格式）")
-            sb.AppendLine("「（联系人：张三，电话：12345678）」 → footer.note（理由：公文附注）")
-            sb.AppendLine("「抄送：市委各部门」 → footer.cc（理由：以""抄送""开头）")
+           (documentTypeContext.Contains("公文") OrElse documentTypeContext.Contains("GB/T 9704") OrElse
+            ctx.Contains("официальн") OrElse ctx.Contains("служебн") OrElse
+            ctx.Contains("приказ") OrElse ctx.Contains("распоряжен")) Then
+            sb.AppendLine("Примеры разметки официального документа:")
+            sb.AppendLine("«Федеральная служба» → header.org (основание: в начале документа, соответствует шаблону обозначения органа)")
+            sb.AppendLine("「×政发〔2024〕15号」 → header.refno (основание: содержит формат номера документа 〔〕X号)")
+            sb.AppendLine("«Подписал: Иванов И.И.» → header.signer (основание: содержит отметку о подписанте)")
+            sb.AppendLine("«О мерах по обеспечению безопасности» → title.main (основание: заголовок документа, формат «О … »)")
+            sb.AppendLine("«Руководителям структурных подразделений:» → title.recipient (основание: адресат, заканчивается двоеточием)")
+            sb.AppendLine("«1. Общие положения» → title.1 (основание: заголовок первого уровня)")
+            sb.AppendLine("«(1) Основные принципы» → title.2 (основание: заголовок второго уровня)")
+            sb.AppendLine("«1.1. Усилить контроль» → title.3 (основание: заголовок третьего уровня)")
+            sb.AppendLine("«В целях повышения качества работы...» → body.normal (основание: абзац основного текста)")
+            sb.AppendLine("«Приложение: 1. План мероприятий» → body.attachment (основание: отметка о приложении)")
+            sb.AppendLine("«Руководитель службы» → footer.signature (основание: наименование органа в конце документа)")
+            sb.AppendLine("«15 января 2024 г.» → footer.date (основание: формат даты в конце документа)")
+            sb.AppendLine("«(Контактное лицо: Петров, тел. 123-45-67)» → footer.note (основание: примечание документа)")
+            sb.AppendLine("«Копия: всем подразделениям» → footer.cc (основание: начинается с отметки о рассылке)")
             Return sb.ToString()
         End If
 
-        ' 学术论文示例
+        ' Научная статья
         If Not String.IsNullOrEmpty(documentTypeContext) AndAlso
-           (documentTypeContext.Contains("学术") OrElse documentTypeContext.Contains("论文")) Then
-            sb.AppendLine("学术论文文档标注示例：")
-            sb.AppendLine("「基于深度学习的图像识别技术研究」 → title.main（理由：论文标题）")
-            sb.AppendLine("「摘要」 → title.abstract（理由：摘要标题）")
-            sb.AppendLine("「本文提出了一种新的...」 → body.abstract（理由：摘要正文）")
-            sb.AppendLine("「关键词」 → title.keywords（理由：关键词标题）")
-            sb.AppendLine("「深度学习；图像识别」 → body.keywords（理由：关键词内容）")
-            sb.AppendLine("「第1章 引言」 → heading.1（理由：章节标题）")
-            sb.AppendLine("「1.1 研究背景」 → heading.2（理由：二级编号标题）")
-            sb.AppendLine("「近年来，随着人工智能技术...」 → body.normal（理由：正文段落）")
-            sb.AppendLine("「参考文献」 → title.references（理由：参考文献标题）")
+           (documentTypeContext.Contains("学术") OrElse documentTypeContext.Contains("论文") OrElse
+            ctx.Contains("научн") OrElse ctx.Contains("статья") OrElse ctx.Contains("диссертац") OrElse
+            ctx.Contains("курсов") OrElse ctx.Contains("вкр")) Then
+            sb.AppendLine("Примеры разметки научной статьи:")
+            sb.AppendLine("«Исследование методов распознавания изображений на основе глубокого обучения» → title.main (основание: заголовок статьи)")
+            sb.AppendLine("«Аннотация» → title.abstract (основание: заголовок аннотации)")
+            sb.AppendLine("«В работе предложен новый метод...» → body.abstract (основание: текст аннотации)")
+            sb.AppendLine("«Ключевые слова» → title.keywords (основание: заголовок ключевых слов)")
+            sb.AppendLine("«глубокое обучение; распознавание изображений» → body.keywords (основание: содержание ключевых слов)")
+            sb.AppendLine("«Глава 1. Введение» → heading.1 (основание: заголовок главы)")
+            sb.AppendLine("«1.1. Актуальность исследования» → heading.2 (основание: заголовок второго уровня)")
+            sb.AppendLine("«В последние годы с развитием технологий...» → body.normal (основание: абзац основного текста)")
+            sb.AppendLine("«Список литературы» → title.references (основание: заголовок списка литературы)")
             Return sb.ToString()
         End If
 
-        ' 商务报告示例
+        ' Бизнес-отчёт
         If Not String.IsNullOrEmpty(documentTypeContext) AndAlso
-           (documentTypeContext.Contains("商务") OrElse documentTypeContext.Contains("报告")) Then
-            sb.AppendLine("商务报告文档标注示例：")
-            sb.AppendLine("「2024年度工作总结报告」 → title.main（理由：报告标题）")
-            sb.AppendLine("「一、年度业绩回顾」 → heading.1（理由：一级标题）")
-            sb.AppendLine("「（一）销售收入分析」 → heading.2（理由：二级标题）")
-            sb.AppendLine("「2024年公司实现销售收入增长15%...」 → body.normal（理由：正文段落）")
-            sb.AppendLine("「综上所述...」 → body.summary（理由：总结段落）")
+           (documentTypeContext.Contains("商务") OrElse documentTypeContext.Contains("报告") OrElse
+            ctx.Contains("бизнес") OrElse ctx.Contains("отчёт") OrElse ctx.Contains("отчет") OrElse
+            ctx.Contains("доклад") OrElse ctx.Contains("аналитическ")) Then
+            sb.AppendLine("Примеры разметки бизнес-отчёта:")
+            sb.AppendLine("«Отчёт об итогах работы за 2024 год» → title.main (основание: заголовок отчёта)")
+            sb.AppendLine("«1. Обзор результатов года» → heading.1 (основание: заголовок первого уровня)")
+            sb.AppendLine("«(1) Анализ выручки» → heading.2 (основание: заголовок второго уровня)")
+            sb.AppendLine("«В 2024 году выручка компании выросла на 15%...» → body.normal (основание: абзац основного текста)")
+            sb.AppendLine("«Таким образом...» → body.summary (основание: абзац с выводами)")
             Return sb.ToString()
         End If
 
-        ' 通用文档示例（默认）
-        sb.AppendLine("通用文档标注示例：")
-        sb.AppendLine("「第一章 总则」 → heading.1（理由：章节标题）")
-        sb.AppendLine("「1.1 目的和依据」 → heading.2（理由：二级编号标题）")
-        sb.AppendLine("「1.1.1 为规范...」 → heading.3（理由：三级编号标题）")
-        sb.AppendLine("「本条例旨在...」 → body.normal（理由：正文段落）")
+        ' Универсальный документ (по умолчанию)
+        sb.AppendLine("Примеры разметки универсального документа:")
+        sb.AppendLine("«Глава 1. Общие положения» → heading.1 (основание: заголовок главы)")
+        sb.AppendLine("«1.1. Цели и основания» → heading.2 (основание: заголовок второго уровня)")
+        sb.AppendLine("«1.1.1. В целях регулирования...» → heading.3 (основание: заголовок третьего уровня)")
+        sb.AppendLine("«Настоящий документ определяет...» → body.normal (основание: абзац основного текста)")
 
-        ' 如果mapping中有自定义标签，也展示一下
+        ' Если в mapping есть пользовательские метки, показать и их
         If mapping IsNot Nothing AndAlso mapping.SemanticTags.Count > 0 Then
             sb.AppendLine()
-            sb.AppendLine("当前标准支持的特殊标签：")
+            sb.AppendLine("Особые метки, поддерживаемые текущим стандартом:")
             For Each tag In mapping.SemanticTags.Take(6)
                 If tag.TagId.StartsWith("header.") OrElse tag.TagId.StartsWith("title.") OrElse tag.TagId.StartsWith("footer.") Then
                     sb.AppendLine($"- {tag.TagId}: {tag.DisplayName}")
@@ -297,12 +304,12 @@ Public Class SemanticPromptBuilder
         sb.AppendLine()
 
         ' 错误反馈
-        sb.AppendLine("【上次输出存在以下错误，请修正】")
+        sb.AppendLine("【В предыдущем выводе есть следующие ошибки, исправь их】")
         For Each errMsg In errors
             sb.AppendLine($"- {errMsg}")
         Next
         sb.AppendLine()
-        sb.AppendLine("请重新输出正确的JSON数组（包含paraIndex、tag、reason三个字段）。")
+        sb.AppendLine("Повторно выведи корректный JSON-массив (с полями paraIndex, tag и reason).")
 
         Return sb.ToString()
     End Function

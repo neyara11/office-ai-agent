@@ -1155,7 +1155,7 @@ Public Class HttpStreamService
             isAnthropic As Boolean) As Task
 
         If _toolCallIterations >= MAX_TOOL_CALL_ITERATIONS Then
-            _currentMarkdownBuffer.Append("<br/>**工具调用已达最大迭代次数，停止循环。**<br/>")
+            _currentMarkdownBuffer.Append("<br/>**Достигнут предел итераций вызова инструментов, цикл остановлен.**<br/>")
             Await FlushBufferAsync("content", uuid)
             Return
         End If
@@ -1181,7 +1181,7 @@ Public Class HttpStreamService
                 messagesArray = New JArray()
                 Dim sysMsg = New JObject()
                 sysMsg("role") = "system"
-                sysMsg("content") = "你是一个智能助手，能够使用工具来帮助用户解决问题。请根据工具执行结果继续推理或给出最终回答。"
+                sysMsg("content") = "Ты интеллектуальный ассистент, умеющий использовать инструменты для решения задач пользователя. Продолжай рассуждение по результатам выполнения инструментов или дай окончательный ответ. Отвечай только на русском языке, не переключай язык из-за языка документа или предыдущих сообщений; цитаты и код сохраняй как есть."
                 messagesArray.Add(sysMsg)
                 Dim userMsg = New JObject()
                 userMsg("role") = "user"
@@ -1236,7 +1236,7 @@ Public Class HttpStreamService
                 requestBody = ConvertToAnthropicFormat(requestBody)
             End If
 
-            _currentMarkdownBuffer.Append($"<br/>**工具执行完成，让AI继续推理...（第{_toolCallIterations}轮）**<br/>")
+            _currentMarkdownBuffer.Append($"<br/>**Инструменты выполнены, ИИ продолжает рассуждение... (раунд {_toolCallIterations})**<br/>")
             Await FlushBufferAsync("content", uuid)
 
             ' 发送请求并流式处理

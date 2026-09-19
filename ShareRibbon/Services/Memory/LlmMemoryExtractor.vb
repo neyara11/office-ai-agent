@@ -82,12 +82,12 @@ Public Class LlmMemoryExtractor
     End Sub
 
     Private Shared Function BuildSystemPrompt() As String
-        Return "你是 Office AI Agent 的长期记忆提取器。你的任务是从一轮用户和助手对话中提取少量、稳定、可复用的结构化记忆。" & vbCrLf &
-               "只提取未来明显有帮助的信息，例如用户偏好、固定格式规则、已确认解决方案、项目事实、Office 文档处理习惯。" & vbCrLf &
-               "不要保存一次性闲聊、临时问题、敏感密钥、完整隐私数据、未确认猜测。" & vbCrLf &
-               "只返回 JSON，不要 Markdown。格式必须是数组，每项字段：" & vbCrLf &
-               "[{""scope"":""user|document|project|session"",""memory_type"":""preference|format_rule|solution|fact|workflow"",""content"":""可直接注入上下文的中文记忆"",""summary"":""短摘要"",""confidence"":0.0-1.0,""importance"":0.0-1.0,""expires_at"":""""}]" & vbCrLf &
-               "如果没有值得保存的记忆，返回 []。"
+        Return "Ты извлекатель долговременной памяти Office AI Agent. Твоя задача — извлечь из одного раунда диалога пользователя и ассистента небольшое число стабильных переиспользуемых структурированных воспоминаний." & vbCrLf &
+               "Извлекай только то, что явно пригодится в будущем: предпочтения пользователя, постоянные правила оформления, подтверждённые решения, факты о проекте, привычки работы с документами Office." & vbCrLf &
+               "Не сохраняй разовые светские реплики, временные вопросы, чувствительные ключи, полные приватные данные и неподтверждённые догадки." & vbCrLf &
+               "Возвращай только JSON, без Markdown. Формат — массив, поля каждого элемента: " & vbCrLf &
+               "[{""scope"":""user|document|project|session"",""memory_type"":""preference|format_rule|solution|fact|workflow"",""content"":""воспоминание на русском, готовое к вставке в контекст"",""summary"":""краткое резюме"",""confidence"":0.0-1.0,""importance"":0.0-1.0,""expires_at"":""""}]" & vbCrLf &
+               "Если сохранять нечего, верни []."
     End Function
 
     Private Shared Function BuildUserPrompt(events As List(Of ConversationEventRecord), contextJson As String) As String
@@ -95,12 +95,12 @@ Public Class LlmMemoryExtractor
 
         Dim sb As New StringBuilder()
         If Not String.IsNullOrWhiteSpace(contextJson) Then
-            sb.AppendLine("上下文 JSON:")
+            sb.AppendLine("JSON контекста:")
             sb.AppendLine(Truncate(contextJson, 2000))
             sb.AppendLine()
         End If
 
-        sb.AppendLine("对话事件:")
+        sb.AppendLine("События диалога:")
         For Each evt In events
             If evt Is Nothing OrElse String.IsNullOrWhiteSpace(evt.Content) Then Continue For
             sb.AppendLine($"[{If(evt.Role, evt.EventType)}] app={evt.AppType}; document={evt.DocumentId}; event_id={evt.EventId}")
