@@ -39,7 +39,9 @@ Public Class WebDataCapturePane
         ' 显示聊天窗口
         Globals.ThisAddIn.ShowChatTaskPane()
         ' 添加选中的内容到引用区
-        ThisAddIn.chatControl.AddSelectedContentItem(
+        Dim chatCtrl = ThisAddIn.chatControl
+        If chatCtrl Is Nothing Then Return
+        chatCtrl.AddSelectedContentItem(
                 "Из веб-страницы",  ' 使用文档名称作为标识
                    content.Substring(0, Math.Min(content.Length, 50)) & If(content.Length > 50, "...", ""))
     End Sub

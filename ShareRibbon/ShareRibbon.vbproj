@@ -334,6 +334,7 @@
     <Compile Include="Controls\CommandPreviewForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Controls\HostTaskPaneRegistry.vb" />
     <Compile Include="Log\AppLogger.vb" />
     <Compile Include="Log\SimpleLogger.vb" />
     <Compile Include="Common\ExceptionClassifier.vb" />

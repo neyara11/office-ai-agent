@@ -7,8 +7,26 @@ Imports Microsoft.Office.Core
 Imports ShareRibbon
 Public Class ThisAddIn
 
-    Public Shared chatTaskPane As Microsoft.Office.Tools.CustomTaskPane
-    Public Shared chatControl As ChatControl
+    ' 按文档窗口维护聊天面板：多窗口时各窗口拥有独立面板
+    Public Shared ReadOnly Property chatControl As ChatControl
+        Get
+            Dim addIn = Globals.ThisAddIn
+            If addIn Is Nothing Then Return Nothing
+            Return addIn.GetActiveChatControl()
+        End Get
+    End Property
+
+    Private _chatPanes As HostTaskPaneRegistry
+
+    Private ReadOnly Property ChatPanes As HostTaskPaneRegistry
+        Get
+            If _chatPanes Is Nothing Then
+                _chatPanes = New HostTaskPaneRegistry(Me.CustomTaskPanes, AddressOf GetWindowHandle)
+            End If
+            Return _chatPanes
+        End Get
+    End Property
+
     ' 翻译服务：延迟初始化，首次使用时创建
 
     Private captureTaskPane As Microsoft.Office.Tools.CustomTaskPane
@@ -93,23 +111,76 @@ Public Class ThisAddIn
     End Sub
 
 
-    ' 为新工作簿创建任务窗格
-    Private Sub CreateChatTaskPane()
+    ''' <summary>返回当前活动文档窗口对应的聊天面板，必要时为该窗口创建。</summary>
+    Private Function EnsureChatPaneEntry() As HostTaskPaneRegistry.Entry
         Try
-            If chatControl IsNot Nothing AndAlso chatTaskPane IsNot Nothing Then
-                Return
+            ChatPanes.PruneClosed(AddressOf GetLiveWindowHandles)
+
+            Dim window = GetActiveWindowObject()
+            If window Is Nothing Then Return Nothing
+
+            Dim entry = ChatPanes.GetOrCreate(window, "ИИ-помощник Word", Function() New ChatControl())
+            If entry Is Nothing Then Return Nothing
+
+            entry.Pane.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight
+            entry.Pane.Width = 420
+            If entry.IsNew Then
+                AddHandler entry.Pane.VisibleChanged, AddressOf ChatTaskPane_VisibleChanged
             End If
-
-            chatControl = New ChatControl()
-            chatTaskPane = Me.CustomTaskPanes.Add(chatControl, "ИИ-помощник Word")
-            chatTaskPane.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight
-            chatTaskPane.Width = 420
-            AddHandler chatTaskPane.VisibleChanged, AddressOf ChatTaskPane_VisibleChanged
-
+            Return entry
         Catch ex As Exception
             MessageBox.Show($"Не удалось инициализировать панель задач Word AI: {ex.Message}")
+            Return Nothing
         End Try
-    End Sub
+    End Function
+
+    ''' <summary>当前活动窗口的聊天控件；该窗口尚未打开聊天时返回 Nothing。</summary>
+    Friend Function GetActiveChatControl() As ChatControl
+        Try
+            Dim window = GetActiveWindowObject()
+            If window Is Nothing Then Return Nothing
+            Dim entry = ChatPanes.GetExisting(GetWindowHandle(window))
+            If entry IsNot Nothing Then Return TryCast(entry.Control, ChatControl)
+        Catch ex As Exception
+            Debug.WriteLine($"[Chat] GetActiveChatControl 失败: {ex.Message}")
+        End Try
+        Return Nothing
+    End Function
+
+    Private Function GetActiveWindowObject() As Object
+        Try
+            Return Me.Application.ActiveWindow
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
+    Private Function GetWindowHandle(window As Object) As Integer
+        Dim wordWindow = TryCast(window, Word.Window)
+        If wordWindow Is Nothing Then Return 0
+        Try
+            Return wordWindow.Hwnd
+        Catch
+            Return 0
+        End Try
+    End Function
+
+    ''' <summary>当前所有打开的文档窗口句柄；整体枚举失败时返回 Nothing 以跳过清理。</summary>
+    Private Function GetLiveWindowHandles() As HashSet(Of Integer)
+        Dim result As New HashSet(Of Integer)()
+        Try
+            For Each w As Word.Window In Me.Application.Windows
+                Try
+                    result.Add(w.Hwnd)
+                Catch
+                End Try
+            Next
+        Catch ex As Exception
+            Debug.WriteLine($"[Chat] 枚举窗口失败: {ex.Message}")
+            Return Nothing
+        End Try
+        Return result
+    End Function
 
     ''' <summary>
     ''' 创建网页爬虫任务窗格（延迟初始化，仅在用户点击爬虫按钮时创建）
@@ -181,8 +252,14 @@ Public Class ThisAddIn
 
     Private Sub WidthTimer_Tick(sender As Object, e As EventArgs)
         widthTimer.Stop()
-        If LLMUtil.IsWpsActive() AndAlso chatTaskPane IsNot Nothing Then
-            chatTaskPane.Width = 420
+        If LLMUtil.IsWpsActive() Then
+            For Each entry In ChatPanes.Entries
+                Try
+                    entry.Pane.Width = 420
+                Catch ex As Exception
+                    Debug.WriteLine($"[Chat] 设置面板宽度失败: {ex.Message}")
+                End Try
+            Next
         End If
     End Sub
     Private Sub WidthTimer1_Tick(sender As Object, e As EventArgs)
@@ -192,7 +269,6 @@ Public Class ThisAddIn
         End If
     End Sub
 
-    Dim loadChatHtml As Boolean = True
     Dim loadDataCaptureHtml As Boolean = True
 
     Public Async Sub ShowChatTaskPane()
@@ -201,12 +277,17 @@ Public Class ThisAddIn
 
     Public Async Function ShowChatTaskPaneAsync() As Task
         EnsureCoreServicesLoaded()
-        CreateChatTaskPane()
-        If chatTaskPane Is Nothing Then Return
-        chatTaskPane.Visible = True
-        If loadChatHtml Then
-            loadChatHtml = False
-            Await chatControl.LoadLocalHtmlFile()
+        Dim entry = EnsureChatPaneEntry()
+        If entry Is Nothing Then Return
+        entry.Pane.Visible = True
+        If Not entry.HtmlLoaded Then
+            entry.HtmlLoaded = True
+            Try
+                Await CType(entry.Control, ChatControl).LoadLocalHtmlFile()
+            Catch ex As Exception
+                entry.HtmlLoaded = False
+                Debug.WriteLine($"[Chat] 加载聊天页面失败: {ex.Message}")
+            End Try
         End If
     End Function
 

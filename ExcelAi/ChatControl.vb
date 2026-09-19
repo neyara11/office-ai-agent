@@ -55,6 +55,7 @@ Public Class ChatControl
 
     ' 添加一个新的重载方法来处理Excel的事件
     Private Sub GetSelectionContentExcel(Sh As Microsoft.Office.Interop.Excel.Worksheet, Target As Microsoft.Office.Interop.Excel.Range)
+        If Me.IsDisposed Then Return
         If Me.Visible AndAlso selectedCellChecked Then
             Dim sheetName As String = Sh.Name
             Dim address As String = Target.Address(False, False)
