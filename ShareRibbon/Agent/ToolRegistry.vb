@@ -899,6 +899,9 @@ Namespace Agent
                              decision.Reason,
                              decision.UserMessage)
             AppLogger.Warn("ToolRegistry", $"Safety denied toolId={tool.Id} action={decision.Action} code={errorCode}: {AppLogger.Redact(decision.Reason)}")
+            ' Ошибку контракта декларативной операции можно исправить и повторить; реальные
+            ' запреты безопасности (блокировка, недопустимый член, VBA) остаются невосстановимыми.
+            Dim recoverable = String.Equals(errorCode, ExceptionClassifier.CodeOperationSchemaInvalid, StringComparison.OrdinalIgnoreCase)
             Return ToolResult.Failed(tool.Id,
                                      message,
                                      New With {
@@ -909,7 +912,7 @@ Namespace Agent
                                      errorCode,
                                      message,
                                      decision.Reason,
-                                     recoverable:=False)
+                                     recoverable:=recoverable)
         End Function
 
         Private Async Function ExecuteMemoryToolAsync(toolId As String, params As JObject) As Task(Of ToolResult)

@@ -5,7 +5,7 @@ application: PowerPoint
 default_for_application: true
 keywords: презентация, презентацию, презентации, слайд, слайды, слайдов, колода, ppt, powerpoint, deck, presentation, создай презентацию, сделай презентацию, добавь слайд, заметки докладчика
 tags: powerpoint, ppt, slide, deck, presentation, layout, theme, chart, notes, review
-allowed-tools: CreateSlides, InsertSlide, FormatSlide, InsertText, InsertTable, ApplyTheme, ApplyTransition, AddSpeakerNotes, BeautifySlides, DiscoverOfficeCapability, OfficeObjectOperation
+allowed-tools: CreateSlides, InsertSlide, FormatSlide, InsertText, InsertTable, ApplyTheme, ApplyTransition, AddSpeakerNotes, BeautifySlides
 intent_types: slide_generation, formatting, review, translation, presentation
 ---
 
@@ -21,17 +21,15 @@ intent_types: slide_generation, formatting, review, translation, presentation
 4. При работе над дизайном сохраняйте замысел презентации пользователя и улучшайте читаемость, иерархию, согласованность и логику изложения.
 5. После выполнения наблюдайте число слайдов, индекс изменённого слайда, вставленные фигуры, заметки и изменения текста.
 6. Если результат неверен, исправьте план, используя наблюдаемое состояние слайдов.
-7. Для длиннохвостых объектных возможностей, не покрытых высокоуровневым инструментом, сначала вызовите `DiscoverOfficeCapability` и используйте только возвращённые исполняемые значения `MemberId` в `OfficeObjectOperation`.
+7. Проверяйте результат по наблюдению самого `CreateSlides` (`createdSlides`, `targetRefs`, `slideResults`, warnings). Не стройте `OfficeObjectOperation` и не придумывайте `MemberId` для проверки числа слайдов — эти инструменты не входят в набор данного навыка.
 8. Для создания презентации предпочитайте профессиональный контракт Scene в `CreateSlides` с одной согласованной `designSystem` и явными архетипами страниц. Не делайте по умолчанию каждую страницу в стиле заголовок-и-маркеры.
 
-## Декларативные операции с объектами
+## Проверка результата
 
-- Используйте только канонические ссылки, такие как `PowerPoint:presentations/active/slides/2/shapes`; никогда не выдумывайте путь к COM-объекту.
-- Стройте `OfficeObjectOperation.batch` со `schemaVersion=1.0`, `appType=PowerPoint`, уникальными ID операций и действиями, ограниченными `get/set/invoke/create/delete/collection_item`.
-- Копируйте `MemberId` точно из последнего результата `DiscoverOfficeCapability`. Не выводите и не сокращайте его.
-- Для SmartArt выполняйте обнаружение и создание в коллекции `shapes` целевого слайда. Прочитайте возвращённый `resultRef` из Observation/Data, прежде чем адресовать созданную фигуру.
-- Текст узлов SmartArt можно адресовать под возвращённой фигурой как `/smartart/nodes/{1-based-index}/textframe2/textrange`; найдите доступный для записи текстовый член и используйте `action=set` с `arguments.value`.
-- Включайте `expectedEffects`, такие как `hasSmartArt`, `nodeCount`, `text` или `nodeTexts`, когда ожидаемое состояние известно. Рассматривайте `VERIFY_FAILED` как сигнал наблюдать и исправить параметры или ссылки.
+- Источник истины — Observation от `CreateSlides`: число созданных слайдов, `targetRefs` и `slideResults`. Сравнивайте ожидаемое число слайдов с `createdSlides`.
+- Если наблюдаемое расходится с ожидаемым, исправляйте план штатными инструментами навыка (`CreateSlides`, `InsertSlide`, `FormatSlide`), а не декларативными операциями.
+- Заметки докладчика, оформление и переходы добавляйте штатными инструментами; не адресуйте COM-объекты вручную.
+- Не выдумывайте пути к COM-объектам и идентификаторы членов API. Если возможности инструмента не хватает, явно сообщите о пробеле вместо догадок.
 
 ## Типовые задачи
 

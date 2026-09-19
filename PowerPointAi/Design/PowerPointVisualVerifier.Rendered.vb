@@ -233,7 +233,7 @@ Namespace Design
             If score < 78 Then
                 report.Issues.Add(New VisualIssue With {
                     .Code = "RENDERED_AESTHETIC_SCORE_LOW",
-                    .Severity = "error",
+                    .Severity = "warning",
                     .Message = $"Rendered slide aesthetic score {score} is below the professional delivery threshold 78"
                 })
             ElseIf score < 85 Then

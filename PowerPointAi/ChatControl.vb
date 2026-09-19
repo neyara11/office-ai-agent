@@ -1384,7 +1384,11 @@ Public Class ChatControl
                 snapshot("textHash") = ComputePowerPointObservationHash(GetPowerPointSlideText(slide))
                 snapshot("textPreview") = TruncatePowerPointObservationText(GetPowerPointSlideText(slide), 240)
                 snapshot("notesHash") = ComputePowerPointObservationHash(GetPowerPointNotesText(slide))
+                snapshot("transitionHash") = ComputePowerPointObservationHash(GetPowerPointSlideTransition(slide))
             End If
+            ' Переходы, тема и заметки часто применяются ко всей презентации,
+            ' поэтому нужен общий отпечаток, иначе успешная команда выглядит как «без изменений».
+            snapshot("transitionHashAll") = ComputePowerPointObservationHash(GetPowerPointPresentationTransitionSignature(presentation))
         Catch ex As Exception
             snapshot("captureError") = AppLogger.Redact(ex.Message)
         End Try
@@ -1485,6 +1489,47 @@ Public Class ChatControl
         Catch
         End Try
         Return String.Join(vbLf, parts)
+    End Function
+
+    ''' <summary>
+    ''' Снимок перехода слайда: без него применение перехода не видно в наблюдении,
+    ''' и успешная команда ложно помечается как «изменений нет».
+    ''' </summary>
+    Private Shared Function GetPowerPointSlideTransition(slide As Object) As String
+        Dim parts As New List(Of String)()
+        Try
+            Dim transition = slide.SlideShowTransition
+            If transition IsNot Nothing Then
+                Try : parts.Add("entry=" & transition.EntryEffect.ToString()) : Catch : End Try
+                Try : parts.Add("speed=" & transition.Speed.ToString()) : Catch : End Try
+                Try : parts.Add("advance=" & transition.AdvanceOnClick.ToString()) : Catch : End Try
+                Try : parts.Add("duration=" & transition.Duration.ToString()) : Catch : End Try
+            End If
+        Catch
+        End Try
+        Return String.Join(";", parts)
+    End Function
+
+    ''' <summary>
+    ''' Отпечаток переходов по всей презентации (ограничен первыми 50 слайдами).
+    ''' </summary>
+    Private Shared Function GetPowerPointPresentationTransitionSignature(presentation As Object) As String
+        Dim parts As New List(Of String)()
+        Try
+            Dim count As Integer = CInt(presentation.Slides.Count)
+            Dim limit = Math.Min(count, 50)
+            For index = 1 To limit
+                Dim slide As Object = Nothing
+                Try
+                    slide = presentation.Slides(index)
+                    parts.Add(index.ToString() & ":" & GetPowerPointSlideTransition(slide))
+                Finally
+                    ShareRibbon.ComObjectHelper.ReleaseComObject(slide)
+                End Try
+            Next
+        Catch
+        End Try
+        Return String.Join("|", parts)
     End Function
 
     Private Shared Function TruncatePowerPointObservationText(value As String, maxLength As Integer) As String

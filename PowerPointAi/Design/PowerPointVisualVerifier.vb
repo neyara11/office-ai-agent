@@ -242,16 +242,18 @@ Namespace Design
             report.Metrics("visualNodeCount") = visualNodes.Count
             report.Metrics("titleBodyFontRatio") = Math.Round(titleBodyRatio, 3)
             If score < 78 Then
+                ' Оценка эстетики эвристическая; не валим из-за неё всю колоду.
+                ' Реальные дефекты (переполнение, наложения, контраст) проверяются отдельно.
                 report.Issues.Add(New VisualIssue With {
                     .Code = "AESTHETIC_SCORE_LOW",
-                    .Severity = "error",
-                    .Message = $"Slide aesthetic score {score} is below the professional delivery threshold 78"
+                    .Severity = "warning",
+                    .Message = $"Эстетическая оценка слайда {score} ниже рекомендуемого порога 78"
                 })
             ElseIf score < 85 Then
                 report.Issues.Add(New VisualIssue With {
                     .Code = "AESTHETIC_SCORE_WARNING",
                     .Severity = "warning",
-                    .Message = $"Slide aesthetic score {score} should be improved"
+                    .Message = "Эстетическую оценку слайда стоит улучшить"
                 })
             End If
         End Sub
