@@ -535,6 +535,7 @@
     <None Include="Resources\help\ru\word.html" />
     <None Include="Resources\help\ru\excel.html" />
     <None Include="Resources\help\ru\ppt.html" />
+    <None Include="Resources\help\ru\faq.html" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\doubao_avatar.png" />

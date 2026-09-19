@@ -6,44 +6,95 @@
 <title>Word — справка Office AI Agent</title>
 <style>
   :root { color-scheme: light dark; }
-  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 32px 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
-  header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 24px; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0 0 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 40px; }
+  nav { border-bottom: 1px solid #e1e4e8; padding: 14px 40px; font-size: 13px; background: #f6f8fa; }
+  nav a { color: #0969da; text-decoration: none; margin-right: 16px; }
+  nav a:hover { text-decoration: underline; }
+  nav a.active { color: #1f2328; font-weight: 600; }
+  header { border-bottom: 1px solid #e1e4e8; padding: 24px 0 16px; margin-bottom: 24px; }
   h1 { font-size: 24px; margin: 0 0 6px; }
-  h2 { font-size: 18px; margin: 28px 0 10px; }
+  h2 { font-size: 18px; margin: 30px 0 10px; }
   h3 { font-size: 15px; margin: 20px 0 6px; }
-  p, li { font-size: 14px; }
-  a.back { font-size: 13px; }
+  p, li, td, th { font-size: 14px; }
   table { border-collapse: collapse; width: 100%; margin: 12px 0; }
   th, td { border: 1px solid #d0d7de; padding: 8px 10px; font-size: 13px; text-align: left; vertical-align: top; }
   th { background: #f6f8fa; }
+  .note { background: #fff8c5; border: 1px solid #d4a72c; border-radius: 8px; padding: 12px 16px; font-size: 13px; }
   code { background: #f0f1f3; padding: 1px 5px; border-radius: 4px; }
   footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e1e4e8; font-size: 12px; color: #57606a; }
   @media (prefers-color-scheme: dark) {
     body { color: #e6edf3; background: #0d1117; }
+    nav { background: #161b22; border-color: #30363d; }
+    nav a.active { color: #e6edf3; }
     header, footer { border-color: #30363d; }
     th, td { border-color: #30363d; }
     th { background: #161b22; }
-    footer { color: #8b949e; }
+    .note { background: #3a2d00; border-color: #9e6a03; color: #f0e6c0; }
     code { background: #21262d; }
   }
 </style>
 </head>
 <body>
+<nav>
+  <a href="index.html">Обзор</a>
+  <a class="active" href="word.html">Word</a>
+  <a href="excel.html">Excel</a>
+  <a href="ppt.html">PowerPoint</a>
+  <a href="faq.html">Вопросы</a>
+</nav>
+<div class="wrap">
 <header>
-  <a class="back" href="index.html">← Общая справка</a>
   <h1>Word</h1>
   <p>Возможности AI-ассистента в документах Word.</p>
 </header>
 
-<h2>Основные действия на ленте</h2>
+<h2>Кнопки на ленте</h2>
 <table>
   <tr><th>Кнопка</th><th>Что делает</th></tr>
-  <tr><td>AI-чат</td><td>Открывает панель диалога. Можно задавать задачи обычным текстом, прикладывать ссылки на файлы.</td></tr>
-  <tr><td>Продолжить</td><td>Продолжает текст от позиции курсора с учётом контекста. После генерации можно попросить «сократи», «сделай официальнее».</td></tr>
-  <tr><td>Вычитка</td><td>Проверяет орфографию, пунктуацию и грамматику выделения или всего документа, предлагает правки.</td></tr>
-  <tr><td>Форматирование</td><td>Определяет тип документа и применяет стандарт оформления (например, ГОСТ). Поддерживает правки в диалоге.</td></tr>
+  <tr><td>AI-чат</td><td>Открывает панель диалога. Задачи задаются обычным текстом, можно ссылаться на выделение и документ.</td></tr>
   <tr><td>AI-перевод</td><td>Переводит выделение, весь документ или работает в режиме иммерсивного перевода.</td></tr>
+  <tr><td>Продолжить</td><td>Продолжает текст от позиции курсора с учётом контекста документа.</td></tr>
+  <tr><td>Вычитка</td><td>Проверяет орфографию, пунктуацию и грамматику выделения или всего документа, предлагает правки.</td></tr>
+  <tr><td>Форматирование</td><td>Определяет тип документа и применяет стандарт оформления. Правки можно уточнять в диалоге.</td></tr>
+  <tr><td>Захват страниц</td><td>Загружает содержимое веб-страницы в документ. Требует сети; при её отсутствии показывает сообщение.</td></tr>
+  <tr><td>Настройка API / Промпты</td><td>Подключение модели и системные инструкции.</td></tr>
+  <tr><td>MCP</td><td>Подключение внешних инструментов по протоколу MCP.</td></tr>
+  <tr><td>О программе / Очистить кэш / Документация</td><td>Сведения о версии, сброс локальных данных и эта справка.</td></tr>
 </table>
+
+<h2>Сценарии</h2>
+
+<h3>Продолжение текста</h3>
+<ol>
+  <li>Поставьте курсор в конец фрагмента, который нужно продолжить.</li>
+  <li>Нажмите <strong>Продолжить</strong>. Текст допишется с учётом контекста.</li>
+  <li>Если результат не тот, уточните задачу в «AI-чате»: «сократи», «сделай официальнее», «добавь выводы».</li>
+</ol>
+
+<h3>Вычитка</h3>
+<ol>
+  <li>Выделите фрагмент или перейдите к началу документа для проверки целиком.</li>
+  <li>Нажмите <strong>Вычитка</strong> и дождитесь списка замечаний.</li>
+  <li>Примите или отклоните правки; спорные места можно переформулировать через чат.</li>
+</ol>
+
+<h3>Форматирование по стандарту</h3>
+<ol>
+  <li>Нажмите <strong>Форматирование</strong>.</li>
+  <li>Ассистент определит тип документа и применит подходящий стандарт оформления.</li>
+  <li>Дополнительные требования задавайте в чате: «шрифт Times New Roman 14», «интервал 1,5», «заголовки полужирным».</li>
+</ol>
+
+<h3>Перевод</h3>
+<ul>
+  <li>Выделение — переводится только выделенный фрагмент.</li>
+  <li>Документ — переводится весь текст, оформление по возможности сохраняется.</li>
+  <li>Иммерсивный режим — перевод показывается рядом с оригиналом для вычитки.</li>
+</ul>
+
+<h3>Захват веб-страницы</h3>
+<p>Открывает страницу по ссылке и переносит её содержимое в документ. Требует доступа в сеть и не входит в обязательный offline-сценарий.</p>
 
 <h2>Примеры команд</h2>
 <ul>
@@ -52,15 +103,18 @@
   <li>«Проверь орфографию и пунктуацию в выделенном фрагменте»</li>
   <li>«Продолжи текст в деловом стиле»</li>
   <li>«Переведи документ на английский, форматирование сохрани»</li>
+  <li>«Сократи выделение на треть, смысл сохрани»</li>
+  <li>«Сделай заголовки полужирными, а подзаголовки — курсивом»</li>
 </ul>
 
 <h2>Полезно знать</h2>
 <ul>
-  <li>Перед крупными изменениями сохраните документ — часть операций можно откатить через <code>Ctrl+Z</code>.</li>
-  <li>Если результат не тот, опишите правку в диалоге: «сократи на треть», «сделай заголовки полужирными».</li>
+  <li>Перед крупными изменениями сохраните документ — часть операций откатывается через <code>Ctrl+Z</code>.</li>
+  <li>Если результат не тот, опишите правку в диалоге, а не повторяйте команду вслепую.</li>
   <li>Для работы нужен настроенный провайдер: <strong>Настройка API</strong> → адрес, ключ, модель.</li>
 </ul>
 
 <footer>Office AI Agent · локальная справка · Word</footer>
+</div>
 </body>
 </html>

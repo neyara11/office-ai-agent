@@ -6,44 +6,107 @@
 <title>Excel — справка Office AI Agent</title>
 <style>
   :root { color-scheme: light dark; }
-  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 32px 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
-  header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 24px; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0 0 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 40px; }
+  nav { border-bottom: 1px solid #e1e4e8; padding: 14px 40px; font-size: 13px; background: #f6f8fa; }
+  nav a { color: #0969da; text-decoration: none; margin-right: 16px; }
+  nav a:hover { text-decoration: underline; }
+  nav a.active { color: #1f2328; font-weight: 600; }
+  header { border-bottom: 1px solid #e1e4e8; padding: 24px 0 16px; margin-bottom: 24px; }
   h1 { font-size: 24px; margin: 0 0 6px; }
-  h2 { font-size: 18px; margin: 28px 0 10px; }
-  p, li { font-size: 14px; }
-  a.back { font-size: 13px; }
+  h2 { font-size: 18px; margin: 30px 0 10px; }
+  h3 { font-size: 15px; margin: 20px 0 6px; }
+  p, li, td, th { font-size: 14px; }
   table { border-collapse: collapse; width: 100%; margin: 12px 0; }
   th, td { border: 1px solid #d0d7de; padding: 8px 10px; font-size: 13px; text-align: left; vertical-align: top; }
   th { background: #f6f8fa; }
+  .note { background: #fff8c5; border: 1px solid #d4a72c; border-radius: 8px; padding: 12px 16px; font-size: 13px; }
   code { background: #f0f1f3; padding: 1px 5px; border-radius: 4px; }
   footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e1e4e8; font-size: 12px; color: #57606a; }
   @media (prefers-color-scheme: dark) {
     body { color: #e6edf3; background: #0d1117; }
+    nav { background: #161b22; border-color: #30363d; }
+    nav a.active { color: #e6edf3; }
     header, footer { border-color: #30363d; }
     th, td { border-color: #30363d; }
     th { background: #161b22; }
-    footer { color: #8b949e; }
+    .note { background: #3a2d00; border-color: #9e6a03; color: #f0e6c0; }
     code { background: #21262d; }
   }
 </style>
 </head>
 <body>
+<nav>
+  <a href="index.html">Обзор</a>
+  <a href="word.html">Word</a>
+  <a class="active" href="excel.html">Excel</a>
+  <a href="ppt.html">PowerPoint</a>
+  <a href="faq.html">Вопросы</a>
+</nav>
+<div class="wrap">
 <header>
-  <a class="back" href="index.html">← Общая справка</a>
   <h1>Excel</h1>
   <p>Возможности AI-ассистента в книгах Excel.</p>
 </header>
 
-<h2>Инструменты на ленте</h2>
+<h2>Кнопки на ленте</h2>
 <table>
   <tr><th>Кнопка</th><th>Что делает</th></tr>
   <tr><td>AI-чат</td><td>Диалог с AI и выполнение команд над выделенным диапазоном и книгой.</td></tr>
-  <tr><td>Анализ данных</td><td>По выделенным данным и вопросу формирует результат на отдельном листе (сводки, диаграммы).</td></tr>
-  <tr><td>Захват страниц</td><td>Загружает содержимое веб-страницы в книгу. Требует сети; при её отсутствии показывает сообщение и не мешает остальным функциям.</td></tr>
-  <tr><td>Подсветка</td><td>Подсвечивает строку и столбец активной ячейки.</td></tr>
-  <tr><td>Пакетная генерация</td><td>Генерирует данные по описанным полям и связям столбцов.</td></tr>
   <tr><td>AI-перевод</td><td>Переводит содержимое листа или выделения.</td></tr>
+  <tr><td>Анализ данных</td><td>Читает выделение или лист, определяет структуру и выполняет анализ: сводки, группировки, рейтинги, формулы, сводные таблицы, диаграммы, отчёты.</td></tr>
+  <tr><td>Пакетная генерация</td><td>По описанным полям и числу строк генерирует таблицу данных и записывает её на активный лист.</td></tr>
+  <tr><td>Подсветка</td><td>Подсвечивает строку и столбец активной ячейки. Одиночный клик включает и выключает, двойной — открывает выбор цвета.</td></tr>
+  <tr><td>Настройка API / Промпты</td><td>Подключение модели и системные инструкции.</td></tr>
+  <tr><td>MCP</td><td>Подключение внешних инструментов по протоколу MCP.</td></tr>
+  <tr><td>О программе / Очистить кэш / Документация</td><td>Сведения о версии, сброс локальных данных и эта справка.</td></tr>
 </table>
+
+<div class="note">
+  Кнопки «Продолжить», «Вычитка» и «Форматирование» относятся к текстовым документам и в Excel скрыты.
+  «Захват страниц» в Excel также скрыт — он доступен в Word.
+</div>
+
+<h2>Сценарии</h2>
+
+<h3>Анализ данных</h3>
+<ol>
+  <li>Выделите диапазон с данными или откройте нужный лист.</li>
+  <li>Нажмите <strong>Анализ данных</strong> и при необходимости добавьте уточнение в чате («по месяцам», «только за 2025 год»).</li>
+  <li>Ассистент построит результат на листе: сводки, формулы, диаграммы или отчёт.</li>
+  <li>Проверьте результат и при необходимости попросите исправить: «поменяй тип диаграммы на линейную».</li>
+</ol>
+
+<h3>Диаграммы</h3>
+<ul>
+  <li>Диаграмма строится по выделенным данным; ассистент сам подбирает подходящий тип.</li>
+  <li>Если данные содержат объединённые ячейки или смешанные типы, сначала приведите их к табличному виду.</li>
+  <li>Уточнить оформление можно словами: «подпиши оси», «добавь легенду справа», «сделай накопительную диаграмму».</li>
+</ul>
+
+<h3>Пакетная генерация</h3>
+<ol>
+  <li>Нажмите <strong>Пакетная генерация</strong>.</li>
+  <li>Опишите поля будущей таблицы и укажите количество строк.</li>
+  <li>Подтвердите — данные будут записаны на активный лист, начиная со строки заголовков.</li>
+</ol>
+
+<h3>Подсветка строки и столбца</h3>
+<ul>
+  <li>Одиночный клик по кнопке включает и выключает режим подсветки.</li>
+  <li>Двойной клик открывает диалог выбора цвета подсветки.</li>
+</ul>
+
+<h2>Функция ALLM</h2>
+<p>В формулах доступна функция <code>ALLM</code> — вызов модели прямо из ячейки:</p>
+<p><code>ALLM(промпт; [модель]; [системный_промпт]; [температура]; [макс._токенов])</code></p>
+<ul>
+  <li><code>промпт</code> — вопрос или инструкция (обязательно).</li>
+  <li><code>модель</code> — имя модели; пусто — модель по умолчанию из настроек.</li>
+  <li><code>температура</code> — 0.0–1.0, по умолчанию 0.7.</li>
+  <li><code>макс._токенов</code> — ограничение длины ответа, по умолчанию 1000.</li>
+</ul>
+<p>Пример: <code>=ALLM("Кратко опиши этот регион"; ; "Отвечай по-русски")</code></p>
 
 <h2>Примеры команд</h2>
 <ul>
@@ -51,15 +114,19 @@
   <li>«Добавь столбец с формулой: цена × количество»</li>
   <li>«Удали дубликаты и отсортируй по убыванию суммы»</li>
   <li>«Сделай сводную таблицу по регионам и категориям»</li>
+  <li>«Найди выбросы в продажах и выдели их»</li>
+  <li>«Посчитай итоги по кварталам и добавь строку "Итого"»</li>
 </ul>
 
 <h2>Полезно знать</h2>
 <ul>
   <li>Формулы можно вводить как задачу: «в C2 посчитай сумму A2:B2».</li>
   <li>Перед массовыми изменениями сохраните книгу — откат доступен через <code>Ctrl+Z</code>.</li>
+  <li>Если после команды данные выглядят неверно, откатитесь через <code>Ctrl+Z</code> и уточните формулировку.</li>
   <li>Для работы нужен настроенный провайдер: <strong>Настройка API</strong> → адрес, ключ, модель.</li>
 </ul>
 
 <footer>Office AI Agent · локальная справка · Excel</footer>
+</div>
 </body>
 </html>

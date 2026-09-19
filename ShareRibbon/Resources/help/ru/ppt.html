@@ -6,41 +6,96 @@
 <title>PowerPoint — справка Office AI Agent</title>
 <style>
   :root { color-scheme: light dark; }
-  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 32px 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
-  header { border-bottom: 1px solid #e1e4e8; padding-bottom: 16px; margin-bottom: 24px; }
+  body { font-family: "Segoe UI", Arial, sans-serif; margin: 0; padding: 0 0 40px; line-height: 1.55; color: #1f2328; background: #ffffff; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 40px; }
+  nav { border-bottom: 1px solid #e1e4e8; padding: 14px 40px; font-size: 13px; background: #f6f8fa; }
+  nav a { color: #0969da; text-decoration: none; margin-right: 16px; }
+  nav a:hover { text-decoration: underline; }
+  nav a.active { color: #1f2328; font-weight: 600; }
+  header { border-bottom: 1px solid #e1e4e8; padding: 24px 0 16px; margin-bottom: 24px; }
   h1 { font-size: 24px; margin: 0 0 6px; }
-  h2 { font-size: 18px; margin: 28px 0 10px; }
-  p, li { font-size: 14px; }
-  a.back { font-size: 13px; }
+  h2 { font-size: 18px; margin: 30px 0 10px; }
+  h3 { font-size: 15px; margin: 20px 0 6px; }
+  p, li, td, th { font-size: 14px; }
   table { border-collapse: collapse; width: 100%; margin: 12px 0; }
   th, td { border: 1px solid #d0d7de; padding: 8px 10px; font-size: 13px; text-align: left; vertical-align: top; }
   th { background: #f6f8fa; }
+  .note { background: #fff8c5; border: 1px solid #d4a72c; border-radius: 8px; padding: 12px 16px; font-size: 13px; }
   code { background: #f0f1f3; padding: 1px 5px; border-radius: 4px; }
   footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e1e4e8; font-size: 12px; color: #57606a; }
   @media (prefers-color-scheme: dark) {
     body { color: #e6edf3; background: #0d1117; }
+    nav { background: #161b22; border-color: #30363d; }
+    nav a.active { color: #e6edf3; }
     header, footer { border-color: #30363d; }
     th, td { border-color: #30363d; }
     th { background: #161b22; }
-    footer { color: #8b949e; }
+    .note { background: #3a2d00; border-color: #9e6a03; color: #f0e6c0; }
     code { background: #21262d; }
   }
 </style>
 </head>
 <body>
+<nav>
+  <a href="index.html">Обзор</a>
+  <a href="word.html">Word</a>
+  <a href="excel.html">Excel</a>
+  <a class="active" href="ppt.html">PowerPoint</a>
+  <a href="faq.html">Вопросы</a>
+</nav>
+<div class="wrap">
 <header>
-  <a class="back" href="index.html">← Общая справка</a>
   <h1>PowerPoint</h1>
   <p>Возможности AI-ассистента в презентациях.</p>
 </header>
 
-<h2>Основные действия на ленте</h2>
+<h2>Кнопки на ленте</h2>
 <table>
   <tr><th>Кнопка</th><th>Что делает</th></tr>
-  <tr><td>AI-чат</td><td>Диалог с AI и выполнение операций над слайдами и фигурами.</td></tr>
-  <tr><td>Продолжить</td><td>Дополняет содержимое слайда с учётом контекста.</td></tr>
-  <tr><td>AI-перевод</td><td>Переводит текст слайдов, сохраняя структуру.</td></tr>
+  <tr><td>AI-чат</td><td>Диалог с AI и выполнение операций над слайдами, фигурами и текстом.</td></tr>
+  <tr><td>AI-перевод</td><td>Переводит выделенные слайды, фигуры или всю презентацию; результат можно применить к файлу или показать в боковой панели.</td></tr>
+  <tr><td>Продолжить</td><td>Дополняет содержимое слайда с учётом контекста презентации.</td></tr>
+  <tr><td>Настройка API / Промпты</td><td>Подключение модели и системные инструкции.</td></tr>
+  <tr><td>MCP</td><td>Подключение внешних инструментов по протоколу MCP.</td></tr>
+  <tr><td>О программе / Очистить кэш / Документация</td><td>Сведения о версии, сброс локальных данных и эта справка.</td></tr>
 </table>
+
+<div class="note">
+  Кнопки «Вычитка», «Форматирование», «Анализ данных», «Подсветка», «Пакетная генерация» и «Захват страниц»
+  в PowerPoint скрыты — эти сценарии относятся к другим приложениям. Создание и оформление слайдов
+  выполняется через <strong>AI-чат</strong>.
+</div>
+
+<h2>Сценарии</h2>
+
+<h3>Создание презентации</h3>
+<ol>
+  <li>Откройте <strong>AI-чат</strong>.</li>
+  <li>Опишите тему, аудиторию и желаемое число слайдов: «презентация из 8 слайдов о результатах квартала для совета директоров».</li>
+  <li>Ассистент построит структуру, применит профессиональную вёрстку и подберёт оформление.</li>
+  <li>Проверьте слайды и попросите правки: «сократи текст на слайде 3», «добавь слайд с выводами».</li>
+</ol>
+
+<h3>Дополнение слайда</h3>
+<ol>
+  <li>Перейдите на нужный слайд и поставьте курсор в текстовое поле.</li>
+  <li>Нажмите <strong>Продолжить</strong> — содержимое дополнится с учётом контекста.</li>
+  <li>При необходимости уточните стиль в чате: «короче», «в деловом тоне», «добавь пример».</li>
+</ol>
+
+<h3>Перевод</h3>
+<ol>
+  <li>Выделите слайды, фигуры или текст либо откройте презентацию целиком.</li>
+  <li>Нажмите <strong>AI-перевод</strong> и выберите исходный и целевой язык, предметную область и способ вывода.</li>
+  <li><strong>Показать в панели</strong> — перевод появится в боковой панели для вычитки; <strong>применить к презентации</strong> — текст слайдов будет заменён.</li>
+</ol>
+
+<h3>Заметки докладчика</h3>
+<ul>
+  <li>Попросите в чате: «добавь заметки докладчика к каждому слайду».</li>
+  <li>Заметки содержат тезисы, опорные данные и предлагаемые формулировки для выступления.</li>
+  <li>Готовые заметки правятся вручную в области заметок под слайдом.</li>
+</ul>
 
 <h2>Примеры команд</h2>
 <ul>
@@ -48,15 +103,19 @@
   <li>«Сделай титульный слайд и слайд с ключевыми показателями»</li>
   <li>«Приведи оформление всех слайдов к единому стилю»</li>
   <li>«Добавь заметки докладчика к каждому слайду»</li>
+  <li>«Сократи текст на слайде 3 и вынеси главное в заголовок»</li>
+  <li>«Переведи презентацию на английский, структуру сохрани»</li>
 </ul>
 
 <h2>Полезно знать</h2>
 <ul>
-  <li>Профессиональная вёрстка выполняется по структурированному описанию слайдов; при неудаче изменения откатываются.</li>
+  <li>Профессиональная вёрстка выполняется по структурированному описанию слайдов; при неудаче изменения этого шага откатываются.</li>
+  <li>Перенасыщенные слайды лучше разбивать на несколько, а не уменьшать шрифт.</li>
   <li>Откат доступен через <code>Ctrl+Z</code>; иногда может понадобиться несколько нажатий.</li>
   <li>Для работы нужен настроенный провайдер: <strong>Настройка API</strong> → адрес, ключ, модель.</li>
 </ul>
 
 <footer>Office AI Agent · локальная справка · PowerPoint</footer>
+</div>
 </body>
 </html>

@@ -7,7 +7,7 @@ Public Class ResourceExtractor
     ''' <summary>
     ''' 资源版本号 — 更新此值可强制刷新所有前端资源文件
     ''' </summary>
-    Private Shared _resourceVersion As String = "2026.09.19.1"
+    Private Shared _resourceVersion As String = "2026.09.19.2"
 
     ''' <summary>
     ''' 获取最后一次错误信息
@@ -121,7 +121,8 @@ Public Class ResourceExtractor
                 {"help_ru_index", "index.html"},
                 {"help_ru_word", "word.html"},
                 {"help_ru_excel", "excel.html"},
-                {"help_ru_ppt", "ppt.html"}
+                {"help_ru_ppt", "ppt.html"},
+                {"help_ru_faq", "faq.html"}
             }
             For Each kvp In helpResources
                 Dim errMsg As String = ExtractResourceToFileFromManager(kvp.Key, kvp.Value, targetDir:=Path.Combine(appDataPath, "help", "ru"), rm:=rm)
