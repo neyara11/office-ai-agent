@@ -149,12 +149,19 @@ Public Class ProofreadJsonParser
             content = inlineMatch.Groups(1).Value.Trim()
         End If
 
-        ' 尝试找到第一个 [ 或 {
-        Dim firstBracket = Math.Max(content.IndexOf("["c), content.IndexOf("{"c))
-        Dim lastBracket = Math.Max(content.LastIndexOf("]"c), content.LastIndexOf("}"c))
+        ' 找到 JSON 起始位置：取最靠前的 [ 或 {，而不是最靠后的
+        Dim startBracket = content.IndexOf("["c)
+        Dim startBrace = content.IndexOf("{"c)
+        Dim realStart = EarliestIndex(startBracket, startBrace)
 
-        If firstBracket >= 0 AndAlso lastBracket > firstBracket Then
-            content = content.Substring(firstBracket, lastBracket - firstBracket + 1)
+        If realStart >= 0 Then
+            content = content.Substring(realStart)
+
+            ' 只保留第一个完整的 JSON 值，忽略后续逗号、说明文字或追加的第二个 JSON 块
+            Dim jsonEnd = FindFirstCompleteJsonEnd(content)
+            If jsonEnd >= 0 Then
+                content = content.Substring(0, jsonEnd + 1)
+            End If
         End If
 
         ' 移除末尾多余的逗号（常见问题）
@@ -162,6 +169,62 @@ Public Class ProofreadJsonParser
         content = Regex.Replace(content, ",\s*([\}\]])", "$1")
 
         Return content
+    End Function
+
+    ''' <summary>
+    ''' 返回两个索引中较小的非负值；都为 -1 时返回 -1。
+    ''' </summary>
+    Private Shared Function EarliestIndex(a As Integer, b As Integer) As Integer
+        If a < 0 Then Return b
+        If b < 0 Then Return a
+        Return Math.Min(a, b)
+    End Function
+
+    ''' <summary>
+    ''' 从头扫描，返回第一个完整 JSON 值（最外层 {} 或 []）的结束索引；
+    ''' 忽略紧随其后的逗号、说明文字或第二个 JSON 块。
+    ''' </summary>
+    Private Shared Function FindFirstCompleteJsonEnd(content As String) As Integer
+        If String.IsNullOrEmpty(content) Then Return -1
+        If Not content.StartsWith("{") AndAlso Not content.StartsWith("[") Then Return -1
+
+        Dim curlyDepth As Integer = 0
+        Dim squareDepth As Integer = 0
+        Dim inString As Boolean = False
+        Dim escaped As Boolean = False
+
+        For i = 0 To content.Length - 1
+            Dim ch = content(i)
+
+            If inString Then
+                If escaped Then
+                    escaped = False
+                ElseIf ch = "\"c Then
+                    escaped = True
+                ElseIf ch = """"c Then
+                    inString = False
+                End If
+                Continue For
+            End If
+
+            If ch = """"c Then
+                inString = True
+            ElseIf ch = "{"c Then
+                curlyDepth += 1
+            ElseIf ch = "}"c Then
+                curlyDepth -= 1
+            ElseIf ch = "["c Then
+                squareDepth += 1
+            ElseIf ch = "]"c Then
+                squareDepth -= 1
+            End If
+
+            If i > 0 AndAlso curlyDepth = 0 AndAlso squareDepth = 0 Then
+                Return i
+            End If
+        Next
+
+        Return -1
     End Function
 
     ''' <summary>
