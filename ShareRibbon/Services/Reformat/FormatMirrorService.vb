@@ -151,47 +151,47 @@ Public Class FormatMirrorService
     Public Shared Function BuildClonePrompt(extracted As List(Of ExtractedParagraphFormat),
                                             Optional availableTags As List(Of SemanticTag) = Nothing) As String
         Dim sb As New StringBuilder()
-        sb.AppendLine("你是排版专家。根据以下从真实文档中提取的段落格式信息，生成一个SemanticStyleMapping JSON。")
+        sb.AppendLine("Ты — эксперт по вёрстке. На основе извлечённых из реального документа параметров абзацев сформируй JSON SemanticStyleMapping.")
         sb.AppendLine()
 
         ' 可用语义标签（动态生成，不再硬编码）
-        sb.AppendLine("【可用语义标签】")
+        sb.AppendLine("【Доступные семантические теги】")
         If availableTags IsNot Nothing AndAlso availableTags.Count > 0 Then
             For Each tag In availableTags
                 sb.Append($"- {tag.TagId}: {tag.DisplayName}")
                 If Not String.IsNullOrEmpty(tag.MatchHint) Then
-                    sb.Append($"（{tag.MatchHint}）")
+                    sb.Append($" ({tag.MatchHint})")
                 End If
                 sb.AppendLine()
             Next
         Else
             ' 降级：使用基础标签集
-            sb.AppendLine("title.main（主标题）、title.1（一级标题）、title.2（二级标题）、title.3（三级标题）")
-            sb.AppendLine("heading.1（一级标题）、heading.2（二级标题）、heading.3（三级标题）")
-            sb.AppendLine("body.normal（正文）、body.emphasis（强调正文）")
-            sb.AppendLine("body.abstract（摘要正文）、body.keywords（关键词）")
-            sb.AppendLine("list.ordered（有序列表）、list.unordered（无序列表）")
-            sb.AppendLine("quote（引用/摘要）、caption（图表说明）")
-            sb.AppendLine("header.org（发文机关）、header.refno（发文字号）")
-            sb.AppendLine("footer.signature（署名）、footer.date（日期）")
+            sb.AppendLine("title.main (главный заголовок), title.1 (заголовок 1), title.2 (заголовок 2), title.3 (заголовок 3)")
+            sb.AppendLine("heading.1 (заголовок 1), heading.2 (заголовок 2), heading.3 (заголовок 3)")
+            sb.AppendLine("body.normal (основной текст), body.emphasis (акцент в тексте)")
+            sb.AppendLine("body.abstract (аннотация), body.keywords (ключевые слова)")
+            sb.AppendLine("list.ordered (нумерованный список), list.unordered (маркированный список)")
+            sb.AppendLine("quote (цитата/аннотация), caption (подпись к рисунку или таблице)")
+            sb.AppendLine("header.org (реквизит организации), header.refno (номер документа)")
+            sb.AppendLine("footer.signature (подпись), footer.date (дата)")
         End If
         sb.AppendLine()
 
-        sb.AppendLine("【从文档提取的格式规则（按出现频率排序）】")
+        sb.AppendLine("【Извлечённые из документа правила форматирования (по убыванию частоты)】")
 
         For Each f In extracted.Take(30)
-            sb.AppendLine($"- 样式名:{f.StyleName} | 出现{f.OccurrenceCount}次 | 样本:「{f.SampleText}」")
-            sb.AppendLine($"  字体: CN={f.FontNameCN} EN={f.FontNameEN} 大小={f.FontSize}pt Bold={f.Bold} Italic={f.Italic}")
-            sb.AppendLine($"  段落: 对齐={f.AlignmentStr} 首行={f.FirstLineIndentCm}cm 行距={f.LineSpacingPt}pt 前={f.SpaceBeforePt}pt 后={f.SpaceAfterPt}pt")
+            sb.AppendLine($"- Имя стиля: {f.StyleName} | вхождений: {f.OccurrenceCount} | образец: «{f.SampleText}»")
+            sb.AppendLine($"  Шрифт: CN={f.FontNameCN} EN={f.FontNameEN} размер={f.FontSize}pt Bold={f.Bold} Italic={f.Italic}")
+            sb.AppendLine($"  Абзац: выравнивание={f.AlignmentStr} первая строка={f.FirstLineIndentCm}см межстрочный={f.LineSpacingPt}pt до={f.SpaceBeforePt}pt после={f.SpaceAfterPt}pt")
         Next
 
         sb.AppendLine()
-        sb.AppendLine("【要求】")
-        sb.AppendLine("1. 将每种格式映射到最合适的语义标签（body.normal 必须有）")
-        sb.AppendLine("2. 仅返回如下JSON结构，不要解释：")
-        sb.AppendLine("{""name"":""克隆格式"",""semanticTags"":[{""tagId"":""title.1"",""font"":{""fontNameCN"":""..."",")
+        sb.AppendLine("【Требования】")
+        sb.AppendLine("1. Сопоставь каждый формат наиболее подходящему семантическому тегу (body.normal обязателен)")
+        sb.AppendLine("2. Верни только следующую JSON-структуру, без пояснений:")
+        sb.AppendLine("{""name"":""Клонированный формат"",""semanticTags"":[{""tagId"":""title.1"",""font"":{""fontNameCN"":""..."",")
         sb.AppendLine("""fontNameEN"":""..."",""fontSize"":16,""bold"":true},""paragraph"":{""alignment"":""center""}}]}")
-        sb.AppendLine("字段与 StyleGuideConverter 的输出格式完全相同（使用 semanticTags 字段）。")
+        sb.AppendLine("Формат полей полностью совпадает с выводом StyleGuideConverter (используется поле semanticTags).")
 
         Return sb.ToString()
     End Function

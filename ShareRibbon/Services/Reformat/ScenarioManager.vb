@@ -124,14 +124,14 @@ Namespace Services.Reformat
 
             ' 结构顺序
             If scenario.StructureGuidance.Order IsNot Nothing AndAlso scenario.StructureGuidance.Order.Count > 0 Then
-                sb.AppendLine($"{scenario.Name}有固定的结构顺序，请按此顺序识别：")
+                sb.AppendLine($"{scenario.Name}: фиксированный порядок структуры, распознавай в этом порядке:")
                 sb.AppendLine(String.Join(" → ", scenario.StructureGuidance.Order))
                 sb.AppendLine()
             End If
 
             ' 规则
             If scenario.StructureGuidance.Rules IsNot Nothing AndAlso scenario.StructureGuidance.Rules.Count > 0 Then
-                sb.AppendLine("注意：")
+                sb.AppendLine("Внимание:")
                 For Each rule In scenario.StructureGuidance.Rules
                     sb.AppendLine($"- {rule}")
                 Next
@@ -150,7 +150,7 @@ Namespace Services.Reformat
             End If
 
             Dim sb As New Text.StringBuilder()
-            sb.AppendLine($"【{scenario.Name}标注示例】")
+            sb.AppendLine($"【Пример разметки: {scenario.Name}】")
 
             For Each example In scenario.Examples
                 sb.AppendLine($"段落{example.ParaIndex}：「{example.Text}」")
@@ -170,7 +170,7 @@ Namespace Services.Reformat
 
             Dim sb As New Text.StringBuilder()
             sb.AppendLine($"【{scenario.Name}识别模式】")
-            sb.AppendLine("以下是各类段落的详细识别特征，请综合运用：")
+            sb.AppendLine("Ниже — подробные признаки распознавания для каждого типа абзацев; используй их в совокупности:")
             sb.AppendLine()
 
             For Each kvp In scenario.IdentificationPatterns

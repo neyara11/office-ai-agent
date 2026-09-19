@@ -24,26 +24,26 @@ Namespace Agent.Context
         Public Function ToPromptText() As String
             Dim sb As New StringBuilder()
 
-            sb.AppendLine("## 当前 Office 环境")
-            sb.AppendLine("应用: " & AppType)
+            sb.AppendLine("## Текущее окружение Office")
+            sb.AppendLine("Приложение: " & AppType)
 
             If Selection IsNot Nothing Then
                 sb.AppendLine()
-                sb.AppendLine("### 当前选区")
-                sb.AppendLine("- 位置: " & Selection.Address)
-                sb.AppendLine("- 数量: " & Selection.ItemCount.ToString() & " 项")
-                sb.AppendLine("- 类型: " & Selection.DataType)
+                sb.AppendLine("### Текущее выделение")
+                sb.AppendLine("- Позиция: " & Selection.Address)
+                sb.AppendLine("- Количество: " & Selection.ItemCount.ToString() & " элем.")
+                sb.AppendLine("- Тип: " & Selection.DataType)
 
                 If Not String.IsNullOrEmpty(Selection.Preview) Then
                     sb.AppendLine()
-                    sb.AppendLine("### 数据预览")
+                    sb.AppendLine("### Предпросмотр данных")
                     sb.AppendLine(Selection.Preview)
                 End If
             End If
 
             If DocStructure IsNot Nothing AndAlso Not String.IsNullOrEmpty(DocStructure.Summary) Then
                 sb.AppendLine()
-                sb.AppendLine("### 文档结构")
+                sb.AppendLine("### Структура документа")
                 sb.AppendLine(DocStructure.Summary)
             End If
 
