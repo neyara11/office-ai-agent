@@ -300,6 +300,125 @@ Public Class IntentRecognitionService
 
 #End Region
 
+#Region "Русские ключевые слова (P0 русификация)"
+
+    Private Shared ReadOnly DataAnalysisKeywordsRu As String() = {
+        "статистик", "аналитик", "анализ", "сводк", "сводн", "сумм", "итог",
+        "средн", "максимум", "минимум", "количеств", "группиров", "агрегир",
+        "доля", "процент", "тренд", "сравнен", "рейтинг", "топ-", "первые", "последние"
+    }
+
+    Private Shared ReadOnly FormulaCalcKeywordsRu As String() = {
+        "формул", "вычисл", "рассчит", "расчёт", "расчет", "сложить", "сложи",
+        "вычесть", "умнож", "разделить", "поделить", "сумма", "среднее значение",
+        "впр", "счёт", "счет", "посчитай"
+    }
+
+    Private Shared ReadOnly ChartGenKeywordsRu As String() = {
+        "диаграмм", "график", "круговая", "круговую", "столбчатая", "столбчат",
+        "линейная", "линейный", "точечная", "гистограмм", "визуализ",
+        "построй", "нарисуй", "графики"
+    }
+
+    Private Shared ReadOnly DataCleaningKeywordsRu As String() = {
+        "очист", "очисть", "дубликат", "дубл", "повторяющ", "заполн",
+        "пустые значения", "пропуск", "замен", "унифиц", "унифицир",
+        "обрезать", "пробел", "удали пустые"
+    }
+
+    Private Shared ReadOnly ReportGenKeywordsRu As String() = {
+        "отчёт", "отчет", "доклад", "сводк", "экспорт", "выгруз",
+        "недельный", "месячный", "дневной", "шаблон", "сформируй отч"
+    }
+
+    Private Shared ReadOnly DataTransformKeywordsRu As String() = {
+        "объедин", "объедини", "разъедин", "разделить", "транспонир",
+        "транспон", "преобраз", "соедини", "сопостав", "извлеч", "разбить"
+    }
+
+    Private Shared ReadOnly FormatStyleKeywordsRu As String() = {
+        "формат", "стиль", "цвет", "шрифт", "границ", "выравн", "полужирн",
+        "жирн", "курсив", "заливк", "подсвет", "условное форм", "оформ", "красив"
+    }
+
+    Private Shared ReadOnly DocumentEditKeywordsRu As String() = {
+        "вставить", "вставь", "удалить", "удали", "заменить", "замени",
+        "скопир", "вырезать", "отмен", "найти", "поиск", "перейти",
+        "выдели", "выделить"
+    }
+
+    Private Shared ReadOnly TextFormatKeywordsRu As String() = {
+        "шрифт", "кегл", "размер шрифта", "жирн", "полужирн", "курсив",
+        "подчёрк", "подчерк", "зачёрк", "зачерк", "надстроч", "подстроч",
+        "абзац", "интервал", "отступ", "выравн"
+    }
+
+    Private Shared ReadOnly TableOperationKeywordsRu As String() = {
+        "таблиц", "ячейк", "строк", "столбц", "объедин", "разъедин",
+        "добавь строк", "добавь столбц", "удали строк", "удали столбц", "стиль таблиц"
+    }
+
+    Private Shared ReadOnly ImageInsertKeywordsRu As String() = {
+        "изображен", "картинк", "рисунок", "фото", "скриншот", "снимок",
+        "вставь картин", "обрез", "поверн"
+    }
+
+    Private Shared ReadOnly TocGenerationKeywordsRu As String() = {
+        "оглавлен", "содержан", "навигац", "обнови оглав", "вставь оглав",
+        "заголовк", "разделы", "нумерац"
+    }
+
+    Private Shared ReadOnly ReviewCommentKeywordsRu As String() = {
+        "примечан", "коммент", "реценз", "отслежив", "принять правк",
+        "отклонить правк", "режим правок", "сравнить документ", "объединить документ"
+    }
+
+    Private Shared ReadOnly ProofreadKeywordsRu As String() = {
+        "вычит", "вычита", "проверь текст", "проверить текст", "орфограф",
+        "пунктуац", "грамматик", "опечат", "ошибк", "стилист", "редактир",
+        "правописан", "запят"
+    }
+
+    Private Shared ReadOnly SlideCreateKeywordsRu As String() = {
+        "слайд", "презентац", "добавь слайд", "новый слайд", "удали слайд",
+        "скопируй слайд", "дублируй слайд", "ppt", "ппт"
+    }
+
+    Private Shared ReadOnly SlideLayoutKeywordsRu As String() = {
+        "макет", "разметк", "титульн", "заголовок и содержан", "пустой слайд",
+        "две колонк", "сравнен", "только заголовок"
+    }
+
+    Private Shared ReadOnly AnimationEffectKeywordsRu As String() = {
+        "анимац", "анимир", "появлен", "исчезн", "постепен", "вращен",
+        "траектор", "порядок анимац"
+    }
+
+    Private Shared ReadOnly TransitionEffectKeywordsRu As String() = {
+        "переход", "смену слайд", "затухан", "сдвиг", "растворен", "жалюзи",
+        "шахмат", "время переход"
+    }
+
+    Private Shared ReadOnly TemplateApplyKeywordsRu As String() = {
+        "шаблон", "дизайн", "палитр", "цветов", "фонов", "мастер слайд",
+        "тема оформл", "тему оформл", "стиль презентац"
+    }
+
+    Private Shared ReadOnly SpeakerNotesKeywordsRu As String() = {
+        "заметк", "заметки докладч", "подсказк", "текст выступлен",
+        "режим докладч", "заметках"
+    }
+
+    ''' <summary>
+    ''' Скоринг с учётом русского и китайского словарей: нормализация считается
+    ''' отдельно для каждого языка, итог — максимум. Китайское поведение не меняется.
+    ''' </summary>
+    Private Function ScoreKeywords(text As String, chineseKeywords As String(), russianKeywords As String()) As Double
+        Return Math.Max(CalculateKeywordScore(text, chineseKeywords), CalculateKeywordScore(text, russianKeywords))
+    End Function
+
+#End Region
+
 #Region "公共方法"
 
     ''' <summary>
@@ -328,7 +447,7 @@ Public Class IntentRecognitionService
         End Select
 
         ' 通用格式样式意图检测
-        Dim formatScore = CalculateKeywordScore(lowerQuestion, FormatStyleKeywords)
+        Dim formatScore = ScoreKeywords(lowerQuestion, FormatStyleKeywords, FormatStyleKeywordsRu)
         If formatScore > result.Confidence Then
             result.IntentType = ExcelIntentType.FORMAT_STYLE
             result.OfficeIntent = OfficeIntentType.FORMAT_STYLE
@@ -350,12 +469,12 @@ Public Class IntentRecognitionService
     ''' </summary>
     Private Sub IdentifyExcelIntent(lowerQuestion As String, result As IntentResult)
         Dim scores As New Dictionary(Of OfficeIntentType, Double)()
-        scores(OfficeIntentType.DATA_ANALYSIS) = CalculateKeywordScore(lowerQuestion, DataAnalysisKeywords)
-        scores(OfficeIntentType.FORMULA_CALC) = CalculateKeywordScore(lowerQuestion, FormulaCalcKeywords)
-        scores(OfficeIntentType.CHART_GEN) = CalculateKeywordScore(lowerQuestion, ChartGenKeywords)
-        scores(OfficeIntentType.DATA_CLEANING) = CalculateKeywordScore(lowerQuestion, DataCleaningKeywords)
-        scores(OfficeIntentType.REPORT_GEN) = CalculateKeywordScore(lowerQuestion, ReportGenKeywords)
-        scores(OfficeIntentType.DATA_TRANSFORMATION) = CalculateKeywordScore(lowerQuestion, DataTransformKeywords)
+        scores(OfficeIntentType.DATA_ANALYSIS) = ScoreKeywords(lowerQuestion, DataAnalysisKeywords, DataAnalysisKeywordsRu)
+        scores(OfficeIntentType.FORMULA_CALC) = ScoreKeywords(lowerQuestion, FormulaCalcKeywords, FormulaCalcKeywordsRu)
+        scores(OfficeIntentType.CHART_GEN) = ScoreKeywords(lowerQuestion, ChartGenKeywords, ChartGenKeywordsRu)
+        scores(OfficeIntentType.DATA_CLEANING) = ScoreKeywords(lowerQuestion, DataCleaningKeywords, DataCleaningKeywordsRu)
+        scores(OfficeIntentType.REPORT_GEN) = ScoreKeywords(lowerQuestion, ReportGenKeywords, ReportGenKeywordsRu)
+        scores(OfficeIntentType.DATA_TRANSFORMATION) = ScoreKeywords(lowerQuestion, DataTransformKeywords, DataTransformKeywordsRu)
 
         Dim maxScore As Double = 0
         Dim maxIntent = OfficeIntentType.GENERAL_QUERY
@@ -379,13 +498,13 @@ Public Class IntentRecognitionService
     ''' </summary>
     Private Sub IdentifyWordIntent(lowerQuestion As String, result As IntentResult)
         Dim scores As New Dictionary(Of OfficeIntentType, Double)()
-        scores(OfficeIntentType.DOCUMENT_EDIT) = CalculateKeywordScore(lowerQuestion, DocumentEditKeywords)
-        scores(OfficeIntentType.TEXT_FORMAT) = CalculateKeywordScore(lowerQuestion, TextFormatKeywords)
-        scores(OfficeIntentType.TABLE_OPERATION) = CalculateKeywordScore(lowerQuestion, TableOperationKeywords)
-        scores(OfficeIntentType.IMAGE_INSERT) = CalculateKeywordScore(lowerQuestion, ImageInsertKeywords)
-        scores(OfficeIntentType.TOC_GENERATION) = CalculateKeywordScore(lowerQuestion, TocGenerationKeywords)
-        scores(OfficeIntentType.REVIEW_COMMENT) = CalculateKeywordScore(lowerQuestion, ReviewCommentKeywords)
-        scores(OfficeIntentType.PROOFREAD) = CalculateKeywordScore(lowerQuestion, ProofreadKeywords)
+        scores(OfficeIntentType.DOCUMENT_EDIT) = ScoreKeywords(lowerQuestion, DocumentEditKeywords, DocumentEditKeywordsRu)
+        scores(OfficeIntentType.TEXT_FORMAT) = ScoreKeywords(lowerQuestion, TextFormatKeywords, TextFormatKeywordsRu)
+        scores(OfficeIntentType.TABLE_OPERATION) = ScoreKeywords(lowerQuestion, TableOperationKeywords, TableOperationKeywordsRu)
+        scores(OfficeIntentType.IMAGE_INSERT) = ScoreKeywords(lowerQuestion, ImageInsertKeywords, ImageInsertKeywordsRu)
+        scores(OfficeIntentType.TOC_GENERATION) = ScoreKeywords(lowerQuestion, TocGenerationKeywords, TocGenerationKeywordsRu)
+        scores(OfficeIntentType.REVIEW_COMMENT) = ScoreKeywords(lowerQuestion, ReviewCommentKeywords, ReviewCommentKeywordsRu)
+        scores(OfficeIntentType.PROOFREAD) = ScoreKeywords(lowerQuestion, ProofreadKeywords, ProofreadKeywordsRu)
 
         Dim maxScore As Double = 0
         Dim maxIntent = OfficeIntentType.GENERAL_QUERY
@@ -409,12 +528,12 @@ Public Class IntentRecognitionService
     ''' </summary>
     Private Sub IdentifyPowerPointIntent(lowerQuestion As String, result As IntentResult)
         Dim scores As New Dictionary(Of OfficeIntentType, Double)()
-        scores(OfficeIntentType.SLIDE_CREATE) = CalculateKeywordScore(lowerQuestion, SlideCreateKeywords)
-        scores(OfficeIntentType.SLIDE_LAYOUT) = CalculateKeywordScore(lowerQuestion, SlideLayoutKeywords)
-        scores(OfficeIntentType.ANIMATION_EFFECT) = CalculateKeywordScore(lowerQuestion, AnimationEffectKeywords)
-        scores(OfficeIntentType.TRANSITION_EFFECT) = CalculateKeywordScore(lowerQuestion, TransitionEffectKeywords)
-        scores(OfficeIntentType.TEMPLATE_APPLY) = CalculateKeywordScore(lowerQuestion, TemplateApplyKeywords)
-        scores(OfficeIntentType.SPEAKER_NOTES) = CalculateKeywordScore(lowerQuestion, SpeakerNotesKeywords)
+        scores(OfficeIntentType.SLIDE_CREATE) = ScoreKeywords(lowerQuestion, SlideCreateKeywords, SlideCreateKeywordsRu)
+        scores(OfficeIntentType.SLIDE_LAYOUT) = ScoreKeywords(lowerQuestion, SlideLayoutKeywords, SlideLayoutKeywordsRu)
+        scores(OfficeIntentType.ANIMATION_EFFECT) = ScoreKeywords(lowerQuestion, AnimationEffectKeywords, AnimationEffectKeywordsRu)
+        scores(OfficeIntentType.TRANSITION_EFFECT) = ScoreKeywords(lowerQuestion, TransitionEffectKeywords, TransitionEffectKeywordsRu)
+        scores(OfficeIntentType.TEMPLATE_APPLY) = ScoreKeywords(lowerQuestion, TemplateApplyKeywords, TemplateApplyKeywordsRu)
+        scores(OfficeIntentType.SPEAKER_NOTES) = ScoreKeywords(lowerQuestion, SpeakerNotesKeywords, SpeakerNotesKeywordsRu)
 
         Dim maxScore As Double = 0
         Dim maxIntent = OfficeIntentType.GENERAL_QUERY
@@ -1229,42 +1348,42 @@ Public Class IntentRecognitionService
             ' 构建上下文摘要
             Dim contextSummary As New StringBuilder()
             For Each msg In recentHistory
-                Dim roleLabel = If(msg.role = "user", "用户", "AI")
+                Dim roleLabel = If(msg.role = "user", "Пользователь", "AI")
                 Dim contentPreview = If(msg.content?.Length > 200, msg.content.Substring(0, 200) & "...", msg.content)
                 contextSummary.AppendLine($"{roleLabel}: {contentPreview}")
             Next
 
             ' 构建判断提示词
-            Dim systemPrompt = "你是一个对话上下文分析助手。判断用户的新问题是否与之前的对话相关。
+            Dim systemPrompt = "Ты помощник по анализу контекста диалога. Определи, связан ли новый вопрос пользователя с предыдущим диалогом. Отвечай только на русском языке.
 
-只返回JSON格式：
+Возвращай только JSON:
 ```json
-{""isFollowUp"": true, ""reason"": ""简短原因""}
+{""isFollowUp"": true, ""reason"": ""краткая причина""}
 ```
 
-判断标准：
-- isFollowUp=true: 新问题是对之前话题的追问、补充、澄清或继续
-- isFollowUp=false: 新问题是全新的话题，与之前对话无关
+Критерии:
+- isFollowUp=true: новый вопрос — уточнение, дополнение, разъяснение или продолжение предыдущей темы
+- isFollowUp=false: новый вопрос — совершенно новая тема, не связанная с предыдущим диалогом
 
-示例：
-- 之前讨论Excel公式，新问题""还有其他方法吗"" → true
-- 之前讨论Excel公式，新问题""帮我画个图表"" → false (新话题)
-- 之前讨论数据分析，新问题""这个结果不对"" → true (追问)
-- 之前讨论将A列和B列相加写入C列，新问题""再来"" → true (重复上次操作)
-- 之前讨论数据分析，新问题""再做一次"" → true (重复上次操作)
-- 之前讨论格式化表格，新问题""继续"" → true (继续上次任务)
-- 之前讨论创建图表，新问题""再做一个"" → true (重复类似操作)
+Примеры:
+- Ранее обсуждали формулы Excel, новый вопрос «есть другие способы?» → true
+- Ранее обсуждали формулы Excel, новый вопрос «построй диаграмму» → false (новая тема)
+- Ранее обсуждали анализ данных, новый вопрос «результат неверный» → true (уточнение)
+- Ранее обсуждали сложение столбцов A и B в столбец C, новый вопрос «ещё раз» → true (повтор прошлой операции)
+- Ранее обсуждали анализ данных, новый вопрос «сделай ещё раз» → true (повтор прошлой операции)
+- Ранее обсуждали форматирование таблицы, новый вопрос «продолжай» → true (продолжение прошлой задачи)
+- Ранее обсуждали создание диаграммы, новый вопрос «сделай ещё одну» → true (повтор похожей операции)
 
-特别注意：
-- ""再来""、""再做一次""、""继续""、""再做一个""等简短请求通常都是追问，表示重复或继续之前的操作
-- 只有明显完全不相关的新话题才判断为false"
+Особое внимание:
+- Короткие запросы вроде «ещё раз», «сделай ещё раз», «продолжай», «сделай ещё одну» обычно являются уточнением и означают повтор или продолжение прошлой операции
+- Только явно совершенно посторонняя новая тема считается false"
 
-            Dim userMessage = $"之前的对话：
+            Dim userMessage = $"Предыдущий диалог:
 {contextSummary}
 
-新问题：{newQuestion}
+Новый вопрос: {newQuestion}
 
-判断新问题是否与之前对话相关？"
+Связан ли новый вопрос с предыдущим диалогом?"
 
             ' 构建请求
             Dim messages As New JArray()
