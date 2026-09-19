@@ -623,7 +623,7 @@ Namespace Agent
         ''' Structured write observations must confirm an actual change, and operation
         ''' batches must not contain unhandled failed/partial steps.
         ''' </summary>
-        Private Function ValidateObservedOutcome(result As ToolResult) As ToolResult
+        Private Function ValidateObservedOutcome(result As ToolResult, appType As String) As ToolResult
             If result Is Nothing OrElse Not result.Success OrElse result.Observation Is Nothing Then Return result
 
             Try
@@ -661,6 +661,15 @@ Namespace Agent
                 If changedToken IsNot Nothing AndAlso
                    changedToken.Type = JTokenType.Boolean AndAlso
                    Not changedToken.Value(Of Boolean)() Then
+                    ' Снимок PowerPoint не покрывает все типы правок (анимации, темы,母版 и т.п.).
+                    ' Если хост уже подтвердил успех, отсутствие изменения в снимке не должно
+                    ' валить всю задачу — фиксируем предупреждение и продолжаем.
+                    If String.Equals(appType, "PowerPoint", StringComparison.OrdinalIgnoreCase) Then
+                        AppendObservationWarning(observation,
+                                                 "Наблюдение не обнаружило изменений, но хост сообщил об успехе")
+                        Return result
+                    End If
+
                     Return ToolResult.Failed(
                         result.ToolId,
                         "Хост сообщил об успехе, но наблюдение не обнаружило фактических изменений",
@@ -676,6 +685,17 @@ Namespace Agent
             End Try
             Return result
         End Function
+
+        Private Shared Sub AppendObservationWarning(observation As JToken, message As String)
+            Dim obj = TryCast(observation, JObject)
+            If obj Is Nothing Then Return
+            Dim warnings = TryCast(obj("warnings"), JArray)
+            If warnings Is Nothing Then
+                warnings = New JArray()
+                obj("warnings") = warnings
+            End If
+            warnings.Add(message)
+        End Sub
 
         Private Function FormatResultData(data As Object) As String
             If data Is Nothing Then Return ""

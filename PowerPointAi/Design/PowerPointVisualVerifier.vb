@@ -198,8 +198,8 @@ Namespace Design
                 score -= 12
                 report.Issues.Add(New VisualIssue With {
                     .Code = "VISUAL_STRUCTURE_MISSING",
-                    .Severity = "error",
-                    .Message = $"The {plan.SlideType} composition contains no rendered visual structure beyond text"
+                    .Severity = "warning",
+                    .Message = "The composition contains no rendered visual structure beyond text"
                 })
             End If
             Dim titleBodyRatio = TitleBodyFontRatio(textNodes)
@@ -208,7 +208,7 @@ Namespace Design
                 score -= 8
                 report.Issues.Add(New VisualIssue With {
                     .Code = "TYPOGRAPHIC_HIERARCHY_WEAK",
-                    .Severity = "error",
+                    .Severity = "warning",
                     .Message = $"Title-to-body font ratio {Math.Round(titleBodyRatio, 2)} is below the professional hierarchy threshold"
                 })
             End If

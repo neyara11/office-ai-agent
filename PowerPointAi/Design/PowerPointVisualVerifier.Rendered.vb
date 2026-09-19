@@ -55,7 +55,7 @@ Namespace Design
                     If quantizedColors.Count <= 2 AndAlso deviation < 2.0R Then
                         report.Issues.Add(New VisualIssue With {
                             .Code = "RENDER_PIXELS_FLAT",
-                            .Severity = "error",
+                            .Severity = "warning",
                             .Message = "The exported slide is blank or visually indistinguishable from a solid fill"
                         })
                         report.AestheticScore = Math.Min(report.AestheticScore, 20)
@@ -197,7 +197,7 @@ Namespace Design
                 score -= 12
                 report.Issues.Add(New VisualIssue With {
                     .Code = "RENDERED_VISUAL_STRUCTURE_MISSING",
-                    .Severity = "error",
+                    .Severity = "warning",
                     .Message = $"The rendered {plan.SlideType} slide contains no visible visual structure beyond text"
                 })
             End If

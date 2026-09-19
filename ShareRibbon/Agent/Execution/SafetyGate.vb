@@ -187,14 +187,16 @@ Namespace Agent.Execution
             Dim id = If(toolId, "").ToLowerInvariant()
             If id.Contains("delete") OrElse id.Contains("clear") OrElse id.Contains("remove") Then Return True
 
-            If String.Equals(id, "replacetext", StringComparison.OrdinalIgnoreCase) Then
-                Dim rangeName = If(params?("range")?.ToString(), "all")
+            ' Дополнительное подтверждение нужно только инструментам, которые реально заменяют содержимое.
+            ' Нельзя считать инструмент разрушительным лишь из-за scope=all:
+            ' ApplyTransition/FormatSlide/BeautifySlides со scope=all ничего не удаляют.
+            If String.Equals(id, "replacetext", StringComparison.OrdinalIgnoreCase) OrElse
+               String.Equals(id, "findreplace", StringComparison.OrdinalIgnoreCase) Then
+                Dim rangeName = If(params?("range")?.ToString(), If(params?("scope")?.ToString(), "all"))
                 Return IsWholeDocumentRange(rangeName)
             End If
 
-            Dim scope = If(params?("scope")?.ToString(), "")
-            Dim range = If(params?("range")?.ToString(), "")
-            Return IsWholeDocumentRange(scope) OrElse IsWholeDocumentRange(range)
+            Return False
         End Function
 
         Private Function IsWholeDocumentRange(value As String) As Boolean

@@ -166,7 +166,8 @@ Namespace Agent
                             If Not String.IsNullOrWhiteSpace(normalized) Then Debug.WriteLine($"[LoopEngine] {normalized}")
                             ' 执行工具
                             toolResult = ValidateObservedOutcome(
-                                Await _toolRegistry.ExecuteToolAsync(executionContext, toolCall.ToolId, toolCall.Parameters))
+                                Await _toolRegistry.ExecuteToolAsync(executionContext, toolCall.ToolId, toolCall.Parameters),
+                                session.AppType)
                         End If
 
                         If Not toolResult.Success AndAlso
@@ -178,7 +179,8 @@ Namespace Agent
                                 executionContext.ApproveTool(toolCall.ToolId, toolCall.Parameters)
                                 OnStatusChanged?.Invoke($"Пользователь подтвердил инструмент {toolCall.ToolId}, продолжаю...")
                                 toolResult = ValidateObservedOutcome(
-                                    Await _toolRegistry.ExecuteToolAsync(executionContext, toolCall.ToolId, toolCall.Parameters))
+                                    Await _toolRegistry.ExecuteToolAsync(executionContext, toolCall.ToolId, toolCall.Parameters),
+                                    session.AppType)
                             Else
                                 toolResult = ToolResult.Failed(
                                     toolCall.ToolId,

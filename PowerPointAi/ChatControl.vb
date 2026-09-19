@@ -2148,24 +2148,26 @@ Public Class ChatControl
     End Function
 
     ''' <summary>
-    ''' 获取切换效果类型
+    ''' 获取切换效果类型（PpEntryEffect 官方枚举值）。
+    ''' 之前的数值无效或指向别的效果（например 257 是 ppEffectCut, а не fade），
+    ''' из-за чего PowerPoint молча игнорировал переход и наблюдение не видело изменений.
     ''' </summary>
     Private Function GetTransitionEffect(transType As String) As Integer
         Select Case transType.ToLower()
             Case "fade"
-                Return 257 ' ppTransitionFade
+                Return 1793 ' ppEffectFade
             Case "push"
-                Return 3844 ' ppTransitionPush
+                Return 3852 ' ppEffectPushDown
             Case "wipe"
-                Return 769 ' ppTransitionWipe
+                Return 2817 ' ppEffectWipeLeft
             Case "split"
-                Return 2817 ' ppTransitionSplit
+                Return 3585 ' ppEffectSplitHorizontalOut
             Case "reveal"
-                Return 3073 ' ppTransitionReveal
+                Return 3894 ' ppEffectRevealSmoothLeft
             Case "random"
-                Return 513 ' ppTransitionRandom
+                Return 513 ' ppEffectRandom
             Case Else
-                Return 257 ' ppTransitionFade (默认)
+                Return 1793 ' ppEffectFade (默认)
         End Select
     End Function
 
