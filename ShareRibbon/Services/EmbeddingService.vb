@@ -99,7 +99,7 @@ Public Class EmbeddingService
                 Return Nothing
             End If
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
 
             Dim apiUrl = ConfigSettings.ApiUrl
             Dim apiKey = ConfigSettings.ApiKey

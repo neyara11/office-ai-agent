@@ -95,9 +95,9 @@ Public Class LLMUtil
             Debug.WriteLine($"请求头Authorization: Bearer {apiKey.Substring(0, Math.Min(10, apiKey.Length))}...")
             Debug.WriteLine($"请求体长度: {requestBody.Length}")
 
-            ' 强制使用 TLS 1.2
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
-            Dim handler As New HttpClientHandler()
+            ' 交由系统策略选择 TLS 版本，并按服务商配置决定是否接受自签名证书
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            Dim handler = HttpClientFactory.CreateHandler(apiUrl)
 
             Using client As New HttpClient(handler)
                 client.Timeout = TimeSpan.FromSeconds(120) ' 设置超时时间为 120 秒

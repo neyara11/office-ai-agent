@@ -43,6 +43,7 @@ Public Class ConfigApiForm
     Private cloudRefreshModelsButton As Button
     Private cloudAddModelButton As Button
     Private cloudTranslateCheckBox As CheckBox
+    Private cloudAllowInsecureTlsCheckBox As CheckBox
     Private cloudSaveButton As Button
     Private cloudDeleteButton As Button
 
@@ -58,6 +59,7 @@ Public Class ConfigApiForm
     Private localRefreshModelsButton As Button
     Private localAddModelButton As Button
     Private localTranslateCheckBox As CheckBox
+    Private localAllowInsecureTlsCheckBox As CheckBox
     Private localSaveButton As Button
     Private localDeleteButton As Button
     Private localAddButton As Button
@@ -284,6 +286,14 @@ Public Class ConfigApiForm
         cloudTranslateTip.AutoSize = True
         cloudTab.Controls.Add(cloudTranslateTip)
 
+        ' 自签名证书支持
+        cloudAllowInsecureTlsCheckBox = New CheckBox()
+        cloudAllowInsecureTlsCheckBox.Text = "Разрешить самоподписанный сертификат (небезопасно)"
+        cloudAllowInsecureTlsCheckBox.Location = New Point(rightX, 338)
+        cloudAllowInsecureTlsCheckBox.AutoSize = True
+        AddHandler cloudAllowInsecureTlsCheckBox.CheckedChanged, AddressOf CloudAllowInsecureTlsCheckBox_CheckedChanged
+        cloudTab.Controls.Add(cloudAllowInsecureTlsCheckBox)
+
         ' 验证并保存按钮
         cloudSaveButton = New Button()
         cloudSaveButton.Text = "验证并保存"
@@ -444,6 +454,14 @@ Public Class ConfigApiForm
         localTranslateTip.Font = New Font(Me.Font.FontFamily, 8)
         localTranslateTip.AutoSize = True
         localTab.Controls.Add(localTranslateTip)
+
+        ' 自签名证书支持
+        localAllowInsecureTlsCheckBox = New CheckBox()
+        localAllowInsecureTlsCheckBox.Text = "Разрешить самоподписанный сертификат (небезопасно)"
+        localAllowInsecureTlsCheckBox.Location = New Point(rightX, 338)
+        localAllowInsecureTlsCheckBox.AutoSize = True
+        AddHandler localAllowInsecureTlsCheckBox.CheckedChanged, AddressOf LocalAllowInsecureTlsCheckBox_CheckedChanged
+        localTab.Controls.Add(localAllowInsecureTlsCheckBox)
 
         ' 保存按钮
         localSaveButton = New Button()
@@ -1222,6 +1240,7 @@ Public Class ConfigApiForm
 
         cloudApiKeyTextBox.Text = If(String.IsNullOrEmpty(currentCloudConfig.key), "", currentCloudConfig.key)
         cloudTranslateCheckBox.Checked = currentCloudConfig.translateSelected
+        cloudAllowInsecureTlsCheckBox.Checked = currentCloudConfig.allowInsecureTls
 
         RefreshCloudModelLists()
         UpdateCloudReasoningControls()
@@ -1393,6 +1412,7 @@ Public Class ConfigApiForm
             currentCloudConfig.url = apiUrl
         End If
         currentCloudConfig.key = apiKey
+        currentCloudConfig.allowInsecureTls = cloudAllowInsecureTlsCheckBox.Checked
 
         Try
             Dim selectedChatModel = currentCloudConfig.model.FirstOrDefault(Function(m) m.modelName = selectedChatModelName)
@@ -1404,6 +1424,7 @@ Public Class ConfigApiForm
                 currentCloudConfig.key = apiKey
                 currentCloudConfig.validated = True
                 currentCloudConfig.translateSelected = cloudTranslateCheckBox.Checked
+                currentCloudConfig.allowInsecureTls = cloudAllowInsecureTlsCheckBox.Checked
 
                 For Each model In currentCloudConfig.model
                     If model.modelType = ModelType.Chat Then
@@ -1421,6 +1442,7 @@ Public Class ConfigApiForm
                 ConfigSettings.ApiUrl = currentCloudConfig.url
                 ConfigSettings.ApiKey = apiKey
                 ConfigSettings.platform = currentCloudConfig.platform
+                ConfigSettings.AllowInsecureTls = cloudAllowInsecureTlsCheckBox.Checked
                 ConfigSettings.ModelName = selectedChatModelName
 
                 If selectedChatModel IsNot Nothing Then
@@ -1560,6 +1582,7 @@ Public Class ConfigApiForm
         localApiKeyTextBox.Text = If(String.IsNullOrEmpty(currentLocalConfig.key), "", currentLocalConfig.key)
         localDefaultKeyLabel.Text = If(String.IsNullOrEmpty(currentLocalConfig.defaultApiKey), "", $"提示: 默认APIKey为 '{currentLocalConfig.defaultApiKey}'，大多数情况可留空")
         localTranslateCheckBox.Checked = currentLocalConfig.translateSelected
+        localAllowInsecureTlsCheckBox.Checked = currentLocalConfig.allowInsecureTls
 
         RefreshLocalModelLists()
         UpdateLocalReasoningControls()
@@ -1697,6 +1720,7 @@ Public Class ConfigApiForm
         currentLocalConfig.platform = platformName
         currentLocalConfig.url = apiUrl
         currentLocalConfig.key = apiKey
+        currentLocalConfig.allowInsecureTls = localAllowInsecureTlsCheckBox.Checked
 
         Try
             Dim selectedChatModel = currentLocalConfig.model.FirstOrDefault(Function(m) m.modelName = selectedChatModelName)
@@ -1705,6 +1729,7 @@ Public Class ConfigApiForm
             If validationResult Then
                 currentLocalConfig.validated = True
                 currentLocalConfig.translateSelected = localTranslateCheckBox.Checked
+                currentLocalConfig.allowInsecureTls = localAllowInsecureTlsCheckBox.Checked
 
                 For Each model In currentLocalConfig.model
                     If model.modelType = ModelType.Chat Then
@@ -1722,6 +1747,7 @@ Public Class ConfigApiForm
                 ConfigSettings.ApiUrl = currentLocalConfig.url
                 ConfigSettings.ApiKey = apiKey
                 ConfigSettings.platform = currentLocalConfig.platform
+                ConfigSettings.AllowInsecureTls = localAllowInsecureTlsCheckBox.Checked
                 ConfigSettings.ModelName = selectedChatModelName
 
                 If selectedChatModel IsNot Nothing Then
@@ -1888,9 +1914,21 @@ Public Class ConfigApiForm
         End Try
     End Sub
 
+    Private Sub CloudAllowInsecureTlsCheckBox_CheckedChanged(sender As Object, e As EventArgs)
+        If currentCloudConfig IsNot Nothing Then
+            currentCloudConfig.allowInsecureTls = cloudAllowInsecureTlsCheckBox.Checked
+        End If
+    End Sub
+
+    Private Sub LocalAllowInsecureTlsCheckBox_CheckedChanged(sender As Object, e As EventArgs)
+        If currentLocalConfig IsNot Nothing Then
+            currentLocalConfig.allowInsecureTls = localAllowInsecureTlsCheckBox.Checked
+        End If
+    End Sub
+
     Private Async Function ValidateApiAsync(apiUrl As String, apiKey As String, modelName As String, Optional reasoningMode As String = Nothing, Optional platformName As String = Nothing) As Task(Of Boolean)
         Try
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
             Dim client = HttpClientPool.GetClient(apiUrl)
             Using request As New HttpRequestMessage(HttpMethod.Post, apiUrl)
                 request.Headers.Authorization = New AuthenticationHeaderValue("Bearer", apiKey)

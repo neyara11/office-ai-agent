@@ -25,7 +25,7 @@ Public Class ModelApiClient
                 Return New List(Of String)()
             End If
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
 
             Dim client = HttpClientPool.GetClient(modelsUrl)
             Using request As New HttpRequestMessage(HttpMethod.Get, modelsUrl)

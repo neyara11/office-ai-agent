@@ -26,8 +26,6 @@ Public Class StreamJsonRpcMCPClient
     Private _stdioProcess As Process
 
     Public Sub New()
-        _httpClient = New HttpClient()
-        _httpClient.Timeout = TimeSpan.FromSeconds(30)
     End Sub
 
     ' 配置客户端 - 支持SSE和Stdio
@@ -86,6 +84,12 @@ Public Class StreamJsonRpcMCPClient
             For Each kvp In options.EnvironmentVariables
                 _stdioProcess.StartInfo.EnvironmentVariables(kvp.Key) = kvp.Value
             Next
+
+            ' 服务商启用了自签名证书支持时，仅对该 MCP 子进程放宽 Node TLS 校验
+            If HttpClientFactory.AnyInsecureTlsAllowed() AndAlso
+               Not _stdioProcess.StartInfo.EnvironmentVariables.ContainsKey("NODE_TLS_REJECT_UNAUTHORIZED") Then
+                _stdioProcess.StartInfo.EnvironmentVariables("NODE_TLS_REJECT_UNAUTHORIZED") = "0"
+            End If
 
             ' 标准进程配置 - 关键修改：添加 UTF-8 编码
             _stdioProcess.StartInfo.UseShellExecute = False
@@ -297,6 +301,9 @@ Public Class StreamJsonRpcMCPClient
 
     ' 设置SSE传输
     Private Sub SetupSSETransport()
+        _httpClient?.Dispose()
+        _httpClient = New HttpClient(HttpClientFactory.CreateHandler(_serverUrl))
+        _httpClient.Timeout = TimeSpan.FromSeconds(30)
         _httpClient.DefaultRequestHeaders.Clear()
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json, text/event-stream")
         _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache")

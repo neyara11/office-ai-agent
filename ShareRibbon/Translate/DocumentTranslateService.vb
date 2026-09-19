@@ -414,7 +414,7 @@ Public MustInherit Class DocumentTranslateService
     ''' 发送HTTP请求
     ''' </summary>
     Protected Async Function SendHttpRequestAsync(apiUrl As String, apiKey As String, requestBody As String) As Task(Of String)
-        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
         Dim client = HttpClientPool.GetClient(apiUrl)
         Using request As New HttpRequestMessage(HttpMethod.Post, apiUrl)
             request.Headers.Authorization = New System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey)

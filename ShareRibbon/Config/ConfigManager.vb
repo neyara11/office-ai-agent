@@ -42,6 +42,7 @@ Public Class ConfigManager
                 ConfigSettings.ApiUrl = item.url
                 ConfigSettings.ApiKey = item.key
                 ConfigSettings.platform = item.platform
+                ConfigSettings.AllowInsecureTls = item.allowInsecureTls
                 For Each item_m In item.model
                     If item_m.selected Then
                         If item_m.modelType = ModelType.Chat Then
@@ -71,6 +72,7 @@ Public Class ConfigManager
                 preset.selected = existing.selected
                 preset.validated = existing.validated
                 preset.translateSelected = existing.translateSelected
+                preset.allowInsecureTls = existing.allowInsecureTls
                 ' 合并模型列表
                 For Each userModel In existing.model
                     Dim presetModel = preset.model.FirstOrDefault(Function(x) x.modelName = userModel.modelName)
@@ -99,6 +101,7 @@ Public Class ConfigManager
                 preset.selected = existing.selected
                 preset.validated = existing.validated
                 preset.translateSelected = existing.translateSelected
+                preset.allowInsecureTls = existing.allowInsecureTls
                 ' 本地模型URL可能被用户修改
                 If Not String.IsNullOrEmpty(existing.url) Then
                     preset.url = existing.url
@@ -161,6 +164,9 @@ Public Class ConfigManager
         Public Property model As List(Of ConfigItemModel)
         Public Property key As String
         Public Property selected As Boolean
+
+        ' 是否允许该服务商使用自签名/不受信任的 TLS 证书
+        Public Property allowInsecureTls As Boolean = False
 
         ' 是否被选为翻译专用平台（在 UI 中为单选，仅允许一个 true）
         Public Property translateSelected As Boolean = False

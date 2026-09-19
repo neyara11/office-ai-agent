@@ -2028,7 +2028,7 @@ Public MustInherit Class BaseChatControl
             Dim apiUrl = ConfigSettings.ApiUrl
             Dim apiKey = ConfigSettings.ApiKey
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
 
             Dim client = HttpClientPool.GetClient(apiUrl)
             Using request As New HttpRequestMessage(HttpMethod.Post, apiUrl)

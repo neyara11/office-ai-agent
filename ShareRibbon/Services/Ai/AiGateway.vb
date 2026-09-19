@@ -38,7 +38,6 @@ Public Class AiGatewayResponse
 End Class
 
 Public Class AiGateway
-    Private Shared ReadOnly _httpClient As New HttpClient()
     Private Const AnthropicVersion As String = "2023-06-01"
 
     Public Shared Async Function SendChatAsync(options As AiRequestOptions) As Task(Of AiGatewayResponse)
@@ -55,14 +54,15 @@ Public Class AiGateway
         Dim timeoutSeconds = If(options.TimeoutSeconds > 0, options.TimeoutSeconds, 60)
 
         Try
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
 
+            Dim httpClient = HttpClientPool.GetClient(options.ApiUrl)
             Using request As New HttpRequestMessage(HttpMethod.Post, options.ApiUrl)
                 ApplyHeaders(request, options.ApiKey, isAnthropic)
                 request.Content = New StringContent(requestBody.ToString(Formatting.None), Encoding.UTF8, "application/json")
 
                 Using cts As New CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds))
-                    Using response = Await _httpClient.SendAsync(request, cts.Token)
+                    Using response = Await httpClient.SendAsync(request, cts.Token)
                         Dim responseText = Await response.Content.ReadAsStringAsync()
                         If Not response.IsSuccessStatusCode Then
                             Dim errorMessage = $"HTTP {CInt(response.StatusCode)} {response.ReasonPhrase}: {Truncate(responseText, 1000)}"

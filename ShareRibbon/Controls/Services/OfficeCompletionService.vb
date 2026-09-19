@@ -11,11 +11,6 @@ Public Class OfficeCompletionService
     Private Shared _instance As OfficeCompletionService
     Private Shared ReadOnly _lock As New Object()
     
-    ' 单例 HttpClient（避免频繁创建连接，提升性能）
-    Private Shared ReadOnly _httpClient As New HttpClient() With {
-        .Timeout = TimeSpan.FromSeconds(8)
-    }
-    
     Private _isEnabled As Boolean = False
     Private _currentCompletions As List(Of String)
     
@@ -129,12 +124,11 @@ Public Class OfficeCompletionService
             requestObj("temperature") = 0.3
             requestObj("stream") = False
             
-            ' 使用单例 HttpClient
             Dim request As New HttpRequestMessage(HttpMethod.Post, model.fimUrl)
             request.Headers.Add("Authorization", "Bearer " & apiKey)
             request.Content = New StringContent(requestObj.ToString(), Encoding.UTF8, "application/json")
             
-            Dim response = Await _httpClient.SendAsync(request, token)
+            Dim response = Await HttpClientPool.GetClient(model.fimUrl, TimeSpan.FromSeconds(8)).SendAsync(request, token)
             response.EnsureSuccessStatusCode()
             
             Dim responseBody = Await response.Content.ReadAsStringAsync()
@@ -181,12 +175,12 @@ Public Class OfficeCompletionService
             messages.Add(New JObject() From {{"role", "user"}, {"content", $"请补全以下文本（只返回补全部分，不要重复原文）：{vbCrLf}{inputText}"}})
             requestObj("messages") = messages
             
-            ' 使用单例 HttpClient
+            ' 使用按服务商配置的 HttpClient
             Dim request As New HttpRequestMessage(HttpMethod.Post, cfg.url)
             request.Headers.Add("Authorization", "Bearer " & apiKey)
             request.Content = New StringContent(requestObj.ToString(), Encoding.UTF8, "application/json")
             
-            Dim response = Await _httpClient.SendAsync(request, token)
+            Dim response = Await HttpClientPool.GetClient(cfg.url, TimeSpan.FromSeconds(8)).SendAsync(request, token)
             response.EnsureSuccessStatusCode()
             
             Dim responseBody = Await response.Content.ReadAsStringAsync()

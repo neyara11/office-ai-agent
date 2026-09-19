@@ -10,6 +10,9 @@ Public Class ConfigSettings
     Public Shared Property mcpable As Boolean
     Public Shared Property ReasoningMode As String = "default"
 
+    ' 允许使用自签名/不受信任的 TLS 证书（仅针对当前选中的服务商）
+    Public Shared Property AllowInsecureTls As Boolean = False
+
     ' Embedding 模型配置
     Public Shared Property EmbeddingModel As String = ""
 
