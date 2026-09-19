@@ -81,31 +81,31 @@ Public Class ReformatIntentRecognizer
                                  analysis As DocumentAnalysisResult,
                                  paragraphs As List(Of String)) As String
         Dim sb As New StringBuilder()
-        sb.AppendLine("你是 Word 文档智能排版的意图识别器。")
-        sb.AppendLine("请把用户需求解析为严格 JSON，不要输出 markdown，不要解释。")
+        sb.AppendLine("Ты распознаватель намерений для умного форматирования документов Word. Отвечай только на русском языке.")
+        sb.AppendLine("Разбери запрос пользователя в строгий JSON, не выводи markdown и не объясняй.")
         sb.AppendLine()
-        sb.AppendLine("输出 JSON 字段：")
+        sb.AppendLine("Поля выходного JSON:")
         sb.AppendLine("{")
         sb.AppendLine("  ""intentType"": ""AutoFormat|StandardFormat|StyleClone|SpecificTweak|FormatCleanup"",")
         sb.AppendLine("  ""targetDocumentType"": ""OfficialDocument|AcademicPaper|BusinessReport|Contract|Resume|GeneralDocument|Unknown"",")
-        sb.AppendLine("  ""targetStandardName"": ""标准名称或空字符串"",")
-        sb.AppendLine("  ""specificRequests"": [""具体格式要求""],")
+        sb.AppendLine("  ""targetStandardName"": ""название стандарта или пустая строка"",")
+        sb.AppendLine("  ""specificRequests"": [""конкретное требование к формату""],")
         sb.AppendLine("  ""scope"": ""selection|wholeDocument|section"",")
         sb.AppendLine("  ""confidence"": 0.0")
         sb.AppendLine("}")
         sb.AppendLine()
-        sb.AppendLine("规则：")
-        sb.AppendLine("1. 用户明确说公文、国标、GB/T 9704 时，优先 StandardFormat 和 GB/T 9704-2012。")
-        sb.AppendLine("2. 用户说标题更醒目、正文紧一点、字号调大等局部变化时，使用 SpecificTweak。")
-        sb.AppendLine("3. 用户说清理格式、去掉混乱格式时，使用 FormatCleanup。")
-        sb.AppendLine("4. 用户说参考范文、照这个、格式克隆时，使用 StyleClone。")
-        sb.AppendLine("5. specificRequests 保留用户的真实约束，例如页码位置、三线表、标题字号、行距、字体、颜色。")
-        sb.AppendLine("6. 用户说重构序号、整理编号、规范标题层级、重构标题和序号时，这是结构排版任务，使用 AutoFormat，不要要求用户澄清。")
-        sb.AppendLine("7. 用户说全文、整篇、所有、统一时，scope 使用 wholeDocument；用户说选中、所选、当前选择时，scope 使用 selection。")
-        sb.AppendLine("8. 不要因为文档内容像技术说明就切换到普通问答；只要用户要求排版、标题、编号、样式，就按 Word 排版任务解析。")
+        sb.AppendLine("Правила:")
+        sb.AppendLine("1. Если пользователь явно говорит об официальном документе, госстандарте, GB/T 9704 — используй StandardFormat и GB/T 9704-2012.")
+        sb.AppendLine("2. Если пользователь просит сделать заголовок заметнее, текст плотнее, шрифт крупнее и т. п. — используй SpecificTweak.")
+        sb.AppendLine("3. Если пользователь просит очистить форматирование, убрать беспорядочные форматы — используй FormatCleanup.")
+        sb.AppendLine("4. Если пользователь просит ориентироваться на образец, скопировать формат — используй StyleClone.")
+        sb.AppendLine("5. В specificRequests сохраняй реальные ограничения пользователя: положение номеров страниц, трёхлинейную таблицу, размер заголовков, интервалы, шрифт, цвет.")
+        sb.AppendLine("6. Если пользователь просит перестроить нумерацию, упорядочить номера, нормализовать уровни заголовков, перестроить заголовки и нумерацию — это задача структурного форматирования, используй AutoFormat и не требуй уточнений у пользователя.")
+        sb.AppendLine("7. Если пользователь говорит «весь текст», «весь документ», «все», «единообразно» — scope = wholeDocument; если «выделенное», «выбранное», «текущее выделение» — scope = selection.")
+        sb.AppendLine("8. Не переключайся на обычный вопрос только потому, что содержимое похоже на техническое описание; если пользователь просит форматирование, заголовки, нумерацию или стили — разбирай как задачу форматирования Word.")
         sb.AppendLine()
 
-        sb.AppendLine("可用标准：")
+        sb.AppendLine("Доступные стандарты:")
         For Each candidate In _standardRegistry.GetAllCandidates().Take(30)
             If candidate.Standard Is Nothing Then Continue For
             sb.AppendLine("- " & candidate.Standard.Name & " [" & candidate.SourceType.ToString() & "]: " & candidate.Standard.Description)
@@ -113,17 +113,17 @@ Public Class ReformatIntentRecognizer
         sb.AppendLine()
 
         If analysis IsNot Nothing Then
-            sb.AppendLine("规则分析上下文：")
+            sb.AppendLine("Контекст анализа правил:")
             sb.AppendLine("- documentType: " & analysis.DocumentType.ToString())
             sb.AppendLine("- confidence: " & analysis.Confidence.ToString("0.00"))
             sb.AppendLine("- paragraphCount: " & analysis.ParagraphCount.ToString())
             sb.AppendLine()
         End If
 
-        sb.AppendLine("文档片段：")
+        sb.AppendLine("Фрагмент документа:")
         sb.AppendLine(BuildParagraphSample(paragraphs))
         sb.AppendLine()
-        sb.AppendLine("用户需求：")
+        sb.AppendLine("Запрос пользователя:")
         sb.AppendLine(userMessage)
 
         Return sb.ToString()
@@ -220,17 +220,17 @@ Public Class ReformatIntentRecognizer
         If String.IsNullOrWhiteSpace(value) Then Return fallback
         Dim normalized = value.Trim()
         Select Case normalized.ToLowerInvariant()
-            Case "official", "officialdocument", "公文"
+            Case "official", "officialdocument", "公文", "официальный", "официальный документ", "приказ"
                 Return DocumentType.OfficialDocument
-            Case "academic", "academicpaper", "paper", "论文"
+            Case "academic", "academicpaper", "paper", "论文", "научная статья", "статья", "диссертация"
                 Return DocumentType.AcademicPaper
-            Case "business", "businessreport", "report", "报告"
+            Case "business", "businessreport", "report", "报告", "бизнес-отчёт", "бизнес-отчет", "отчёт", "отчет"
                 Return DocumentType.BusinessReport
-            Case "contract", "合同"
+            Case "contract", "合同", "договор", "контракт"
                 Return DocumentType.Contract
-            Case "resume", "简历"
+            Case "resume", "简历", "резюме"
                 Return DocumentType.[Resume]
-            Case "general", "generaldocument", "通用"
+            Case "general", "generaldocument", "通用", "общий документ", "обычный документ"
                 Return DocumentType.GeneralDocument
             Case Else
                 Dim parsed As DocumentType
@@ -244,9 +244,9 @@ Public Class ReformatIntentRecognizer
     Private Shared Function ParseScope(value As String) As ReformatScopeKind
         If String.IsNullOrWhiteSpace(value) Then Return ReformatScopeKind.Selection
         Select Case value.Trim().ToLowerInvariant()
-            Case "wholedocument", "whole", "document", "全文", "整篇"
+            Case "wholedocument", "whole", "document", "全文", "整篇", "весь документ", "весь текст", "полный документ"
                 Return ReformatScopeKind.WholeDocument
-            Case "section", "章节"
+            Case "section", "章节", "раздел", "глава"
                 Return ReformatScopeKind.Section
             Case Else
                 Return ReformatScopeKind.Selection

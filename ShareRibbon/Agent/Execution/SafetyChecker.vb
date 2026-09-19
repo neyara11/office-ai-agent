@@ -54,14 +54,14 @@ Namespace Agent.Execution
             ' 1. 检测危险操作（绝对禁止）
             For Each danger In DANGEROUS
                 If code.IndexOf(danger, StringComparison.OrdinalIgnoreCase) >= 0 Then
-                    Return SafetyResult.Blocked($"检测到危险操作: {danger}")
+                    Return SafetyResult.Blocked($"Обнаружена опасная операция: {danger}")
                 End If
             Next
 
             ' 2. 检测需要确认的操作
             For Each item In NEEDS_CONFIRM
                 If code.IndexOf(item, StringComparison.OrdinalIgnoreCase) >= 0 Then
-                    Return SafetyResult.NeedConfirm($"将执行: {item}")
+                    Return SafetyResult.NeedConfirm($"Будет выполнено: {item}")
                 End If
             Next
 
@@ -107,7 +107,7 @@ Namespace Agent.Execution
             Return New SafetyResult With {
                 .IsSafe = True,
                 .NeedsConfirm = False,
-                .Reason = "安全检查通过"
+                .Reason = "Проверка безопасности пройдена"
             }
         End Function
 
@@ -138,9 +138,9 @@ Namespace Agent.Execution
         ''' </summary>
         Public Function ToUserMessage() As String
             If Not IsSafe Then
-                Return $"⛔ 安全拦截: {Reason}"
+                Return $"⛔ Блокировка безопасности: {Reason}"
             ElseIf NeedsConfirm Then
-                Return $"⚠️ 需要确认: {Reason}"
+                Return $"⚠️ Требуется подтверждение: {Reason}"
             Else
                 Return $"✅ {Reason}"
             End If
