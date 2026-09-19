@@ -1,71 +1,71 @@
 {
   "id": "academic-paper",
-  "name": "学术论文",
-  "description": "学术论文、毕业论文格式",
-  "triggerKeywords": ["论文", "学术", "毕业论文", "摘要", "关键词", "参考文献"],
+  "name": "Научная статья",
+  "description": "Научные статьи, выпускные квалификационные работы",
+  "triggerKeywords": ["статья", "научная", "диплом", "вкр", "диссертация", "курсовая", "аннотация", "реферат", "ключевые слова", "библиография"],
   "structureGuidance": {
-    "title": "【论文结构识别】",
+    "title": "【Структура научной статьи】",
     "order": [
-      "论文标题(title.main)",
-      "作者信息(header.author)",
-      "摘要(section.abstract)",
-      "关键词(section.keywords)",
-      "章节标题(heading.1, heading.2, heading.3)",
-      "正文(body.normal)",
-      "图表标题(body.figure, body.table)",
-      "参考文献(section.references)",
-      "致谢(section.acknowledgment)"
+      "Заголовок статьи(title.main)",
+      "Сведения об авторах(header.author)",
+      "Аннотация(section.abstract)",
+      "Ключевые слова(section.keywords)",
+      "Заголовки разделов(heading.1, heading.2, heading.3)",
+      "Основной текст(body.normal)",
+      "Подписи к рисункам и таблицам(body.figure, body.table)",
+      "Список литературы(section.references)",
+      "Благодарности(section.acknowledgment)"
     ],
     "rules": [
-      "论文使用heading.*层级标题体系：第一章用heading.1，第一节用heading.2，一、二、三级标题递进",
-      "不要使用公文专用标签(header.org/header.refno/footer.signature等)",
-      "「摘要」「Abstract」段落使用section.abstract；「关键词」「Keywords」使用section.keywords",
-      "「参考文献」及其列表使用section.references；「致谢」使用section.acknowledgment",
-      "正文中的「图1」「表2」等标题使用body.figure/body.table"
+      "В статье используется иерархия заголовков heading.*: глава — heading.1, раздел — heading.2, подраздел — heading.3",
+      "Не используй теги, специфичные для служебных документов (header.org/header.refno/footer.signature и т. п.)",
+      "Абзацы «Аннотация» и «Abstract» помечай section.abstract; «Ключевые слова» и «Keywords» — section.keywords",
+      "«Список литературы» и следующий за ним перечень помечай section.references; «Благодарности» — section.acknowledgment",
+      "Подписи «Рис. 1», «Таблица 2» и подобные в основном тексте помечай body.figure/body.table"
     ]
   },
   "examples": [
     {
       "paraIndex": 0,
-      "text": "基于深度学习的图像识别研究",
+      "text": "Исследование распознавания изображений на основе глубокого обучения",
       "tag": "title.main",
-      "reason": "论文标题"
+      "reason": "заголовок статьи"
     },
     {
       "paraIndex": 1,
-      "text": "张三  李四",
+      "text": "Иванов И.И.   Петров П.П.",
       "tag": "header.author",
-      "reason": "作者信息"
+      "reason": "сведения об авторах"
     },
     {
       "paraIndex": 2,
-      "text": "摘要",
+      "text": "Аннотация",
       "tag": "section.abstract",
-      "reason": "摘要标识"
+      "reason": "заголовок аннотации"
     },
     {
       "paraIndex": 3,
-      "text": "本文研究了深度学习在图像识别中的应用...",
+      "text": "В работе исследуется применение глубокого обучения для распознавания изображений...",
       "tag": "body.normal",
-      "reason": "摘要正文"
+      "reason": "текст аннотации"
     },
     {
       "paraIndex": 4,
-      "text": "关键词：深度学习；图像识别；卷积神经网络",
+      "text": "Ключевые слова: глубокое обучение; распознавание изображений; свёрточные нейронные сети",
       "tag": "section.keywords",
-      "reason": "关键词"
+      "reason": "ключевые слова"
     },
     {
       "paraIndex": 5,
-      "text": "第一章 绪论",
+      "text": "Глава 1. Введение",
       "tag": "heading.1",
-      "reason": "一级标题"
+      "reason": "заголовок первого уровня"
     },
     {
       "paraIndex": 6,
-      "text": "1.1 研究背景",
+      "text": "1.1. Актуальность исследования",
       "tag": "heading.2",
-      "reason": "二级标题"
+      "reason": "заголовок второго уровня"
     }
   ]
 }

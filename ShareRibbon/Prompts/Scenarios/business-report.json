@@ -1,51 +1,51 @@
 {
   "id": "business-report",
-  "name": "商务报告",
-  "description": "商务报告、项目报告、分析报告",
-  "triggerKeywords": ["报告", "商务", "项目", "分析", "总结"],
+  "name": "Бизнес-отчёт",
+  "description": "Бизнес-отчёты, отчёты по проектам, аналитические отчёты",
+  "triggerKeywords": ["отчёт", "отчет", "бизнес", "проект", "анализ", "итоги", "сводка", "доклад"],
   "structureGuidance": {
-    "title": "【报告结构识别】",
+    "title": "【Структура отчёта】",
     "order": [
-      "报告标题(title.main)",
-      "报告信息(header.meta)",
-      "章节标题(heading.1, heading.2, heading.3)",
-      "正文(body.normal)",
-      "列表(body.list)",
-      "图表(body.figure, body.table)",
-      "结论(section.conclusion)",
-      "附录(section.appendix)"
+      "Заголовок отчёта(title.main)",
+      "Реквизиты отчёта(header.meta)",
+      "Заголовки разделов(heading.1, heading.2, heading.3)",
+      "Основной текст(body.normal)",
+      "Списки(body.list)",
+      "Рисунки и таблицы(body.figure, body.table)",
+      "Выводы(section.conclusion)",
+      "Приложения(section.appendix)"
     ],
     "rules": [
-      "使用heading.*层级标题：第一章/第一部分用heading.1，下级标题递进",
-      "不使用公文标签，公文是政府文件",
-      "报告元信息（日期、编制人、部门等）使用header.meta",
-      "结论性段落使用section.conclusion"
+      "Используй иерархию заголовков heading.*: глава или часть — heading.1, вложенные заголовки — по уровням ниже",
+      "Не используй теги служебных документов — они предназначены для официальной переписки",
+      "Реквизиты отчёта (дата, составитель, подразделение и т. п.) помечай header.meta",
+      "Абзацы с выводами помечай section.conclusion"
     ]
   },
   "examples": [
     {
       "paraIndex": 0,
-      "text": "2024年第一季度销售分析报告",
+      "text": "Аналитический отчёт по продажам за I квартал 2024 года",
       "tag": "title.main",
-      "reason": "报告标题"
+      "reason": "заголовок отчёта"
     },
     {
       "paraIndex": 1,
-      "text": "报告日期：2024年4月",
+      "text": "Дата отчёта: апрель 2024 года",
       "tag": "header.meta",
-      "reason": "报告元信息"
+      "reason": "реквизиты отчёта"
     },
     {
       "paraIndex": 2,
-      "text": "一、市场概况",
+      "text": "1. Обзор рынка",
       "tag": "heading.1",
-      "reason": "一级标题"
+      "reason": "заголовок первого уровня"
     },
     {
       "paraIndex": 3,
-      "text": "本季度市场整体呈现增长态势...",
+      "text": "В отчётном квартале рынок в целом демонстрировал рост...",
       "tag": "body.normal",
-      "reason": "正文内容"
+      "reason": "основной текст"
     }
   ]
 }
