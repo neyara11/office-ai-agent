@@ -20,10 +20,10 @@ Public Class TranslateSettings
     Public Property SourceLanguage As String = "auto"
     Public Property TargetLanguage As String = "zh"
     Public Property MaxRequestsPerSecond As Integer = 5
-    Public Property PromptText As String = "你是一个专业的翻译，按要求翻译并保留格式。"
+    Public Property PromptText As String = "Ты профессиональный переводчик. Переводи по заданию, сохраняя формат."
 
     ''' <summary>当前选中的翻译领域</summary>
-    Public Property CurrentDomain As String = "通用"
+    Public Property CurrentDomain As String = "Универсальный"
 
     ''' <summary>翻译输出模式</summary>
     Public Property OutputMode As TranslateOutputMode = TranslateOutputMode.SidePanel

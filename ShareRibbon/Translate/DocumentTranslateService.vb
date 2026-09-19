@@ -107,7 +107,7 @@ Public MustInherit Class DocumentTranslateService
         ' 获取翻译配置
         Dim cfg = ConfigManager.ConfigData.FirstOrDefault(Function(c) c.translateSelected)
         If cfg Is Nothing OrElse cfg.model Is Nothing OrElse cfg.model.Count = 0 Then
-            Throw New Exception("未配置翻译平台，请先在翻译配置中选择平台和模型")
+                Throw New Exception("Платформа перевода не настроена; сначала выберите платформу и модель в настройках перевода")
         End If
 
         Dim modelName = cfg.model.FirstOrDefault(Function(m) m.translateSelected)?.modelName
@@ -127,7 +127,7 @@ Public MustInherit Class DocumentTranslateService
         RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
             .Current = 0,
             .Total = total,
-            .Message = $"AI翻译启动中... 共{total}段内容，分{totalBatches}批进行"
+                .Message = $"Запуск AI-перевода... всего {total} фрагментов, {totalBatches} пакетов"
         })
 
         ' 按批次翻译
@@ -141,7 +141,7 @@ Public MustInherit Class DocumentTranslateService
             RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                 .Current = currentIndex,
                 .Total = total,
-                .Message = $"正在准备第{currentBatch}批（共{totalBatches}批），{batch.Count}段内容..."
+                .Message = $"Подготовка пакета {currentBatch} из {totalBatches}, фрагментов: {batch.Count}..."
             })
 
             Dim batchResults = Await TranslateBatchAsync(batch, currentIndex, currentBatch, totalBatches, apiUrl, apiKey, modelName, systemPrompt, sourceLang, targetLang)
@@ -153,7 +153,7 @@ Public MustInherit Class DocumentTranslateService
             RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                 .Current = currentIndex,
                 .Total = total,
-                .Message = $"已完成 {currentIndex}/{total} ({CInt(currentIndex * 100.0 / total)}%)"
+                .Message = $"Готово {currentIndex}/{total} ({CInt(currentIndex * 100.0 / total)}%)"
             })
 
             ' 控制请求频率（如果还有更多批次）
@@ -161,7 +161,7 @@ Public MustInherit Class DocumentTranslateService
                 RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                     .Current = currentIndex,
                     .Total = total,
-                    .Message = $"等待发送第{currentBatch + 1}批请求..."
+                    .Message = $"Ожидание отправки пакета {currentBatch + 1}..."
                 })
                 Await Task.Delay(CInt(1000 / Settings.MaxRequestsPerSecond))
             End If
@@ -170,7 +170,7 @@ Public MustInherit Class DocumentTranslateService
         RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
             .Current = total,
             .Total = total,
-            .Message = "AI翻译全部完成，正在写入文档..."
+                .Message = "AI-перевод завершён, запись в документ..."
         })
 
         RaiseEvent TranslationCompleted(Me, results)
@@ -206,7 +206,7 @@ Public MustInherit Class DocumentTranslateService
             Return results
         End If
 
-        Dim userContent = $"请将以下内容从{GetLanguageName(sourceLang)}翻译为{GetLanguageName(targetLang)}。每个段落以[数字]开头，请保持相同格式输出，只输出翻译结果：
+        Dim userContent = $"Переведи следующий текст с {GetLanguageName(sourceLang)} на {GetLanguageName(targetLang)}. Каждый абзац начинается с [номер]; сохрани тот же формат вывода и выведи только перевод:
 
 {contentBuilder}"
 
@@ -218,7 +218,7 @@ Public MustInherit Class DocumentTranslateService
         RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
             .Current = startIndex,
             .Total = startIndex + batch.Count,
-            .Message = $"第{currentBatch}/{totalBatches}批：正在请求AI翻译，请稍候..."
+                    .Message = $"Пакет {currentBatch}/{totalBatches}: запрос AI-перевода, подождите..."
         })
 
         Try
@@ -228,14 +228,14 @@ Public MustInherit Class DocumentTranslateService
             RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                 .Current = startIndex,
                 .Total = startIndex + batch.Count,
-                .Message = $"第{currentBatch}/{totalBatches}批：正在解析AI返回结果..."
+                    .Message = $"Пакет {currentBatch}/{totalBatches}: разбор ответа AI..."
             })
 
             Dim jObj = JObject.Parse(response)
             Dim msg = jObj("choices")(0)("message")("content")?.ToString()
 
             If String.IsNullOrEmpty(msg) Then
-                Throw New Exception("翻译结果为空")
+                    Throw New Exception("Результат перевода пуст")
             End If
 
             ' 解析翻译结果（AI 可能重排返回顺序，用字典按 [N] 索引匹配）
@@ -264,7 +264,7 @@ Public MustInherit Class DocumentTranslateService
             RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                 .Current = startIndex,
                 .Total = startIndex + batch.Count,
-                .Message = $"第{currentBatch}/{totalBatches}批：批量翻译遇到问题，正在逐条重试..."
+                        .Message = $"Пакет {currentBatch}/{totalBatches}: сбой пакетного перевода, повтор по одному фрагменту..."
             })
 
             For i = 0 To batch.Count - 1
@@ -272,7 +272,7 @@ Public MustInherit Class DocumentTranslateService
                 RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                     .Current = startIndex + i,
                     .Total = startIndex + batch.Count,
-                    .Message = $"第{currentBatch}/{totalBatches}批：正在单独翻译第{i + 1}/{batch.Count}条..."
+                            .Message = $"Пакет {currentBatch}/{totalBatches}: отдельный перевод фрагмента {i + 1}/{batch.Count}..."
                 })
 
                 Try
@@ -312,7 +312,7 @@ Public MustInherit Class DocumentTranslateService
             Return text
         End If
 
-        Dim userContent = $"请将以下内容从{GetLanguageName(sourceLang)}翻译为{GetLanguageName(targetLang)}，只输出翻译结果，不要添加任何解释：
+        Dim userContent = $"Переведи следующий текст с {GetLanguageName(sourceLang)} на {GetLanguageName(targetLang)}, выведи только перевод без пояснений:
 
 {text}"
 
@@ -323,7 +323,7 @@ Public MustInherit Class DocumentTranslateService
             RaiseEvent ProgressChanged(Me, New TranslateProgressEventArgs() With {
                 .Current = batchIndex + itemIndex,
                 .Total = batchIndex + itemTotal,
-                .Message = $"正在请求AI翻译第{itemIndex + 1}/{itemTotal}条，请稍候..."
+                    .Message = $"Запрос AI-перевода фрагмента {itemIndex + 1}/{itemTotal}, подождите..."
             })
         End If
 
@@ -375,21 +375,21 @@ Public MustInherit Class DocumentTranslateService
     ''' </summary>
     Protected Function GetLanguageName(code As String) As String
         Select Case code.ToLower()
-            Case "auto" : Return "原语言"
-            Case "zh" : Return "中文"
-            Case "en" : Return "英文"
-            Case "ja" : Return "日语"
-            Case "ko" : Return "韩语"
-            Case "fr" : Return "法语"
-            Case "de" : Return "德语"
-            Case "es" : Return "西班牙语"
-            Case "ru" : Return "俄语"
-            Case "pt" : Return "葡萄牙语"
-            Case "it" : Return "意大利语"
-            Case "vi" : Return "越南语"
-            Case "th" : Return "泰语"
-            Case "id" : Return "印尼语"
-            Case "ar" : Return "阿拉伯语"
+            Case "auto" : Return "исходного языка"
+            Case "zh" : Return "китайского"
+            Case "en" : Return "английского"
+            Case "ja" : Return "японского"
+            Case "ko" : Return "корейского"
+            Case "fr" : Return "французского"
+            Case "de" : Return "немецкого"
+            Case "es" : Return "испанского"
+            Case "ru" : Return "русского"
+            Case "pt" : Return "португальского"
+            Case "it" : Return "итальянского"
+            Case "vi" : Return "вьетнамского"
+            Case "th" : Return "тайского"
+            Case "id" : Return "индонезийского"
+            Case "ar" : Return "арабского"
             Case Else : Return code
         End Select
     End Function
