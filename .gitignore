@@ -75,6 +75,7 @@ docs/*
 !docs/project-issues-and-optimization-audit.md
 !docs/ai-native-harness-design.md
 !docs/ai-native-harness-implementation-design.md
+!docs/ru-localization-plan.md
 !docs/design/
 !docs/design/**
 
