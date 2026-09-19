@@ -127,16 +127,16 @@ Public Class LLMUtil
 
         Catch ex As TaskCanceledException
             Debug.WriteLine($"HTTP请求超时: {ex.Message}")
-            Return $"错误: 请求超时 - {ex.Message}"
+            Return $"Ошибка: превышено время ожидания запроса - {ex.Message}"
         Catch ex As HttpRequestException
             Debug.WriteLine($"HTTP请求异常: {ex.Message}")
             ' 不显示MessageBox，直接返回错误信息
-            Return $"错误: HTTP请求失败 - {ex.Message}"
+            Return $"Ошибка: сбой HTTP-запроса - {ex.Message}"
         Catch ex As Exception
             Debug.WriteLine($"发送HTTP请求时发生未知异常: {ex.Message}")
             Debug.WriteLine($"异常类型: {ex.GetType().Name}")
             Debug.WriteLine($"异常堆栈: {ex.StackTrace}")
-            Return $"错误: {ex.Message}"
+            Return $"Ошибка: {ex.Message}"
         End Try
     End Function
     ''' <summary>
@@ -149,10 +149,10 @@ Public Class LLMUtil
             Dim result = SyncOverAsync.Run(
                 Function() SendHttpRequest(apiUrl, apiKey, requestBody),
                 120000)
-            Return If(result, "错误: 请求超时或无响应")
+            Return If(result, "Ошибка: превышено время ожидания или нет ответа")
         Catch ex As Exception
             Debug.WriteLine($"[LLMUtil.SendHttpRequestSync] {ex.GetType().Name}: {ex.Message}")
-            Return $"错误: {ex.Message}"
+            Return $"Ошибка: {ex.Message}"
         End Try
     End Function
 End Class

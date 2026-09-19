@@ -23,7 +23,7 @@ Public Class TempDocumentService
         EnsureTempDirectory()
 
         If String.IsNullOrWhiteSpace(sourceDocPath) OrElse Not File.Exists(sourceDocPath) Then
-            Throw New FileNotFoundException($"原文档路径无效或文件不存在: {sourceDocPath}", sourceDocPath)
+            Throw New FileNotFoundException($"Недопустимый путь к исходному документу или файл не существует: {sourceDocPath}", sourceDocPath)
         End If
 
         Dim docName = Path.GetFileNameWithoutExtension(sourceDocPath)
@@ -66,7 +66,7 @@ Public Class TempDocumentService
             CopyDocumentContent(sourceDoc, tempDoc)
             tempDoc.SaveAs2(FileName:=tempPath, FileFormat:=12, AddToRecentFiles:=False)
         Catch ex As Exception
-            Throw New InvalidOperationException($"无法为未保存文档创建临时副本: {ex.Message}", ex)
+            Throw New InvalidOperationException($"Не удалось создать временную копию несохранённого документа: {ex.Message}", ex)
         Finally
             If tempDoc IsNot Nothing Then
                 Try
@@ -98,7 +98,7 @@ Public Class TempDocumentService
                 If sourceRange Is Nothing Then sourceRange = sourceDoc.Content
                 targetRange.Text = sourceRange.Text
             Catch fallbackEx As Exception
-                Throw New InvalidOperationException($"复制未保存文档内容失败: {fallbackEx.Message}", fallbackEx)
+                Throw New InvalidOperationException($"Не удалось скопировать содержимое несохранённого документа: {fallbackEx.Message}", fallbackEx)
             End Try
         End Try
     End Sub

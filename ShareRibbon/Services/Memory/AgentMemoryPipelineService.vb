@@ -85,7 +85,7 @@ Public Class AgentMemoryPipelineService
         Dim userEvent = AgentMemoryRepository.GetConversationEventById(userEventId)
         Dim assistantEvent = AgentMemoryRepository.GetConversationEventById(assistantEventId)
         If userEvent Is Nothing AndAlso assistantEvent Is Nothing Then
-            Throw New InvalidOperationException("未找到可提取记忆的 conversation_event")
+            Throw New InvalidOperationException("Не найдено событие conversation_event для извлечения памяти")
         End If
 
         Dim events As New List(Of ConversationEventRecord)()
@@ -117,12 +117,12 @@ Public Class AgentMemoryPipelineService
         Dim payload = ParsePayload(job.PayloadJson)
         Dim memoryId = If(Not String.IsNullOrWhiteSpace(job.TargetId), job.TargetId, GetPayloadText(payload, "memory_id"))
         If String.IsNullOrWhiteSpace(memoryId) Then
-            Throw New InvalidOperationException("embed_memory 缺少 memory_id")
+            Throw New InvalidOperationException("В embed_memory отсутствует memory_id")
         End If
 
         Dim memory = AgentMemoryRepository.GetMemoryItemById(memoryId)
         If memory Is Nothing OrElse String.IsNullOrWhiteSpace(memory.Content) Then
-            Throw New InvalidOperationException("未找到可向量化的 memory_item")
+            Throw New InvalidOperationException("Не найден memory_item для векторизации")
         End If
 
         If Not EmbeddingService.IsEmbeddingAvailable() Then

@@ -105,7 +105,7 @@ Public Class SqliteNativeLoader
             Dim handle As IntPtr = NativeMethods.LoadLibrary(dllPath)
             If handle = IntPtr.Zero Then
                 Dim err As Integer = Marshal.GetLastWin32Error()
-                Throw New Exception($"加载 e_sqlite3.dll 失败 (路径: {dllPath})，错误码: {err}")
+                Throw New Exception($"Не удалось загрузить e_sqlite3.dll (путь: {dllPath}), код ошибки: {err}")
             End If
 
             _loaded = True

@@ -270,7 +270,7 @@ Namespace Agent
                     trace.Skills.Add(New ChatContextSkillTrace With {
                         .Name = skill.Name,
                         .Source = "runtime",
-                        .Reason = "AI Native runtime 自动选择"
+                        .Reason = "Автовыбор AI Native runtime"
                     })
                 Next
             End If

@@ -959,12 +959,17 @@ Public Class MCPConfigForm
                                     ' 尝试从描述中提取合适的示例
                                     Dim desc = propObj("description")?.ToString()
                                     If Not String.IsNullOrEmpty(desc) Then
-                                        If desc.Contains("例如") OrElse desc.Contains("示例") Then
-                                            Dim exStart = Math.Max(desc.IndexOf("例如"), desc.IndexOf("示例"))
+                                        Dim lowerDesc = desc.ToLowerInvariant()
+                                        If desc.Contains("例如") OrElse desc.Contains("示例") OrElse
+                                           lowerDesc.Contains("например") OrElse lowerDesc.Contains("пример") Then
+                                            Dim exStart = Math.Max(Math.Max(desc.IndexOf("例如"), desc.IndexOf("示例")),
+                                                                   Math.Max(lowerDesc.IndexOf("например"), lowerDesc.IndexOf("пример")))
                                             If exStart > 0 Then
                                                 Dim exEnd = desc.IndexOf("。", exStart)
+                                                If exEnd < 0 Then exEnd = desc.IndexOf(".", exStart)
+                                                If exEnd < 0 Then exEnd = desc.IndexOf(vbLf, exStart)
                                                 If exEnd > exStart Then
-                                                    defaultValue = desc.Substring(exStart, exEnd - exStart)
+                                                    defaultValue = desc.Substring(exStart, exEnd - exStart).Trim()
                                                 End If
                                             End If
                                         End If

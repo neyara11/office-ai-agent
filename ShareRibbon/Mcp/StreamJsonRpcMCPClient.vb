@@ -176,7 +176,7 @@ Public Class StreamJsonRpcMCPClient
     ' 修改 SendStdioRequestAsync 方法，确保使用 UTF-8 编码
     Private Async Function SendStdioRequestAsync(request As JObject) As Task(Of JObject)
         If _stdioProcess Is Nothing OrElse _stdioProcess.HasExited Then
-            Throw New InvalidOperationException("进程未启动或已退出")
+            Throw New InvalidOperationException("Процесс не запущен или уже завершён")
         End If
 
         ' 添加行尾换行符，确保请求完整发送
@@ -244,7 +244,7 @@ Public Class StreamJsonRpcMCPClient
                     If response("error") IsNot Nothing Then
                         Dim errorMsg = response("error")("message")?.ToString()
                         Debug.WriteLine($"Stdio响应包含错误: {errorMsg}")
-                        Throw New Exception($"服务器错误: {errorMsg}")
+                        Throw New Exception($"Ошибка сервера: {errorMsg}")
                     End If
 
                     ' 返回结果
@@ -511,7 +511,7 @@ Public Class StreamJsonRpcMCPClient
 
             If Not response.IsSuccessStatusCode Then
                 Debug.WriteLine($"HTTP 错误: {response.StatusCode} - {response.ReasonPhrase}")
-                Throw New HttpRequestException($"服务器返回错误: {response.StatusCode} {response.ReasonPhrase}")
+                Throw New HttpRequestException($"Сервер вернул ошибку: {response.StatusCode} {response.ReasonPhrase}")
             End If
 
             Dim responseContent = Await response.Content.ReadAsStringAsync()
@@ -527,7 +527,7 @@ Public Class StreamJsonRpcMCPClient
                     Dim errorMsg = jsonResponse("error")("message")?.ToString()
 
                     Debug.WriteLine($"JSON-RPC 错误: 错误码: {errorCode}, 消息: {errorMsg}")
-                    Throw New Exception($"服务器错误: {errorMsg}")
+                    Throw New Exception($"Ошибка сервера: {errorMsg}")
                 End If
 
                 ' 获取结果
@@ -537,7 +537,7 @@ Public Class StreamJsonRpcMCPClient
                     ' 将结果转换为请求的类型
                     Return result.ToObject(Of T)()
                 Else
-                    Throw New Exception("无效的服务器响应: 缺少 result 对象")
+                    Throw New Exception("Недопустимый ответ сервера: отсутствует объект result")
                 End If
             Catch jsonEx As JsonException
                 Debug.WriteLine($"JSON 解析错误: {jsonEx.Message}")
