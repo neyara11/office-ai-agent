@@ -9,6 +9,6 @@
     "Запрещены команды, специфичные для приложений, кроме Excel",
     "Для динамических диапазонов используй плейсхолдеры {lastRow}, {lastCol}, {selection}"
   ],
-  "fallbackHint": "Если перечисленных 22 команд недостаточно, используй резервный вариант ExecuteVBA",
+  "fallbackHint": "VBA отключён. Если перечисленных команд недостаточно, комбинируй штатные команды (DataAnalysis, GenerateReport, ApplyFormula, CreateChart) или сообщи пользователю, что задачу нельзя выразить командами; не предлагай ExecuteVBA",
   "dynamicRanges": ["{lastRow}", "{lastCol}", "{selection}"]
 }

@@ -319,10 +319,10 @@ Public Class PromptManager
 {""commands"": [{""command"": ""WriteData"", ""params"": {""data"": [[""Имя"", ""Возраст""]], ""targetRange"": ""A1""}}, {""command"": ""FormatRange"", ""params"": {""range"": ""A1:B1"", ""style"": ""header""}}]}
 ```
 
-【25 команд, поддерживаемых Excel】
+【24 команд, поддерживаемых Excel】
 
 === Базовые операции (5) ===
-1. ApplyFormula - применить формулу {targetRange:обязательно, formula:обязательно, fillDown:необязательно}
+1. ApplyFormula - применить формулу {targetRange:обязательно, formula:обязательно, fillDown:необязательно}. Формула — в англоязычном виде (английские имена функций, запятая как разделитель); для «дата без времени» используй =INT(E2), а не TEXT с кодами DD.MM.YYYY
 2. WriteData - записать данные {targetRange:обязательно, data:обязательно(одно значение или двумерный массив)}
 3. FormatRange - форматирование {range:обязательно, style:header/total/data, bold/italic/fontSize/backgroundColor/fontColor, borders:true/""all""/""outline""/""none""}
 4. CreateChart - создать диаграмму {dataRange:обязательно, type:column/line/pie/bar/scatter/area, title:необязательно, position:необязательно, seriesNames:массив имён серий, categoryAxis:диапазон оси категорий, legendPosition:right/left/top/bottom}
@@ -355,10 +355,6 @@ Public Class PromptManager
 23. DataAnalysis - анализ данных {sourceRange:обязательно, type:summary/pivot/groupby/ranking, targetRange/groupBy/valueField/aggregate/topN:по необходимости}
 24. GenerateReport - создать отчёт {sourceRange:обязательно, targetSheet/title/includeChart:необязательно}
 
-=== Резервный VBA (1) ===
-25. ExecuteVBA - выполнить код VBA {code:обязательно, полный код Sub или Function}
-    Когда перечисленных команд недостаточно, сгенерируй код VBA как резервный вариант
-
 【Плейсхолдеры динамических диапазонов】
 Используй {lastRow} для последней строки, {lastCol} для последнего столбца, {selection} для текущего выделения
 
@@ -374,8 +370,8 @@ Public Class PromptManager
 - Вычитка: сообщи пользователю нажать кнопку «AI-вычитка» на панели
 
 【Приоритет решений】
-1. В первую очередь используй перечисленные выше 25 команд
-2. Если сложную задачу нельзя решить командой, используй ExecuteVBA для генерации кода VBA
+1. В первую очередь используй перечисленные выше штатные команды
+2. VBA отключён: не предлагай ExecuteVBA и не возвращай макросы; составные задачи собирай из ApplyFormula, DataAnalysis, GenerateReport, CreateChart
 3. Если запрос неоднозначен, задай уточняющий вопрос на русском языке"
     End Function
     

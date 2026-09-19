@@ -1028,34 +1028,10 @@ Public Class ChatControl
             "ExcelAi.ChatControl",
             "Создание точки отмены")
 
-        ' 尝试检测并应用公式 - 使用 ErrorHandler 包装
-        ErrorHandlerExtension.SafeExecute(
-            Sub()
-                If allPlainMarkdownBuffer IsNot Nothing AndAlso allPlainMarkdownBuffer.Length > 0 Then
-                    Dim aiResponse As String = allPlainMarkdownBuffer.ToString()
-
-                    ' 检测并应用公式
-                    If FormulaHandlerExtension.DetectFormula(aiResponse) Then
-                        System.Diagnostics.Debug.WriteLine("[ChatControl] 检测到公式，尝试应用")
-
-                        ' 在应用公式前创建更具体的撤销点
-                        UndoManagerExtension.CreateAIOperationUndoPoint(
-                            "Excel",
-                            Globals.ThisAddIn.Application,
-                            "Применение формулы ИИ",
-                            "Применение формулы Excel, созданной ИИ")
-
-                        FormulaHandlerExtension.TryApplyFormula(aiResponse, Globals.ThisAddIn.Application)
-
-                        ' 显示撤销提示
-                        Dim hint = UndoManagerExtension.GetUndoHint("Excel")
-                        System.Diagnostics.Debug.WriteLine("[ChatControl] 撤销提示: " & hint)
-                    End If
-                End If
-            End Sub,
-            "ExcelAi.ChatControl",
-            "Применение формулы",
-            "Ошибка при применении формулы. Проверьте формат формулы.")
+        ' Примечание: прежняя эвристика "найти = и имя функции в тексте ответа и применить формулу
+        ' к активной ячейке" удалена. Она срабатывала на планах и VBA-коде, извлекала мусор
+        ' вроде "= ActiveSheet" и показывала диалог извлечения формулы вместо нормального
+        ' применения инструмента (ApplyFormula/WriteData) через Agent Loop.
     End Sub
 
     ''' <summary>
@@ -1234,8 +1210,10 @@ Public Class ChatControl
             worksheet = app.ActiveSheet
             If workbook Is Nothing OrElse worksheet Is Nothing Then Return snapshot
 
-            snapshot("workbook") = If(workbook.Name, "")
-            snapshot("worksheet") = If(worksheet.Name, "")
+            ' Явно приводим позднесвязанные Object-значения к String: иначе присваивание
+            ' в JObject пытается скастовать Object (String) к JToken и падает с InvalidCastException.
+            snapshot("workbook") = Convert.ToString(workbook.Name)
+            snapshot("worksheet") = Convert.ToString(worksheet.Name)
             usedRange = worksheet.UsedRange
             If usedRange IsNot Nothing Then
                 snapshot("usedRows") = CInt(usedRange.Rows.Count)
@@ -1260,6 +1238,9 @@ Public Class ChatControl
                 target = worksheet.Range(targetAddress)
                 snapshot("targetValueHash") = ComputeObservationHash(SerializeExcelRangeValue(target.Value2))
                 snapshot("targetFormulaHash") = ComputeObservationHash(SerializeExcelRangeValue(target.Formula))
+                ' Форматирование не видно в значениях/формулах, поэтому без отдельного отпечатка
+                ' успешный FormatRange/ConditionalFormat выглядит как «изменений нет».
+                snapshot("targetFormatHash") = ComputeObservationHash(SerializeExcelRangeFormat(target))
                 snapshot("targetPreview") = BuildExcelRangePreview(target, 3, 4)
                 snapshot("formulaErrorCount") = CountExcelFormulaErrors(target, 5000)
             End If
@@ -1337,6 +1318,38 @@ Public Class ChatControl
             Return JsonConvert.SerializeObject(value, Formatting.None)
         Catch
             Return value.ToString()
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Отпечаток форматирования первого блока диапазона: нужен, чтобы изменения стиля
+    ''' (шрифт, заливка, формат чисел, выравнивание) регистрировались наблюдением.
+    ''' </summary>
+    Private Shared Function SerializeExcelRangeFormat(target As Object) As String
+        If target Is Nothing Then Return ""
+        Dim cell As Object = Nothing
+        Dim font As Object = Nothing
+        Dim interior As Object = Nothing
+        Try
+            cell = target.Cells(1, 1)
+            If cell Is Nothing Then Return ""
+            font = cell.Font
+            interior = cell.Interior
+            Dim sb As New StringBuilder()
+            Try : sb.Append("bold=").Append(font.Bold).Append(";") : Catch : End Try
+            Try : sb.Append("italic=").Append(font.Italic).Append(";") : Catch : End Try
+            Try : sb.Append("size=").Append(font.Size).Append(";") : Catch : End Try
+            Try : sb.Append("fontColor=").Append(font.Color).Append(";") : Catch : End Try
+            Try : sb.Append("fillColor=").Append(interior.Color).Append(";") : Catch : End Try
+            Try : sb.Append("numberFormat=").Append(cell.NumberFormat).Append(";") : Catch : End Try
+            Try : sb.Append("hAlign=").Append(cell.HorizontalAlignment).Append(";") : Catch : End Try
+            Return sb.ToString()
+        Catch
+            Return ""
+        Finally
+            ComObjectHelper.ReleaseComObject(font)
+            ComObjectHelper.ReleaseComObject(interior)
+            ComObjectHelper.ReleaseComObject(cell)
         End Try
     End Function
 

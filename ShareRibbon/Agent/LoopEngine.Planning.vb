@@ -661,10 +661,11 @@ Namespace Agent
                 If changedToken IsNot Nothing AndAlso
                    changedToken.Type = JTokenType.Boolean AndAlso
                    Not changedToken.Value(Of Boolean)() Then
-                    ' Снимок PowerPoint не покрывает все типы правок (анимации, темы,母版 и т.п.).
-                    ' Если хост уже подтвердил успех, отсутствие изменения в снимке не должно
-                    ' валить всю задачу — фиксируем предупреждение и продолжаем.
-                    If String.Equals(appType, "PowerPoint", StringComparison.OrdinalIgnoreCase) Then
+                    ' Снимок PowerPoint/Excel не покрывает все типы правок (анимации, темы,
+                    ' форматирование, вид и т.п.). Если хост уже подтвердил успех, отсутствие
+                    ' изменения в снимке не должно валить всю задачу — фиксируем предупреждение.
+                    If String.Equals(appType, "PowerPoint", StringComparison.OrdinalIgnoreCase) OrElse
+                       String.Equals(appType, "Excel", StringComparison.OrdinalIgnoreCase) Then
                         AppendObservationWarning(observation,
                                                  "Наблюдение не обнаружило изменений, но хост сообщил об успехе")
                         Return result

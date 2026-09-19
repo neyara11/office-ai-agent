@@ -87,10 +87,13 @@ Public Class ExcelJsonCommandSchema
 - {""operations"": [...]}
 - любые другие самодельные форматы
 
-【25 поддерживаемых команд и их параметры】
+【24 поддерживаемых команд и их параметры】
 
 === Базовые операции (5) ===
 1. ApplyFormula: targetRange(обязательно), formula(обязательно), fillDown(необязательно)
+   Формула задаётся в англоязычном виде: английские имена функций (TEXT, COUNTIF, INT, IF, SUM, DATE), запятая как разделитель аргументов.
+   Для «дата без времени» используй =INT(E2), а не TEXT с форматом; TEXT с кодами DD.MM.YYYY локалезависим и даёт неверный результат.
+   Строковые литералы — в двойных кавычках; не дублируй один и тот же столбец-помощник.
 2. WriteData: targetRange(обязательно), data(обязательно, одно значение или двумерный массив)
 3. FormatRange: range(обязательно), style(необязательно:header/total/data), bold/italic/fontSize/backgroundColor/fontColor(необязательно), borders(необязательно:true/""all""/""outline""/""none"")
 4. CreateChart: dataRange(обязательно), type(необязательно:column/line/pie/bar/scatter/area), title(необязательно), position(необязательно), seriesNames(необязательно, массив имён серий, например [""2022"",""2021""]), categoryAxis(необязательно, диапазон оси категорий, например ""B2:B7""), legendPosition(необязательно:right/left/top/bottom)
@@ -123,20 +126,15 @@ Public Class ExcelJsonCommandSchema
 23. DataAnalysis: sourceRange(обязательно), type(обязательно:summary/pivot/groupby/ranking), targetRange(необязательно), groupBy/valueField/aggregate/topN(по необходимости)
 24. GenerateReport: sourceRange(обязательно), targetSheet(необязательно), title(необязательно), includeChart(необязательно)
 
-=== Резервный VBA (1) ===
-25. ExecuteVBA: code(обязательно, полный код VBA Sub или Function)
-   - используй эту команду, когда перечисленные выше команды не покрывают задачу
-   - код должен быть корректным синтаксисом VBA
-   - пример: {""command"": ""ExecuteVBA"", ""params"": {""code"": ""Sub Test()\nRange(\""A1\"").Value = \""Hello\""\nEnd Sub""}}
-
 【Плейсхолдеры динамических диапазонов】
 Используй {lastRow} для последней строки, {lastCol} для последнего столбца, {selection} для текущего выделения
 
 【Приоритет решений】
-1. В первую очередь используй перечисленные выше 22 команды
-2. Если сложную задачу нельзя решить командой, используй ExecuteVBA для генерации кода VBA
-3. Если запрос неоднозначен, прямо задай уточняющий вопрос пользователю, не возвращай JSON
-4. Для перевода сообщи пользователю использовать кнопку ""Перевод"" на панели инструментов, не возвращай JSON"
+1. В первую очередь используй перечисленные выше штатные команды
+2. VBA отключён: не предлагай ExecuteVBA и не возвращай макросы; составные задачи собирай из ApplyFormula, DataAnalysis, GenerateReport, CreateChart
+3. Если задачу нельзя выразить штатными командами, сообщи об этом пользователю на русском, не возвращай JSON
+4. Если запрос неоднозначен, прямо задай уточняющий вопрос пользователю, не возвращай JSON
+5. Для перевода сообщи пользователю использовать кнопку ""Перевод"" на панели инструментов, не возвращай JSON"
     End Function
 
     ''' <summary>
@@ -459,6 +457,17 @@ Public Class ExcelJsonCommandSchema
             Return False
         End If
 
+        ' Range.Formula — англоязычный (US) синтаксис: локализованные имена и ';' приведут
+        ' к неверному результату. Отклоняем и просим переформулировать.
+        If HasCharOutsideQuotes(formula, ";"c) Then
+            errorMessage = "ApplyFormula: используй запятую ',' как разделитель аргументов (не ';')"
+            Return False
+        End If
+        If HasCyrillicFunctionOutsideQuotes(formula) Then
+            errorMessage = "ApplyFormula: используй английские имена функций (TEXT, COUNTIF, INT, IF, SUM, DATE), локализованные имена не поддерживаются"
+            Return False
+        End If
+
         ' 校验范围格式 (支持占位符和Sheet!Range格式)
         If Not IsValidRangeFormat(targetRange) Then
             errorMessage = $"Недопустимый формат диапазона: {targetRange}"
@@ -466,6 +475,91 @@ Public Class ExcelJsonCommandSchema
         End If
 
         Return True
+    End Function
+
+    ''' <summary>
+    ''' 是否有指定字符出现在字符串字面量之外（двойные кавычки с экранированием "").
+    ''' </summary>
+    Private Shared Function HasCharOutsideQuotes(text As String, ch As Char) As Boolean
+        If String.IsNullOrEmpty(text) Then Return False
+        Dim i = 0
+        Dim inQuote = False
+        While i < text.Length
+            Dim c = text(i)
+            If c = """"c Then
+                If inQuote AndAlso i + 1 < text.Length AndAlso text(i + 1) = """"c Then
+                    i += 2
+                    Continue While
+                End If
+                inQuote = Not inQuote
+            ElseIf Not inQuote AndAlso c = ch Then
+                Return True
+            End If
+            i += 1
+        End While
+        Return False
+    End Function
+
+    ''' <summary>
+    ''' Есть ли локализованное (кириллическое) имя функции вне строковых литералов.
+    ''' Имена листов (например, Лист1!A1) и строки формата не считаются функциями.
+    ''' </summary>
+    Private Shared Function HasCyrillicFunctionOutsideQuotes(text As String) As Boolean
+        If String.IsNullOrEmpty(text) Then Return False
+        Dim i = 0
+        Dim inQuote = False
+        While i < text.Length
+            Dim c = text(i)
+            If c = """"c Then
+                If inQuote AndAlso i + 1 < text.Length AndAlso text(i + 1) = """"c Then
+                    i += 2
+                    Continue While
+                End If
+                inQuote = Not inQuote
+                i += 1
+                Continue While
+            End If
+
+            If Not inQuote AndAlso IsFormulaIdentifierStart(c) Then
+                Dim start = i
+                While i < text.Length AndAlso IsFormulaIdentifierChar(text(i))
+                    i += 1
+                End While
+                Dim token = text.Substring(start, i - start)
+                Dim j = i
+                While j < text.Length AndAlso text(j) = " "c
+                    j += 1
+                End While
+                If j < text.Length AndAlso text(j) = "("c AndAlso TokenHasCyrillic(token) Then
+                    Return True
+                End If
+                Continue While
+            End If
+
+            i += 1
+        End While
+        Return False
+    End Function
+
+    Private Shared Function IsFormulaIdentifierStart(c As Char) As Boolean
+        Return (c >= "A"c AndAlso c <= "Z"c) OrElse
+               (c >= "a"c AndAlso c <= "z"c) OrElse
+               (c >= "А"c AndAlso c <= "я"c) OrElse
+               c = "Ё"c OrElse c = "ё"c OrElse c = "_"c
+    End Function
+
+    Private Shared Function IsFormulaIdentifierChar(c As Char) As Boolean
+        Return IsFormulaIdentifierStart(c) OrElse
+               (c >= "0"c AndAlso c <= "9"c) OrElse
+               c = "."c
+    End Function
+
+    Private Shared Function TokenHasCyrillic(token As String) As Boolean
+        If String.IsNullOrEmpty(token) Then Return False
+        For Each c In token
+            If (c >= "А"c AndAlso c <= "я"c) OrElse c = "Ё"c OrElse c = "ё"c Then Return True
+        Next
+        Return False
     End Function
 
     ''' <summary>
