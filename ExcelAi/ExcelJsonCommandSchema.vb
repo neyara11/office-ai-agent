@@ -51,9 +51,9 @@ Public Class ExcelJsonCommandSchema
     ''' </summary>
     Public Shared Function GetStrictJsonSchemaPrompt() As String
         Return "
-【重要】你必须且只能返回以下两种JSON格式之一：
+【Важно】Ты должен и можешь вернуть только один из двух форматов JSON:
 
-格式1 - 单个命令：
+Формат 1 — одна команда:
 ```json
 {
   ""command"": ""ApplyFormula"",
@@ -65,7 +65,7 @@ Public Class ExcelJsonCommandSchema
 }
 ```
 
-格式2 - 多个命令（批量操作）：
+Формат 2 — несколько команд (пакетная операция):
 ```json
 {
   ""commands"": [
@@ -81,83 +81,83 @@ Public Class ExcelJsonCommandSchema
 }
 ```
 
-【绝对禁止的格式】
+【Категорически запрещённые форматы】
 - {""command"": ""xxx"", ""actions"": [...]}
-- {""command"": ""xxx"", ""formula"": ""..."", ""range"": ""...""} (缺少params包装)
+- {""command"": ""xxx"", ""formula"": ""..."", ""range"": ""...""} (отсутствует обёртка params)
 - {""operations"": [...]}
-- 任何其他自创格式
+- любые другие самодельные форматы
 
-【支持的25个命令及参数】
+【25 поддерживаемых команд и их параметры】
 
-=== 基础操作 (5个) ===
-1. ApplyFormula: targetRange(必需), formula(必需), fillDown(可选)
-2. WriteData: targetRange(必需), data(必需,可以是单值或二维数组)
-3. FormatRange: range(必需), style(可选:header/total/data), bold/italic/fontSize/backgroundColor/fontColor(可选), borders(可选:true/""all""/""outline""/""none"")
-4. CreateChart: dataRange(必需), type(可选:column/line/pie/bar/scatter/area), title(可选), position(可选), seriesNames(可选,系列名称数组如[""2022"",""2021""]), categoryAxis(可选,分类轴范围如""B2:B7""), legendPosition(可选:right/left/top/bottom)
-5. CleanData: range(必需), operation(必需:removeduplicates/fillempty/trim/replace), fillValue/findText/replaceText(按需)
+=== Базовые операции (5) ===
+1. ApplyFormula: targetRange(обязательно), formula(обязательно), fillDown(необязательно)
+2. WriteData: targetRange(обязательно), data(обязательно, одно значение или двумерный массив)
+3. FormatRange: range(обязательно), style(необязательно:header/total/data), bold/italic/fontSize/backgroundColor/fontColor(необязательно), borders(необязательно:true/""all""/""outline""/""none"")
+4. CreateChart: dataRange(обязательно), type(необязательно:column/line/pie/bar/scatter/area), title(необязательно), position(необязательно), seriesNames(необязательно, массив имён серий, например [""2022"",""2021""]), categoryAxis(необязательно, диапазон оси категорий, например ""B2:B7""), legendPosition(необязательно:right/left/top/bottom)
+5. CleanData: range(обязательно), operation(обязательно:removeduplicates/fillempty/trim/replace), fillValue/findText/replaceText(по необходимости)
 
-=== 数据操作 (8个) ===
-6. SortData: range(必需), sortColumn(必需,1开始的列号), order(可选:asc/desc,默认asc), hasHeader(可选,默认true)
-7. FilterData: range(必需), column(必需), criteria(必需,筛选条件如"">100""或""文本""), clearFilter(可选,true则清除筛选)
-8. RemoveDuplicates: range(必需), columns(可选,要检查的列号数组,默认所有列), hasHeader(可选)
-9. ConditionalFormat: range(必需), rule(必需:highlight/databar/colorscale/iconset), condition(按规则需要), color(可选)
-10. MergeCells: range(必需), unmerge(可选,true则取消合并)
-11. AutoFit: range(必需), type(可选:columns/rows/both,默认columns)
-12. FindReplace: range(必需,或""all""表示全表), find(必需), replace(必需), matchCase(可选), matchEntireCell(可选)
-13. CreatePivotTable: sourceRange(必需), targetCell(必需), rowFields(必需), valueFields(必需), columnFields(可选)
+=== Операции с данными (8) ===
+6. SortData: range(обязательно), sortColumn(обязательно, номер столбца с 1), order(необязательно:asc/desc, по умолчанию asc), hasHeader(необязательно, по умолчанию true)
+7. FilterData: range(обязательно), column(обязательно), criteria(обязательно, условие фильтра, например "">100"" или ""текст""), clearFilter(необязательно, true очищает фильтр)
+8. RemoveDuplicates: range(обязательно), columns(необязательно, массив номеров проверяемых столбцов, по умолчанию все столбцы), hasHeader(необязательно)
+9. ConditionalFormat: range(обязательно), rule(обязательно:highlight/databar/colorscale/iconset), condition(требуется правилом), color(необязательно)
+10. MergeCells: range(обязательно), unmerge(необязательно, true отменяет объединение)
+11. AutoFit: range(обязательно), type(необязательно:columns/rows/both, по умолчанию columns)
+12. FindReplace: range(обязательно, или ""all"" для всего листа), find(обязательно), replace(обязательно), matchCase(необязательно), matchEntireCell(необязательно)
+13. CreatePivotTable: sourceRange(обязательно), targetCell(обязательно), rowFields(обязательно), valueFields(обязательно), columnFields(необязательно)
 
-=== 工作表操作 (4个) ===
-14. CreateSheet: name(必需), position(可选:before/after), referenceSheet(可选)
-15. DeleteSheet: name(必需)
-16. RenameSheet: oldName(必需), newName(必需)
-17. CopySheet: sourceName(必需), newName(必需), position(可选)
+=== Операции с листами (4) ===
+14. CreateSheet: name(обязательно), position(необязательно:before/after), referenceSheet(необязательно)
+15. DeleteSheet: name(обязательно)
+16. RenameSheet: oldName(обязательно), newName(обязательно)
+17. CopySheet: sourceName(обязательно), newName(обязательно), position(необязательно)
 
-=== 高级功能 (4个) ===
-18. InsertRowCol: type(必需:row/column), position(必需,行号或列字母), count(可选,默认1)
-19. DeleteRowCol: type(必需:row/column), position(必需), count(可选,默认1)
-20. HideRowCol: type(必需:row/column), position(必需), unhide(可选,true则取消隐藏)
-21. ProtectSheet: sheetName(可选,默认当前), password(可选), unprotect(可选,true则取消保护)
+=== Расширенные функции (4) ===
+18. InsertRowCol: type(обязательно:row/column), position(обязательно, номер строки или буква столбца), count(необязательно, по умолчанию 1)
+19. DeleteRowCol: type(обязательно:row/column), position(обязательно), count(необязательно, по умолчанию 1)
+20. HideRowCol: type(обязательно:row/column), position(обязательно), unhide(необязательно, true отменяет скрытие)
+21. ProtectSheet: sheetName(необязательно, по умолчанию текущий), password(необязательно), unprotect(необязательно, true снимает защиту)
 
-=== Agent能力 (3个) ===
-22. TransformData: sourceRange(必需), operation(必需:transpose/split/merge), targetRange(可选), delimiter(可选)
-23. DataAnalysis: sourceRange(必需), type(必需:summary/pivot/groupby/ranking), targetRange(可选), groupBy/valueField/aggregate/topN(按需)
-24. GenerateReport: sourceRange(必需), targetSheet(可选), title(可选), includeChart(可选)
+=== Возможности Agent (3) ===
+22. TransformData: sourceRange(обязательно), operation(обязательно:transpose/split/merge), targetRange(необязательно), delimiter(необязательно)
+23. DataAnalysis: sourceRange(обязательно), type(обязательно:summary/pivot/groupby/ranking), targetRange(необязательно), groupBy/valueField/aggregate/topN(по необходимости)
+24. GenerateReport: sourceRange(обязательно), targetSheet(необязательно), title(необязательно), includeChart(необязательно)
 
-=== VBA回退 (1个) ===
-25. ExecuteVBA: code(必需,完整的VBA Sub或Function代码)
-   - 当以上命令无法满足需求时使用此命令
-   - 代码必须是有效的VBA语法
-   - 示例: {""command"": ""ExecuteVBA"", ""params"": {""code"": ""Sub Test()\nRange(\""A1\"").Value = \""Hello\""\nEnd Sub""}}
+=== Резервный VBA (1) ===
+25. ExecuteVBA: code(обязательно, полный код VBA Sub или Function)
+   - используй эту команду, когда перечисленные выше команды не покрывают задачу
+   - код должен быть корректным синтаксисом VBA
+   - пример: {""command"": ""ExecuteVBA"", ""params"": {""code"": ""Sub Test()\nRange(\""A1\"").Value = \""Hello\""\nEnd Sub""}}
 
-【动态范围占位符】
-使用 {lastRow} 表示最后一行，{lastCol} 表示最后一列，{selection} 表示当前选择
+【Плейсхолдеры динамических диапазонов】
+Используй {lastRow} для последней строки, {lastCol} для последнего столбца, {selection} для текущего выделения
 
-【重要决策规则】
-1. 优先使用上述22个命令处理用户需求
-2. 如果需求复杂无法用命令实现，使用ExecuteVBA生成VBA代码
-3. 如果用户需求不明确，请直接用中文询问用户，不要返回JSON
-4. 翻译需求请告知用户使用工具栏的""翻译""按钮，不要返回JSON"
+【Приоритет решений】
+1. В первую очередь используй перечисленные выше 22 команды
+2. Если сложную задачу нельзя решить командой, используй ExecuteVBA для генерации кода VBA
+3. Если запрос неоднозначен, прямо задай уточняющий вопрос пользователю, не возвращай JSON
+4. Для перевода сообщи пользователю использовать кнопку ""Перевод"" на панели инструментов, не возвращай JSON"
     End Function
 
     ''' <summary>
     ''' 获取格式校验失败的重试提示（Self-check机制）
     ''' </summary>
     Public Shared Function GetFormatCorrectionPrompt(originalJson As String, errorMessage As String) As String
-        Return $"你之前返回的JSON格式不符合规范:
+        Return $"Возвращённый ранее JSON не соответствует формату:
 
-【错误原因】{errorMessage}
+【Причина ошибки】{errorMessage}
 
-【你返回的内容】
+【Твой ответ】
 {originalJson}
 
-【正确格式示例】
-单命令:
+【Пример правильного формата】
+Одна команда:
 {{""command"": ""ApplyFormula"", ""params"": {{""targetRange"": ""C1:C{{lastRow}}"", ""formula"": ""=A1+B1""}}}}
 
-多命令:
+Несколько команд:
 {{""commands"": [{{""command"": ""ApplyFormula"", ""params"": {{""targetRange"": ""C1"", ""formula"": ""=A1+B1""}}}}, {{""command"": ""ApplyFormula"", ""params"": {{""targetRange"": ""E1"", ""formula"": ""=C1*D1""}}}}]}}
 
-请严格按照上述格式重新返回JSON命令。"
+Строго следуй указанному формату и верни JSON-команды заново."
     End Function
 
     ''' <summary>
@@ -170,7 +170,7 @@ Public Class ExcelJsonCommandSchema
 
             Dim token = JToken.Parse(jsonText)
             If token.Type <> JTokenType.Object Then
-                errorMessage = "响应必须是JSON对象"
+                errorMessage = "Ответ должен быть JSON-объектом"
                 Return False
             End If
 
@@ -179,7 +179,7 @@ Public Class ExcelJsonCommandSchema
             ' 检查是否是 commands 数组格式
             If jsonObj("commands") IsNot Nothing Then
                 If jsonObj("commands").Type <> JTokenType.Array Then
-                    errorMessage = "commands必须是数组"
+                    errorMessage = "commands должен быть массивом"
                     Return False
                 End If
 
@@ -188,7 +188,7 @@ Public Class ExcelJsonCommandSchema
                 For i As Integer = 0 To commands.Count - 1
                     Dim cmd = commands(i)
                     If cmd.Type <> JTokenType.Object Then
-                        errorMessage = $"commands[{i}]必须是对象"
+                        errorMessage = $"commands[{i}] должен быть объектом"
                         Return False
                     End If
 
@@ -210,12 +210,12 @@ Public Class ExcelJsonCommandSchema
 
             ' 检查是否有禁止的格式
             If jsonObj("actions") IsNot Nothing Then
-                errorMessage = "禁止使用actions格式，请使用commands数组"
+                errorMessage = "Формат actions запрещён, используйте массив commands"
                 Return False
             End If
 
             If jsonObj("operations") IsNot Nothing Then
-                errorMessage = "禁止使用operations格式，请使用commands数组"
+                errorMessage = "Формат operations запрещён, используйте массив commands"
                 Return False
             End If
 
@@ -231,14 +231,14 @@ Public Class ExcelJsonCommandSchema
                 Return True
             End If
 
-            errorMessage = "缺少command或commands字段"
+            errorMessage = "Отсутствует поле command или commands"
             Return False
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            errorMessage = $"JSON解析失败: {ex.Message}"
+            errorMessage = $"Не удалось разобрать JSON: {ex.Message}"
             Return False
         Catch ex As Exception
-            errorMessage = $"验证异常: {ex.Message}"
+            errorMessage = $"Исключение при проверке: {ex.Message}"
             Return False
         End Try
     End Function
@@ -284,7 +284,7 @@ Public Class ExcelJsonCommandSchema
 
             Return json
         Catch ex As Exception
-            Debug.WriteLine($"NormalizeCommandStructure 出错: {ex.Message}")
+            Debug.WriteLine($"Ошибка NormalizeCommandStructure: {ex.Message}")
             Return json
         End Try
     End Function
@@ -353,20 +353,20 @@ Public Class ExcelJsonCommandSchema
             ' 检查command字段
             Dim command = json("command")?.ToString()
             If String.IsNullOrEmpty(command) Then
-                errorMessage = "缺少command字段"
+                errorMessage = "Отсутствует поле command"
                 Return False
             End If
 
             ' 检查是否是支持的命令
             If Not SupportedCommands.Any(Function(c) c.Equals(command, StringComparison.OrdinalIgnoreCase)) Then
-                errorMessage = $"不支持的命令: {command}。支持的命令: {String.Join(", ", SupportedCommands)}"
+                errorMessage = $"Неподдерживаемая команда: {command}. Поддерживаемые команды: {String.Join(", ", SupportedCommands)}"
                 Return False
             End If
 
             ' 检查params字段
             Dim params = json("params")
             If params Is Nothing Then
-                errorMessage = "缺少params字段"
+                errorMessage = "Отсутствует поле params"
                 Return False
             End If
 
@@ -432,7 +432,7 @@ Public Class ExcelJsonCommandSchema
             End Select
 
         Catch ex As Exception
-            errorMessage = $"JSON校验异常: {ex.Message}"
+            errorMessage = $"Исключение при проверке JSON: {ex.Message}"
             Return False
         End Try
     End Function
@@ -450,18 +450,18 @@ Public Class ExcelJsonCommandSchema
         Dim formula = params("formula")?.ToString()
 
         If String.IsNullOrEmpty(targetRange) Then
-            errorMessage = "ApplyFormula缺少targetRange或range参数"
+            errorMessage = "ApplyFormula: отсутствует параметр targetRange или range"
             Return False
         End If
 
         If String.IsNullOrEmpty(formula) Then
-            errorMessage = "ApplyFormula缺少formula参数"
+            errorMessage = "ApplyFormula: отсутствует параметр formula"
             Return False
         End If
 
         ' 校验范围格式 (支持占位符和Sheet!Range格式)
         If Not IsValidRangeFormat(targetRange) Then
-            errorMessage = $"无效的范围格式: {targetRange}"
+            errorMessage = $"Недопустимый формат диапазона: {targetRange}"
             Return False
         End If
 
@@ -497,12 +497,12 @@ Public Class ExcelJsonCommandSchema
         End If
 
         If String.IsNullOrEmpty(targetRange) Then
-            errorMessage = "WriteData缺少targetRange或startCell参数"
+            errorMessage = "WriteData: отсутствует параметр targetRange или startCell"
             Return False
         End If
 
         If data Is Nothing Then
-            errorMessage = "WriteData缺少data参数"
+            errorMessage = "WriteData: отсутствует параметр data"
             Return False
         End If
 
@@ -519,7 +519,7 @@ Public Class ExcelJsonCommandSchema
         End If
 
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "FormatRange缺少range参数"
+            errorMessage = "FormatRange: отсутствует параметр range"
             Return False
         End If
 
@@ -533,7 +533,7 @@ Public Class ExcelJsonCommandSchema
         Dim dataRange = params("dataRange")?.ToString()
 
         If String.IsNullOrEmpty(dataRange) Then
-            errorMessage = "CreateChart缺少dataRange参数"
+            errorMessage = "CreateChart: отсутствует параметр dataRange"
             Return False
         End If
 
@@ -548,7 +548,7 @@ Public Class ExcelJsonCommandSchema
         Dim operation = params("operation")?.ToString()
 
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "CleanData缺少range参数"
+            errorMessage = "CleanData: отсутствует параметр range"
             Return False
         End If
 
@@ -563,13 +563,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateSortData(params As JToken, ByRef errorMessage As String) As Boolean
         Dim range = params("range")?.ToString()
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "SortData缺少range参数"
+            errorMessage = "SortData: отсутствует параметр range"
             Return False
         End If
 
         Dim sortColumn = params("sortColumn")
         If sortColumn Is Nothing Then
-            errorMessage = "SortData缺少sortColumn参数(列号从1开始)"
+            errorMessage = "SortData: отсутствует параметр sortColumn (номер столбца с 1)"
             Return False
         End If
 
@@ -588,19 +588,19 @@ Public Class ExcelJsonCommandSchema
 
         Dim range = params("range")?.ToString()
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "FilterData缺少range参数"
+            errorMessage = "FilterData: отсутствует параметр range"
             Return False
         End If
         
         Dim column = params("column")
         If column Is Nothing Then
-            errorMessage = "FilterData缺少column参数"
+            errorMessage = "FilterData: отсутствует параметр column"
             Return False
         End If
         
         Dim criteria = params("criteria")?.ToString()
         If String.IsNullOrEmpty(criteria) Then
-            errorMessage = "FilterData缺少criteria参数"
+            errorMessage = "FilterData: отсутствует параметр criteria"
             Return False
         End If
         
@@ -613,7 +613,7 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateRemoveDuplicates(params As JToken, ByRef errorMessage As String) As Boolean
         Dim range = params("range")?.ToString()
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "RemoveDuplicates缺少range参数"
+            errorMessage = "RemoveDuplicates: отсутствует параметр range"
             Return False
         End If
         Return True
@@ -625,13 +625,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateConditionalFormat(params As JToken, ByRef errorMessage As String) As Boolean
         Dim range = params("range")?.ToString()
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "ConditionalFormat缺少range参数"
+            errorMessage = "ConditionalFormat: отсутствует параметр range"
             Return False
         End If
         
         Dim rule = params("rule")?.ToString()
         If String.IsNullOrEmpty(rule) Then
-            errorMessage = "ConditionalFormat缺少rule参数(highlight/databar/colorscale/iconset)"
+            errorMessage = "ConditionalFormat: отсутствует параметр rule (highlight/databar/colorscale/iconset)"
             Return False
         End If
         
@@ -644,7 +644,7 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateMergeCells(params As JToken, ByRef errorMessage As String) As Boolean
         Dim range = params("range")?.ToString()
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "MergeCells缺少range参数"
+            errorMessage = "MergeCells: отсутствует параметр range"
             Return False
         End If
         Return True
@@ -656,7 +656,7 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateAutoFit(params As JToken, ByRef errorMessage As String) As Boolean
         Dim range = params("range")?.ToString()
         If String.IsNullOrEmpty(range) Then
-            errorMessage = "AutoFit缺少range参数"
+            errorMessage = "AutoFit: отсутствует параметр range"
             Return False
         End If
         Return True
@@ -668,13 +668,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateFindReplace(params As JToken, ByRef errorMessage As String) As Boolean
         Dim findText = params("find")?.ToString()
         If String.IsNullOrEmpty(findText) Then
-            errorMessage = "FindReplace缺少find参数"
+            errorMessage = "FindReplace: отсутствует параметр find"
             Return False
         End If
         
         ' replace可以为空字符串（删除）
         If params("replace") Is Nothing Then
-            errorMessage = "FindReplace缺少replace参数"
+            errorMessage = "FindReplace: отсутствует параметр replace"
             Return False
         End If
         
@@ -687,25 +687,25 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateCreatePivotTable(params As JToken, ByRef errorMessage As String) As Boolean
         Dim sourceRange = params("sourceRange")?.ToString()
         If String.IsNullOrEmpty(sourceRange) Then
-            errorMessage = "CreatePivotTable缺少sourceRange参数"
+            errorMessage = "CreatePivotTable: отсутствует параметр sourceRange"
             Return False
         End If
         
         Dim targetCell = params("targetCell")?.ToString()
         If String.IsNullOrEmpty(targetCell) Then
-            errorMessage = "CreatePivotTable缺少targetCell参数"
+            errorMessage = "CreatePivotTable: отсутствует параметр targetCell"
             Return False
         End If
         
         Dim rowFields = params("rowFields")
         If rowFields Is Nothing Then
-            errorMessage = "CreatePivotTable缺少rowFields参数"
+            errorMessage = "CreatePivotTable: отсутствует параметр rowFields"
             Return False
         End If
         
         Dim valueFields = params("valueFields")
         If valueFields Is Nothing Then
-            errorMessage = "CreatePivotTable缺少valueFields参数"
+            errorMessage = "CreatePivotTable: отсутствует параметр valueFields"
             Return False
         End If
         
@@ -718,7 +718,7 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateCreateSheet(params As JToken, ByRef errorMessage As String) As Boolean
         Dim name = params("name")?.ToString()
         If String.IsNullOrEmpty(name) Then
-            errorMessage = "CreateSheet缺少name参数"
+            errorMessage = "CreateSheet: отсутствует параметр name"
             Return False
         End If
         Return True
@@ -730,7 +730,7 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateDeleteSheet(params As JToken, ByRef errorMessage As String) As Boolean
         Dim name = params("name")?.ToString()
         If String.IsNullOrEmpty(name) Then
-            errorMessage = "DeleteSheet缺少name参数"
+            errorMessage = "DeleteSheet: отсутствует параметр name"
             Return False
         End If
         Return True
@@ -742,13 +742,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateRenameSheet(params As JToken, ByRef errorMessage As String) As Boolean
         Dim oldName = params("oldName")?.ToString()
         If String.IsNullOrEmpty(oldName) Then
-            errorMessage = "RenameSheet缺少oldName参数"
+            errorMessage = "RenameSheet: отсутствует параметр oldName"
             Return False
         End If
         
         Dim newName = params("newName")?.ToString()
         If String.IsNullOrEmpty(newName) Then
-            errorMessage = "RenameSheet缺少newName参数"
+            errorMessage = "RenameSheet: отсутствует параметр newName"
             Return False
         End If
         
@@ -761,13 +761,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateCopySheet(params As JToken, ByRef errorMessage As String) As Boolean
         Dim sourceName = params("sourceName")?.ToString()
         If String.IsNullOrEmpty(sourceName) Then
-            errorMessage = "CopySheet缺少sourceName参数"
+            errorMessage = "CopySheet: отсутствует параметр sourceName"
             Return False
         End If
         
         Dim newName = params("newName")?.ToString()
         If String.IsNullOrEmpty(newName) Then
-            errorMessage = "CopySheet缺少newName参数"
+            errorMessage = "CopySheet: отсутствует параметр newName"
             Return False
         End If
         
@@ -780,13 +780,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateInsertRowCol(params As JToken, ByRef errorMessage As String) As Boolean
         Dim type = params("type")?.ToString()
         If String.IsNullOrEmpty(type) OrElse (type.ToLower() <> "row" AndAlso type.ToLower() <> "column") Then
-            errorMessage = "InsertRowCol的type参数必须是row或column"
+            errorMessage = "InsertRowCol: параметр type должен быть row или column"
             Return False
         End If
         
         Dim position = params("position")?.ToString()
         If String.IsNullOrEmpty(position) Then
-            errorMessage = "InsertRowCol缺少position参数"
+            errorMessage = "InsertRowCol: отсутствует параметр position"
             Return False
         End If
         
@@ -799,13 +799,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateDeleteRowCol(params As JToken, ByRef errorMessage As String) As Boolean
         Dim type = params("type")?.ToString()
         If String.IsNullOrEmpty(type) OrElse (type.ToLower() <> "row" AndAlso type.ToLower() <> "column") Then
-            errorMessage = "DeleteRowCol的type参数必须是row或column"
+            errorMessage = "DeleteRowCol: параметр type должен быть row или column"
             Return False
         End If
         
         Dim position = params("position")?.ToString()
         If String.IsNullOrEmpty(position) Then
-            errorMessage = "DeleteRowCol缺少position参数"
+            errorMessage = "DeleteRowCol: отсутствует параметр position"
             Return False
         End If
         
@@ -818,13 +818,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateHideRowCol(params As JToken, ByRef errorMessage As String) As Boolean
         Dim type = params("type")?.ToString()
         If String.IsNullOrEmpty(type) OrElse (type.ToLower() <> "row" AndAlso type.ToLower() <> "column") Then
-            errorMessage = "HideRowCol的type参数必须是row或column"
+            errorMessage = "HideRowCol: параметр type должен быть row или column"
             Return False
         End If
         
         Dim position = params("position")?.ToString()
         If String.IsNullOrEmpty(position) Then
-            errorMessage = "HideRowCol缺少position参数"
+            errorMessage = "HideRowCol: отсутствует параметр position"
             Return False
         End If
         
@@ -842,13 +842,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateTransformData(params As JToken, ByRef errorMessage As String) As Boolean
         Dim sourceRange = params("sourceRange")?.ToString()
         If String.IsNullOrEmpty(sourceRange) Then
-            errorMessage = "TransformData缺少sourceRange参数"
+            errorMessage = "TransformData: отсутствует параметр sourceRange"
             Return False
         End If
 
         Dim operation = params("operation")?.ToString()
         If String.IsNullOrEmpty(operation) Then
-            errorMessage = "TransformData缺少operation参数(transpose/split/merge)"
+            errorMessage = "TransformData: отсутствует параметр operation (transpose/split/merge)"
             Return False
         End If
 
@@ -858,13 +858,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateDataAnalysis(params As JToken, ByRef errorMessage As String) As Boolean
         Dim sourceRange = params("sourceRange")?.ToString()
         If String.IsNullOrEmpty(sourceRange) Then
-            errorMessage = "DataAnalysis缺少sourceRange参数"
+            errorMessage = "DataAnalysis: отсутствует параметр sourceRange"
             Return False
         End If
 
         Dim analysisType = params("type")?.ToString()
         If String.IsNullOrEmpty(analysisType) Then
-            errorMessage = "DataAnalysis缺少type参数(summary/pivot/groupby/ranking)"
+            errorMessage = "DataAnalysis: отсутствует параметр type (summary/pivot/groupby/ranking)"
             Return False
         End If
 
@@ -874,7 +874,7 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateGenerateReport(params As JToken, ByRef errorMessage As String) As Boolean
         Dim sourceRange = params("sourceRange")?.ToString()
         If String.IsNullOrEmpty(sourceRange) Then
-            errorMessage = "GenerateReport缺少sourceRange参数"
+            errorMessage = "GenerateReport: отсутствует параметр sourceRange"
             Return False
         End If
 
@@ -887,13 +887,13 @@ Public Class ExcelJsonCommandSchema
     Private Shared Function ValidateExecuteVBA(params As JToken, ByRef errorMessage As String) As Boolean
         Dim code = params("code")?.ToString()
         If String.IsNullOrEmpty(code) Then
-            errorMessage = "ExecuteVBA缺少code参数"
+            errorMessage = "ExecuteVBA: отсутствует параметр code"
             Return False
         End If
         
         ' 基本的VBA代码验证
         If Not code.ToLower().Contains("sub") AndAlso Not code.ToLower().Contains("function") Then
-            errorMessage = "ExecuteVBA的code必须包含Sub或Function定义"
+            errorMessage = "ExecuteVBA: параметр code должен содержать определение Sub или Function"
             Return False
         End If
         

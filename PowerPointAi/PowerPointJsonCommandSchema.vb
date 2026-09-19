@@ -42,97 +42,97 @@ Public Class PowerPointJsonCommandSchema
     ''' </summary>
     Public Shared Function GetStrictJsonSchemaPrompt() As String
         Return "
-【重要】你必须且只能返回以下两种JSON格式之一：
+【Важно】Ты должен и можешь вернуть только один из двух форматов JSON:
 
-格式1 - 单个命令：
+Формат 1 — одна команда:
 ```json
 {
   ""command"": ""InsertSlide"",
   ""params"": {
     ""position"": ""end"",
     ""layout"": ""title"",
-    ""title"": ""幻灯片标题""
+    ""title"": ""Заголовок слайда""
   }
 }
 ```
 
-格式2 - 多个命令（批量操作）：
+Формат 2 — несколько команд (пакетная операция):
 ```json
 {
   ""commands"": [
-    {""command"": ""InsertSlide"", ""params"": {""title"": ""第一页""}},
+    {""command"": ""InsertSlide"", ""params"": {""title"": ""Первый слайд""}},
     {""command"": ""AddAnimation"", ""params"": {""effect"": ""fadeIn"", ""scope"": ""all""}}
   ]
 }
 ```
 
-【绝对禁止的格式】
-- 禁止 {""command"": ""xxx"", ""actions"": [...]}
-- 禁止 {""command"": ""xxx"", ""title"": ""...""} (缺少params包装)
-- 禁止 {""operations"": [...]}
+【Категорически запрещённые форматы】
+- запрещено {""command"": ""xxx"", ""actions"": [...]}
+- запрещено {""command"": ""xxx"", ""title"": ""...""} (отсутствует обёртка params)
+- запрещено {""operations"": [...]}
 
-【PowerPoint支持的16个命令】
+【16 команд, поддерживаемых PowerPoint】
 
-=== 幻灯片操作 (5个) ===
-1. InsertSlide - 插入幻灯片 {position:current/end, layout:title/titleAndContent/blank, title:可选, content:可选}
-2. DeleteSlide - 删除幻灯片 {slideIndex:必需,-1表示当前}
-3. DuplicateSlide - 复制幻灯片 {slideIndex:必需, insertAfter:可选}
-4. MoveSlide - 移动幻灯片 {fromIndex:必需, toIndex:必需}
-5. CreateSlides - 批量创建 {slides:数组,每个含title/content/layout}
+=== Операции со слайдами (5) ===
+1. InsertSlide — вставить слайд {position:current/end, layout:title/titleAndContent/blank, title:необязательно, content:необязательно}
+2. DeleteSlide — удалить слайд {slideIndex:обязательно, -1 означает текущий}
+3. DuplicateSlide — дублировать слайд {slideIndex:обязательно, insertAfter:необязательно}
+4. MoveSlide — переместить слайд {fromIndex:обязательно, toIndex:обязательно}
+5. CreateSlides — пакетное создание {slides:массив, каждый содержит title/content/layout}
 
-=== 内容操作 (3个) ===
-6. InsertText - 插入文本 {content:必需, slideIndex:-1表示当前, x/y:可选位置}
-7. InsertShape - 插入形状 {shapeType:rectangle/oval/arrow等, x:必需, y:必需, width/height:可选}
-8. InsertTable - 插入表格 {rows:必需, cols:必需, data:可选, slideIndex:可选}
+=== Операции с содержимым (3) ===
+6. InsertText — вставить текст {content:обязательно, slideIndex:-1 означает текущий, x/y:необязательное положение}
+7. InsertShape — вставить фигуру {shapeType:rectangle/oval/arrow и т. п., x:обязательно, y:обязательно, width/height:необязательно}
+8. InsertTable — вставить таблицу {rows:обязательно, cols:обязательно, data:необязательно, slideIndex:необязательно}
 
-=== 样式和动画 (5个) ===
-9. FormatSlide - 格式化幻灯片 {slideIndex:可选, background:颜色/图片路径, layout:可选}
-10. AddAnimation - 添加动画 {effect:fadeIn/flyIn/zoom/wipe/appear, slideIndex:可选, targetShapes:all/title/content}
-11. ApplyTransition - 切换效果 {transitionType:fade/push/wipe/split, scope:all/current, duration:秒}
-12. BeautifySlides - 美化幻灯片 {scope:all/current, theme:{background/titleFont/bodyFont}}
-13. SetSlideLayout - 设置布局 {slideIndex:可选, layout:title/titleAndContent/twoContent/blank/comparison}
+=== Стили и анимация (5) ===
+9. FormatSlide — форматировать слайд {slideIndex:необязательно, background:цвет/путь к изображению, layout:необязательно}
+10. AddAnimation — добавить анимацию {effect:fadeIn/flyIn/zoom/wipe/appear, slideIndex:необязательно, targetShapes:all/title/content}
+11. ApplyTransition — эффект перехода {transitionType:fade/push/wipe/split, scope:all/current, duration:секунды}
+12. BeautifySlides — оформить слайды {scope:all/current, theme:{background/titleFont/bodyFont}}
+13. SetSlideLayout — задать макет {slideIndex:необязательно, layout:title/titleAndContent/twoContent/blank/comparison}
 
-=== 高级功能 (1个) ===
-14. AddSpeakerNotes - 演讲备注 {slideIndex:可选, notes:必需}
+=== Расширенные функции (1) ===
+14. AddSpeakerNotes — заметки докладчика {slideIndex:необязательно, notes:обязательно}
 
-=== 主题 (1个) ===
-15. ApplyTheme - 应用主题 {themeName:可选内置主题名, themeFile:可选主题文件路径}
+=== Тема (1) ===
+15. ApplyTheme — применить тему {themeName:необязательное имя встроенной темы, themeFile:необязательный путь к файлу темы}
 
-=== VBA回退 (1个) ===
-16. ExecuteVBA - 执行VBA代码 {code:必需,完整的Sub或Function代码}
-    当以上命令无法满足需求时,生成VBA代码作为回退方案
+=== Резервный VBA (1) ===
+16. ExecuteVBA — выполнить код VBA {code:обязательно, полный код Sub или Function}
+    Когда перечисленных команд недостаточно, сгенерируй код VBA как резервный вариант
 
-【slideIndex说明】
-- -1 或不填表示当前幻灯片
-- 0 表示第一张幻灯片
-- 正数表示具体幻灯片索引
+【Пояснение slideIndex】
+- -1 или пропуск означает текущий слайд
+- 0 означает первый слайд
+- положительное число означает конкретный индекс слайда
 
-【重要决策规则】
-1. 优先使用上述16个命令处理用户需求
-2. 复杂需求无法用命令实现时，使用ExecuteVBA生成VBA代码
-3. 翻译需求请告知用户使用工具栏的""翻译""按钮
-4. 如果用户需求不明确，直接用中文询问"
+【Приоритет решений】
+1. В первую очередь используй перечисленные выше 16 команд
+2. Для сложных задач, которые нельзя решить командой, используй ExecuteVBA для генерации кода VBA
+3. Для перевода сообщи пользователю использовать кнопку ""Перевод"" на панели инструментов
+4. Если запрос неоднозначен, задай вопрос напрямую"
     End Function
 
     ''' <summary>
     ''' 获取格式校验失败的重试提示（Self-check机制）
     ''' </summary>
     Public Shared Function GetFormatCorrectionPrompt(originalJson As String, errorMessage As String) As String
-        Return $"你之前返回的JSON格式不符合规范:
+        Return $"Возвращённый ранее JSON не соответствует формату:
 
-【错误原因】{errorMessage}
+【Причина ошибки】{errorMessage}
 
-【你返回的内容】
+【Твой ответ】
 {originalJson}
 
-【正确格式示例】
-单命令:
-{{""command"": ""InsertSlide"", ""params"": {{""position"": ""end"", ""title"": ""标题""}}}}
+【Пример правильного формата】
+Одна команда:
+{{""command"": ""InsertSlide"", ""params"": {{""position"": ""end"", ""title"": ""Заголовок""}}}}
 
-多命令:
-{{""commands"": [{{""command"": ""InsertSlide"", ""params"": {{""title"": ""第一页""}}}}, {{""command"": ""InsertText"", ""params"": {{""content"": ""内容""}}}}]}}
+Несколько команд:
+{{""commands"": [{{""command"": ""InsertSlide"", ""params"": {{""title"": ""Первый слайд""}}}}, {{""command"": ""InsertText"", ""params"": {{""content"": ""содержимое""}}}}]}}
 
-请严格按照上述格式重新返回JSON命令。"
+Строго следуй указанному формату и верни JSON-команды заново."
     End Function
 
     ''' <summary>
@@ -145,7 +145,7 @@ Public Class PowerPointJsonCommandSchema
 
             Dim token = JToken.Parse(jsonText)
             If token.Type <> JTokenType.Object Then
-                errorMessage = "响应必须是JSON对象"
+                errorMessage = "Ответ должен быть JSON-объектом"
                 Return False
             End If
 
@@ -154,7 +154,7 @@ Public Class PowerPointJsonCommandSchema
             ' 检查是否是 commands 数组格式
             If jsonObj("commands") IsNot Nothing Then
                 If jsonObj("commands").Type <> JTokenType.Array Then
-                    errorMessage = "commands必须是数组"
+                    errorMessage = "commands должен быть массивом"
                     Return False
                 End If
 
@@ -163,7 +163,7 @@ Public Class PowerPointJsonCommandSchema
                 For i As Integer = 0 To commands.Count - 1
                     Dim cmd = commands(i)
                     If cmd.Type <> JTokenType.Object Then
-                        errorMessage = $"commands[{i}]必须是对象"
+                        errorMessage = $"commands[{i}] должен быть объектом"
                         Return False
                     End If
                     
@@ -185,12 +185,12 @@ Public Class PowerPointJsonCommandSchema
 
             ' 检查是否有禁止的格式
             If jsonObj("actions") IsNot Nothing Then
-                errorMessage = "禁止使用actions格式，请使用commands数组"
+                errorMessage = "Формат actions запрещён, используйте массив commands"
                 Return False
             End If
 
             If jsonObj("operations") IsNot Nothing Then
-                errorMessage = "禁止使用operations格式，请使用commands数组"
+                errorMessage = "Формат operations запрещён, используйте массив commands"
                 Return False
             End If
 
@@ -206,14 +206,14 @@ Public Class PowerPointJsonCommandSchema
                 Return True
             End If
 
-            errorMessage = "缺少command或commands字段"
+            errorMessage = "Отсутствует поле command или commands"
             Return False
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            errorMessage = $"JSON解析失败: {ex.Message}"
+            errorMessage = $"Не удалось разобрать JSON: {ex.Message}"
             Return False
         Catch ex As Exception
-            errorMessage = $"验证异常: {ex.Message}"
+            errorMessage = $"Исключение при проверке: {ex.Message}"
             Return False
         End Try
     End Function
@@ -251,7 +251,7 @@ Public Class PowerPointJsonCommandSchema
 
             Return json
         Catch ex As Exception
-            Debug.WriteLine($"NormalizeCommandStructure 出错: {ex.Message}")
+            Debug.WriteLine($"Ошибка NormalizeCommandStructure: {ex.Message}")
             Return json
         End Try
     End Function
@@ -268,18 +268,18 @@ Public Class PowerPointJsonCommandSchema
             
             Dim command = json("command")?.ToString()
             If String.IsNullOrEmpty(command) Then
-                errorMessage = "缺少command字段"
+                errorMessage = "Отсутствует поле command"
                 Return False
             End If
             
             If Not SupportedCommands.Any(Function(c) c.Equals(command, StringComparison.OrdinalIgnoreCase)) Then
-                errorMessage = $"不支持的命令: {command}。支持的命令: {String.Join(", ", SupportedCommands)}"
+                errorMessage = $"Неподдерживаемая команда: {command}. Поддерживаемые команды: {String.Join(", ", SupportedCommands)}"
                 Return False
             End If
             
             Dim params = json("params")
             If params Is Nothing Then
-                errorMessage = "缺少params字段"
+                errorMessage = "Отсутствует поле params"
                 Return False
             End If
             
@@ -328,7 +328,7 @@ Public Class PowerPointJsonCommandSchema
             End Select
             
         Catch ex As Exception
-            errorMessage = $"JSON校验异常: {ex.Message}"
+            errorMessage = $"Исключение при проверке JSON: {ex.Message}"
             Return False
         End Try
     End Function
@@ -349,7 +349,7 @@ Public Class PowerPointJsonCommandSchema
             End If
         End If
         If String.IsNullOrEmpty(content) Then
-            errorMessage = "InsertText缺少content参数"
+            errorMessage = "InsertText: отсутствует параметр content"
             Return False
         End If
         Return True
@@ -358,12 +358,12 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateInsertShape(params As JToken, ByRef errorMessage As String) As Boolean
         Dim shapeType = params("shapeType")?.ToString()
         If String.IsNullOrEmpty(shapeType) Then
-            errorMessage = "InsertShape缺少shapeType参数"
+            errorMessage = "InsertShape: отсутствует параметр shapeType"
             Return False
         End If
         
         If params("x") Is Nothing OrElse params("y") Is Nothing Then
-            errorMessage = "InsertShape缺少x或y参数"
+            errorMessage = "InsertShape: отсутствует параметр x или y"
             Return False
         End If
         Return True
@@ -373,7 +373,7 @@ Public Class PowerPointJsonCommandSchema
         ' FormatSlide至少需要一个格式化属性
         If params("background") Is Nothing AndAlso params("transition") Is Nothing AndAlso
            params("layout") Is Nothing Then
-            errorMessage = "FormatSlide至少需要一个格式化属性(background/transition/layout)"
+            errorMessage = "FormatSlide: требуется хотя бы один атрибут форматирования (background/transition/layout)"
             Return False
         End If
         Return True
@@ -384,7 +384,7 @@ Public Class PowerPointJsonCommandSchema
         Dim cols = params("cols")
         
         If rows Is Nothing OrElse cols Is Nothing Then
-            errorMessage = "InsertTable缺少rows或cols参数"
+            errorMessage = "InsertTable: отсутствует параметр rows или cols"
             Return False
         End If
         Return True
@@ -393,13 +393,13 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateCreateSlides(params As JToken, ByRef errorMessage As String) As Boolean
         Dim slides = params("slides")
         If slides Is Nothing OrElse slides.Type <> JTokenType.Array Then
-            errorMessage = "CreateSlides缺少slides数组参数"
+            errorMessage = "CreateSlides: отсутствует параметр-массив slides"
             Return False
         End If
         
         Dim slidesArray = CType(slides, JArray)
         If slidesArray.Count = 0 Then
-            errorMessage = "CreateSlides的slides数组不能为空"
+            errorMessage = "CreateSlides: массив slides не может быть пустым"
             Return False
         End If
         Return True
@@ -408,13 +408,13 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateAddAnimation(params As JToken, ByRef errorMessage As String) As Boolean
         Dim effect = params("effect")?.ToString()
         If String.IsNullOrEmpty(effect) Then
-            errorMessage = "AddAnimation缺少effect参数"
+            errorMessage = "AddAnimation: отсутствует параметр effect"
             Return False
         End If
         
         Dim validEffects = {"fadein", "flyin", "zoom", "wipe", "appear", "float"}
         If Not validEffects.Contains(effect.ToLower()) Then
-            errorMessage = $"AddAnimation的effect参数无效: {effect}。有效值: fadeIn, flyIn, zoom, wipe, appear, float"
+            errorMessage = $"AddAnimation: недопустимый параметр effect: {effect}. Допустимые значения: fadeIn, flyIn, zoom, wipe, appear, float"
             Return False
         End If
         Return True
@@ -423,13 +423,13 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateApplyTransition(params As JToken, ByRef errorMessage As String) As Boolean
         Dim transType = params("transitionType")?.ToString()
         If String.IsNullOrEmpty(transType) Then
-            errorMessage = "ApplyTransition缺少transitionType参数"
+            errorMessage = "ApplyTransition: отсутствует параметр transitionType"
             Return False
         End If
         
         Dim validTypes = {"fade", "push", "wipe", "split", "reveal", "random"}
         If Not validTypes.Contains(transType.ToLower()) Then
-            errorMessage = $"ApplyTransition的transitionType参数无效: {transType}。有效值: fade, push, wipe, split, reveal, random"
+            errorMessage = $"ApplyTransition: недопустимый параметр transitionType: {transType}. Допустимые значения: fade, push, wipe, split, reveal, random"
             Return False
         End If
         Return True
@@ -438,7 +438,7 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateBeautifySlides(params As JToken, ByRef errorMessage As String) As Boolean
         ' BeautifySlides参数都是可选的，但至少需要一个
         If params("scope") Is Nothing AndAlso params("theme") Is Nothing Then
-            errorMessage = "BeautifySlides至少需要scope或theme参数"
+            errorMessage = "BeautifySlides: требуется параметр scope или theme"
             Return False
         End If
         Return True
@@ -448,7 +448,7 @@ Public Class PowerPointJsonCommandSchema
 
     Private Shared Function ValidateDeleteSlide(params As JToken, ByRef errorMessage As String) As Boolean
         If params("slideIndex") Is Nothing Then
-            errorMessage = "DeleteSlide缺少slideIndex参数"
+            errorMessage = "DeleteSlide: отсутствует параметр slideIndex"
             Return False
         End If
         Return True
@@ -456,7 +456,7 @@ Public Class PowerPointJsonCommandSchema
 
     Private Shared Function ValidateDuplicateSlide(params As JToken, ByRef errorMessage As String) As Boolean
         If params("slideIndex") Is Nothing Then
-            errorMessage = "DuplicateSlide缺少slideIndex参数"
+            errorMessage = "DuplicateSlide: отсутствует параметр slideIndex"
             Return False
         End If
         Return True
@@ -464,11 +464,11 @@ Public Class PowerPointJsonCommandSchema
 
     Private Shared Function ValidateMoveSlide(params As JToken, ByRef errorMessage As String) As Boolean
         If params("fromIndex") Is Nothing Then
-            errorMessage = "MoveSlide缺少fromIndex参数"
+            errorMessage = "MoveSlide: отсутствует параметр fromIndex"
             Return False
         End If
         If params("toIndex") Is Nothing Then
-            errorMessage = "MoveSlide缺少toIndex参数"
+            errorMessage = "MoveSlide: отсутствует параметр toIndex"
             Return False
         End If
         Return True
@@ -477,7 +477,7 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateSetSlideLayout(params As JToken, ByRef errorMessage As String) As Boolean
         Dim layout = params("layout")?.ToString()
         If String.IsNullOrEmpty(layout) Then
-            errorMessage = "SetSlideLayout缺少layout参数"
+            errorMessage = "SetSlideLayout: отсутствует параметр layout"
             Return False
         End If
         Return True
@@ -486,7 +486,7 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateAddSpeakerNotes(params As JToken, ByRef errorMessage As String) As Boolean
         Dim notes = params("notes")?.ToString()
         If String.IsNullOrEmpty(notes) Then
-            errorMessage = "AddSpeakerNotes缺少notes参数"
+            errorMessage = "AddSpeakerNotes: отсутствует параметр notes"
             Return False
         End If
         Return True
@@ -495,7 +495,7 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateApplyTheme(params As JToken, ByRef errorMessage As String) As Boolean
         ' 至少需要themeName或themeFile之一
         If params("themeName") Is Nothing AndAlso params("themeFile") Is Nothing Then
-            errorMessage = "ApplyTheme需要themeName或themeFile参数"
+            errorMessage = "ApplyTheme: требуется параметр themeName или themeFile"
             Return False
         End If
         Return True
@@ -504,13 +504,13 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateExecuteVBA(params As JToken, ByRef errorMessage As String) As Boolean
         Dim code = params("code")?.ToString()
         If String.IsNullOrEmpty(code) Then
-            errorMessage = "ExecuteVBA缺少code参数"
+            errorMessage = "ExecuteVBA: отсутствует параметр code"
             Return False
         End If
         
         ' 基本的VBA代码验证
         If Not code.ToLower().Contains("sub") AndAlso Not code.ToLower().Contains("function") Then
-            errorMessage = "ExecuteVBA的code必须包含Sub或Function定义"
+            errorMessage = "ExecuteVBA: параметр code должен содержать определение Sub или Function"
             Return False
         End If
         

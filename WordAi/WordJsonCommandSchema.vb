@@ -29,80 +29,80 @@ Public Class WordJsonCommandSchema
     ''' </summary>
     Public Shared Function GetStrictJsonSchemaPrompt() As String
         Return "
-【重要】你必须且只能返回以下两种JSON格式之一：
+【Важно】Ты должен и можешь вернуть только один из двух форматов JSON:
 
-格式1 - 单个命令：
+Формат 1 — одна команда:
 ```json
 {
   ""command"": ""InsertText"",
   ""params"": {
     ""position"": ""cursor"",
-    ""content"": ""要插入的文本内容""
+    ""content"": ""текст для вставки""
   }
 }
 ```
 
-格式2 - 多个命令（批量操作）：
+Формат 2 — несколько команд (пакетная операция):
 ```json
 {
   ""commands"": [
-    {""command"": ""InsertText"", ""params"": {""position"": ""cursor"", ""content"": ""标题""}},
+    {""command"": ""InsertText"", ""params"": {""position"": ""cursor"", ""content"": ""Заголовок""}},
     {""command"": ""FormatText"", ""params"": {""range"": ""selection"", ""bold"": true, ""fontSize"": 16}}
   ]
 }
 ```
 
-【绝对禁止的格式】
-- 禁止 {""command"": ""xxx"", ""actions"": [...]}
-- 禁止 {""command"": ""xxx"", ""content"": ""...""} (缺少params包装)
-- 禁止 {""operations"": [...]}
+【Категорически запрещённые форматы】
+- запрещено {""command"": ""xxx"", ""actions"": [...]}
+- запрещено {""command"": ""xxx"", ""content"": ""...""} (отсутствует обёртка params)
+- запрещено {""operations"": [...]}
 
-【Word支持的9个命令】
+【9 команд, поддерживаемых Word】
 
-=== 基础文本操作 (4个) ===
-1. InsertText - 插入文本 {content:必需, position:cursor/start/end}
-2. FormatText - 格式化 {range:selection/all, bold/italic/fontSize/fontName/underline/color}
-3. ReplaceText - 查找替换 {find:必需, replace:必需, matchCase:可选, matchWholeWord:可选}
-4. DeleteText - 删除文本 {range:selection/all}
+=== Базовые операции с текстом (4) ===
+1. InsertText — вставить текст {content:обязательно, position:cursor/start/end}
+2. FormatText — форматировать {range:selection/all, bold/italic/fontSize/fontName/underline/color}
+3. ReplaceText — поиск и замена {find:обязательно, replace:обязательно, matchCase:необязательно, matchWholeWord:необязательно}
+4. DeleteText — удалить текст {range:selection/all}
 
-=== 段落和样式 (2个) ===
-5. ApplyStyle - 应用样式 {styleName:必需如""标题 1""/""正文"", range:selection/paragraph}
-6. SetParagraphFormat - 段落格式 {alignment:left/center/right/justify, firstLineIndent:可选, beforeSpacing/afterSpacing:可选}
+=== Абзацы и стили (2) ===
+5. ApplyStyle — применить стиль {styleName:обязательно, например ""Заголовок 1""/""Обычный"", range:selection/paragraph}
+6. SetParagraphFormat — формат абзаца {alignment:left/center/right/justify, firstLineIndent:необязательно, beforeSpacing/afterSpacing:необязательно}
 
-=== 表格操作 (1个) ===
-7. InsertTable - 插入表格 {rows:必需, cols:必需, data:可选二维数组, style:可选}
+=== Таблицы (1) ===
+7. InsertTable — вставить таблицу {rows:обязательно, cols:обязательно, data:необязательно (двумерный массив), style:необязательно}
 
-=== 文档结构 (1个) ===
-8. GenerateTOC - 生成目录 {position:start/cursor, levels:1-9, includePageNumbers:默认true}
+=== Структура документа (1) ===
+8. GenerateTOC — создать оглавление {position:start/cursor, levels:1-9, includePageNumbers:по умолчанию true}
 
-=== 文档美化 (1个) ===
-9. BeautifyDocument - 美化文档 {theme:{h1/h2/body字体设置}, margins:{top/bottom/left/right}}
+=== Оформление документа (1) ===
+9. BeautifyDocument — оформить документ {theme:{настройки шрифтов h1/h2/body}, margins:{top/bottom/left/right}}
 
-【重要决策规则】
-1. 只能使用上述9个已实现命令处理用户需求
-2. 翻译需求请告知用户使用工具栏的""翻译""按钮
-3. 如果用户需求不明确，直接用中文询问"
+【Приоритет решений】
+1. Для выполнения запроса можно использовать только перечисленные выше 9 реализованных команд
+2. Для перевода сообщи пользователю использовать кнопку ""Перевод"" на панели инструментов
+3. Если запрос неоднозначен, задай вопрос напрямую"
     End Function
 
     ''' <summary>
     ''' 获取格式校验失败的重试提示（Self-check机制）
     ''' </summary>
     Public Shared Function GetFormatCorrectionPrompt(originalJson As String, errorMessage As String) As String
-        Return $"你之前返回的JSON格式不符合规范:
+        Return $"Возвращённый ранее JSON не соответствует формату:
 
-【错误原因】{errorMessage}
+【Причина ошибки】{errorMessage}
 
-【你返回的内容】
+【Твой ответ】
 {originalJson}
 
-【正确格式示例】
-单命令:
-{{""command"": ""InsertText"", ""params"": {{""position"": ""cursor"", ""content"": ""文本内容""}}}}
+【Пример правильного формата】
+Одна команда:
+{{""command"": ""InsertText"", ""params"": {{""position"": ""cursor"", ""content"": ""текст""}}}}
 
-多命令:
-{{""commands"": [{{""command"": ""InsertText"", ""params"": {{""content"": ""内容1""}}}}, {{""command"": ""FormatText"", ""params"": {{""range"": ""selection"", ""bold"": true}}}}]}}
+Несколько команд:
+{{""commands"": [{{""command"": ""InsertText"", ""params"": {{""content"": ""содержимое 1""}}}}, {{""command"": ""FormatText"", ""params"": {{""range"": ""selection"", ""bold"": true}}}}]}}
 
-请严格按照上述格式重新返回JSON命令。"
+Строго следуй указанному формату и верни JSON-команды заново."
     End Function
 
     ''' <summary>
@@ -115,7 +115,7 @@ Public Class WordJsonCommandSchema
 
             Dim token = JToken.Parse(jsonText)
             If token.Type <> JTokenType.Object Then
-                errorMessage = "响应必须是JSON对象"
+                errorMessage = "Ответ должен быть JSON-объектом"
                 Return False
             End If
 
@@ -124,7 +124,7 @@ Public Class WordJsonCommandSchema
             ' 检查是否是 commands 数组格式
             If jsonObj("commands") IsNot Nothing Then
                 If jsonObj("commands").Type <> JTokenType.Array Then
-                    errorMessage = "commands必须是数组"
+                    errorMessage = "commands должен быть массивом"
                     Return False
                 End If
 
@@ -133,7 +133,7 @@ Public Class WordJsonCommandSchema
                 For i As Integer = 0 To commands.Count - 1
                     Dim cmd = commands(i)
                     If cmd.Type <> JTokenType.Object Then
-                        errorMessage = $"commands[{i}]必须是对象"
+                        errorMessage = $"commands[{i}] должен быть объектом"
                         Return False
                     End If
                     
@@ -155,12 +155,12 @@ Public Class WordJsonCommandSchema
 
             ' 检查是否有禁止的格式
             If jsonObj("actions") IsNot Nothing Then
-                errorMessage = "禁止使用actions格式，请使用commands数组"
+                errorMessage = "Формат actions запрещён, используйте массив commands"
                 Return False
             End If
 
             If jsonObj("operations") IsNot Nothing Then
-                errorMessage = "禁止使用operations格式，请使用commands数组"
+                errorMessage = "Формат operations запрещён, используйте массив commands"
                 Return False
             End If
 
@@ -176,14 +176,14 @@ Public Class WordJsonCommandSchema
                 Return True
             End If
 
-            errorMessage = "缺少command或commands字段"
+            errorMessage = "Отсутствует поле command или commands"
             Return False
 
         Catch ex As Newtonsoft.Json.JsonReaderException
-            errorMessage = $"JSON解析失败: {ex.Message}"
+            errorMessage = $"Не удалось разобрать JSON: {ex.Message}"
             Return False
         Catch ex As Exception
-            errorMessage = $"验证异常: {ex.Message}"
+            errorMessage = $"Исключение при проверке: {ex.Message}"
             Return False
         End Try
     End Function
@@ -221,7 +221,7 @@ Public Class WordJsonCommandSchema
 
             Return json
         Catch ex As Exception
-            Debug.WriteLine($"NormalizeCommandStructure 出错: {ex.Message}")
+            Debug.WriteLine($"Ошибка NormalizeCommandStructure: {ex.Message}")
             Return json
         End Try
     End Function
@@ -238,18 +238,18 @@ Public Class WordJsonCommandSchema
             
             Dim command = json("command")?.ToString()
             If String.IsNullOrEmpty(command) Then
-                errorMessage = "缺少command字段"
+                errorMessage = "Отсутствует поле command"
                 Return False
             End If
             
             If Not SupportedCommands.Any(Function(c) c.Equals(command, StringComparison.OrdinalIgnoreCase)) Then
-                errorMessage = $"不支持的命令: {command}。支持的命令: {String.Join(", ", SupportedCommands)}"
+                errorMessage = $"Неподдерживаемая команда: {command}. Поддерживаемые команды: {String.Join(", ", SupportedCommands)}"
                 Return False
             End If
             
             Dim params = json("params")
             If params Is Nothing Then
-                errorMessage = "缺少params字段"
+                errorMessage = "Отсутствует поле params"
                 Return False
             End If
             
@@ -283,7 +283,7 @@ Public Class WordJsonCommandSchema
             End Select
             
         Catch ex As Exception
-            errorMessage = $"JSON校验异常: {ex.Message}"
+            errorMessage = $"Исключение при проверке JSON: {ex.Message}"
             Return False
         End Try
     End Function
@@ -299,7 +299,7 @@ Public Class WordJsonCommandSchema
             End If
         End If
         If String.IsNullOrEmpty(content) Then
-            errorMessage = "InsertText缺少content参数"
+            errorMessage = "InsertText: отсутствует параметр content"
             Return False
         End If
         Return True
@@ -310,7 +310,7 @@ Public Class WordJsonCommandSchema
         If params("bold") Is Nothing AndAlso params("italic") Is Nothing AndAlso 
            params("fontSize") Is Nothing AndAlso params("fontName") Is Nothing AndAlso
            params("underline") Is Nothing Then
-            errorMessage = "FormatText至少需要一个格式化属性(bold/italic/fontSize/fontName/underline)"
+            errorMessage = "FormatText: требуется хотя бы один атрибут форматирования (bold/italic/fontSize/fontName/underline)"
             Return False
         End If
         Return True
@@ -319,12 +319,12 @@ Public Class WordJsonCommandSchema
     Private Shared Function ValidateReplaceText(params As JToken, ByRef errorMessage As String) As Boolean
         Dim find = params("find")?.ToString()
         If String.IsNullOrEmpty(find) Then
-            errorMessage = "ReplaceText缺少find参数"
+            errorMessage = "ReplaceText: отсутствует параметр find"
             Return False
         End If
         
         If params("replace") Is Nothing Then
-            errorMessage = "ReplaceText缺少replace参数"
+            errorMessage = "ReplaceText: отсутствует параметр replace"
             Return False
         End If
         Return True
@@ -335,7 +335,7 @@ Public Class WordJsonCommandSchema
         Dim cols = params("cols")
         
         If rows Is Nothing OrElse cols Is Nothing Then
-            errorMessage = "InsertTable缺少rows或cols参数"
+            errorMessage = "InsertTable: отсутствует параметр rows или cols"
             Return False
         End If
         Return True
@@ -344,7 +344,7 @@ Public Class WordJsonCommandSchema
     Private Shared Function ValidateApplyStyle(params As JToken, ByRef errorMessage As String) As Boolean
         Dim styleName = params("styleName")?.ToString()
         If String.IsNullOrEmpty(styleName) Then
-            errorMessage = "ApplyStyle缺少styleName参数"
+            errorMessage = "ApplyStyle: отсутствует параметр styleName"
             Return False
         End If
         Return True
@@ -356,7 +356,7 @@ Public Class WordJsonCommandSchema
         If levels IsNot Nothing Then
             Dim levelValue = levels.Value(Of Integer)()
             If levelValue < 1 OrElse levelValue > 9 Then
-                errorMessage = "GenerateTOC的levels参数必须在1-9之间"
+                errorMessage = "GenerateTOC: параметр levels должен быть в диапазоне 1-9"
                 Return False
             End If
         End If
@@ -366,7 +366,7 @@ Public Class WordJsonCommandSchema
     Private Shared Function ValidateBeautifyDocument(params As JToken, ByRef errorMessage As String) As Boolean
         ' BeautifyDocument至少需要theme或margins之一
         If params("theme") Is Nothing AndAlso params("margins") Is Nothing Then
-            errorMessage = "BeautifyDocument至少需要theme或margins参数"
+            errorMessage = "BeautifyDocument: требуется параметр theme или margins"
             Return False
         End If
         Return True
@@ -383,7 +383,7 @@ Public Class WordJsonCommandSchema
         ' 至少需要一个段落格式属性
         If params("alignment") Is Nothing AndAlso params("firstLineIndent") Is Nothing AndAlso
            params("beforeSpacing") Is Nothing AndAlso params("afterSpacing") Is Nothing Then
-            errorMessage = "SetParagraphFormat至少需要一个格式属性"
+            errorMessage = "SetParagraphFormat: требуется хотя бы один атрибут формата"
             Return False
         End If
         Return True
