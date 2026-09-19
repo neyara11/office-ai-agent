@@ -12,12 +12,18 @@ Imports Newtonsoft.Json.Linq
 Public Class ModelApiClient
 
     ''' <summary>
+    ''' 最近一次获取模型列表失败的详细原因（用于界面提示）
+    ''' </summary>
+    Public Shared LastError As String = String.Empty
+
+    ''' <summary>
     ''' 异步获取模型列表
     ''' </summary>
     ''' <param name="apiUrl">API端点URL (chat/completions 端点)</param>
     ''' <param name="apiKey">API密钥</param>
     ''' <returns>模型名称列表</returns>
     Public Shared Async Function GetModelsAsync(apiUrl As String, apiKey As String) As Task(Of List(Of String))
+        LastError = String.Empty
         Try
             ' 构造 /v1/models 端点
             Dim modelsUrl As String = GetModelsEndpoint(apiUrl)
@@ -25,7 +31,7 @@ Public Class ModelApiClient
                 Return New List(Of String)()
             End If
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
             Dim client = HttpClientPool.GetClient(modelsUrl)
             Using request As New HttpRequestMessage(HttpMethod.Get, modelsUrl)
@@ -45,13 +51,15 @@ Public Class ModelApiClient
                     Dim jsonContent = Await response.Content.ReadAsStringAsync()
                     Return ParseModelsResponse(jsonContent, apiUrl)
                 Else
+                    LastError = $"HTTP {CInt(response.StatusCode)} {response.ReasonPhrase}"
                     Debug.WriteLine($"获取模型列表失败: {response.StatusCode}")
                     End If
                     End Using
                 End Using
             End Using
         Catch ex As Exception
-            Debug.WriteLine($"获取模型列表异常: {ex.Message}")
+            LastError = HttpClientFactory.DescribeError(ex) & " (" & HttpClientFactory.DescribeProxy(apiUrl) & ")"
+            Debug.WriteLine($"获取模型列表异常: {LastError}")
         End Try
 
         Return New List(Of String)()
@@ -62,18 +70,7 @@ Public Class ModelApiClient
     ''' </summary>
     Private Shared Function GetModelsEndpoint(apiUrl As String) As String
         If String.IsNullOrEmpty(apiUrl) Then Return ""
-
-        ' 处理不同服务商的端点差异
-        If apiUrl.Contains("/chat/completions") Then
-            Return apiUrl.Replace("/chat/completions", "/models")
-        ElseIf apiUrl.Contains("/v1/messages") Then
-            ' Anthropic 的 models 端点
-            Return apiUrl.Replace("/v1/messages", "/v1/models")
-        End If
-
-        ' 尝试直接替换为 /models
-        Dim uri As New Uri(apiUrl)
-        Return $"{uri.Scheme}://{uri.Host}:{uri.Port}/v1/models"
+        Return HttpClientFactory.ResolveModelsUrl(apiUrl)
     End Function
 
     ''' <summary>

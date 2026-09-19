@@ -57,9 +57,9 @@ Namespace Agent.Execution
 
         Public Function Evaluate(tool As ToolDescriptor, params As JObject) As SafetyDecision
             If tool Is Nothing Then
-                Return SafetyDecision.Deny("工具不存在，无法执行安全裁决",
+                Return SafetyDecision.Deny("Инструмент не найден, невозможно принять решение о безопасности",
                                            ExceptionClassifier.CodeNotFound,
-                                           "工具不存在，无法执行")
+                                           "Инструмент не существует, выполнение невозможно")
             End If
 
             Dim toolId = If(tool.Id, "")
@@ -74,14 +74,14 @@ Namespace Agent.Execution
             End If
 
             If RequireApprovalForDelete AndAlso IsDestructiveTool(toolId, params) Then
-                Return SafetyDecision.RequireApproval($"工具 {toolId} 可能删除或清空内容",
-                                                      $"工具 {toolId} 需要确认后才能执行",
+                Return SafetyDecision.RequireApproval($"Инструмент {toolId} может удалить или очистить содержимое",
+                                                      $"Инструмент {toolId} требует подтверждения перед выполнением",
                                                       "risky")
             End If
 
             If RequireApprovalForRisky AndAlso String.Equals(risk, "risky", StringComparison.OrdinalIgnoreCase) Then
-                Return SafetyDecision.RequireApproval($"高风险工具 {toolId} 需要用户确认",
-                                                      $"高风险工具 {toolId} 需要确认后才能执行",
+                Return SafetyDecision.RequireApproval($"Рискованный инструмент {toolId} требует подтверждения пользователя",
+                                                      $"Рискованный инструмент {toolId} требует подтверждения перед выполнением",
                                                       risk)
             End If
 
@@ -91,25 +91,25 @@ Namespace Agent.Execution
         Private Function EvaluateOfficeOperation(params As JObject) As SafetyDecision
             Dim batchToken = params?("batch")
             If batchToken Is Nothing OrElse batchToken.Type <> JTokenType.Object Then
-                Return SafetyDecision.Deny("OfficeObjectOperation 缺少合法 batch",
+                Return SafetyDecision.Deny("OfficeObjectOperation: отсутствует корректный batch",
                                            ExceptionClassifier.CodeOperationSchemaInvalid,
-                                           "声明式 Office 操作格式无效")
+                                           "Неверный формат декларативной операции Office")
             End If
 
             Dim batch As OfficeOperationBatch = Nothing
             Try
                 batch = batchToken.ToObject(Of OfficeOperationBatch)()
             Catch ex As Exception
-                Return SafetyDecision.Deny("OfficeObjectOperation batch 反序列化失败",
+                Return SafetyDecision.Deny("OfficeObjectOperation: не удалось десериализовать batch",
                                            ExceptionClassifier.CodeOperationSchemaInvalid,
-                                           "声明式 Office 操作格式无效")
+                                           "Неверный формат декларативной операции Office")
             End Try
 
             Dim validation = OfficeOperationValidation.ValidateBatch(batch)
             If Not validation.IsValid Then
                 Return SafetyDecision.Deny(validation.ToErrorMessage(),
                                            ExceptionClassifier.CodeOperationSchemaInvalid,
-                                           "声明式 Office 操作未通过合同校验")
+                                           "Декларативная операция Office не прошла проверку контракта")
             End If
 
             Dim requiresApproval As Boolean = False
@@ -123,9 +123,9 @@ Namespace Agent.Execution
                    ContainsMemberToken(memberId, "shell") OrElse
                    ContainsMemberToken(memberId, "run") OrElse
                    ContainsMemberToken(memberId, "executemso") Then
-                    Return SafetyDecision.Deny($"成员 {operation.MemberId} 禁止通过声明式操作执行",
+                    Return SafetyDecision.Deny($"Член {operation.MemberId} запрещён к выполнению через декларативные операции",
                                                ExceptionClassifier.CodeSafetyBlocked,
-                                               "该 Office API 成员不允许执行")
+                                               "Этот член Office API не разрешён к выполнению")
                 End If
 
                 If action = "delete" OrElse
@@ -143,8 +143,8 @@ Namespace Agent.Execution
             Next
 
             If requiresApproval Then
-                Return SafetyDecision.RequireApproval("声明式 Office 操作包含删除、关闭或覆盖类成员",
-                                                      "该 Office 操作可能删除、关闭或覆盖内容，需要确认后执行",
+                Return SafetyDecision.RequireApproval("Декларативная операция Office содержит члены удаления, закрытия или перезаписи",
+                                                      "Эта операция Office может удалить, закрыть или перезаписать содержимое; требуется подтверждение",
                                                       highestRisk)
             End If
             Return SafetyDecision.Allow(highestRisk)
@@ -157,9 +157,9 @@ Namespace Agent.Execution
 
         Private Function EvaluateVba(toolId As String, params As JObject, risk As String) As SafetyDecision
             If Not VbaEnabled Then
-                Return SafetyDecision.Deny("VBA 工具默认关闭",
+                Return SafetyDecision.Deny("VBA-инструменты отключены по умолчанию",
                                            ExceptionClassifier.CodeVbaDisabled,
-                                           "VBA 执行默认关闭，未进入宿主执行器",
+                                           "Выполнение VBA отключено по умолчанию и не передано в исполнитель хоста",
                                            risk)
             End If
 
@@ -178,8 +178,8 @@ Namespace Agent.Execution
                                                       risk)
             End If
 
-            Return SafetyDecision.RequireApproval($"VBA 工具 {toolId} 需要用户确认",
-                                                  $"VBA 工具 {toolId} 需要确认后才能执行",
+            Return SafetyDecision.RequireApproval($"VBA-инструмент {toolId} требует подтверждения пользователя",
+                                                  $"VBA-инструмент {toolId} требует подтверждения перед выполнением",
                                                   risk)
         End Function
 

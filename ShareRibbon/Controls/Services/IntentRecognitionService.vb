@@ -1090,9 +1090,9 @@ Public Class IntentRecognitionService
 
         ' 如果有提取到的实体，补充描述
         If intent.ExtractedEntities.ContainsKey("range") Then
-            description &= $"（范围: {intent.ExtractedEntities("range")}）"
+            description &= $" (диапазон: {intent.ExtractedEntities("range")})"
         ElseIf intent.ExtractedEntities.ContainsKey("column") Then
-            description &= $"（{intent.ExtractedEntities("column")}列）"
+            description &= $" (столбец: {intent.ExtractedEntities("column")})"
         End If
 
         intent.UserFriendlyDescription = description
@@ -1105,21 +1105,21 @@ Public Class IntentRecognitionService
     Private Function GetExcelIntentDescription(intentType As ExcelIntentType) As String
         Select Case intentType
             Case ExcelIntentType.DATA_ANALYSIS
-                Return "对数据进行统计分析"
+                Return "Статистический анализ данных"
             Case ExcelIntentType.FORMULA_CALC
-                Return "应用公式进行计算"
+                Return "Вычисление по формулам"
             Case ExcelIntentType.CHART_GEN
-                Return "创建数据可视化图表"
+                Return "Построение диаграммы"
             Case ExcelIntentType.DATA_CLEANING
-                Return "清洗和整理数据"
+                Return "Очистка и упорядочивание данных"
             Case ExcelIntentType.REPORT_GEN
-                Return "生成数据报表"
+                Return "Формирование отчёта"
             Case ExcelIntentType.DATA_TRANSFORMATION
-                Return "转换和处理数据"
+                Return "Преобразование данных"
             Case ExcelIntentType.FORMAT_STYLE
-                Return "调整格式和样式"
+                Return "Настройка формата и стиля"
             Case Else
-                Return "处理您的Excel请求"
+                Return "Обработка запроса в Excel"
         End Select
     End Function
 
@@ -1129,21 +1129,21 @@ Public Class IntentRecognitionService
     Private Function GetWordIntentDescription(intentType As OfficeIntentType) As String
         Select Case intentType
             Case OfficeIntentType.DOCUMENT_EDIT
-                Return "编辑文档内容"
+                Return "Редактирование содержимого документа"
             Case OfficeIntentType.TEXT_FORMAT
-                Return "格式化文本样式"
+                Return "Форматирование текста"
             Case OfficeIntentType.TABLE_OPERATION
-                Return "操作文档表格"
+                Return "Работа с таблицами документа"
             Case OfficeIntentType.IMAGE_INSERT
-                Return "插入和处理图片"
+                Return "Вставка и обработка изображений"
             Case OfficeIntentType.TOC_GENERATION
-                Return "生成或更新目录"
+                Return "Создание или обновление оглавления"
             Case OfficeIntentType.REVIEW_COMMENT
-                Return "添加审阅批注"
+                Return "Добавление примечаний и правок"
             Case OfficeIntentType.FORMAT_STYLE
-                Return "调整文档格式"
+                Return "Настройка оформления документа"
             Case Else
-                Return "处理您的Word请求"
+                Return "Обработка запроса в Word"
         End Select
     End Function
 
@@ -1153,21 +1153,21 @@ Public Class IntentRecognitionService
     Private Function GetPowerPointIntentDescription(intentType As OfficeIntentType) As String
         Select Case intentType
             Case OfficeIntentType.SLIDE_CREATE
-                Return "创建新幻灯片"
+                Return "Создание новых слайдов"
             Case OfficeIntentType.SLIDE_LAYOUT
-                Return "调整幻灯片布局"
+                Return "Изменение макета слайдов"
             Case OfficeIntentType.ANIMATION_EFFECT
-                Return "添加动画效果"
+                Return "Добавление анимации"
             Case OfficeIntentType.TRANSITION_EFFECT
-                Return "设置切换效果"
+                Return "Настройка переходов"
             Case OfficeIntentType.TEMPLATE_APPLY
-                Return "应用模板主题"
+                Return "Применение темы/шаблона"
             Case OfficeIntentType.SPEAKER_NOTES
-                Return "编辑演讲者备注"
+                Return "Редактирование заметок докладчика"
             Case OfficeIntentType.FORMAT_STYLE
-                Return "调整幻灯片格式"
+                Return "Настройка оформления слайдов"
             Case Else
-                Return "处理您的PPT请求"
+                Return "Обработка запроса в PowerPoint"
         End Select
     End Function
 
@@ -1179,53 +1179,53 @@ Public Class IntentRecognitionService
 
         Select Case intent.IntentType
             Case ExcelIntentType.DATA_ANALYSIS
-                plan.Add(New ExecutionStep(1, "识别数据所在区域", "search"))
-                plan.Add(New ExecutionStep(2, "分析数据结构和类型", "data"))
-                plan.Add(New ExecutionStep(3, "执行统计计算", "formula"))
-                plan.Add(New ExecutionStep(4, "输出分析结果", "data"))
+                plan.Add(New ExecutionStep(1, "Определение области данных", "search"))
+                plan.Add(New ExecutionStep(2, "Анализ структуры и типов данных", "data"))
+                plan.Add(New ExecutionStep(3, "Статистические вычисления", "formula"))
+                plan.Add(New ExecutionStep(4, "Вывод результатов анализа", "data"))
 
             Case ExcelIntentType.FORMULA_CALC
-                plan.Add(New ExecutionStep(1, "确定目标单元格", "search"))
-                plan.Add(New ExecutionStep(2, "构建计算公式", "formula"))
-                plan.Add(New ExecutionStep(3, "应用公式到指定范围", "formula"))
+                plan.Add(New ExecutionStep(1, "Определение целевой ячейки", "search"))
+                plan.Add(New ExecutionStep(2, "Построение формулы", "formula"))
+                plan.Add(New ExecutionStep(3, "Применение формулы к диапазону", "formula"))
 
             Case ExcelIntentType.CHART_GEN
-                plan.Add(New ExecutionStep(1, "识别图表数据源", "search"))
-                plan.Add(New ExecutionStep(2, "选择合适的图表类型", "chart"))
-                plan.Add(New ExecutionStep(3, "创建并配置图表", "chart"))
-                plan.Add(New ExecutionStep(4, "调整图表位置和样式", "format"))
+                plan.Add(New ExecutionStep(1, "Определение источника данных для диаграммы", "search"))
+                plan.Add(New ExecutionStep(2, "Выбор подходящего типа диаграммы", "chart"))
+                plan.Add(New ExecutionStep(3, "Создание и настройка диаграммы", "chart"))
+                plan.Add(New ExecutionStep(4, "Настройка положения и оформления", "format"))
 
             Case ExcelIntentType.DATA_CLEANING
-                plan.Add(New ExecutionStep(1, "扫描数据区域", "search"))
-                plan.Add(New ExecutionStep(2, "识别需要清洗的内容", "data"))
-                plan.Add(New ExecutionStep(3, "执行清洗操作", "clean"))
-                plan.Add(New ExecutionStep(4, "验证清洗结果", "data"))
+                plan.Add(New ExecutionStep(1, "Сканирование области данных", "search"))
+                plan.Add(New ExecutionStep(2, "Выявление требующих очистки данных", "data"))
+                plan.Add(New ExecutionStep(3, "Выполнение очистки", "clean"))
+                plan.Add(New ExecutionStep(4, "Проверка результата очистки", "data"))
 
             Case ExcelIntentType.REPORT_GEN
-                plan.Add(New ExecutionStep(1, "收集报表数据", "search"))
-                plan.Add(New ExecutionStep(2, "设计报表结构", "data"))
-                plan.Add(New ExecutionStep(3, "填充数据内容", "data"))
-                plan.Add(New ExecutionStep(4, "应用报表格式", "format"))
+                plan.Add(New ExecutionStep(1, "Сбор данных отчёта", "search"))
+                plan.Add(New ExecutionStep(2, "Проектирование структуры отчёта", "data"))
+                plan.Add(New ExecutionStep(3, "Заполнение данными", "data"))
+                plan.Add(New ExecutionStep(4, "Применение оформления отчёта", "format"))
 
             Case ExcelIntentType.DATA_TRANSFORMATION
-                plan.Add(New ExecutionStep(1, "读取源数据", "search"))
-                plan.Add(New ExecutionStep(2, "执行数据转换", "data"))
-                plan.Add(New ExecutionStep(3, "输出转换结果", "data"))
+                plan.Add(New ExecutionStep(1, "Чтение исходных данных", "search"))
+                plan.Add(New ExecutionStep(2, "Преобразование данных", "data"))
+                plan.Add(New ExecutionStep(3, "Вывод результата", "data"))
 
             Case ExcelIntentType.FORMAT_STYLE
-                plan.Add(New ExecutionStep(1, "选择目标区域", "search"))
-                plan.Add(New ExecutionStep(2, "应用格式设置", "format"))
+                plan.Add(New ExecutionStep(1, "Выбор целевой области", "search"))
+                plan.Add(New ExecutionStep(2, "Применение форматирования", "format"))
 
             Case Else
-                plan.Add(New ExecutionStep(1, "分析您的需求", "search"))
-                plan.Add(New ExecutionStep(2, "生成解决方案", "data"))
-                plan.Add(New ExecutionStep(3, "执行操作", "default"))
+                plan.Add(New ExecutionStep(1, "Анализ запроса", "search"))
+                plan.Add(New ExecutionStep(2, "Формирование решения", "data"))
+                plan.Add(New ExecutionStep(3, "Выполнение операции", "default"))
         End Select
 
         ' 根据提取的实体更新步骤描述
         If intent.ExtractedEntities.ContainsKey("range") Then
             For Each execStep In plan
-                If execStep.Description.Contains("区域") OrElse execStep.Description.Contains("范围") Then
+                If execStep.Description.Contains("област") OrElse execStep.Description.Contains("диапазон") Then
                     execStep.WillModify = intent.ExtractedEntities("range")
                 End If
             Next

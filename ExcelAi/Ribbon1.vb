@@ -14,7 +14,7 @@ Public Class Ribbon1
         Globals.ThisAddIn.ShowChatTaskPane()
     End Sub
     Protected Overrides Async Sub WebCaptureButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请根据当前工作簿上下文自动处理网页内容采集需求；如果用户已提供网址或网页文本，请提取结构化数据并写入适合的工作表区域。")
+        Await StartAgentFromRibbonAsync("Собери содержимое веб-страницы по контексту текущей книги; если пользователь дал ссылку или текст, извлеки структурированные данные и запиши их в подходящий диапазон листа. Отвечай только на русском языке.")
     End Sub
     Protected Overrides Sub SpotlightButton_Click(sender As Object, e As RibbonControlEventArgs)
         Try
@@ -57,7 +57,7 @@ Public Class Ribbon1
     End Function
 
     Protected Overrides Async Sub DataAnalysisButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请作为 Excel 数据分析智能体读取当前选区或当前工作表，自动判断数据结构并执行合适的数据分析：统计摘要、分组汇总、排名、公式计算、透视表、图表或报表生成。优先使用已注册 Excel 工具和匹配的 Skills，执行后观察结果并说明已完成的修改。")
+        Await StartAgentFromRibbonAsync("Как агент анализа данных Excel прочитай текущий выделенный диапазон или лист, определи структуру и выполни подходящий анализ: сводные показатели, группировки, рейтинги, формулы, сводные таблицы, диаграммы или отчёты. Сначала используй зарегистрированные инструменты Excel и подходящие Skills, после выполнения проверь результат и объясни внесённые изменения. Отвечай только на русском языке.")
     End Sub
 
     Protected Overrides Function GetApplication() As ApplicationInfo
@@ -153,11 +153,11 @@ Public Class Ribbon1
     ' MCPButton_Click 已在 BaseOfficeRibbon 中提供共用实现，Excel 不需要差异化逻辑，故不再重写。
 
     Protected Overrides Async Sub ProofreadButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请自动校对当前选中单元格区域，检查错别字、标点、术语一致性和明显的数据文本问题，并在适合时直接给出修改建议或执行低风险修正。")
+        Await StartAgentFromRibbonAsync("Проверь выделенный диапазон ячеек: опечатки, пунктуацию, единообразие терминов и очевидные проблемы «текст/число»; при возможности дай рекомендации или внеси безопасные правки. Отвечай только на русском языке.")
     End Sub
 
     Protected Overrides Async Sub ReformatButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请自动分析当前选中单元格区域或当前工作表，并进行专业表格排版：标题、表头、列宽、数字格式、边框、对齐、重点高亮和可读性优化。")
+        Await StartAgentFromRibbonAsync("Проанализируй выделенный диапазон или лист и выполни профессиональное оформление таблицы: заголовок, шапка, ширины столбцов, числовые форматы, границы, выравнивание, акценты и читаемость. Отвечай только на русском языке.")
     End Sub
 
     ' 一键翻译功能 - Excel实现（翻译选中单元格内容）
@@ -216,14 +216,14 @@ Public Class Ribbon1
 
     ' AI续写功能 - Excel 交给 Agent 根据表格上下文自动补全
     Protected Overrides Async Sub ContinuationButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请根据当前选中单元格或相邻数据自动续写/补全内容，保持已有字段、语气、格式和数据规律一致。")
+        Await StartAgentFromRibbonAsync("Продолжи или дополни содержимое по выделенной ячейке или соседним данным, сохраняя поля, тон, формат и закономерности. Отвечай только на русском языке.")
     End Sub
 
 
 
     ' 模板排版功能 - 交给 Agent 自动识别当前表格结构和可用模板/样式
     Protected Overrides Async Sub TemplateFormatButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请根据当前工作表内容自动识别表格类型，并套用适合的专业模板化排版方案；如果有可用 Skills 或模板，请自动选择最匹配的方案执行。")
+        Await StartAgentFromRibbonAsync("Определи тип таблицы по содержимому листа и примени подходящий профессиональный шаблон оформления; если есть подходящие Skills или шаблоны — выбери наиболее подходящий и выполни. Отвечай только на русском языке.")
     End Sub
 
     Private Async Function StartAgentFromRibbonAsync(request As String) As Task

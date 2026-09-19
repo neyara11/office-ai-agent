@@ -3,6 +3,7 @@ name: powerpoint-deck-agent
 description: Используйте для задач PowerPoint, требующих генерации слайдов, структуры презентации, исправления макета, заметок докладчика, визуальной согласованности, перевода, проверки или вставки диаграмм/таблиц.
 application: PowerPoint
 default_for_application: true
+keywords: презентация, презентацию, презентации, слайд, слайды, слайдов, колода, ppt, powerpoint, deck, presentation, создай презентацию, сделай презентацию, добавь слайд, заметки докладчика
 tags: powerpoint, ppt, slide, deck, presentation, layout, theme, chart, notes, review
 allowed-tools: CreateSlides, InsertSlide, FormatSlide, InsertText, InsertTable, ApplyTheme, ApplyTransition, AddSpeakerNotes, BeautifySlides, DiscoverOfficeCapability, OfficeObjectOperation
 intent_types: slide_generation, formatting, review, translation, presentation

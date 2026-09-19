@@ -131,7 +131,8 @@ Namespace Design
                                                        deckPreflightReports(preflightIndex), Nothing,
                                                        "LAYOUT_VERIFY_FAILED"))
                     Return BuildFailure(presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                        "Предпроверка профессионального макета не пройдена", ExceptionClassifier.CodeVerifyFailed)
+                                        "Предпроверка профессионального макета не пройдена" & DescribeReportIssues(deckPreflightReports(preflightIndex)),
+                                        ExceptionClassifier.CodeVerifyFailed)
                 End If
             Next
 
@@ -169,7 +170,8 @@ Namespace Design
                 If Not preflight.Passed Then
                     slideResults.Add(BuildSlideResult(index, slideSpec, "failed", preflight, Nothing, "LAYOUT_VERIFY_FAILED"))
                     Return BuildFailure(presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                        "Предпроверка профессионального макета не пройдена", ExceptionClassifier.CodeVerifyFailed)
+                                        "Предпроверка профессионального макета не пройдена" & DescribeReportIssues(preflight),
+                                        ExceptionClassifier.CodeVerifyFailed)
                 End If
 
                 Dim renderResult As SceneRenderResult = Nothing
@@ -212,7 +214,8 @@ Namespace Design
                         Return BuildFailureWithVisualEvidence(CaptureVisualEvidence(renderResult.Slide, index + 1,
                                                                                      slideWidth, slideHeight),
                                                               presentation, spec, initialCount, createdCount, targetRefs, slideResults, warnings,
-                                            "Проверка визуального качества после отрисовки не пройдена", ExceptionClassifier.CodeVerifyFailed)
+                                            "Проверка визуального качества после отрисовки не пройдена" & DescribeReportIssues(preflight),
+                                            ExceptionClassifier.CodeVerifyFailed)
                     End If
                 Catch ex As Exception
                     Dim classified = ExceptionClassifier.Classify(ex)

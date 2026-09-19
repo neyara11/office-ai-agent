@@ -158,7 +158,7 @@ Public Class ConfigPromptForm
         btnUse = New Button() With {
             .Text = "Использовать выбранный",
             .Location = New Point(10, 260),
-            .Size = New Size(85, 28),
+            .Size = New Size(180, 28),
             .BackColor = Color.FromArgb(70, 130, 180),
             .ForeColor = Color.White,
             .FlatStyle = FlatStyle.Flat
@@ -168,8 +168,8 @@ Public Class ConfigPromptForm
 
         btnDelete = New Button() With {
             .Text = "Удалить",
-            .Location = New Point(105, 260),
-            .Size = New Size(85, 28),
+            .Location = New Point(10, 292),
+            .Size = New Size(175, 28),
             .FlatStyle = FlatStyle.Flat
         }
         AddHandler btnDelete.Click, AddressOf BtnDelete_Click
@@ -209,7 +209,7 @@ Public Class ConfigPromptForm
         btnAdd = New Button() With {
             .Text = "Добавить/Сохранить",
             .Location = New Point(210, 260),
-            .Size = New Size(100, 28),
+            .Size = New Size(150, 28),
             .BackColor = Color.FromArgb(60, 179, 113),
             .ForeColor = Color.White,
             .FlatStyle = FlatStyle.Flat
@@ -219,8 +219,8 @@ Public Class ConfigPromptForm
 
         Dim btnClear As New Button() With {
             .Text = "Очистить поля",
-            .Location = New Point(320, 260),
-            .Size = New Size(80, 28),
+            .Location = New Point(370, 260),
+            .Size = New Size(100, 28),
             .FlatStyle = FlatStyle.Flat
         }
         AddHandler btnClear.Click, Sub(s, e)
@@ -434,7 +434,7 @@ Public Class ConfigPromptForm
         btnSaveSchema = New Button() With {
             .Text = "Сохранить изменения",
             .Location = New Point(10, 335),
-            .Size = New Size(100, 30),
+            .Size = New Size(160, 30),
             .BackColor = Color.FromArgb(60, 179, 113),
             .ForeColor = Color.White,
             .FlatStyle = FlatStyle.Flat
@@ -444,8 +444,8 @@ Public Class ConfigPromptForm
 
         btnResetSchema = New Button() With {
             .Text = "Сбросить к значениям по умолчанию",
-            .Location = New Point(120, 335),
-            .Size = New Size(100, 30),
+            .Location = New Point(180, 335),
+            .Size = New Size(260, 30),
             .FlatStyle = FlatStyle.Flat
         }
         AddHandler btnResetSchema.Click, AddressOf BtnResetSchema_Click
@@ -534,7 +534,7 @@ Public Class ConfigPromptForm
         btnAddQuestion = New Button() With {
             .Text = "Добавить/Обновить",
             .Location = New Point(10, 270),
-            .Size = New Size(90, 28),
+            .Size = New Size(145, 28),
             .BackColor = Color.FromArgb(60, 179, 113),
             .ForeColor = Color.White,
             .FlatStyle = FlatStyle.Flat
@@ -544,8 +544,8 @@ Public Class ConfigPromptForm
 
         btnDeleteQuestion = New Button() With {
             .Text = "Удалить выбранное",
-            .Location = New Point(110, 270),
-            .Size = New Size(90, 28),
+            .Location = New Point(165, 270),
+            .Size = New Size(145, 28),
             .FlatStyle = FlatStyle.Flat
         }
         AddHandler btnDeleteQuestion.Click, AddressOf BtnDeleteQuestion_Click
@@ -553,8 +553,8 @@ Public Class ConfigPromptForm
 
         btnSaveQuestions = New Button() With {
             .Text = "Сохранить конфигурацию",
-            .Location = New Point(350, 270),
-            .Size = New Size(90, 28),
+            .Location = New Point(10, 304),
+            .Size = New Size(180, 28),
             .BackColor = Color.FromArgb(70, 130, 180),
             .ForeColor = Color.White,
             .FlatStyle = FlatStyle.Flat
@@ -564,8 +564,8 @@ Public Class ConfigPromptForm
 
         btnResetQuestions = New Button() With {
             .Text = "Сбросить к значениям по умолчанию",
-            .Location = New Point(450, 270),
-            .Size = New Size(90, 28),
+            .Location = New Point(200, 304),
+            .Size = New Size(260, 28),
             .FlatStyle = FlatStyle.Flat
         }
         AddHandler btnResetQuestions.Click, AddressOf BtnResetQuestions_Click
@@ -574,8 +574,9 @@ Public Class ConfigPromptForm
         ' 提示信息
         Dim lblTip As New Label() With {
             .Text = "💡 Подсказка: после сохранения нажмите # в поле ввода чата, чтобы увидеть актуальный список быстрых вопросов.",
-            .Location = New Point(10, 310),
-            .Size = New Size(530, 20),
+            .Location = New Point(10, 342),
+            .AutoSize = True,
+            .MaximumSize = New Size(530, 0),
             .ForeColor = Color.FromArgb(70, 130, 180),
             .Font = New Font("Microsoft YaHei UI", 9, FontStyle.Italic)
         }

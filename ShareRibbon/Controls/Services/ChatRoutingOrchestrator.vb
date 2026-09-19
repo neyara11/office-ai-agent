@@ -149,7 +149,7 @@ Public Class ChatRoutingOrchestrator
                         If preCheck IsNot Nothing AndAlso Not preCheck.IsValid Then
                             Dim errors = String.Join(";", preCheck.Errors)
                             Debug.WriteLine($"[ChatRoutingOrchestrator] PreSendCheck blocked: {errors}")
-                            _host.ShowWarning($"请求未通过预检: {errors}")
+                            _host.ShowWarning($"Запрос не прошёл предварительную проверку: {errors}")
                             Return ChatRouteDecision.BlockedByPreCheck
                         End If
                         If preCheck IsNot Nothing AndAlso preCheck.Warnings IsNot Nothing AndAlso preCheck.Warnings.Count > 0 Then
@@ -162,7 +162,7 @@ Public Class ChatRoutingOrchestrator
             End If
 
             If hasReferences AndAlso String.IsNullOrWhiteSpace(originalQuestion) Then
-                intent.UserFriendlyDescription = "已根据引用内容自动识别处理意图"
+                intent.UserFriendlyDescription = "Намерение определено автоматически по содержимому ссылки"
                 _host.SetCurrentIntentResult(intent)
             End If
 

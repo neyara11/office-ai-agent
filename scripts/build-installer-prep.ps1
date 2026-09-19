@@ -49,7 +49,7 @@ if (-not $SkipBuild) {
     }
 }
 else {
-    Write-Host "==> Step 1/2: SkipBuild — using existing $Configuration outputs"
+    Write-Host "==> Step 1/2: SkipBuild - using existing $Configuration outputs"
 }
 
 Write-Host ""
@@ -79,6 +79,17 @@ Write-Host ""
 Write-Host "============================================================"
 Write-Host " Installer prep PASSED"
 Write-Host "============================================================"
+
+# Building VSTO projects inside Visual Studio recreates HKCU add-in registrations pointing at
+# ..\bin\Release\...vsto. If they stay, Office loads both the dev and the MSI-installed add-in
+# and shows duplicate ribbon tabs. Remove them so only the installed registration remains.
+$cleanupScript = Join-Path $repoRoot "scripts\clean-vsto-debug-registrations.ps1"
+if (Test-Path -LiteralPath $cleanupScript) {
+    Write-Host ""
+    Write-Host "==> Step 3/3: Remove stale VSTO dev registrations"
+    & $cleanupScript
+}
+
 Write-Host "Next steps:"
 Write-Host "  1. Open Visual Studio with Installer Projects extension."
 Write-Host "  2. Open OfficeAgent\OfficeAgent.vdproj (or load it from AiHelper.sln)."

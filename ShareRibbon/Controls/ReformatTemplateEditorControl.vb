@@ -132,7 +132,7 @@ Public Class ReformatTemplateEditorControl
 
         btnSave = New Button With {
             .Text = "Сохранить",
-            .Size = New Size(55, 28),
+            .Size = New Size(90, 28),
             .FlatStyle = FlatStyle.Flat,
             .BackColor = Color.FromArgb(76, 175, 80),
             .ForeColor = Color.White,
@@ -144,7 +144,7 @@ Public Class ReformatTemplateEditorControl
 
         btnCancel = New Button With {
             .Text = "Отмена",
-            .Size = New Size(55, 28),
+            .Size = New Size(70, 28),
             .FlatStyle = FlatStyle.Flat,
             .BackColor = Color.FromArgb(180, 180, 180),
             .ForeColor = Color.FromArgb(60, 60, 60),
@@ -155,8 +155,8 @@ Public Class ReformatTemplateEditorControl
         pnlToolbar.Controls.Add(btnCancel)
 
         AddHandler pnlToolbar.Resize, Sub(s, e)
-                                          btnSave.Location = New Point(pnlToolbar.Width - 65, 8)
-                                          btnCancel.Location = New Point(pnlToolbar.Width - 125, 8)
+                                          btnSave.Location = New Point(pnlToolbar.Width - 100, 8)
+                                          btnCancel.Location = New Point(pnlToolbar.Width - 180, 8)
                                       End Sub
 
         Me.Controls.Add(pnlToolbar)
@@ -494,7 +494,7 @@ Public Class ReformatTemplateEditorControl
         btnUpdatePlaceholder = New Button With {
             .Text = "Обновить предпросмотр",
             .Location = New Point(10, 230),
-            .Size = New Size(80, 25)
+            .Size = New Size(170, 25)
         }
         AddHandler btnUpdatePlaceholder.Click, AddressOf OnUpdatePlaceholderClick
         tab.Controls.Add(btnUpdatePlaceholder)

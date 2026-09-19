@@ -145,8 +145,8 @@ Public Class ReformatTemplateEditorForm
         ' 底部按钮
         btnSave = New Button With {
             .Text = "Сохранить",
-            .Location = New Point(500, 520),
-            .Size = New Size(80, 30),
+            .Location = New Point(495, 520),
+            .Size = New Size(90, 30),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Right
         }
         AddHandler btnSave.Click, AddressOf BtnSave_Click

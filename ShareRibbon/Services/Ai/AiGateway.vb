@@ -54,7 +54,7 @@ Public Class AiGateway
         Dim timeoutSeconds = If(options.TimeoutSeconds > 0, options.TimeoutSeconds, 60)
 
         Try
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
             Dim httpClient = HttpClientPool.GetClient(options.ApiUrl)
             Using request As New HttpRequestMessage(HttpMethod.Post, options.ApiUrl)

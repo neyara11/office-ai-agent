@@ -4,7 +4,19 @@ Public Class ConfigSettings
     End Sub
 
     Public Shared Property platform As String
+
+    ' Пользователь может указать базу ("https://host/api/v1"); наружу всегда отдаём полный
+    ' OpenAI-совместимый endpoint (.../chat/completions). Сохранённое значение не меняем.
+    Private Shared _apiUrl As String
     Public Shared Property ApiUrl As String
+        Get
+            Return HttpClientFactory.ResolveChatCompletionsUrl(_apiUrl)
+        End Get
+        Set(value As String)
+            _apiUrl = value
+        End Set
+    End Property
+
     Public Shared Property ApiKey As String
     Public Shared Property ModelName As String
     Public Shared Property mcpable As Boolean

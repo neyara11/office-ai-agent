@@ -96,7 +96,7 @@ Public Class LLMUtil
             Debug.WriteLine($"请求体长度: {requestBody.Length}")
 
             ' 交由系统策略选择 TLS 版本，并按服务商配置决定是否接受自签名证书
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
             Dim handler = HttpClientFactory.CreateHandler(apiUrl)
 
             Using client As New HttpClient(handler)

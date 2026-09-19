@@ -451,6 +451,16 @@
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <!-- Native tool descriptors must travel inside the assembly: MSI does not install the Tools folder,
+         and the runtime directory probe finds nothing in the installed layout. -->
+    <EmbeddedResource Include="Tools\**\*.json">
+      <LogicalName>$(RootNamespace).Tools.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <!-- Built-in Skills are embedded and extracted to the user Skills directory on first use,
+         otherwise the installed add-in has no skills at all (MSI ships no Skills folder). -->
+    <EmbeddedResource Include="Skills\**\*">
+      <LogicalName>Skills/%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

@@ -15,14 +15,14 @@ Public Class Ribbon1
     End Sub
 
     Protected Overrides Async Sub WebCaptureButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请根据当前演示文稿上下文自动处理网页内容采集需求；如果用户已提供网址或网页文本，请提取适合制作幻灯片的结构化要点、标题和页面内容。")
+        Await StartAgentFromRibbonAsync("Собери содержимое веб-страницы по контексту текущей презентации; если пользователь дал ссылку или текст, извлеки структурированные тезисы, заголовки и материал для слайдов. Отвечай только на русском языке.")
     End Sub
 
     Protected Overrides Sub SpotlightButton_Click(sender As Object, e As RibbonControlEventArgs)
         'Globals.ThisAddIn.ShowChatTaskPane()
     End Sub
     Protected Overrides Async Sub DataAnalysisButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请自动分析当前演示文稿或选中幻灯片中的数据、图表和表格，提炼关键结论、异常点和适合放入演示的洞察；如可执行，请直接生成或优化对应页面内容。")
+        Await StartAgentFromRibbonAsync("Проанализируй данные, диаграммы и таблицы текущей презентации или выделенных слайдов, выдели ключевые выводы, аномалии и идеи для презентации; если возможно — сразу сформируй или улучши содержимое соответствующих слайдов. Отвечай только на русском языке.")
     End Sub
 
     Protected Overrides Function GetApplication() As ApplicationInfo
@@ -43,7 +43,7 @@ Public Class Ribbon1
     ' MCPButton_Click 已在 BaseOfficeRibbon 中提供共用实现，PowerPoint 不需要差异化逻辑，故不再重写。
 
     Protected Overrides Async Sub ProofreadButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请自动校对当前选中幻灯片或整份演示文稿，检查错别字、标点、术语一致性、标题层级、表达简洁度和演示语气，并在适合时直接执行低风险修正。")
+        Await StartAgentFromRibbonAsync("Проверь выделенный слайд или всю презентацию: опечатки, пунктуацию, единообразие терминов, уровни заголовков, лаконичность и тон подачи; при возможности сразу внеси безопасные правки. Отвечай только на русском языке.")
     End Sub
 
     ' 排版功能 - 进入模板选择模式

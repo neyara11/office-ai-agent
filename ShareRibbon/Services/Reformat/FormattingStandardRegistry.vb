@@ -17,8 +17,8 @@ Public Class FormattingStandardCandidate
 End Class
 
 ''' <summary>
-''' 统一排版标准注册中心。
-''' 把内置标准、用户模板、样式指南映射和 docx 映射统一成可选择的 FormattingStandard。
+''' Реестр стандартов форматирования.
+''' Сводит встроенные стандарты, пользовательские шаблоны, стилевые руководства и docx-сопоставления в единый выбор FormattingStandard.
 ''' </summary>
 Public Class FormattingStandardRegistry
     Private ReadOnly _knowledgeEngine As FormattingKnowledgeEngine
@@ -94,7 +94,7 @@ Public Class FormattingStandardRegistry
                 .SourceId = standard.Id,
                 .SourceName = standard.Name,
                 .Confidence = 0.8,
-                .Reason = "内置排版标准"
+                .Reason = "Встроенный стандарт вёрстки"
             })
         Next
     End Sub
@@ -114,11 +114,11 @@ Public Class FormattingStandardRegistry
                     .SourceId = template.Id,
                     .SourceName = template.Name,
                     .Confidence = If(template.IsPreset, 0.7, 0.9),
-                    .Reason = "用户或预置排版模板"
+                    .Reason = "Пользовательский или предустановленный шаблон"
                 })
             Next
         Catch ex As Exception
-            Debug.WriteLine("加载模板标准候选失败: " & ex.Message)
+            Debug.WriteLine("Не удалось загрузить шаблонные стандарты: " & ex.Message)
         End Try
     End Sub
 
@@ -137,11 +137,11 @@ Public Class FormattingStandardRegistry
                     .SourceId = guide.Id,
                     .SourceName = guide.Name,
                     .Confidence = If(guide.IsPreset, 0.75, 0.88),
-                    .Reason = "已转换的排版规范"
+                    .Reason = "Преобразованный стандарт вёрстки"
                 })
             Next
         Catch ex As Exception
-            Debug.WriteLine("加载样式指南标准候选失败: " & ex.Message)
+            Debug.WriteLine("Не удалось загрузить стилевые стандарты: " & ex.Message)
         End Try
     End Sub
 
@@ -153,16 +153,16 @@ Public Class FormattingStandardRegistry
                 If mapping.SemanticTags Is Nothing OrElse mapping.SemanticTags.Count = 0 Then Continue For
 
                 result.Add(New FormattingStandardCandidate With {
-                    .Standard = BuildStandard(mapping.Name, "从 Word 模板文档提取的排版标准", "", mapping, False),
+                    .Standard = BuildStandard(mapping.Name, "Стандарт вёрстки, извлечённый из шаблона Word", "", mapping, False),
                     .SourceType = FormattingStandardSourceType.DocxMapping,
                     .SourceId = mapping.Id,
                     .SourceName = mapping.Name,
                     .Confidence = 0.92,
-                    .Reason = "docx 语义映射"
+                    .Reason = "Семантическое сопоставление docx"
                 })
             Next
         Catch ex As Exception
-            Debug.WriteLine("加载 docx 映射标准候选失败: " & ex.Message)
+            Debug.WriteLine("Не удалось загрузить docx-сопоставления: " & ex.Message)
         End Try
     End Sub
 
@@ -189,7 +189,7 @@ Public Class FormattingStandardRegistry
     End Function
 
     Private Shared Function CreateGeneralFallbackStandard() As FormattingStandard
-        Dim standard As New FormattingStandard("通用文档智能排版", "适用于未识别出明确类型的 Word 文档，提供标题、正文、编号列表的基础排版能力。")
+        Dim standard As New FormattingStandard("Универсальная вёрстка документа", "Базовое оформление заголовков, основного текста и нумерованных списков для документов без явно определённого типа.")
         standard.Id = "general-document-ai-native"
         standard.IsBuiltIn = True
         standard.IsActive = True
@@ -206,11 +206,11 @@ Public Class FormattingStandardRegistry
     Private Shared Function InferDocumentTypes(name As String, category As String) As List(Of DocumentType)
         Dim text = (If(name, "") & " " & If(category, "")).ToLowerInvariant()
         Dim result As New List(Of DocumentType)()
-        If ContainsAny(text, {"公文", "行政", "gb/t", "9704"}) Then result.Add(DocumentType.OfficialDocument)
-        If ContainsAny(text, {"论文", "学术", "paper", "academic"}) Then result.Add(DocumentType.AcademicPaper)
-        If ContainsAny(text, {"报告", "商务", "商业", "business", "report"}) Then result.Add(DocumentType.BusinessReport)
-        If ContainsAny(text, {"合同", "协议", "contract"}) Then result.Add(DocumentType.Contract)
-        If ContainsAny(text, {"简历", "resume"}) Then result.Add(DocumentType.[Resume])
+        If ContainsAny(text, {"公文", "行政", "gb/t", "9704", "гост", "приказ", "распоряжение", "официальн"}) Then result.Add(DocumentType.OfficialDocument)
+        If ContainsAny(text, {"论文", "学术", "paper", "academic", "диплом", "курсов", "диссертац", "реферат", "научн"}) Then result.Add(DocumentType.AcademicPaper)
+        If ContainsAny(text, {"报告", "商务", "商业", "business", "report", "отчёт", "отчет", "доклад", "бизнес"}) Then result.Add(DocumentType.BusinessReport)
+        If ContainsAny(text, {"合同", "协议", "contract", "договор", "контракт", "соглашени"}) Then result.Add(DocumentType.Contract)
+        If ContainsAny(text, {"简历", "resume", "резюме"}) Then result.Add(DocumentType.[Resume])
         If result.Count = 0 Then result.Add(DocumentType.GeneralDocument)
         Return result
     End Function

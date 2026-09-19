@@ -78,14 +78,14 @@ Public Class SemanticStyleMapping
         If SemanticTags Is Nothing Then SemanticTags = New List(Of SemanticTag)()
 
         AddMissingTag(CreateDefaultBodyNormalTag())
-        AddMissingTag(CreateDefaultTitleTag(SemanticTagRegistry.TAG_TITLE_1, "一级标题", 16, True))
-        AddMissingTag(CreateDefaultTitleTag(SemanticTagRegistry.TAG_TITLE_2, "二级标题", 14, True))
-        AddMissingTag(CreateDefaultTitleTag(SemanticTagRegistry.TAG_TITLE_3, "三级标题", 12, True))
-        AddMissingTag(CreateDefaultHeadingTag("heading.1", "章节一级标题", 16, True))
-        AddMissingTag(CreateDefaultHeadingTag("heading.2", "章节二级标题", 14, True))
-        AddMissingTag(CreateDefaultHeadingTag("heading.3", "章节三级标题", 12, True))
-        AddMissingTag(CreateDefaultListTag(SemanticTagRegistry.TAG_LIST_ORDERED, "有序列表"))
-        AddMissingTag(CreateDefaultListTag(SemanticTagRegistry.TAG_LIST_UNORDERED, "无序列表"))
+        AddMissingTag(CreateDefaultTitleTag(SemanticTagRegistry.TAG_TITLE_1, "Заголовок 1 уровня", 16, True))
+        AddMissingTag(CreateDefaultTitleTag(SemanticTagRegistry.TAG_TITLE_2, "Заголовок 2 уровня", 14, True))
+        AddMissingTag(CreateDefaultTitleTag(SemanticTagRegistry.TAG_TITLE_3, "Заголовок 3 уровня", 12, True))
+        AddMissingTag(CreateDefaultHeadingTag("heading.1", "Заголовок раздела 1 уровня", 16, True))
+        AddMissingTag(CreateDefaultHeadingTag("heading.2", "Заголовок раздела 2 уровня", 14, True))
+        AddMissingTag(CreateDefaultHeadingTag("heading.3", "Заголовок раздела 3 уровня", 12, True))
+        AddMissingTag(CreateDefaultListTag(SemanticTagRegistry.TAG_LIST_ORDERED, "Нумерованный список"))
+        AddMissingTag(CreateDefaultListTag(SemanticTagRegistry.TAG_LIST_UNORDERED, "Маркированный список"))
     End Sub
 
     Private Sub AddMissingTag(tag As SemanticTag)
@@ -95,7 +95,7 @@ Public Class SemanticStyleMapping
     End Sub
 
     Private Shared Function CreateDefaultBodyNormalTag() As SemanticTag
-        Dim tag As New SemanticTag(SemanticTagRegistry.TAG_BODY_NORMAL, "正文", SemanticTagRegistry.TAG_BODY, 2, "普通正文段落")
+        Dim tag As New SemanticTag(SemanticTagRegistry.TAG_BODY_NORMAL, "Основной текст", SemanticTagRegistry.TAG_BODY, 2, "Обычный абзац основного текста")
         tag.Font = New FontConfig("宋体", "Times New Roman", 12)
         tag.Paragraph = New ParagraphConfig("justify", 2, 1.5)
         tag.Color = New ColorConfig("#000000")
@@ -103,7 +103,7 @@ Public Class SemanticStyleMapping
     End Function
 
     Private Shared Function CreateDefaultTitleTag(tagId As String, displayName As String, fontSize As Double, bold As Boolean) As SemanticTag
-        Dim tag As New SemanticTag(tagId, displayName, SemanticTagRegistry.TAG_TITLE, 2, displayName & "，用于文档标题或编号标题")
+        Dim tag As New SemanticTag(tagId, displayName, SemanticTagRegistry.TAG_TITLE, 2, displayName & ": используется для заголовка документа или нумерованного заголовка")
         tag.Font = New FontConfig("黑体", "Times New Roman", fontSize, bold)
         tag.Paragraph = New ParagraphConfig("left", 0, 1.5)
         tag.Paragraph.SpaceBefore = 0.5
@@ -114,7 +114,7 @@ Public Class SemanticStyleMapping
     End Function
 
     Private Shared Function CreateDefaultHeadingTag(tagId As String, displayName As String, fontSize As Double, bold As Boolean) As SemanticTag
-        Dim tag As New SemanticTag(tagId, displayName, SemanticTagRegistry.TAG_HEADING, 2, displayName & "，用于通用文档章节结构")
+        Dim tag As New SemanticTag(tagId, displayName, SemanticTagRegistry.TAG_HEADING, 2, displayName & ": используется для структуры разделов документа")
         tag.Font = New FontConfig("黑体", "Times New Roman", fontSize, bold)
         tag.Paragraph = New ParagraphConfig("left", 0, 1.5)
         tag.Paragraph.SpaceBefore = 0.5
@@ -125,7 +125,7 @@ Public Class SemanticStyleMapping
     End Function
 
     Private Shared Function CreateDefaultListTag(tagId As String, displayName As String) As SemanticTag
-        Dim tag As New SemanticTag(tagId, displayName, SemanticTagRegistry.TAG_LIST, 2, displayName & "，用于需要保留或规范编号的列表项")
+        Dim tag As New SemanticTag(tagId, displayName, SemanticTagRegistry.TAG_LIST, 2, displayName & ": используется для элементов списка с нумерацией или маркерами")
         tag.Font = New FontConfig("宋体", "Times New Roman", 12)
         tag.Paragraph = New ParagraphConfig("left", 0, 1.5)
         tag.Paragraph.LeftIndent = 0.75

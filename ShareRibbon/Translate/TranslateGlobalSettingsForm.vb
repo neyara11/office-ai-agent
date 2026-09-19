@@ -74,23 +74,23 @@ Public Class TranslateGlobalSettingsForm
         btnAddDomain = New Button() With {
             .Text = "Добавить область",
             .Location = New Point(15, 235),
-            .Size = New Size(90, 28)
+            .Size = New Size(135, 28)
         }
         AddHandler btnAddDomain.Click, AddressOf AddDomain_Click
         grpDomain.Controls.Add(btnAddDomain)
 
         btnEditDomain = New Button() With {
             .Text = "Изменить",
-            .Location = New Point(115, 235),
-            .Size = New Size(50, 28)
+            .Location = New Point(160, 235),
+            .Size = New Size(80, 28)
         }
         AddHandler btnEditDomain.Click, AddressOf EditDomain_Click
         grpDomain.Controls.Add(btnEditDomain)
 
         btnDeleteDomain = New Button() With {
             .Text = "Удалить",
-            .Location = New Point(170, 235),
-            .Size = New Size(50, 28)
+            .Location = New Point(250, 235),
+            .Size = New Size(75, 28)
         }
         AddHandler btnDeleteDomain.Click, AddressOf DeleteDomain_Click
         grpDomain.Controls.Add(btnDeleteDomain)
@@ -117,7 +117,7 @@ Public Class TranslateGlobalSettingsForm
         grpAdvanced.Controls.Add(lblBatch)
 
         numBatchSize = New NumericUpDown() With {
-            .Location = New Point(120, 22),
+            .Location = New Point(180, 22),
             .Size = New Size(60, 24),
             .Minimum = 0,
             .Maximum = 20,
@@ -127,7 +127,7 @@ Public Class TranslateGlobalSettingsForm
 
         chkShowProgress = New CheckBox() With {
             .Text = "Показывать ход перевода",
-            .Location = New Point(200, 24),
+            .Location = New Point(260, 24),
             .AutoSize = True,
             .Checked = True
         }
@@ -306,8 +306,8 @@ Public Class DomainTemplateEditForm
 
         btnOk = New Button() With {
             .Text = "Сохранить",
-            .Location = New Point(300, yPos),
-            .Size = New Size(80, 32),
+            .Location = New Point(320, yPos),
+            .Size = New Size(90, 32),
             .DialogResult = DialogResult.OK
         }
         AddHandler btnOk.Click, AddressOf OkButton_Click

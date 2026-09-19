@@ -57,9 +57,9 @@ Namespace Extensions
 
                 ' 询问用户确认
                 Dim result As DialogResult = MessageBox.Show(
-                    "检测到幻灯片大纲，是否自动生成幻灯片？" & vbCrLf & vbCrLf &
-                    "将在当前幻灯片后插入新幻灯片。",
-                    "生成幻灯片",
+                    "Обнаружен план слайдов. Сгенерировать слайды автоматически?" & vbCrLf & vbCrLf &
+                    "Новые слайды будут вставлены после текущего.",
+                    "Генерация слайдов",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question)
 
@@ -72,8 +72,8 @@ Namespace Extensions
 
                     If count > 0 Then
                         MessageBox.Show(
-                            String.Format("成功生成 {0} 张幻灯片！", count),
-                            "生成完成",
+                            String.Format("Успешно создано слайдов: {0}.", count),
+                            "Готово",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information)
 
@@ -81,8 +81,8 @@ Namespace Extensions
                         Return True
                     Else
                         MessageBox.Show(
-                            "未能生成幻灯片，请检查大纲格式。",
-                            "生成失败",
+                            "Не удалось создать слайды. Проверьте формат плана.",
+                            "Не удалось создать слайды",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Warning)
                         Return False
@@ -94,8 +94,8 @@ Namespace Extensions
             Catch ex As Exception
                 System.Diagnostics.Debug.WriteLine("[PptGenerationHandlerExtension] 错误: " & ex.Message)
                 MessageBox.Show(
-                    "生成幻灯片时出错: " & ex.Message,
-                    "错误",
+                    "Ошибка при создании слайдов: " & ex.Message,
+                    "Ошибка",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error)
                 Return False

@@ -92,7 +92,7 @@ function New-DevPfx {
     # Empty password: matches typical VSTO TemporaryKey usage in this repo.
     Export-PfxCertificate -Cert $cert -FilePath $PfxPath -Password $pwd | Out-Null
 
-    # Remove from store copy optional — keep for local trust if desired
+    # Remove from store copy optional - keep for local trust if desired
     Write-Host "  Created $PfxPath"
     Write-Host "  Thumbprint: $($cert.Thumbprint)"
     return $cert.Thumbprint
@@ -126,6 +126,6 @@ foreach ($p in $projects) {
 }
 
 Write-Host ""
-Write-Host "Done. TemporaryKey files are for local Debug only — do not commit *.pfx."
+Write-Host "Done. TemporaryKey files are for local Debug only - do not commit *.pfx."
 Write-Host "Release signing: build\SignArtifacts.ps1 + OFFICE_AI_SIGN_* env vars."
 Write-Host "See docs\signing-and-certificates.md"

@@ -99,7 +99,7 @@ Public Class EmbeddingService
                 Return Nothing
             End If
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
             Dim apiUrl = ConfigSettings.ApiUrl
             Dim apiKey = ConfigSettings.ApiKey
@@ -114,18 +114,7 @@ Public Class EmbeddingService
                                   apiUrl.Contains("/v1/embeddings") OrElse
                                   Not apiUrl.Contains("anthropic.com")
 
-            Dim embeddingUrl As String
-            If apiUrl.Contains("/v1/chat/completions") Then
-                embeddingUrl = apiUrl.Replace("/v1/chat/completions", "/v1/embeddings")
-            ElseIf Not apiUrl.EndsWith("/embeddings") AndAlso Not apiUrl.Contains("/embeddings") Then
-                If apiUrl.EndsWith("/") Then
-                    embeddingUrl = apiUrl & "v1/embeddings"
-                Else
-                    embeddingUrl = apiUrl & "/v1/embeddings"
-                End If
-            Else
-                embeddingUrl = apiUrl
-            End If
+            Dim embeddingUrl As String = HttpClientFactory.ResolveEmbeddingsUrl(apiUrl)
 
             ' 根据 API 提供商选择合适的 Embedding 模型
             Dim modelToUse = GetConfiguredEmbeddingModelName()

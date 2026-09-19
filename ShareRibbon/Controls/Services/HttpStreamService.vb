@@ -167,7 +167,7 @@ Public Class HttpStreamService
 
         Dim requestCts As System.Threading.CancellationTokenSource = Nothing
         Try
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
             requestCts = RegisterRequestCancellation(requestUuid)
             requestCts.CancelAfter(TimeSpan.FromMinutes(5))
 
@@ -465,7 +465,7 @@ Public Class HttpStreamService
         Dim requestCts As System.Threading.CancellationTokenSource = Nothing
 
         Try
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
             requestCts = RegisterRequestCancellation(requestUuid)
 
             Dim client = HttpClientPool.GetClient(apiUrl)
@@ -1240,7 +1240,7 @@ Public Class HttpStreamService
             Await FlushBufferAsync("content", uuid)
 
             ' 发送请求并流式处理
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.SystemDefault
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
 
             Dim client = HttpClientPool.GetClient(apiUrl)
 

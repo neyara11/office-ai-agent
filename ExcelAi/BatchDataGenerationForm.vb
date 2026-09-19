@@ -59,7 +59,7 @@ Public Class BatchDataGenerationForm
         _fieldListView.FullRowSelect = True
         _fieldListView.GridLines = True
         _fieldListView.Columns.Add("Имя поля", 120)
-        _fieldListView.Columns.Add("Целевой столбец (напр. A)", 110)
+        _fieldListView.Columns.Add("Столбец (A, B)", 110)
         _fieldListView.Columns.Add("Описание поля", 360)
         Me.Controls.Add(_fieldListView)
 
@@ -72,11 +72,11 @@ Public Class BatchDataGenerationForm
         Dim rowCountLabel As New Label()
         rowCountLabel.Text = "Число строк:"
         rowCountLabel.Location = New Point(10, 12)
-        rowCountLabel.Width = 70
+        rowCountLabel.Width = 90
         rowCountPanel.Controls.Add(rowCountLabel)
 
         _rowCountInput = New NumericUpDown()
-        _rowCountInput.Location = New Point(85, 10)
+        _rowCountInput.Location = New Point(105, 10)
         _rowCountInput.Width = 80
         _rowCountInput.Minimum = 1
         _rowCountInput.Maximum = 500
@@ -85,7 +85,7 @@ Public Class BatchDataGenerationForm
 
         ' 添加一个提示标签
         Dim hintLabel As New Label()
-        hintLabel.Text = "Подсказка: укажите букву столбца Excel (например, A, B, C); ИИ сгенерирует содержимое по описанию поля"
+        hintLabel.Text = "Укажите столбец Excel буквой (A, B, C) — ИИ заполнит данные."
         hintLabel.Location = New Point(180, 12)
         hintLabel.Width = 420
         hintLabel.ForeColor = Drawing.Color.Gray
@@ -100,27 +100,27 @@ Public Class BatchDataGenerationForm
         _addButton = New Button()
         _addButton.Text = "Добавить поле"
         _addButton.Location = New Point(10, 12)
-        _addButton.Width = 100
+        _addButton.Width = 110
         AddHandler _addButton.Click, AddressOf AddButton_Click
         buttonPanel.Controls.Add(_addButton)
 
         _removeButton = New Button()
         _removeButton.Text = "Удалить поле"
-        _removeButton.Location = New Point(120, 12)
-        _removeButton.Width = 100
+        _removeButton.Location = New Point(130, 12)
+        _removeButton.Width = 110
         AddHandler _removeButton.Click, AddressOf RemoveButton_Click
         buttonPanel.Controls.Add(_removeButton)
 
         _generateButton = New Button()
         _generateButton.Text = "Сгенерировать данные"
-        _generateButton.Location = New Point(390, 12)
-        _generateButton.Width = 100
+        _generateButton.Location = New Point(360, 12)
+        _generateButton.Width = 140
         AddHandler _generateButton.Click, AddressOf GenerateButton_Click
         buttonPanel.Controls.Add(_generateButton)
 
         _cancelButton = New Button()
         _cancelButton.Text = "Отмена"
-        _cancelButton.Location = New Point(500, 12)
+        _cancelButton.Location = New Point(510, 12)
         _cancelButton.Width = 100
         AddHandler _cancelButton.Click, AddressOf CancelButton_Click
         buttonPanel.Controls.Add(_cancelButton)
@@ -198,31 +198,31 @@ Public Class FieldInputForm
         Dim cellColumnLabel As New Label()
         cellColumnLabel.Text = "Целевой столбец:"
         cellColumnLabel.Location = New Point(10, 45)
-        cellColumnLabel.Width = 80
+        cellColumnLabel.Width = 120
         Me.Controls.Add(cellColumnLabel)
 
         _cellColumnTextBox = New TextBox()
-        _cellColumnTextBox.Location = New Point(100, 42)
+        _cellColumnTextBox.Location = New Point(130, 42)
         _cellColumnTextBox.Width = 80
         _cellColumnTextBox.MaxLength = 3
         Me.Controls.Add(_cellColumnTextBox)
 
         Dim colHint As New Label()
-        colHint.Text = "(буква столбца Excel, напр. A, B, AA)"
-        colHint.Location = New Point(190, 45)
-        colHint.Width = 200
+        colHint.Text = "напр. A, B, AA"
+        colHint.Location = New Point(220, 45)
+        colHint.Width = 155
         colHint.ForeColor = Drawing.Color.Gray
         Me.Controls.Add(colHint)
 
         Dim fieldDescLabel As New Label()
         fieldDescLabel.Text = "Описание поля:"
         fieldDescLabel.Location = New Point(10, 75)
-        fieldDescLabel.Width = 80
+        fieldDescLabel.Width = 105
         Me.Controls.Add(fieldDescLabel)
 
         _fieldDescTextBox = New TextBox()
-        _fieldDescTextBox.Location = New Point(100, 72)
-        _fieldDescTextBox.Width = 280
+        _fieldDescTextBox.Location = New Point(115, 72)
+        _fieldDescTextBox.Width = 265
         _fieldDescTextBox.Height = 60
         _fieldDescTextBox.Multiline = True
         Me.Controls.Add(_fieldDescTextBox)

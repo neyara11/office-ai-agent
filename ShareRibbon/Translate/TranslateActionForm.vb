@@ -158,8 +158,8 @@ Public Class TranslateActionForm
 
         btnEditDomain = New Button() With {
             .Text = "Изменить",
-            .Location = New Point(385, 23),
-            .Size = New Size(65, 26)
+            .Location = New Point(380, 23),
+            .Size = New Size(80, 26)
         }
         AddHandler btnEditDomain.Click, AddressOf EditDomain_Click
         grpLanguage.Controls.Add(btnEditDomain)
@@ -333,8 +333,8 @@ Public Class TranslateActionForm
         ' ========== 按钮 ==========
         btnTranslate = New Button() With {
             .Text = "Начать перевод",
-            .Location = New Point(280, yPos),
-            .Size = New Size(90, 35),
+            .Location = New Point(250, yPos),
+            .Size = New Size(120, 35),
             .DialogResult = DialogResult.OK
         }
         AddHandler btnTranslate.Click, AddressOf TranslateButton_Click

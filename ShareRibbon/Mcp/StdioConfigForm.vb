@@ -31,11 +31,11 @@ Public Class StdioConfigForm
         Dim commandLabel As New Label()
         commandLabel.Text = "Путь к команде:"
         commandLabel.Location = New Point(20, 20)
-        commandLabel.Width = 100
+        commandLabel.Width = 150
         Me.Controls.Add(commandLabel)
 
         _commandTextBox = New TextBox()
-        _commandTextBox.Location = New Point(130, 17)
+        _commandTextBox.Location = New Point(160, 17)
         _commandTextBox.Width = 250
         Me.Controls.Add(_commandTextBox)
 
@@ -43,26 +43,26 @@ Public Class StdioConfigForm
         Dim argsLabel As New Label()
         argsLabel.Text = "Аргументы команды:"
         argsLabel.Location = New Point(20, 50)
-        argsLabel.Width = 100
+        argsLabel.Width = 150
         Me.Controls.Add(argsLabel)
 
         _argumentsTextBox = New TextBox()
-        _argumentsTextBox.Location = New Point(130, 47)
-        _argumentsTextBox.Width = 340
+        _argumentsTextBox.Location = New Point(160, 47)
+        _argumentsTextBox.Width = 310
         Me.Controls.Add(_argumentsTextBox)
 
         ' 环境变量标签和切换按钮
         Dim envLabel As New Label()
         envLabel.Text = "Переменные окружения:"
         envLabel.Location = New Point(20, 110)
-        envLabel.Width = 100
+        envLabel.Width = 150
         Me.Controls.Add(envLabel)
 
         ' 添加切换视图按钮
         _switchViewButton = New Button()
         _switchViewButton.Text = "Переключить на текстовый вид"
-        _switchViewButton.Location = New Point(330, 107)
-        _switchViewButton.Width = 140
+        _switchViewButton.Location = New Point(280, 107)
+        _switchViewButton.Width = 200
         AddHandler _switchViewButton.Click, AddressOf SwitchViewButton_Click
         Me.Controls.Add(_switchViewButton)
 

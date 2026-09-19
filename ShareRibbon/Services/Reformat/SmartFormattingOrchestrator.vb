@@ -1229,14 +1229,14 @@ Public Class SmartFormattingOrchestrator
                 parts.Add(alignName)
             End If
             If tag.Paragraph.FirstLineIndent > 0 Then
-                parts.Add($"首行缩进{tag.Paragraph.FirstLineIndent}字符")
+                parts.Add($"отступ первой строки {tag.Paragraph.FirstLineIndent} симв.")
             End If
             If tag.Paragraph.LineSpacing > 0 AndAlso
                Math.Abs(tag.Paragraph.LineSpacing - 1.5) > 0.01 Then
                 If IsOfficialDocumentLineSpacing(tag) Then
-                    parts.Add("固定值约28磅")
+                    parts.Add("фиксированный ~28 пт")
                 Else
-                    parts.Add($"行距{tag.Paragraph.LineSpacing}")
+                    parts.Add($"межстрочный {tag.Paragraph.LineSpacing}")
                 End If
             End If
         End If
@@ -1258,30 +1258,33 @@ Public Class SmartFormattingOrchestrator
         If font Is Nothing Then Return ""
         Dim parts As New List(Of String)()
 
-        If Not String.IsNullOrEmpty(font.FontNameCN) Then
+        ' В русскоязычном контуре показываем основной (латинский) шрифт, а не восточноазиатский.
+        If Not String.IsNullOrEmpty(font.FontNameEN) Then
+            parts.Add(font.FontNameEN)
+        ElseIf Not String.IsNullOrEmpty(font.FontNameCN) Then
             parts.Add(font.FontNameCN)
         End If
         If font.FontSize > 0 Then
             parts.Add($"{font.FontSize}pt")
         End If
         If font.Bold Then
-            parts.Add("加粗")
+            parts.Add("полужирный")
         End If
         If font.Italic Then
-            parts.Add("斜体")
+            parts.Add("курсив")
         End If
 
         Return String.Join(" ", parts)
     End Function
 
-    ''' <summary>获取对齐方式的中文显示名称</summary>
+    ''' <summary>Отображаемое название выравнивания</summary>
     Private Shared Function GetAlignmentDisplayName(alignment As String) As String
         If String.IsNullOrEmpty(alignment) Then Return ""
         Select Case alignment.ToLower()
-            Case "center" : Return "居中"
-            Case "right" : Return "右对齐"
-            Case "justify" : Return "两端对齐"
-            Case Else : Return "左对齐"
+            Case "center" : Return "по центру"
+            Case "right" : Return "по правому краю"
+            Case "justify" : Return "по ширине"
+            Case Else : Return "по левому краю"
         End Select
     End Function
 

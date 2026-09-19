@@ -143,7 +143,7 @@ Namespace Agent
 {sb.ToString()}"
 
             Try
-                Dim summary = Await SendAIRequest(summaryPrompt, "你是一个对话摘要专家。请用中文输出简洁摘要。", Nothing)
+                Dim summary = Await SendAIRequest(summaryPrompt, "Ты специалист по краткому изложению диалогов. Отвечай только на русском языке, кратко и по делу.", Nothing)
                 If Not String.IsNullOrWhiteSpace(summary) Then
                     SyncLock _lock
                         If _sessionHistory.Count > CompactBatchSize Then

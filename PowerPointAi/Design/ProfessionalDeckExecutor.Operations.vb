@@ -18,8 +18,8 @@ Namespace Design
                    String.Equals(signatures(index), signatures(index - 2), StringComparison.Ordinal) Then
                     reports(index).Issues.Add(New VisualIssue With {
                         .Code = "DECK_COMPOSITION_REPETITION",
-                        .Severity = "error",
-                        .Message = "Three consecutive slides use the same composition; vary hierarchy, focal structure, or Scene variant"
+                        .Severity = "warning",
+                        .Message = "Три подряд идущих слайда используют одну композицию; стоит разнообразить иерархию, фокус или вариант Scene"
                     })
                     reports(index).AestheticScore = Math.Min(reports(index).AestheticScore, 72)
                 End If
@@ -70,7 +70,7 @@ Namespace Design
                                                        If(report.Passed, "", "LAYOUT_VERIFY_FAILED")))
                     If Not report.Passed Then
                         Return BuildPreviewFailure(spec, tokens, initialCount, slideResults, warnings,
-                                                   "Предпроверка профессионального макета не пройдена",
+                                                   "Предпроверка профессионального макета не пройдена" & DescribeReportIssues(report),
                                                    ExceptionClassifier.CodeVerifyFailed)
                     End If
                 Catch ex As Exception
@@ -159,6 +159,24 @@ Namespace Design
             }
         End Function
 
+        ''' <summary>
+        ''' Кратко перечисляет неисправленные ошибки отчёта, чтобы причина сбоя была видна пользователю.
+        ''' </summary>
+        Private Shared Function DescribeReportIssues(report As VisualVerificationReport) As String
+            If report Is Nothing OrElse report.Issues Is Nothing OrElse report.Issues.Count = 0 Then Return ""
+
+            Dim errors = report.Issues.
+                Where(Function(item) item IsNot Nothing AndAlso
+                                     String.Equals(item.Severity, "error", StringComparison.OrdinalIgnoreCase) AndAlso
+                                     Not item.Repaired).
+                Take(3).
+                Select(Function(item) $"{item.Code}: {item.Message}").
+                ToList()
+
+            If errors.Count = 0 Then Return ""
+            Return " [" & String.Join("; ", errors) & "]"
+        End Function
+
         Private Shared Function BuildFailure(presentation As PowerPoint.Presentation,
                                              spec As DeckDesignSpec,
                                              initialCount As Integer,
@@ -212,8 +230,8 @@ Namespace Design
                                      },
                                      errorCode:=errorCode,
                                      userMessage:=If(interfaceUnavailable,
-                                                     "В текущем PowerPoint/WPS отсутствует требуемый COM-интерфейс; повторное выполнение остановлено",
-                                                     "Генерация профессиональных слайдов выполнена не полностью; Agent исправит по результатам визуальной проверки"),
+                                                     "В текущем PowerPoint/WPS отсутствует требуемый COM-интерфейс: " & message & "; повторное выполнение остановлено",
+                                                     "Генерация профессиональных слайдов выполнена не полностью: " & message),
                                      recoverable:=Not interfaceUnavailable,
                                      observation:=failureObservation)
         End Function

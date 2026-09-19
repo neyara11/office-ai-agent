@@ -182,6 +182,63 @@ Public Class SkillsDirectoryService
         If Not Directory.Exists(dir) Then
             Directory.CreateDirectory(dir)
         End If
+        EnsureBuiltInSkillsExtracted()
+    End Sub
+
+    ''' <summary>
+    ''' Разворачивает встроенные Skill-каталоги в пользовательский каталог Skills.
+    ''' Существующие файлы не перезаписываются, чтобы не затирать правки пользователя.
+    ''' Нужно, потому что установленная раскладка MSI не содержит каталог Skills.
+    ''' </summary>
+    Public Shared Sub EnsureBuiltInSkillsExtracted()
+        Try
+            Dim userDir = GetSkillsDirectory()
+            If String.IsNullOrWhiteSpace(userDir) Then Return
+            Directory.CreateDirectory(userDir)
+
+            Dim asm = GetType(SkillsDirectoryService).Assembly
+            Dim extracted As Integer = 0
+            For Each resName In asm.GetManifestResourceNames()
+                If String.IsNullOrWhiteSpace(resName) Then Continue For
+                If Not resName.StartsWith("Skills", StringComparison.OrdinalIgnoreCase) Then Continue For
+                If resName.EndsWith(".resources", StringComparison.OrdinalIgnoreCase) Then Continue For
+
+                Dim rel = resName.Substring("Skills".Length).TrimStart("."c, "/"c, "\"c)
+                If String.IsNullOrWhiteSpace(rel) Then Continue For
+                rel = rel.Replace("/"c, Path.DirectorySeparatorChar).Replace("\"c, Path.DirectorySeparatorChar)
+
+                Dim targetPath = Path.Combine(userDir, rel)
+                Dim targetDir = Path.GetDirectoryName(targetPath)
+                If Not String.IsNullOrWhiteSpace(targetDir) AndAlso Not Directory.Exists(targetDir) Then
+                    Directory.CreateDirectory(targetDir)
+                End If
+
+                Using stream = asm.GetManifestResourceStream(resName)
+                    If stream Is Nothing Then Continue For
+                    Using memory As New IO.MemoryStream()
+                        stream.CopyTo(memory)
+                        Dim content = memory.ToArray()
+
+                        ' Обновляем встроенный файл, если он изменился; иначе не трогаем.
+                        If IO.File.Exists(targetPath) Then
+                            Dim existing = IO.File.ReadAllBytes(targetPath)
+                            If existing.Length = content.Length AndAlso existing.SequenceEqual(content) Then
+                                Continue For
+                            End If
+                        End If
+
+                        IO.File.WriteAllBytes(targetPath, content)
+                        extracted += 1
+                    End Using
+                End Using
+            Next
+
+            If extracted > 0 Then
+                Debug.WriteLine($"[SkillsDirectoryService] встроенных Skills извлечено: {extracted} -> {userDir}")
+            End If
+        Catch ex As Exception
+            Debug.WriteLine($"[SkillsDirectoryService] не удалось извлечь встроенные Skills: {ex.Message}")
+        End Try
     End Sub
 
     ''' <summary>
@@ -214,6 +271,8 @@ Public Class SkillsDirectoryService
     Public Shared Sub RefreshSkills()
         _cachedSkills.Clear()
 
+        EnsureBuiltInSkillsExtracted()
+
         For Each skillsRoot In GetSkillsDirectories()
             If Not Directory.Exists(skillsRoot) Then Continue For
             LoadSkillsFromRoot(skillsRoot, includeDetails:=True, target:=_cachedSkills)
@@ -227,6 +286,8 @@ Public Class SkillsDirectoryService
     ''' </summary>
     Public Shared Sub RefreshSkillCatalog()
         _cachedSkillCatalog.Clear()
+
+        EnsureBuiltInSkillsExtracted()
 
         For Each skillsRoot In GetSkillsDirectories()
             If Not Directory.Exists(skillsRoot) Then Continue For

@@ -55,3 +55,48 @@
 `.vdproj` 适合快速生成 MSI，但它依赖 Visual Studio 扩展，自动化能力和版本兼容性都比较弱。后续如果要继续做三合一安装包、减少重复 DLL、支持 CI 构建，建议规划迁移到 WiX Toolset 或 MSIX。
 
 短期内保持 `OfficeAgent.vdproj` 最小改动；中长期把安装包瘦身、共享依赖去重、注册表写入和升级卸载逻辑迁移到可脚本化、可 CI 构建的安装链路。
+
+## 命令行构建 MSI（验证过的步骤）
+
+1. 安装扩展 `Microsoft Visual Studio Installer Projects 2022`（3.x，安装目标为 `Microsoft.VisualStudio.Community [17.0,19.0)`；旧版 1.x 只支持 VS 2017/2019，会被 VSIXInstaller 拒绝）。
+2. 生成 Release 代码并审计输入：`.\build-installer-prep.bat`。
+3. 命令行构建 `devenv.com` 会报 `ERROR: An error occurred while validating. HRESULT = '8000000A'`。这是 VS 2012+ 不支持进程外构建 setup 项目的已知问题，不是代码错误。设置注册表开关（HKCU，无需管理员）：
+
+   ```powershell
+   $instanceId = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -version "[17.0,18.0)" -property instanceId
+   $regPath = "HKCU:\SOFTWARE\Microsoft\VisualStudio\17.0_${instanceId}_Config\MSBuild"
+   New-Item -Path $regPath -Force | Out-Null
+   Set-ItemProperty -Path $regPath -Name "EnableOutOfProcBuild" -Value 0 -Type DWord
+   ```
+
+   也可以直接运行 `Common7\IDE\CommonExtensions\Microsoft\VSI\DisableOutOfProcBuild\DisableOutOfProcBuild.exe`（需从 VS 安装目录上下文运行，否则找不到实例）。
+4. 构建：`devenv.com AiHelper.sln /Build Release /Project OfficeAgent /Out <log>` → `OfficeAgent\Release\OfficeAgent.msi`。
+
+### 松散 DLL 输入（易漏）
+
+`OfficeAgent.vdproj` 中有以纯文件名（无目录）书写的 `SourcePath`，它们相对 `OfficeAgent\` 解析。仓库跟踪了其中一部分（`Markdig.dll`、`System.Buffers.dll`、`System.Memory.dll`、`System.Runtime.CompilerServices.Unsafe.dll`、`System.Threading.Tasks.Extensions.dll`），但下列四个曾缺失，导致预校验失败：
+
+- `System.Text.Json.dll`
+- `System.Diagnostics.DiagnosticSource.dll`
+- `System.Numerics.Vectors.dll`
+- `System.Threading.Tasks.Dataflow.dll`（不在 `packages/` 中；StreamJsonRpc 2.22.11 的 netstandard2.0 资产依赖它，需从 NuGet `System.Threading.Tasks.Dataflow` 8.0.1 取 `lib/net462`）
+
+前三个可从 `WordAi\bin\Release\` 复制；第四个需单独获取。建议把它们与其余松散 DLL 一起纳入版本管理，保证可复现。
+
+注意：`build\AuditInstallerInputs.ps1` 默认跳过纯文件名（无目录）的 `SourcePath`（`-IncludePlainFiles` 才检查），所以它报告 `PASS` 时仍可能缺少上述 DLL。修复 MSI 输入时不要只依赖该审计结果。
+
+### 升级安装不会替换同版本文件
+
+Windows Installer 只在新文件的版本号更高时才替换已安装的同名程序集。本项目程序集长期保持 `1.0.0.0`，因此用同一个 `ProductVersion` 重新打包后安装，磁盘上的 `ShareRibbon.dll` / 各插件 DLL 仍是旧文件（时间戳不变），表现为「代码改了但功能没变」。
+
+处理方式（任选其一）：
+
+1. 每次发版提升 `AssemblyInfo` 的文件/程序集版本（推荐，符合 MSI 语义）；或
+2. 安装时强制覆盖：`msiexec /i OfficeAgent.msi REINSTALL=ALL REINSTALLMODE=amus`（本地验证可用）；或
+3. 每次发布提升 `ProductVersion` 并生成新的 `ProductCode`（`UpgradeCode` 保持不变，`RemovePreviousVersions=TRUE`），保证是升级而不是就地修复。
+
+本地验证旧文件是否被替换，可比较哈希：
+
+```powershell
+(Get-FileHash WordAi\bin\Release\ShareRibbon.dll).Hash -eq (Get-FileHash "C:\Program Files (x86)\it235\OfficeAiAgent\WordAi\ShareRibbon.dll").Hash
+```

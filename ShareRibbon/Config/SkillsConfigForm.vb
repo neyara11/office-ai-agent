@@ -50,7 +50,7 @@ Public Class SkillsConfigForm
         Dim lblInfo As New Label() With {
             .Text = "Каталог Skills: Documents\OfficeAiAppData\Skills. Скопируйте сюда каталоги Skills, соответствующие спецификации Claude",
             .Location = New Point(15, 10),
-            .Size = New Size(800, 20),
+            .Size = New Size(800, 34),
             .ForeColor = Color.Gray,
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right
         }
@@ -95,15 +95,15 @@ Public Class SkillsConfigForm
         lblName = New Label() With {
             .Text = "Имя:",
             .Location = New Point(xRight, p2Y),
-            .Size = New Size(70, 20),
+            .Size = New Size(140, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left,
             .Font = New Font(Me.Font, FontStyle.Bold)
         }
         split.Panel2.Controls.Add(lblName)
         Dim txtName As New Label() With {
             .Name = "txtName",
-            .Location = New Point(xRight + 70, p2Y),
-            .Size = New Size(430, 20),
+            .Location = New Point(xRight + 140, p2Y),
+            .Size = New Size(360, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right,
             .ForeColor = Color.FromArgb(70, 130, 180)
         }
@@ -114,14 +114,14 @@ Public Class SkillsConfigForm
         lblDescription = New Label() With {
             .Text = "Описание:",
             .Location = New Point(xRight, p2Y),
-            .Size = New Size(70, 20),
+            .Size = New Size(140, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left
         }
         split.Panel2.Controls.Add(lblDescription)
         Dim txtDescription As New Label() With {
             .Name = "txtDescription",
-            .Location = New Point(xRight + 70, p2Y),
-            .Size = New Size(430, 40),
+            .Location = New Point(xRight + 140, p2Y),
+            .Size = New Size(360, 40),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right,
             .ForeColor = Color.DarkGray
         }
@@ -130,8 +130,8 @@ Public Class SkillsConfigForm
 
         ' 元数据行
         Dim metadataPanel As New Panel() With {
-            .Location = New Point(xRight + 70, p2Y),
-            .Size = New Size(430, 80),
+            .Location = New Point(xRight + 140, p2Y),
+            .Size = New Size(360, 102),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left Or AnchorStyles.Right,
             .BackColor = Color.FromArgb(245, 245, 245)
         }
@@ -140,14 +140,14 @@ Public Class SkillsConfigForm
         lblLicense = New Label() With {
             .Text = "Лицензия:",
             .Location = New Point(5, 5),
-            .Size = New Size(60, 18),
+            .Size = New Size(135, 18),
             .ForeColor = Color.Gray
         }
         metadataPanel.Controls.Add(lblLicense)
         Dim txtLicense As New Label() With {
             .Name = "txtLicense",
-            .Location = New Point(70, 5),
-            .Size = New Size(355, 18),
+            .Location = New Point(145, 5),
+            .Size = New Size(205, 18),
             .ForeColor = Color.FromArgb(100, 100, 100)
         }
         metadataPanel.Controls.Add(txtLicense)
@@ -155,14 +155,14 @@ Public Class SkillsConfigForm
         lblCompatibility = New Label() With {
             .Text = "Окружение:",
             .Location = New Point(5, 28),
-            .Size = New Size(60, 18),
+            .Size = New Size(135, 18),
             .ForeColor = Color.Gray
         }
         metadataPanel.Controls.Add(lblCompatibility)
         Dim txtCompatibility As New Label() With {
             .Name = "txtCompatibility",
-            .Location = New Point(70, 28),
-            .Size = New Size(355, 18),
+            .Location = New Point(145, 28),
+            .Size = New Size(205, 18),
             .ForeColor = Color.FromArgb(100, 100, 100)
         }
         metadataPanel.Controls.Add(txtCompatibility)
@@ -170,14 +170,14 @@ Public Class SkillsConfigForm
         lblAllowedTools = New Label() With {
             .Text = "Инструменты:",
             .Location = New Point(5, 51),
-            .Size = New Size(60, 18),
+            .Size = New Size(135, 18),
             .ForeColor = Color.Gray
         }
         metadataPanel.Controls.Add(lblAllowedTools)
         Dim txtAllowedTools As New Label() With {
             .Name = "txtAllowedTools",
-            .Location = New Point(70, 51),
-            .Size = New Size(355, 18),
+            .Location = New Point(145, 51),
+            .Size = New Size(205, 18),
             .ForeColor = Color.FromArgb(100, 100, 100)
         }
         metadataPanel.Controls.Add(txtAllowedTools)
@@ -185,46 +185,46 @@ Public Class SkillsConfigForm
         lblAuthor = New Label() With {
             .Text = "Автор:",
             .Location = New Point(5, 74),
-            .Size = New Size(60, 18),
+            .Size = New Size(135, 18),
             .ForeColor = Color.Gray
         }
         metadataPanel.Controls.Add(lblAuthor)
         Dim txtAuthor As New Label() With {
             .Name = "txtAuthor",
-            .Location = New Point(70, 74),
-            .Size = New Size(200, 18),
+            .Location = New Point(145, 74),
+            .Size = New Size(205, 18),
             .ForeColor = Color.FromArgb(100, 100, 100)
         }
         metadataPanel.Controls.Add(txtAuthor)
 
         lblVersion = New Label() With {
             .Text = "Версия:",
-            .Location = New Point(280, 74),
-            .Size = New Size(50, 18),
+            .Location = New Point(5, 97),
+            .Size = New Size(135, 18),
             .ForeColor = Color.Gray
         }
         metadataPanel.Controls.Add(lblVersion)
         Dim txtVersion As New Label() With {
             .Name = "txtVersion",
-            .Location = New Point(330, 74),
-            .Size = New Size(95, 18),
+            .Location = New Point(145, 97),
+            .Size = New Size(205, 18),
             .ForeColor = Color.FromArgb(100, 100, 100)
         }
         metadataPanel.Controls.Add(txtVersion)
 
-        p2Y += 88
+        p2Y += 110
 
         ' 内容区域
         Dim lblContent As New Label() With {
             .Text = "Содержимое Skill:",
             .Location = New Point(xRight, p2Y),
-            .Size = New Size(70, 20),
+            .Size = New Size(140, 20),
             .Anchor = AnchorStyles.Top Or AnchorStyles.Left
         }
         split.Panel2.Controls.Add(lblContent)
         txtContent = New TextBox() With {
-            .Location = New Point(xRight + 70, p2Y),
-            .Size = New Size(430, 210),
+            .Location = New Point(xRight + 140, p2Y),
+            .Size = New Size(360, 210),
             .Multiline = True,
             .ScrollBars = ScrollBars.Vertical,
             .ReadOnly = True,
@@ -243,7 +243,7 @@ Public Class SkillsConfigForm
         Dim btnOpenDir As New Button() With {
             .Text = "Открыть каталог Skills",
             .Location = New Point(15, y),
-            .Size = New Size(120, 28),
+            .Size = New Size(155, 28),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Left,
             .BackColor = Color.FromArgb(70, 130, 180),
             .ForeColor = Color.White,
@@ -254,8 +254,8 @@ Public Class SkillsConfigForm
 
         Dim btnRefresh As New Button() With {
             .Text = "Обновить список",
-            .Location = New Point(145, y),
-            .Size = New Size(100, 28),
+            .Location = New Point(180, y),
+            .Size = New Size(130, 28),
             .Anchor = AnchorStyles.Bottom Or AnchorStyles.Left
         }
         AddHandler btnRefresh.Click, AddressOf BtnRefreshClick

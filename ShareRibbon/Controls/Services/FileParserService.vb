@@ -37,7 +37,7 @@ Public Class FileParserService
                 Return New FileContentResult With {
                     .FileName = Path.GetFileName(filePath),
                     .FileType = "Text",
-                    .ParsedContent = $"[解析文本文件时出错: {ex.Message}]"
+                    .ParsedContent = $"[Ошибка разбора текстового файла: {ex.Message}]"
                 }
             End Try
         End Function
@@ -57,7 +57,7 @@ Public Class FileParserService
 
                 ' 创建一个格式化的 CSV 内容
                 Dim formattedContent As New StringBuilder()
-                formattedContent.AppendLine($"CSV 文件: {Path.GetFileName(filePath)} (编码: {encoding.EncodingName})")
+                formattedContent.AppendLine($"CSV-файл: {Path.GetFileName(filePath)} (кодировка: {encoding.EncodingName})")
                 formattedContent.AppendLine()
 
                 ' 分析 CSV 数据结构
@@ -99,7 +99,7 @@ Public Class FileParserService
                 Return New FileContentResult With {
                     .FileName = Path.GetFileName(filePath),
                     .FileType = "CSV",
-                    .ParsedContent = $"[解析 CSV 文件时出错: {ex.Message}]"
+                    .ParsedContent = $"[Ошибка разбора CSV-файла: {ex.Message}]"
                 }
             End Try
         End Function

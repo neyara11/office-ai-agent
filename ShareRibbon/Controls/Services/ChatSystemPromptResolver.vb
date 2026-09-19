@@ -23,6 +23,6 @@ Public Class ChatSystemPromptResolver
             Return ConfigSettings.propmtContent
         End If
 
-        Return "你是一个 Office AI 助手，请根据用户需求提供简洁、准确的回答。"
+        Return "Ты ассистент Office AI. Отвечай по запросам пользователя кратко, точно и только на русском языке."
     End Function
 End Class

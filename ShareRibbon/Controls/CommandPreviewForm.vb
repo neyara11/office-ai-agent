@@ -71,13 +71,13 @@ Public Class CommandPreviewForm
 
         cancelButton = New Button()
         cancelButton.Text = "Отмена"
-        cancelButton.Size = New Size(80, 28)
+        cancelButton.AutoSize = True
         cancelButton.DialogResult = DialogResult.Cancel
         AddHandler cancelButton.Click, AddressOf CancelButton_Click
 
         confirmButton = New Button()
         confirmButton.Text = "Подтвердить выполнение"
-        confirmButton.Size = New Size(90, 28)
+        confirmButton.AutoSize = True
         confirmButton.BackColor = Color.FromArgb(0, 120, 212)
         confirmButton.ForeColor = Color.White
         confirmButton.FlatStyle = FlatStyle.Flat
@@ -89,7 +89,7 @@ Public Class CommandPreviewForm
         ' 顶部信息标签
         Dim infoLabel As New Label()
         infoLabel.Dock = DockStyle.Top
-        infoLabel.Height = 30
+        infoLabel.Height = 45
         infoLabel.Text = "  Выберите команду для подробностей; нажмите «Подтвердить выполнение», чтобы выполнить все команды"
         infoLabel.TextAlign = ContentAlignment.MiddleLeft
         infoLabel.BackColor = Color.FromArgb(240, 240, 240)

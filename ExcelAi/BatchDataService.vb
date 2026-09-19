@@ -33,10 +33,10 @@ Public Class BatchDataService
                                                             End If
                                                         End Function))
 
-        Dim systemPrompt = "你是数据生成助手。只输出纯 JSON 数组，不使用 Markdown 代码块，不附加任何说明文字。"
-        Dim userContent = $"请生成 {rowCount} 条随机测试数据，以 JSON 数组返回。" &
-                          $"每条数据是 JSON 对象，包含以下字段：{fieldList}。" &
-                          "只返回 JSON 数组，示例格式：[{{""字段名"": ""值""}}]"
+        Dim systemPrompt = "Ты ассистент по генерации данных. Выводи только чистый JSON-массив, без Markdown-блоков и любых пояснений."
+        Dim userContent = $"Сгенерируй {rowCount} строк случайных тестовых данных и верни их JSON-массивом." &
+                          $"Каждая строка — JSON-объект со следующими полями: {fieldList}." &
+                          "Верни только JSON-массив, пример формата: [{{""имя_поля"": ""значение""}}]"
 
         ' 使用 JsonConvert.SerializeObject 而非手写字符串拼接：
         ' 手写转义容易遗漏 \t、\b、\f 及 U+0000~U+001F 控制字符，导致 API 返回 400/parse error

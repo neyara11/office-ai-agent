@@ -127,7 +127,7 @@ Public Class MCPConfigForm
     Private Sub CreateConnectionConfigArea()
         ' 连接名称输入框
         Dim nameLabel As New Label()
-        nameLabel.Text = "Имя подключения:"
+        nameLabel.Text = "Имя:"
         nameLabel.Location = New Point(210, 40)
         nameLabel.Width = 80
         Me.Controls.Add(nameLabel)
@@ -139,7 +139,7 @@ Public Class MCPConfigForm
 
         ' 连接类型选择
         Dim typeLabel As New Label()
-        typeLabel.Text = "Тип подключения:"
+        typeLabel.Text = "Тип:"
         typeLabel.Location = New Point(210, 70)
         typeLabel.Width = 80
         Me.Controls.Add(typeLabel)
@@ -157,7 +157,7 @@ Public Class MCPConfigForm
         Dim serverUrlLabel As New Label()
         serverUrlLabel.Text = "URL сервера:"
         serverUrlLabel.Location = New Point(210, 100)
-        serverUrlLabel.Width = 80
+        serverUrlLabel.Width = 90
         Me.Controls.Add(serverUrlLabel)
 
         _serverUrlTextBox = New TextBox()
@@ -170,7 +170,7 @@ Public Class MCPConfigForm
 
         ' 高级设置按钮 - 调整位置，填补预设按钮的空缺
         _advancedButton = New Button()
-        _advancedButton.Text = "Дополнительные настройки"
+        _advancedButton.Text = "Доп. настройки"
         _advancedButton.Location = New Point(710, 67)  ' 移到预设按钮的位置
         _advancedButton.Width = 170  ' 增加宽度
         _advancedButton.Enabled = False ' 默认禁用（HTTP模式）
@@ -180,8 +180,8 @@ Public Class MCPConfigForm
         ' 测试连接按钮
         _testButton = New Button()
         _testButton.Text = "Подключиться и исследовать"
-        _testButton.Location = New Point(710, 97)
-        _testButton.Width = 170
+        _testButton.Location = New Point(695, 97)
+        _testButton.Width = 185
         AddHandler _testButton.Click, AddressOf TestConnectionAsync
         Me.Controls.Add(_testButton)
     End Sub
@@ -191,22 +191,22 @@ Public Class MCPConfigForm
         ' 添加导入配置按钮
         Dim importConfigButton As New Button()
         importConfigButton.Text = "Импорт настроек"
-        importConfigButton.Location = New Point(570, 520)
-        importConfigButton.Width = 100
+        importConfigButton.Location = New Point(540, 520)
+        importConfigButton.Width = 115
         AddHandler importConfigButton.Click, AddressOf ImportConfigButton_Click
         Me.Controls.Add(importConfigButton)
 
         _saveButton = New Button()
         _saveButton.Text = "Сохранить настройки"
-        _saveButton.Location = New Point(680, 520)
-        _saveButton.Width = 100
+        _saveButton.Location = New Point(665, 520)
+        _saveButton.Width = 135
         AddHandler _saveButton.Click, AddressOf SaveButton_Click
         Me.Controls.Add(_saveButton)
 
         _cancelButton = New Button()
         _cancelButton.Text = "Отмена"
-        _cancelButton.Location = New Point(790, 520)
-        _cancelButton.Width = 100
+        _cancelButton.Location = New Point(808, 520)
+        _cancelButton.Width = 74
         AddHandler _cancelButton.Click, AddressOf CancelButton_Click
         Me.Controls.Add(_cancelButton)
     End Sub
@@ -815,11 +815,11 @@ Public Class MCPConfigForm
         Dim toolLabel = New Label()
         toolLabel.Text = "Выберите инструмент:"
         toolLabel.Location = New Point(10, 10)
-        toolLabel.Width = 80
+        toolLabel.Width = 140
         testTab.Controls.Add(toolLabel)
 
         _testToolCombo = New ComboBox()
-        _testToolCombo.Location = New Point(100, 7)
+        _testToolCombo.Location = New Point(150, 7)
         _testToolCombo.Width = 450  ' 增加宽度从300改为450，以便显示更长的工具名称
         _testToolCombo.DropDownStyle = ComboBoxStyle.DropDownList
         AddHandler _testToolCombo.SelectedIndexChanged, AddressOf TestToolCombo_SelectedIndexChanged
@@ -827,7 +827,7 @@ Public Class MCPConfigForm
 
         _executeTestButton = New Button()
         _executeTestButton.Text = "Выполнить"
-        _executeTestButton.Location = New Point(560, 5)  ' 调整位置
+        _executeTestButton.Location = New Point(610, 5)  ' 调整位置
         _executeTestButton.Width = 90  ' 略微增加按钮宽度
         AddHandler _executeTestButton.Click, AddressOf ExecuteTestAsync
         testTab.Controls.Add(_executeTestButton)
@@ -836,7 +836,7 @@ Public Class MCPConfigForm
         Dim paramsLabel = New Label()
         paramsLabel.Text = "Параметры (JSON):"
         paramsLabel.Location = New Point(10, 40)
-        paramsLabel.Width = 100
+        paramsLabel.AutoSize = True
         testTab.Controls.Add(paramsLabel)
 
         _testParametersTextBox = New TextBox()
@@ -852,7 +852,7 @@ Public Class MCPConfigForm
         Dim resultLabel = New Label()
         resultLabel.Text = "Результат выполнения:"
         resultLabel.Location = New Point(10, 170)
-        resultLabel.Width = 100
+        resultLabel.AutoSize = True
         testTab.Controls.Add(resultLabel)
 
         _testResultTextBox = New TextBox()

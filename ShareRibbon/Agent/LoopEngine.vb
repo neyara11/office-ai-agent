@@ -16,6 +16,7 @@ Namespace Agent
         Private ReadOnly _promptManager As PromptManager
         Private ReadOnly _undoManager As Core.UndoManager
         Private _multimodalRepairDisabledForRun As Boolean
+        Private _lastPlanFailureReason As String = ""
 
         ' 循环限制
         Private Const MaxIterations As Integer = 15
@@ -51,7 +52,7 @@ Namespace Agent
 
             Try
                 ' Phase 1: 生成 Spec
-                OnStatusChanged?.Invoke("正在分析任务...")
+                OnStatusChanged?.Invoke("Анализирую задачу...")
                 If session.Spec Is Nothing Then
                     session.Spec = Await GenerateSpecAsync(session)
                 Else
@@ -59,13 +60,14 @@ Namespace Agent
                 End If
 
                 ' Phase 2: 生成计划
-                OnStatusChanged?.Invoke("正在制定执行计划...")
+                OnStatusChanged?.Invoke("Формирую план выполнения...")
                 session.Plan = Await GeneratePlanAsync(session, systemPrompt, skill)
                 If session.Plan Is Nothing OrElse session.Plan.Steps.Count = 0 Then
                     Dim capabilityGap = If(session.Plan?.CapabilityGap, "")
                     Dim planFailure = If(String.IsNullOrWhiteSpace(capabilityGap),
-                                         "规划失败：模型未生成可执行计划",
-                                         "当前能力无法完整执行：" & capabilityGap)
+                                         "Не удалось построить план выполнения" &
+                                         If(String.IsNullOrWhiteSpace(_lastPlanFailureReason), "", ": " & _lastPlanFailureReason),
+                                         "Текущая способность не позволяет выполнить полностью: " & capabilityGap)
                     OnStatusChanged?.Invoke(planFailure)
                     Return AgentResult.Failed(session.Id, planFailure)
                 End If
@@ -80,7 +82,7 @@ Namespace Agent
                 OnPlanGenerated?.Invoke(session.Plan)
 
                 session.Status = AgentStatus.Executing
-                OnStatusChanged?.Invoke($"规划完成（共 {session.Plan.Steps.Count} 步），进入自治执行...")
+                OnStatusChanged?.Invoke($"План готов (шагов: {session.Plan.Steps.Count}), переход к выполнению...")
                 Dim executionContext As ToolExecutionContext = ToolExecutionContext.FromSession(session, skill)
 
                 ' Phase 3: ReAct Loop
@@ -91,7 +93,7 @@ Namespace Agent
 
                     ' --- THINK ---
                     session.Status = AgentStatus.Thinking
-                    OnStatusChanged?.Invoke($"步骤 {stepIndex + 1}/{session.Plan.Steps.Count}: {planStep.Description}")
+                    OnStatusChanged?.Invoke($"Шаг {stepIndex + 1}/{session.Plan.Steps.Count}: {planStep.Description}")
                     Dim thought = Await ThinkAsync(session, planStep, systemPrompt)
 
                     ' --- PARSE ACTION ---
@@ -100,7 +102,7 @@ Namespace Agent
                         noProgressCount += 1
                         planStep.Status = StepStatus.Failed
                         planStep.ErrorMessage = "Не удалось разобрать вызов инструмента"
-                        OnStepCompleted?.Invoke(stepIndex, False, "解析失败")
+                        OnStepCompleted?.Invoke(stepIndex, False, "Ошибка разбора")
 
                         If noProgressCount >= MaxNoProgress Then Exit While
                         stepIndex += 1
@@ -126,7 +128,7 @@ Namespace Agent
                     Dim tool = _toolRegistry.GetTool(toolCall.ToolId)
                     If tool IsNot Nothing AndAlso tool.RiskLevel = "risky" Then
                         Debug.WriteLine($"[LoopEngine] 自治模式执行高风险工具: {toolCall.ToolId}")
-                        OnStatusChanged?.Invoke($"步骤 {stepIndex + 1} 使用高风险工具 {toolCall.ToolId}，已记录风险并继续执行")
+                        OnStatusChanged?.Invoke($"Шаг {stepIndex + 1}: используется рискованный инструмент {toolCall.ToolId}; риск зафиксирован, продолжаю")
                     End If
 
                     ' --- ACT (增强版 - 多轮自修复 + 撤销点) ---
@@ -137,7 +139,7 @@ Namespace Agent
                     If _undoManager IsNot Nothing Then
                         undoPoint = _undoManager.CreateUndoPoint(
                             If(session.AppType, "Unknown"),
-                            $"步骤 {stepIndex + 1}: {toolCall.ToolId}",
+                            $"Шаг {stepIndex + 1}: {toolCall.ToolId}",
                             planStep.Description)
                         If undoPoint IsNot Nothing Then
                             Debug.WriteLine($"[LoopEngine] 创建撤销点: {undoPoint.Name}")
@@ -170,23 +172,23 @@ Namespace Agent
                         If Not toolResult.Success AndAlso
                            String.Equals(toolResult.ErrorCode, ExceptionClassifier.CodeSafetyNeedsApproval, StringComparison.OrdinalIgnoreCase) AndAlso
                            OnRequestApproval IsNot Nothing Then
-                            OnStatusChanged?.Invoke($"工具 {toolCall.ToolId} 正在等待用户确认...")
+                            OnStatusChanged?.Invoke($"Инструмент {toolCall.ToolId} ожидает подтверждения пользователя...")
                             Dim approved = Await OnRequestApproval(If(toolResult.UserMessage, toolResult.Message))
                             If approved Then
                                 executionContext.ApproveTool(toolCall.ToolId, toolCall.Parameters)
-                                OnStatusChanged?.Invoke($"用户已批准工具 {toolCall.ToolId}，继续执行...")
+                                OnStatusChanged?.Invoke($"Пользователь подтвердил инструмент {toolCall.ToolId}, продолжаю...")
                                 toolResult = ValidateObservedOutcome(
                                     Await _toolRegistry.ExecuteToolAsync(executionContext, toolCall.ToolId, toolCall.Parameters))
                             Else
                                 toolResult = ToolResult.Failed(
                                     toolCall.ToolId,
-                                    "用户拒绝高风险操作",
+                                    "Пользователь отклонил рискованную операцию",
                                     errorCode:=ExceptionClassifier.CodeSafetyBlocked,
-                                    userMessage:="已取消该高风险操作",
+                                    userMessage:="Рискованная операция отменена",
                                     recoverable:=False,
                                     observation:=New JObject From {
                                         {"kind", "approval"},
-                                        {"summary", "用户拒绝高风险操作"},
+                                        {"summary", "Пользователь отклонил рискованную операцию"},
                                         {"changed", False},
                                         {"warnings", New JArray("approval_rejected")}
                                     })
@@ -207,24 +209,24 @@ Namespace Agent
                                 Exit While
                             End If
 
-                            OnStatusChanged?.Invoke($"代码执行失败，AI 正在修复（尝试 {fixAttempt}/{MaxFixAttempts}）...")
+                            OnStatusChanged?.Invoke($"Выполнение не удалось, AI вносит исправление (попытка {fixAttempt}/{MaxFixAttempts})...")
                             AppLogger.Info("LoopEngine", $"Repair attempt {fixAttempt}/{MaxFixAttempts}: {toolResult.ToObserveSummary()}")
 
                             ' 构建修复提示词（含结构化错误契约）
-                            Dim fixPrompt = $"上一次执行失败：
+                            Dim fixPrompt = $"Предыдущее выполнение завершилось ошибкой:
 
-错误码: {If(toolResult.ErrorCode, ExceptionClassifier.CodeUnknown)}
-用户可见说明: {If(toolResult.UserMessage, toolResult.Message)}
-调试细节: {If(toolResult.DebugDetail, toolResult.Message)}
-可自动修复: {toolResult.Recoverable}
+Код ошибки: {If(toolResult.ErrorCode, ExceptionClassifier.CodeUnknown)}
+Пояснение для пользователя: {If(toolResult.UserMessage, toolResult.Message)}
+Детали отладки: {If(toolResult.DebugDetail, toolResult.Message)}
+Допускает авт. исправление: {toolResult.Recoverable}
 
-原工具调用: {toolCall.ToolId}
-原参数: {Newtonsoft.Json.JsonConvert.SerializeObject(toolCall.Parameters)}
+Исходный вызов инструмента: {toolCall.ToolId}
+Исходные параметры: {Newtonsoft.Json.JsonConvert.SerializeObject(toolCall.Parameters)}
 
-当前 {If(session.AppType, "Office")} 可用工具（必须使用原样工具 ID，不要自创 snake_case 或未注册命令）:
+Доступные инструменты для {If(session.AppType, "Office")} (используй точные ID инструментов, не придумывай snake_case и незарегистрированные команды):
 {BuildAvailableToolHint(session.AppType, executionContext)}
 
-请分析错误原因并返回修正后的工具调用。只返回 JSON，格式：
+Проанализируй причину ошибки и верни исправленный вызов инструмента. Верни только JSON в формате:
 ```json
 {{
   ""toolId"": ""..."",
@@ -261,9 +263,9 @@ Namespace Agent
 
                     ' 如果失败且已达最大修复次数，追加提示
                     If Not toolResult.Success AndAlso fixAttempt >= MaxFixAttempts Then
-                        observation &= $" (AI 已尝试自动修复 {fixAttempt} 次，仍然失败)"
+                        observation &= $" (AI пытался исправить автоматически {fixAttempt} раз, но безуспешно)"
                     ElseIf fixAttempt > 0 AndAlso toolResult.Success Then
-                        observation &= $" (AI 第 {fixAttempt} 次修复成功)"
+                        observation &= $" (AI успешно исправил с попытки {fixAttempt})"
                     End If
 
                     _memory.SetWorking("lastObservation", observation)
@@ -297,7 +299,7 @@ Namespace Agent
                         AppLogger.Warn("LoopEngine", $"Step failed: {toolResult.ToObserveSummary()}")
 
                         If Not toolResult.Recoverable Then
-                            Dim terminalFailure = $"任务因不可恢复错误停止: {toolResult.ToObserveSummary()}"
+                            Dim terminalFailure = $"Задача остановлена из-за невосстановимой ошибки: {toolResult.ToObserveSummary()}"
                             session.Status = AgentStatus.Failed
                             OnStatusChanged?.Invoke(terminalFailure)
                             AppLogger.Warn("LoopEngine", terminalFailure)
@@ -313,13 +315,13 @@ Namespace Agent
                         ' --- REFLECT (连续失败) ---
                         If noProgressCount >= MaxNoProgress Then
                             If replanAttempts >= MaxReplanAttempts Then
-                                Dim failMsg = $"步骤多次失败，已达最大重规划次数: {toolResult.ToObserveSummary()}"
+                                Dim failMsg = $"Шаг многократно завершался ошибкой, достигнут лимит повторного планирования: {toolResult.ToObserveSummary()}"
                                 AppLogger.Error("LoopEngine", failMsg)
                                 Return AgentResult.Failed(session.Id, failMsg)
                             End If
 
                             session.Status = AgentStatus.Reflecting
-                            OnStatusChanged?.Invoke("正在分析失败原因并重新规划...")
+                            OnStatusChanged?.Invoke("Анализирую причину сбоя и перестраиваю план...")
                             replanAttempts += 1
                             AppLogger.Info("LoopEngine", $"Reflect/replan attempt {replanAttempts}: {toolResult.ToObserveSummary()}")
 
@@ -330,7 +332,7 @@ Namespace Agent
                                 noProgressCount = 0
                                 Continue While
                             Else
-                                Dim replanFail = $"重新规划失败: {toolResult.ToObserveSummary()}"
+                                Dim replanFail = $"Не удалось перестроить план: {toolResult.ToObserveSummary()}"
                                 AppLogger.Error("LoopEngine", replanFail)
                                 Return AgentResult.Failed(session.Id, replanFail)
                             End If
@@ -342,7 +344,7 @@ Namespace Agent
 
                 If session.CurrentIteration = 0 Then
                     session.Status = AgentStatus.Failed
-                    Dim failMsg = "任务未执行任何工具调用。可能是计划步骤没有生成可解析的 action，或当前宿主工具未加载。"
+                    Dim failMsg = "Задача не выполнила ни одного вызова инструмента. Возможно, шаги плана не содержат разбираемого action или инструменты текущего хоста не загружены."
                     OnStatusChanged?.Invoke(failMsg)
                     AppLogger.Warn("LoopEngine", failMsg)
                     Return AgentResult.Failed(session.Id, failMsg)
@@ -353,7 +355,7 @@ Namespace Agent
                     ToList()
                 If incompleteSteps.Count > 0 Then
                     session.Status = AgentStatus.Failed
-                    Dim failMsg = $"任务未完成，失败/未执行步骤 {incompleteSteps.Count} 个: {String.Join("; ", incompleteSteps.Select(Function(s) s.ErrorMessage).Where(Function(m) Not String.IsNullOrWhiteSpace(m)).Take(3))}"
+                    Dim failMsg = $"Задача не завершена, неудачных/невыполненных шагов: {incompleteSteps.Count}: {String.Join("; ", incompleteSteps.Select(Function(s) s.ErrorMessage).Where(Function(m) Not String.IsNullOrWhiteSpace(m)).Take(3))}"
                     OnStatusChanged?.Invoke(failMsg)
                     AppLogger.Warn("LoopEngine", failMsg)
                     Return AgentResult.Failed(session.Id, failMsg)
@@ -369,7 +371,7 @@ Namespace Agent
 
                 ' 完成
                 session.Status = AgentStatus.Completed
-                Dim finalMsg = $"任务完成，共执行 {session.CurrentIteration} 个迭代"
+                Dim finalMsg = $"Задача выполнена, итераций: {session.CurrentIteration}"
                 OnStatusChanged?.Invoke(finalMsg)
                 AppLogger.Info("LoopEngine", finalMsg)
                 Return AgentResult.SuccessResult(session.Id, finalMsg)
@@ -377,9 +379,9 @@ Namespace Agent
             Catch ex As Exception
                 session.Status = AgentStatus.Failed
                 Dim classified = ExceptionClassifier.Classify(ex)
-                OnStatusChanged?.Invoke($"执行出错: {classified.UserMessage}")
+                OnStatusChanged?.Invoke($"Ошибка выполнения: {classified.UserMessage}")
                 AppLogger.Error("LoopEngine", "RunAsync unhandled exception", ex)
-                Return AgentResult.Failed(session.Id, $"执行异常: [{classified.ErrorCode}] {classified.UserMessage}")
+                Return AgentResult.Failed(session.Id, $"Исключение при выполнении: [{classified.ErrorCode}] {classified.UserMessage}")
             End Try
         End Function
 

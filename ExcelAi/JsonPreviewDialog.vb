@@ -101,14 +101,14 @@ Public Class JsonPreviewDialog
 
         btnCancel = New Button()
         btnCancel.Text = "Отмена"
-        btnCancel.Size = New Size(100, 35)
+        btnCancel.AutoSize = True
         btnCancel.DialogResult = DialogResult.Cancel
         btnCancel.FlatStyle = FlatStyle.Flat
         btnCancel.FlatAppearance.BorderColor = Color.Gray
 
         btnExecute = New Button()
         btnExecute.Text = "Выполнить"
-        btnExecute.Size = New Size(100, 35)
+        btnExecute.AutoSize = True
         btnExecute.BackColor = Color.FromArgb(74, 111, 165)
         btnExecute.ForeColor = Color.White
         btnExecute.FlatStyle = FlatStyle.Flat

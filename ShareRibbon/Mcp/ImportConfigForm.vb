@@ -53,15 +53,15 @@ Public Class ImportConfigForm
         Dim exampleButton As New Button()
         exampleButton.Text = "Заполнить примером"
         exampleButton.Location = New Point(20, 360)
-        exampleButton.Size = New Size(100, 30)
+        exampleButton.Size = New Size(150, 30)
         AddHandler exampleButton.Click, AddressOf ExampleButton_Click
         Me.Controls.Add(exampleButton)
 
         ' 验证按钮
         Dim validateButton As New Button()
         validateButton.Text = "Проверить JSON"
-        validateButton.Location = New Point(130, 360)
-        validateButton.Size = New Size(100, 30)
+        validateButton.Location = New Point(180, 360)
+        validateButton.Size = New Size(125, 30)
         AddHandler validateButton.Click, AddressOf ValidateButton_Click
         Me.Controls.Add(validateButton)
 

@@ -234,7 +234,7 @@ if (document.readyState !== 'loading') {
     ''' </summary>
     Public Shared Async Function SendHttpRequestAsync(apiUrl As String, apiKey As String, requestBody As String) As Threading.Tasks.Task(Of String)
         Try
-            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.SystemDefault
+            System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12
             Using client As New System.Net.Http.HttpClient(ShareRibbon.HttpClientFactory.CreateHandler(apiUrl))
                 client.Timeout = TimeSpan.FromSeconds(120)
                 client.DefaultRequestHeaders.Add("Authorization", "Bearer " & apiKey)

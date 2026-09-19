@@ -33,24 +33,24 @@ Namespace Agent
             Dim mcpStatus = ExtractResultDataValue(toolResult, "mcpStatus")
             Dim failureReason = If(success, "", ExtractResultDataValue(toolResult, "failureReason"))
             If String.IsNullOrWhiteSpace(failureReason) AndAlso Not success Then failureReason = message
-            Dim verb = If(success, "已完成", "未完成")
-            Dim fixText = If(fixAttempts > 0, $"，期间自动修复 {fixAttempts} 次", "")
-            Dim skillText = If(String.IsNullOrWhiteSpace(skillName), "", $"，Skill: {skillName}")
-            Dim scriptText = If(String.IsNullOrWhiteSpace(scriptFileName), "", $"，脚本: {scriptFileName}")
-            Dim mcpText = If(String.IsNullOrWhiteSpace(mcpToolName), "", $"，MCP: {mcpToolName}")
+            Dim verb = If(success, "выполнен", "не выполнен")
+            Dim fixText = If(fixAttempts > 0, $", авт. исправлений: {fixAttempts}", "")
+            Dim skillText = If(String.IsNullOrWhiteSpace(skillName), "", $", Skill: {skillName}")
+            Dim scriptText = If(String.IsNullOrWhiteSpace(scriptFileName), "", $", скрипт: {scriptFileName}")
+            Dim mcpText = If(String.IsNullOrWhiteSpace(mcpToolName), "", $", MCP: {mcpToolName}")
             Dim elapsedMs = CLng(Math.Max(0, (finishedAt - startedAt).TotalMilliseconds))
             If toolResult IsNot Nothing AndAlso toolResult.ElapsedMs > 0 Then elapsedMs = toolResult.ElapsedMs
             Dim undoHint = If(undoPoint Is Nothing, "", _undoManager.GetUndoHint(If(undoPoint.AppType, "")))
             Dim undoPointName = If(undoPoint?.Name, "")
             Dim canUndo = undoPoint IsNot Nothing AndAlso undoPoint.CanUndo
-            Dim beforeSummary = $"准备执行步骤 {stepIndex + 1}: {If(planStep?.Description, "")}；工具: {toolId}；参数: {paramsJson}"
+            Dim beforeSummary = $"Подготовка к шагу {stepIndex + 1}: {If(planStep?.Description, "")}; инструмент: {toolId}; параметры: {paramsJson}"
             Dim afterSummary = If(observation, message)
             Dim observationJson = SerializeCompactJson(If(toolResult?.Observation, Nothing), 8192)
             Dim dataSummaryJson = SerializeCompactJson(BuildDataSummary(toolResult), 4096)
             Dim repairSummary = If(fixAttempts > 0,
-                                   If(success, $"AI 自动修复 {fixAttempts} 次后成功", $"AI 自动修复 {fixAttempts} 次后仍失败"),
+                                   If(success, $"AI успешно исправил после {fixAttempts} попыток", $"AI не смог исправить после {fixAttempts} попыток"),
                                    "")
-            Dim text = $"步骤 {stepIndex + 1} {verb}：调用 {toolName}（{toolId}）{skillText}{scriptText}{mcpText}{fixText}。{message}"
+            Dim text = $"Шаг {stepIndex + 1} {verb}: вызов {toolName} ({toolId}){skillText}{scriptText}{mcpText}{fixText}. {message}"
 
             Return New ExecutionExplanation With {
                 .StepIndex = stepIndex,
@@ -178,27 +178,27 @@ Namespace Agent
         Private Async Function GenerateSpecAsync(session As AgentSession) As Task(Of AgentTaskSpec)
             Dim spec As New AgentTaskSpec()
             Try
-                Dim prompt = $"分析以下需求，提取结构化任务规格：
+                Dim prompt = $"Проанализируй запрос и выдели структурированную спецификацию задачи:
 
-需求: {session.UserRequest}
+Запрос: {session.UserRequest}
 
-返回 JSON：
+Верни JSON:
 ```json
 {{
-  ""goal"": ""一句话描述核心目标"",
-  ""constraints"": [""约束1""],
-  ""success_criteria"": [""成功标准1""],
+  ""goal"": ""одно предложение о главной цели"",
+  ""constraints"": [""ограничение 1""],
+  ""success_criteria"": [""критерий успеха 1""],
   ""complexity"": ""simple|medium|complex""
 }}
 ```
 
-complexity 规则：
-- simple：单一操作，步骤数 <= 2，无需用户确认
-- medium：2-5个步骤，建议用户确认
-- complex：步骤多或逻辑复杂，必须用户确认"
+Правила complexity:
+- simple: одно действие, не более 2 шагов, подтверждение пользователя не требуется
+- medium: 2-5 шагов, желательно подтверждение пользователя
+- complex: много шагов или сложная логика, подтверждение пользователя обязательно"
 
                 Dim response = Await SendAIRequest(prompt,
-                    "你是一个任务分析专家。只返回JSON，不要解释。", Nothing)
+                    "Ты специалист по анализу задач. Возвращай только JSON, без пояснений.", Nothing)
 
                 Dim jsonStr = ExtractJson(response)
                 If Not String.IsNullOrEmpty(jsonStr) Then
@@ -234,7 +234,7 @@ complexity 规则：
 
                 Dim jsonStr = ExtractJson(response)
                 If String.IsNullOrEmpty(jsonStr) Then
-                    failureReason = "响应中没有 JSON"
+                    failureReason = "в ответе модели нет JSON"
                 Else
                     Dim obj = JObject.Parse(jsonStr)
                     plan.Understanding = obj("understanding")?.ToString()
@@ -260,15 +260,17 @@ complexity 规则：
             End Try
 
             If plan.Steps.Count = 0 AndAlso String.IsNullOrWhiteSpace(plan.CapabilityGap) Then
-                If String.IsNullOrWhiteSpace(failureReason) Then failureReason = "响应没有 steps 或 capabilityGap"
+                If String.IsNullOrWhiteSpace(failureReason) Then failureReason = "в ответе нет steps и нет capabilityGap"
+                _lastPlanFailureReason = failureReason
                 AppLogger.Warn("LoopEngine", $"规划无效 attempt={attempt}: {AppLogger.Redact(failureReason)}")
                 If attempt = 0 Then
                     Dim correctedPrompt = systemPrompt & vbCrLf &
-                        "【规划纠错】上次响应不是有效计划。必须返回严格 JSON，并且提供非空 steps 或明确 capabilityGap。"
+                        "【Исправление плана】Предыдущий ответ не является допустимым планом. Верни строгий JSON и обязательно непустой массив steps либо явное поле capabilityGap. Отвечай только на русском языке."
                     Return Await GeneratePlanAsync(session, correctedPrompt, skill, attempt + 1)
                 End If
                 Return Nothing
             End If
+            _lastPlanFailureReason = ""
             Return plan
         End Function
 
@@ -279,7 +281,7 @@ complexity 规则：
             If spec.ExpectedOutputs.Contains("images") AndAlso
                Not toolIds.Contains("InsertImage") AndAlso
                Not PlanContainsCreateSlidesImage(plan) Then
-                Return "规划未覆盖用户要求的真实图片插入；没有可访问图片来源时必须明确报告 capability gap。"
+                Return "План не покрывает вставку реального изображения, которое запросил пользователь; при отсутствии доступного источника нужно явно сообщить о нехватке возможности."
             End If
             If spec.ExpectedOutputs.Contains("images") Then
                 Dim imagePathError = ValidatePlannedImagePaths(plan)
@@ -288,13 +290,13 @@ complexity 规则：
             If spec.ExpectedSlideCount > 0 AndAlso
                Not toolIds.Contains("CreateSlides") AndAlso
                Not toolIds.Contains("InsertSlide") Then
-                Return $"规划未覆盖创建 {spec.ExpectedSlideCount} 张幻灯片的要求。"
+                Return $"План не покрывает создание {spec.ExpectedSlideCount} слайдов."
             End If
             Return ""
         End Function
 
         Private Function ValidatePlannedImagePaths(plan As ExecutionPlan) As String
-            If plan?.Steps Is Nothing Then Return "图片计划为空。"
+            If plan?.Steps Is Nothing Then Return "План работы с изображениями пуст."
 
             For Each stepItem In plan.Steps
                 Try
@@ -310,10 +312,10 @@ complexity 规则：
                             Dim params = TryCast(commandObj("params"), JObject)
                             Dim imagePath = params?("imagePath")?.ToString()
                             If String.IsNullOrWhiteSpace(imagePath) Then
-                                Return "图片计划缺少 imagePath，不能开始部分修改。"
+                                Return "В плане с изображением отсутствует imagePath; частичные изменения не начинаются."
                             End If
                             If Not IO.File.Exists(imagePath) Then
-                                Return $"图片文件不可访问：{imagePath}。为避免只创建文字页，任务尚未执行。"
+                                Return $"Файл изображения недоступен: {imagePath}. Чтобы не создавать только текстовые слайды, задача не выполнялась."
                             End If
                         ElseIf String.Equals(commandName, "CreateSlides", StringComparison.OrdinalIgnoreCase) Then
                             Dim params = TryCast(commandObj("params"), JObject)
@@ -322,7 +324,7 @@ complexity 规则：
                             For Each slide In slides.OfType(Of JObject)()
                                 Dim imagePath = slide("imagePath")?.ToString()
                                 If Not String.IsNullOrWhiteSpace(imagePath) AndAlso Not IO.File.Exists(imagePath) Then
-                                    Return $"图片文件不可访问：{imagePath}。为避免只创建文字页，任务尚未执行。"
+                                    Return $"Файл изображения недоступен: {imagePath}. Чтобы не создавать только текстовые слайды, задача не выполнялась."
                                 End If
                             Next
                         End If
@@ -380,7 +382,7 @@ complexity 规则：
                    Function(toolCall) String.Equals(toolCall.ToolId, "InsertImage", StringComparison.OrdinalIgnoreCase) OrElse
                                       (String.Equals(toolCall.ToolId, "CreateSlides", StringComparison.OrdinalIgnoreCase) AndAlso
                                        CreateSlidesParametersContainImage(toolCall.Parameters))) Then
-                Return "任务未完成：用户要求插入图片，但执行记录中没有成功产生真实图片的操作。"
+                Return "Задача не выполнена: пользователь просил вставить изображение, но в записи выполнения нет успешной вставки реального изображения."
             End If
 
             If session.Spec.ExpectedSlideCount > 0 Then
@@ -394,7 +396,7 @@ complexity 规则：
                     End If
                 Next
                 If created < session.Spec.ExpectedSlideCount Then
-                    Return $"任务未完成：要求创建 {session.Spec.ExpectedSlideCount} 张幻灯片，执行记录仅确认 {created} 张。"
+                    Return $"Задача не выполнена: требовалось создать {session.Spec.ExpectedSlideCount} слайдов, в записи выполнения подтверждено {created}."
                 End If
             End If
             Return ""
@@ -534,15 +536,15 @@ complexity 规则：
         ''' </summary>
         Private Function FormatObservation(result As ToolResult) As String
             If result Is Nothing Then
-                Return "❌ [unknown] 无工具结果"
+                Return "❌ [unknown] нет результата инструмента"
             End If
             If result.Success Then
                 Dim summary = result.ToObserveSummary()
                 Dim dataSummary = FormatResultData(result.Data)
                 If Not String.IsNullOrWhiteSpace(dataSummary) Then
-                    Return $"✅ [{result.ToolId}] 执行成功: {summary}{vbCrLf}data={dataSummary}"
+                    Return $"✅ [{result.ToolId}] выполнено успешно: {summary}{vbCrLf}data={dataSummary}"
                 End If
-                Return $"✅ [{result.ToolId}] 执行成功: {summary}"
+                Return $"✅ [{result.ToolId}] выполнено успешно: {summary}"
             End If
             ' Structured observe payload for repair/reflect (P0-4).
             Return $"❌ [{result.ToolId}] {result.ToObserveSummary()}"
@@ -569,7 +571,7 @@ complexity 规则：
                 New JObject From {
                     {"type", "text"},
                     {"text", fixPrompt & vbCrLf & vbCrLf &
-                        "请结合附带的实际 PowerPoint 渲染截图诊断视觉问题；只返回约定的修正后工具调用 JSON。"}
+                        "Диагностируй визуальную проблему по приложенному реальному скриншоту PowerPoint; верни только согласованный JSON исправленного вызова инструмента. Отвечай только на русском языке."}
                 }
             }
             Dim evidenceCount As Integer = 0
@@ -645,10 +647,10 @@ complexity 规则：
                     If failedCount > 0 Then
                         Return ToolResult.Failed(
                             result.ToolId,
-                            $"操作批次存在 {failedCount} 个未成功步骤",
+                            $"В пакете операций не выполнено шагов: {failedCount}",
                             data:=result.Data,
                             errorCode:=ExceptionClassifier.CodePartialApply,
-                            userMessage:="部分 Office 操作未完成，正在尝试修复",
+                            userMessage:="Часть операций Office не выполнена, пытаюсь исправить",
                             recoverable:=True,
                             observation:=result.Observation,
                             artifacts:=result.Artifacts)
@@ -661,10 +663,10 @@ complexity 规则：
                    Not changedToken.Value(Of Boolean)() Then
                     Return ToolResult.Failed(
                         result.ToolId,
-                        "宿主返回成功，但观察结果未检测到实际变化",
+                        "Хост сообщил об успехе, но наблюдение не обнаружило фактических изменений",
                         data:=result.Data,
                         errorCode:=ExceptionClassifier.CodeVerifyFailed,
-                        userMessage:="Office 未产生预期变化，正在重新验证或修复",
+                        userMessage:="Office не дал ожидаемых изменений, повторно проверяю или исправляю",
                         recoverable:=True,
                         observation:=result.Observation,
                         artifacts:=result.Artifacts)

@@ -287,11 +287,50 @@ Namespace Agent
         End Sub
 
         ''' <summary>
+        ''' Загружает описания нативных инструментов, встроенные в сборку как ресурсы.
+        ''' Нужно, потому что установленная раскладка MSI не содержит каталог Tools,
+        ''' и поиск по каталогам ничего не находит.
+        ''' </summary>
+        Public Sub LoadFromEmbeddedResources()
+            Try
+                Dim asm = GetType(ToolRegistry).Assembly
+                Dim loaded As Integer = 0
+                For Each resName In asm.GetManifestResourceNames()
+                    If Not resName.EndsWith(".json", StringComparison.OrdinalIgnoreCase) Then Continue For
+                    If resName.IndexOf(".Tools.", StringComparison.OrdinalIgnoreCase) < 0 Then Continue For
+
+                    Try
+                        Using stream = asm.GetManifestResourceStream(resName)
+                            If stream Is Nothing Then Continue For
+                            Using reader As New IO.StreamReader(stream)
+                                Dim json = reader.ReadToEnd()
+                                Dim tool = JsonConvert.DeserializeObject(Of ToolDescriptor)(json)
+                                If tool IsNot Nothing AndAlso Not String.IsNullOrWhiteSpace(tool.Id) Then
+                                    RegisterOrMergeTool(tool)
+                                    loaded += 1
+                                End If
+                            End Using
+                        End Using
+                    Catch ex As Exception
+                        Debug.WriteLine($"[ToolRegistry] загрузка встроенного инструмента не удалась {resName}: {ex.Message}")
+                    End Try
+                Next
+                Debug.WriteLine($"[ToolRegistry] встроенных нативных инструментов загружено={loaded}, всего={ToolCount}")
+            Catch ex As Exception
+                Debug.WriteLine($"[ToolRegistry] LoadFromEmbeddedResources ошибка: {ex.Message}")
+            End Try
+        End Sub
+
+        ''' <summary>
         ''' 从 VSTO 宿主输出、共享程序集输出和开发仓库候选目录加载原生工具。
         ''' AiNative 分析与 AgentKernel 执行必须调用同一入口，避免两阶段工具视图不一致。
         ''' </summary>
         Public Function LoadFromRuntimeDirectories(Optional preferredBaseDirectory As String = Nothing) As Integer
             Dim before = ToolCount
+
+            ' Встроенные описания — основной источник для установленной раскладки.
+            LoadFromEmbeddedResources()
+
             Dim candidates As New List(Of String)()
             Dim roots As New List(Of String) From {
                 preferredBaseDirectory,

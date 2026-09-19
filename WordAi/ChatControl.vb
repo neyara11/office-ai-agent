@@ -908,7 +908,7 @@ Public Class ChatControl
                 sb.AppendLine($"Область применения: {_activeReformatPlan.ScopeSummary}")
             End If
             sb.AppendLine($"Рекомендуемый стандарт: {_activeReformatPlan.StandardName}")
-            sb.AppendLine($"Тип документа: {_activeReformatPlan.DetectedType.ToString()}")
+            sb.AppendLine($"Тип документа: {GetReformatDocumentTypeName(_activeReformatPlan.DetectedType)}")
             sb.AppendLine($"Всего изменений формата: {_activeReformatPlan.TotalStyleChanges}:")
             If _activeReformatPlan.Changes Is Nothing OrElse _activeReformatPlan.Changes.Count = 0 Then
                 sb.AppendLine("  - Структурный анализ выполнен; области, требующие немедленной настройки, не обнаружены.")
@@ -958,6 +958,18 @@ Public Class ChatControl
                 Return "Маркированный список"
             Case Else
                 Return tagId
+        End Select
+    End Function
+
+    Private Function GetReformatDocumentTypeName(docType As DocumentType) As String
+        Select Case docType
+            Case DocumentType.OfficialDocument : Return "Официальный документ"
+            Case DocumentType.AcademicPaper : Return "Научная статья"
+            Case DocumentType.BusinessReport : Return "Бизнес-отчёт"
+            Case DocumentType.Contract : Return "Договор/соглашение"
+            Case DocumentType.[Resume] : Return "Резюме"
+            Case DocumentType.GeneralDocument : Return "Обычный документ"
+            Case Else : Return "Не определён"
         End Select
     End Function
 

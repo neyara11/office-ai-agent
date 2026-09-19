@@ -69,6 +69,15 @@ Public Class SkillsService
         {"顾问", New List(Of String) From {"advisor", "consultant", "顾问"}}
     }
 
+    ' Служебные слова не несут смысла для выбора Skill, но как подстроки дают ложные
+    ' срабатывания (например, "на" внутри "навыков"), поэтому исключаются из запроса.
+    Private Shared ReadOnly StopWords As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase) From {
+        "на", "в", "во", "и", "с", "со", "по", "за", "из", "к", "ко", "о", "об", "от", "до",
+        "для", "при", "про", "над", "под", "у", "не", "ни", "же", "бы", "ли", "это", "этот",
+        "мне", "мой", "моя", "мы", "вы", "ты", "он", "она", "они", "как", "что", "чтобы",
+        "the", "a", "an", "of", "to", "in", "on", "for", "and", "or", "with", "is", "are", "be", "at", "by"
+    }
+
     ' 使用统计文件路径
     Private Shared ReadOnly UsageStatsPath As String = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -166,7 +175,7 @@ Public Class SkillsService
 
         For Each token In tokens
             Dim t = token.Trim()
-            If t.Length > 0 Then
+            If t.Length > 0 AndAlso Not StopWords.Contains(t) Then
                 words.Add(t)
                 ' 添加同义词
                 For Each kvp In Synonyms
@@ -204,7 +213,7 @@ Public Class SkillsService
 
             ' 查询词完全包含在Skill名称中
             For Each word In queryWords
-                If word.Length > 1 AndAlso nameLower.Contains(word) Then
+                If word.Length >= 3 AndAlso nameLower.Contains(word) Then
                     score += 10
                     If Not matchedKeywords.Contains(word) Then
                         matchedKeywords.Add(word)
@@ -219,7 +228,7 @@ Public Class SkillsService
 
             ' 查询词匹配
             For Each word In queryWords
-                If word.Length > 1 AndAlso descLower.Contains(word) Then
+                If word.Length >= 3 AndAlso descLower.Contains(word) Then
                     score += 5
                     If Not matchedKeywords.Contains(word) Then
                         matchedKeywords.Add(word)

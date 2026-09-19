@@ -218,7 +218,7 @@ Namespace Services
                 plan.Operations.Add(New FormattingOperation With {
                     .Kind = If(IsPointUnit(unit), FormattingOperationKind.FontSizeDelta, FormattingOperationKind.FontSizeGradeDelta),
                     .NumericValue = Math.Max(0.5, ParseAmount(inc.Groups(2).Value, 1)),
-                    .Explanation = If(IsPointUnit(unit), "字号磅值增量", "中文字号等级增量")
+                    .Explanation = If(IsPointUnit(unit), "Увеличение размера шрифта в пунктах", "Увеличение кегля шрифта")
                 })
                 Return
             End If
@@ -229,7 +229,7 @@ Namespace Services
                 plan.Operations.Add(New FormattingOperation With {
                     .Kind = If(IsPointUnit(unit), FormattingOperationKind.FontSizeDelta, FormattingOperationKind.FontSizeGradeDelta),
                     .NumericValue = -Math.Max(0.5, ParseAmount(dec.Groups(2).Value, 1)),
-                    .Explanation = If(IsPointUnit(unit), "字号磅值减量", "中文字号等级减量")
+                    .Explanation = If(IsPointUnit(unit), "Уменьшение размера шрифта в пунктах", "Уменьшение кегля шрифта")
                 })
                 Return
             End If

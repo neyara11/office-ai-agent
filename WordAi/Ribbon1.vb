@@ -24,7 +24,7 @@ Public Class Ribbon1
         'Globals.ThisAddIn.ShowChatTaskPane()
     End Sub
     Protected Overrides Async Sub DataAnalysisButton_Click(sender As Object, e As RibbonControlEventArgs)
-        Await StartAgentFromRibbonAsync("请自动分析当前选中文档内容或整篇 Word 文档，提取结构、关键数据、风险点、摘要结论和可执行改进建议；如包含表格或数字，请优先进行结构化分析。")
+        Await StartAgentFromRibbonAsync("Проанализируй выделенный фрагмент или весь документ Word: структуру, ключевые данные, риски, выводы и рекомендации; если есть таблицы или числа — сначала структурный анализ. Отвечай только на русском языке.")
     End Sub
 
     Protected Overrides Function GetApplication() As ApplicationInfo
