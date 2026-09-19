@@ -124,7 +124,7 @@ Public Module ExcelDnaFunctions
         Try
             ' 验证输入
             If String.IsNullOrEmpty(prompt) Then
-                Return "错误: 提示词不能为空"
+                Return "Ошибка: промпт не может быть пустым"
             End If
 
             ' 确保配置已加载
@@ -134,11 +134,11 @@ Public Module ExcelDnaFunctions
             Dim apiUrl As String = ConfigSettings.ApiUrl
 
             If String.IsNullOrEmpty(apiKey) Then
-                Return "错误: 未配置API密钥"
+                Return "Ошибка: не настроен ключ API"
             End If
 
             If String.IsNullOrEmpty(apiUrl) Then
-                Return "错误: 未配置API URL"
+                Return "Ошибка: не настроен URL API"
             End If
 
             ' 使用指定的模型或默认模型
@@ -153,7 +153,7 @@ Public Module ExcelDnaFunctions
 
             ' 如果响应为空，返回错误信息
             If String.IsNullOrEmpty(response) Then
-                Return "错误: API未返回响应"
+                Return "Ошибка: API не вернул ответ"
             End If
 
             Dim parsedResponse As JObject = JObject.Parse(response)
@@ -264,7 +264,7 @@ Public Module ExcelDnaFunctions
         Try
             ' 验证输入
             If String.IsNullOrEmpty(prompt) Then
-                Return "错误: 提示词不能为空"
+                Return "Ошибка: промпт не может быть пустым"
             End If
 
             EnsureConfigLoaded()
@@ -272,11 +272,11 @@ Public Module ExcelDnaFunctions
             Dim apiUrl As String = ConfigSettings.ApiUrl
 
             If String.IsNullOrEmpty(apiKey) Then
-                Return "错误: 未配置API密钥"
+                Return "Ошибка: не настроен ключ API"
             End If
 
             If String.IsNullOrEmpty(apiUrl) Then
-                Return "错误: 未配置API URL"
+                Return "Ошибка: не настроен URL API"
             End If
 
             ' 使用指定的模型或默认模型
@@ -292,7 +292,7 @@ Public Module ExcelDnaFunctions
 
             ' 如果响应为空或是错误信息，直接返回
             If String.IsNullOrEmpty(response) Then
-                Return "错误: API未返回响应"
+                Return "Ошибка: API не вернул ответ"
             End If
 
             If response.StartsWith("错误:") Then
