@@ -30,7 +30,7 @@ try {
     if ($openAiRequest["model"].ToString() -ne "gpt-smoke") { throw "OpenAI model was not preserved." }
     if ($openAiRequest["stream"].ToString().ToLowerInvariant() -ne "false") { throw "OpenAI stream must be false." }
     if ($openAiRequest["messages"].Count -ne 2) { throw "OpenAI messages count mismatch." }
-    if ($openAiRequest["temperature"].ToString() -ne "0.2") { throw "OpenAI temperature mismatch." }
+    if ([math]::Abs([double]$openAiRequest["temperature"].Value - 0.2) -gt 0.0001) { throw "OpenAI temperature mismatch." }
     if ($openAiRequest["max_tokens"].ToString() -ne "123") { throw "OpenAI max_tokens mismatch." }
 
     $anthropicOptions = New-Object ShareRibbon.AiRequestOptions
