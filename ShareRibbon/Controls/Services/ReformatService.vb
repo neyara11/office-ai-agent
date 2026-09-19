@@ -75,8 +75,8 @@ Public Class ReformatService
                     allItems.Add(New With {
                         .Id = "docx_" & m.Id,
                         .Name = m.Name,
-                        .Description = $"从Word文档提取，共{m.SemanticTags.Count}个语义标签",
-                        .Category = "文档提取",
+                        .Description = $"Извлечено из документа Word, всего {m.SemanticTags.Count} семантических меток",
+                        .Category = "Извлечено из документа",
                         .IsPreset = False,
                         .IsDocxMapping = True,
                         .MappingId = m.Id,
@@ -100,8 +100,8 @@ Public Class ReformatService
         _invokeOnUiThread(Sub()
             Try
                 Dim ofd As New OpenFileDialog With {
-                    .Filter = "模板文件 (*.json;*.doc;*.docx;*.dotx;*.ppt;*.pptx)|*.json;*.doc;*.docx;*.dotx;*.ppt;*.pptx|JSON文件 (*.json)|*.json|Word文档/模板 (*.doc;*.docx;*.dotx)|*.doc;*.docx;*.dotx|PowerPoint文档 (*.ppt;*.pptx)|*.ppt;*.pptx|所有文件 (*.*)|*.*",
-                    .Title = "选择要导入的模板文件"
+                    .Filter = "Файлы шаблонов (*.json;*.doc;*.docx;*.dotx;*.ppt;*.pptx)|*.json;*.doc;*.docx;*.dotx;*.ppt;*.pptx|Файлы JSON (*.json)|*.json|Документы/шаблоны Word (*.doc;*.docx;*.dotx)|*.doc;*.docx;*.dotx|Документы PowerPoint (*.ppt;*.pptx)|*.ppt;*.pptx|Все файлы (*.*)|*.*",
+                    .Title = "Выберите файл шаблона для импорта"
                 }
 
                 If ofd.ShowDialog() = DialogResult.OK Then
@@ -114,15 +114,15 @@ Public Class ReformatService
 
                     Dim imported = ReformatTemplateManager.Instance.ImportTemplate(ofd.FileName)
                     If imported IsNot Nothing Then
-                        GlobalStatusStrip.ShowInfo("模板「" & imported.Name & "」导入成功")
+                        GlobalStatusStrip.ShowInfo("Шаблон «" & imported.Name & "» успешно импортирован")
                         HandleGetReformatTemplates()
                     Else
-                        GlobalStatusStrip.ShowWarning("模板导入失败，请检查文件格式")
+                        GlobalStatusStrip.ShowWarning("Не удалось импортировать шаблон, проверьте формат файла")
                     End If
                 End If
             Catch ex As Exception
                 Debug.WriteLine($"HandleImportTemplate 出错: {ex.Message}")
-                GlobalStatusStrip.ShowWarning($"导入模板失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось импортировать шаблон: {ex.Message}")
             End Try
         End Sub)
     End Sub
@@ -137,26 +137,26 @@ Public Class ReformatService
                 Dim template = ReformatTemplateManager.Instance.GetTemplateById(templateId)
 
                 If template Is Nothing Then
-                    GlobalStatusStrip.ShowWarning("模板不存在")
+                    GlobalStatusStrip.ShowWarning("Шаблон не найден")
                     Return
                 End If
 
                 Dim sfd As New SaveFileDialog With {
-                    .Filter = "模板文件 (*.json)|*.json",
-                    .Title = "导出模板",
+                    .Filter = "Файлы шаблонов (*.json)|*.json",
+                    .Title = "Экспорт шаблона",
                     .FileName = $"{template.Name}.json"
                 }
 
                 If sfd.ShowDialog() = DialogResult.OK Then
                     If ReformatTemplateManager.Instance.ExportTemplate(templateId, sfd.FileName) Then
-                        GlobalStatusStrip.ShowInfo($"模板已导出到: {sfd.FileName}")
+                        GlobalStatusStrip.ShowInfo($"Шаблон экспортирован в: {sfd.FileName}")
                     Else
-                        GlobalStatusStrip.ShowWarning("模板导出失败")
+                        GlobalStatusStrip.ShowWarning("Не удалось экспортировать шаблон")
                     End If
                 End If
             Catch ex As Exception
                 Debug.WriteLine($"HandleExportTemplate 出错: {ex.Message}")
-                GlobalStatusStrip.ShowWarning($"导出模板失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось экспортировать шаблон: {ex.Message}")
             End Try
         End Sub)
     End Sub
@@ -171,14 +171,14 @@ Public Class ReformatService
 
             Dim duplicated = ReformatTemplateManager.Instance.DuplicateTemplate(templateId, newName)
             If duplicated IsNot Nothing Then
-                GlobalStatusStrip.ShowInfo("模板「" & duplicated.Name & "」创建成功")
+                GlobalStatusStrip.ShowInfo("Шаблон «" & duplicated.Name & "» успешно создан")
                 HandleGetReformatTemplates()
             Else
-                GlobalStatusStrip.ShowWarning("复制模板失败")
+                GlobalStatusStrip.ShowWarning("Не удалось скопировать шаблон")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleDuplicateTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"复制模板失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось скопировать шаблон: {ex.Message}")
         End Try
     End Sub
 
@@ -190,14 +190,14 @@ Public Class ReformatService
             Dim templateId = jsonDoc("templateId")?.ToString()
 
             If ReformatTemplateManager.Instance.DeleteTemplate(templateId) Then
-                GlobalStatusStrip.ShowInfo("模板已删除")
+                GlobalStatusStrip.ShowInfo("Шаблон удалён")
                 HandleGetReformatTemplates()
             Else
-                GlobalStatusStrip.ShowWarning("无法删除预置模板")
+                GlobalStatusStrip.ShowWarning("Невозможно удалить предустановленный шаблон")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleDeleteTemplate 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"删除模板失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось удалить шаблон: {ex.Message}")
         End Try
     End Sub
 
@@ -225,7 +225,7 @@ Public Class ReformatService
                 End If
             Catch ex As Exception
                 Debug.WriteLine($"HandleOpenTemplateEditor 出错: {ex.Message}")
-                GlobalStatusStrip.ShowWarning($"打开模板编辑器失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось открыть редактор шаблонов: {ex.Message}")
             End Try
         End Sub)
     End Sub
@@ -284,7 +284,7 @@ Public Class ReformatService
                     templateJson = jsonDoc("template")?.ToString()
                 End If
                 If String.IsNullOrWhiteSpace(templateJson) Then
-                    GlobalStatusStrip.ShowWarning("没有可保存的模板数据")
+                    GlobalStatusStrip.ShowWarning("Нет данных шаблона для сохранения")
                     Return
                 End If
 
@@ -301,11 +301,11 @@ Public Class ReformatService
                     End If
                 End If
 
-                GlobalStatusStrip.ShowInfo($"模板 '{template.Name}' 已保存")
+                GlobalStatusStrip.ShowInfo($"Шаблон '{template.Name}' сохранён")
                 HandleGetReformatTemplates()
             Catch ex As Exception
                 Debug.WriteLine($"HandleSaveAiTemplate 出错: {ex.Message}")
-                GlobalStatusStrip.ShowWarning($"保存模板失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось сохранить шаблон: {ex.Message}")
             End Try
         End Sub)
     End Sub
@@ -334,8 +334,8 @@ Public Class ReformatService
         _invokeOnUiThread(Sub()
             Try
                 Dim ofd As New OpenFileDialog With {
-                    .Filter = "规范文档 (*.txt;*.md;*.csv)|*.txt;*.md;*.csv|所有文件 (*.*)|*.*",
-                    .Title = "选择排版规范文档"
+                    .Filter = "Документы стандартов (*.txt;*.md;*.csv)|*.txt;*.md;*.csv|Все файлы (*.*)|*.*",
+                    .Title = "Выберите документ со стандартами оформления"
                 }
 
                 If ofd.ShowDialog() = DialogResult.OK Then
@@ -356,11 +356,11 @@ Public Class ReformatService
 
                     StyleGuideManager.Instance.AddStyleGuide(guide)
                     HandleGetStyleGuides()
-                    GlobalStatusStrip.ShowSuccess($"规范文档「{guide.Name}」已添加")
+                    GlobalStatusStrip.ShowSuccess($"Документ стандартов «{guide.Name}» добавлен")
                 End If
             Catch ex As Exception
                 Debug.WriteLine($"HandleUploadStyleGuideDocument 出错: {ex.Message}")
-                GlobalStatusStrip.ShowWarning($"上传规范失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось загрузить стандарт: {ex.Message}")
             End Try
         End Sub)
     End Sub
@@ -373,9 +373,9 @@ Public Class ReformatService
             Dim guideId = jsonDoc("guideId")?.ToString()
             If StyleGuideManager.Instance.DeleteStyleGuide(guideId) Then
                 HandleGetStyleGuides()
-                GlobalStatusStrip.ShowSuccess("规范已删除")
+                GlobalStatusStrip.ShowSuccess("Стандарт удалён")
             Else
-                GlobalStatusStrip.ShowWarning("无法删除预置规范")
+                GlobalStatusStrip.ShowWarning("Невозможно удалить предустановленный стандарт")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleDeleteStyleGuide 出错: {ex.Message}")
@@ -394,14 +394,14 @@ Public Class ReformatService
             Dim guide = StyleGuideManager.Instance.GetStyleGuideById(guideId)
             If guide Is Nothing Then Return
             If guide.IsPreset Then
-                GlobalStatusStrip.ShowWarning("预置规范不可编辑")
+                GlobalStatusStrip.ShowWarning("Предустановленный стандарт нельзя редактировать")
                 Return
             End If
 
             guide.GuideContent = newContent
             StyleGuideManager.Instance.UpdateStyleGuide(guide)
             HandleGetStyleGuides()
-            GlobalStatusStrip.ShowSuccess($"规范「{guide.Name}」已保存")
+            GlobalStatusStrip.ShowSuccess($"Стандарт «{guide.Name}» сохранён")
         Catch ex As Exception
             Debug.WriteLine($"HandleUpdateStyleGuide 出错: {ex.Message}")
         End Try
@@ -417,7 +417,7 @@ Public Class ReformatService
             Dim duplicate = StyleGuideManager.Instance.DuplicateStyleGuide(guideId, newName)
             If duplicate IsNot Nothing Then
                 HandleGetStyleGuides()
-                GlobalStatusStrip.ShowSuccess($"规范「{duplicate.Name}」已创建")
+                GlobalStatusStrip.ShowSuccess($"Стандарт «{duplicate.Name}» создан")
             End If
         Catch ex As Exception
             Debug.WriteLine($"HandleDuplicateStyleGuide 出错: {ex.Message}")
@@ -436,14 +436,14 @@ Public Class ReformatService
 
                 Dim extension = If(String.IsNullOrEmpty(guide.SourceFileExtension), ".md", guide.SourceFileExtension)
                 Dim sfd As New SaveFileDialog With {
-                    .Filter = $"规范文件 (*{extension})|*{extension}|所有文件 (*.*)|*.*",
+                    .Filter = $"Файлы стандартов (*{extension})|*{extension}|Все файлы (*.*)|*.*",
                     .FileName = guide.Name & extension,
-                    .Title = "导出规范文档"
+                    .Title = "Экспорт документа стандартов"
                 }
 
                 If sfd.ShowDialog() = DialogResult.OK Then
                     If StyleGuideManager.Instance.ExportStyleGuide(guideId, sfd.FileName) Then
-                        GlobalStatusStrip.ShowSuccess($"规范已导出到: {sfd.FileName}")
+                        GlobalStatusStrip.ShowSuccess($"Стандарт экспортирован в: {sfd.FileName}")
                     End If
                 End If
             Catch ex As Exception
@@ -463,8 +463,8 @@ Public Class ReformatService
         _invokeOnUiThread(Sub()
             Try
                 Dim ofd As New OpenFileDialog With {
-                    .Filter = "Word模板文件 (*.docx;*.dotx)|*.docx;*.dotx|所有文件 (*.*)|*.*",
-                    .Title = "选择Word模板文件"
+                    .Filter = "Файлы шаблонов Word (*.docx;*.dotx)|*.docx;*.dotx|Все файлы (*.*)|*.*",
+                    .Title = "Выберите файл шаблона Word"
                 }
 
                 If ofd.ShowDialog() = DialogResult.OK Then
@@ -472,7 +472,7 @@ Public Class ReformatService
                 End If
             Catch ex As Exception
                 Debug.WriteLine($"HandleUploadDocxTemplate 出错: {ex.Message}")
-                GlobalStatusStrip.ShowWarning($"上传模板失败: {ex.Message}")
+                GlobalStatusStrip.ShowWarning($"Не удалось загрузить шаблон: {ex.Message}")
             End Try
         End Sub)
     End Sub
@@ -498,10 +498,10 @@ Public Class ReformatService
             End If
 
             HandleGetReformatTemplates()
-            GlobalStatusStrip.ShowInfo("已删除文档映射")
+            GlobalStatusStrip.ShowInfo("Сопоставление документа удалено")
         Catch ex As Exception
             Debug.WriteLine($"HandleDeleteDocxMapping 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"删除映射失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось удалить сопоставление: {ex.Message}")
         End Try
     End Sub
 
@@ -579,19 +579,19 @@ Public Class ReformatService
         wordParagraphs As List(Of Object)) As Task(Of ReformatPreviewPlan)
 
         Try
-            GlobalStatusStrip.ShowInfo("正在分析文档...")
+            GlobalStatusStrip.ShowInfo("Анализ документа...")
             Dim plan = Await FormattingOrchestrator.QuickReformatAsync(paragraphs, wordParagraphs)
 
             If plan.Changes.Count = 0 Then
-                GlobalStatusStrip.ShowWarning("未找到匹配的排版方案，请尝试使用模板")
+                GlobalStatusStrip.ShowWarning("Подходящая схема форматирования не найдена, попробуйте использовать шаблон")
             Else
-                GlobalStatusStrip.ShowSuccess($"分析完成，发现{plan.TotalChanges}处可优化项")
+                GlobalStatusStrip.ShowSuccess($"Анализ завершён, найдено {plan.TotalChanges} пунктов для оптимизации")
             End If
 
             Return plan
         Catch ex As Exception
             Debug.WriteLine($"QuickReformatAsync 出错: {ex.Message}")
-            GlobalStatusStrip.ShowWarning($"排版分析失败: {ex.Message}")
+            GlobalStatusStrip.ShowWarning($"Не удалось проанализировать форматирование: {ex.Message}")
             Return New ReformatPreviewPlan()
         End Try
     End Function

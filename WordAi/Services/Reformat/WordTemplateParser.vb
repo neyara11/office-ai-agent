@@ -42,7 +42,7 @@ Public Class WordTemplateParser
                 _styleMap = Nothing
             End Using
         Catch ex As Exception
-            Debug.WriteLine($"解析.docx模板失败: {ex.Message}")
+            Debug.WriteLine($"Не удалось разобрать шаблон .docx: {ex.Message}")
         End Try
 
         ' 确保至少有基础标签
@@ -179,7 +179,9 @@ Public Class WordTemplateParser
                name = "Heading " & level.ToString() OrElse
                name = "heading " & level.ToString() OrElse
                name.Contains("标题 " & level.ToString()) OrElse
-               name.Contains("标题" & level.ToString()) Then
+               name.Contains("标题" & level.ToString()) OrElse
+               name.IndexOf("Заголовок " & level.ToString(), StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+               name.IndexOf("Заголовок" & level.ToString(), StringComparison.OrdinalIgnoreCase) >= 0 Then
 
                 Dim tagId As String
                 Dim displayName As String
@@ -188,20 +190,20 @@ Public Class WordTemplateParser
                 Select Case level
                     Case 1
                         tagId = SemanticTagRegistry.TAG_TITLE_1
-                        displayName = "一级标题"
-                        matchHint = "包含'第X章'、'一、'或文档主要章节标题"
+                        displayName = "Заголовок 1"
+                        matchHint = "Содержит 'Глава X', '一、' или основной заголовок раздела документа"
                     Case 2
                         tagId = SemanticTagRegistry.TAG_TITLE_2
-                        displayName = "二级标题"
-                        matchHint = "包含'1.1'、'（一）'或章节子标题"
+                        displayName = "Заголовок 2"
+                        matchHint = "Содержит '1.1', '（一）' или подзаголовок раздела"
                     Case 3
                         tagId = SemanticTagRegistry.TAG_TITLE_3
-                        displayName = "三级标题"
-                        matchHint = "包含'1.1.1'、'1.'或小节标题"
+                        displayName = "Заголовок 3"
+                        matchHint = "Содержит '1.1.1', '1.' или заголовок подраздела"
                     Case Else
                         tagId = $"title.{level}"
-                        displayName = $"{level}级标题"
-                        matchHint = $"{level}级子标题"
+                        displayName = $"Заголовок {level}"
+                        matchHint = $"Подзаголовок уровня {level}"
                 End Select
 
                 Return New TagMatchInfo(tagId, displayName, SemanticTagRegistry.TAG_TITLE, matchHint)
@@ -211,34 +213,41 @@ Public Class WordTemplateParser
         ' === 正文类 ===
         If id = "normal" OrElse id = "bodytext" OrElse id = "body" OrElse
            name = "Normal" OrElse name = "正文" OrElse name = "Body Text" OrElse
-           name.Contains("正文") Then
-            Return New TagMatchInfo(SemanticTagRegistry.TAG_BODY_NORMAL, "正文", SemanticTagRegistry.TAG_BODY, "普通正文段落")
+           name.Contains("正文") OrElse
+           name = "Обычный" OrElse name.IndexOf("Обычный", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+           name.IndexOf("Основной текст", StringComparison.OrdinalIgnoreCase) >= 0 Then
+            Return New TagMatchInfo(SemanticTagRegistry.TAG_BODY_NORMAL, "Основной текст", SemanticTagRegistry.TAG_BODY, "Обычный абзац основного текста")
         End If
 
         ' === 列表类 ===
         If id = "listparagraph" OrElse id.Contains("list") OrElse
-           name.Contains("列表") OrElse name = "List Paragraph" Then
-            Return New TagMatchInfo(SemanticTagRegistry.TAG_LIST_ORDERED, "列表", SemanticTagRegistry.TAG_LIST, "列表项")
+           name.Contains("列表") OrElse name = "List Paragraph" OrElse
+           name.IndexOf("Список", StringComparison.OrdinalIgnoreCase) >= 0 Then
+            Return New TagMatchInfo(SemanticTagRegistry.TAG_LIST_ORDERED, "Список", SemanticTagRegistry.TAG_LIST, "Элемент списка")
         End If
 
         ' === 引用类 ===
         If id.Contains("quote") OrElse id.Contains("blockquote") OrElse
-           name.Contains("引用") OrElse name.Contains("Quote") Then
-            Return New TagMatchInfo(SemanticTagRegistry.TAG_QUOTE, "引用", "", "引用段落")
+           name.Contains("引用") OrElse name.Contains("Quote") OrElse
+           name.IndexOf("Цитата", StringComparison.OrdinalIgnoreCase) >= 0 Then
+            Return New TagMatchInfo(SemanticTagRegistry.TAG_QUOTE, "Цитата", "", "Абзац цитаты")
         End If
 
         ' === 题注类 ===
-        If id.Contains("caption") OrElse name.Contains("题注") OrElse name.Contains("Caption") Then
-            Return New TagMatchInfo(SemanticTagRegistry.TAG_CAPTION, "题注", "", "图表题注")
+        If id.Contains("caption") OrElse name.Contains("题注") OrElse name.Contains("Caption") OrElse
+           name.IndexOf("Название", StringComparison.OrdinalIgnoreCase) >= 0 Then
+            Return New TagMatchInfo(SemanticTagRegistry.TAG_CAPTION, "Название", "", "Название (подпись) рисунка или таблицы")
         End If
 
         ' === 目录类（跳过） ===
-        If id.StartsWith("toc") OrElse name.Contains("目录") Then
+        If id.StartsWith("toc") OrElse name.Contains("目录") OrElse
+           name.IndexOf("Оглавление", StringComparison.OrdinalIgnoreCase) >= 0 Then
             Return Nothing
         End If
 
         ' === 页眉页脚（跳过）===
-        If id = "header" OrElse id = "footer" OrElse name.Contains("页眉") OrElse name.Contains("页脚") Then
+        If id = "header" OrElse id = "footer" OrElse name.Contains("页眉") OrElse name.Contains("页脚") OrElse
+           name.IndexOf("колонтитул", StringComparison.OrdinalIgnoreCase) >= 0 Then
             Return Nothing
         End If
 
@@ -515,14 +524,14 @@ Public Class WordTemplateParser
     Private Shared Sub EnsureBasicTags(mapping As SemanticStyleMapping)
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = SemanticTagRegistry.TAG_BODY_NORMAL) Then
             mapping.SemanticTags.Add(New SemanticTag(
-                SemanticTagRegistry.TAG_BODY_NORMAL, "正文",
-                SemanticTagRegistry.TAG_BODY, 2, "普通正文段落"))
+                SemanticTagRegistry.TAG_BODY_NORMAL, "Основной текст",
+                SemanticTagRegistry.TAG_BODY, 2, "Обычный абзац основного текста"))
         End If
 
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = SemanticTagRegistry.TAG_TITLE_1) Then
             mapping.SemanticTags.Add(New SemanticTag(
-                SemanticTagRegistry.TAG_TITLE_1, "一级标题",
-                SemanticTagRegistry.TAG_TITLE, 2, "主要章节标题"))
+                SemanticTagRegistry.TAG_TITLE_1, "Заголовок 1",
+                SemanticTagRegistry.TAG_TITLE, 2, "Заголовок основного раздела"))
         End If
     End Sub
 

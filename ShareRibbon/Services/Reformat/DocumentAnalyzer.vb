@@ -148,7 +148,10 @@ Public Class DocumentAnalyzer
     Private Shared ReadOnly OfficialDocKeywords As String() = {
         "发文机关", "发文字号", "通知", "决定", "批复", "请示", "报告",
         "函", "纪要", "印发", "转发", "抄送", "主送", "主题词",
-        "〔", "〕", "机密", "特急", "急件", "签发人", "会签"
+        "〔", "〕", "机密", "特急", "急件", "签发人", "会签",
+        "приказ", "распоряжение", "уведомление", "постановление",
+        "письмо", "протокол", "рассылка", "секретно", "срочно",
+        "подпись", "согласование", "официальн", "документ", "исходящ", "входящ"
     }
 
     ' ---- 学术论文关键词 ----
@@ -156,7 +159,11 @@ Public Class DocumentAnalyzer
         "摘要", "关键词", "参考文献", "Abstract", "引言", "绪论",
         "结论", "致谢", "附录", "文献综述", "研究方法", "实验",
         "结果分析", "讨论", "数据来源", "基金项目", "作者简介",
-        "DOI", "中图分类号"
+        "DOI", "中图分类号",
+        "аннотация", "реферат", "ключевые слова", "литература", "введение",
+        "заключение", "благодарности", "приложение", "обзор литературы",
+        "методология", "эксперимент", "обсуждение", "источники", "грант",
+        "об авторе", "УДК"
     }
 
     ' ---- 商业报告关键词 ----
@@ -164,7 +171,11 @@ Public Class DocumentAnalyzer
         "项目", "季度", "年度", "汇报", "总结", "分析", "预算",
         "营收", "利润", "增长率", "市场份额", "KPI", "指标",
         "目标", "战略", "方案", "建议", "风险评估", "里程碑",
-        "交付物", "干系人", "ROI"
+        "交付物", "干系人", "ROI",
+        "проект", "квартал", "годовой", "отчёт", "отчет", "сводка", "анализ",
+        "бюджет", "выручка", "прибыль", "рост", "доля рынка", "показател",
+        "стратег", "план", "рекомендац", "риск", "веха", "результат",
+        "заинтересованн", "рентабельность"
     }
 
     ' ---- 合同关键词 ----
@@ -172,14 +183,22 @@ Public Class DocumentAnalyzer
         "甲方", "乙方", "丙方", "合同", "协议", "条款", "签署",
         "盖章", "生效", "违约", "赔偿", "保密", "仲裁", "管辖",
         "权利义务", "不可抗力", "争议解决", "定金", "首款",
-        "尾款", "服务期限", "知识产权"
+        "尾款", "服务期限", "知识产权",
+        "заказчик", "исполнитель", "договор", "соглашение", "условия",
+        "подпис", "печать", "вступает в силу", "нарушени", "компенсац",
+        "конфиденциальн", "арбитраж", "юрисдикц", "права и обязанности",
+        "форс-мажор", "спор", "аванс", "предоплата", "срок",
+        "интеллектуальная собственность"
     }
 
     ' ---- 简历关键词 ----
     Private Shared ReadOnly ResumeKeywords As String() = {
         "工作经历", "教育背景", "专业技能", "项目经验", "自我评价",
         "个人简介", "职业技能", "实习经历", "证书", "语言能力",
-        "兴趣爱好", "求职意向", "期望薪资", "学历"
+        "兴趣爱好", "求职意向", "期望薪资", "学历",
+        "опыт работы", "образование", "навыки", "проекты", "о себе",
+        "профиль", "квалификац", "стажировка", "сертификат", "язык",
+        "интересы", "цель", "зарплат", "учёная степень"
     }
 
     ' ---- 标题编号模式 ----
@@ -459,9 +478,18 @@ Public Class DocumentAnalyzer
 
         ' ===== 新增：落款特征增强 =====
         ' 成文日期格式验证（多种可能）
-        Dim hasDate = paragraphs.Any(Function(p) Regex.IsMatch(p.Trim(), "^\d{4}年\d{1,2}月\d{1,2}日$"))
+        Dim hasDate = paragraphs.Any(Function(p) Regex.IsMatch(p.Trim(), "^\d{4}年\d{1,2}月\d{1,2}日$") OrElse
+                                               Regex.IsMatch(p.Trim(), "^\d{2}\.\d{2}\.\d{4}$"))
         If hasDate Then
             score += 0.15
+        End If
+
+        ' 俄文公文结构标记（Приложение/Копия）
+        If Regex.IsMatch(fullText, "Приложение", RegexOptions.IgnoreCase) Then
+            score += 0.15
+        End If
+        If Regex.IsMatch(fullText, "Копия", RegexOptions.IgnoreCase) Then
+            score += 0.05
         End If
 
         ' 机关落款
@@ -528,13 +556,16 @@ Public Class DocumentAnalyzer
 
         ' 摘要特征：段落以"摘要"开头
         If paragraphs.Any(Function(p) p.Trim().StartsWith("摘要") OrElse
-                                       p.Trim().StartsWith("摘　要")) Then
+                                       p.Trim().StartsWith("摘　要") OrElse
+                                       p.Trim().StartsWith("Аннотация", StringComparison.OrdinalIgnoreCase) OrElse
+                                       p.Trim().StartsWith("Реферат", StringComparison.OrdinalIgnoreCase)) Then
             score += 0.15
         End If
 
         ' 关键词特征
         If paragraphs.Any(Function(p) p.Trim().StartsWith("关键词") OrElse
-                                       p.Trim().StartsWith("关键字")) Then
+                                       p.Trim().StartsWith("关键字") OrElse
+                                       p.Trim().StartsWith("Ключевые слова", StringComparison.OrdinalIgnoreCase)) Then
             score += 0.15
         End If
 
@@ -589,7 +620,9 @@ Public Class DocumentAnalyzer
         Dim dataLineCount = 0
         For Each p In paragraphs
             If Regex.IsMatch(p, "\d+%") AndAlso (p.Contains("同比") OrElse p.Contains("环比") OrElse
-                                                 p.Contains("增长") OrElse p.Contains("下降")) Then
+                                                 p.Contains("增长") OrElse p.Contains("下降") OrElse
+                                                 p.IndexOf("рост", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                                                 p.IndexOf("снижен", StringComparison.OrdinalIgnoreCase) >= 0) Then
                 dataLineCount += 1
             End If
         Next
@@ -598,16 +631,23 @@ Public Class DocumentAnalyzer
         End If
 
         ' 报告标题特征
-        If paragraphs.Any(Function(p) (p.Contains("报告") OrElse p.Contains("汇报")) AndAlso
+        If paragraphs.Any(Function(p) (p.Contains("报告") OrElse p.Contains("汇报") OrElse
+                                        p.IndexOf("отчёт", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                                        p.IndexOf("отчет", StringComparison.OrdinalIgnoreCase) >= 0) AndAlso
                                        (p.Contains("年度") OrElse p.Contains("季度") OrElse
                                         p.Contains("月度") OrElse p.Contains("工作") OrElse
-                                        p.Contains("项目"))) Then
+                                        p.Contains("项目") OrElse
+                                        p.IndexOf("квартал", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                                        p.IndexOf("годовой", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                                        p.IndexOf("проект", StringComparison.OrdinalIgnoreCase) >= 0)) Then
             score += 0.15
         End If
 
         ' 目录特征
         If paragraphs.Any(Function(p) p.Trim() = "目录" OrElse p.Trim() = "CONTENTS" OrElse
-                                       p.Trim() = "目　录") Then
+                                       p.Trim() = "目　录" OrElse
+                                       p.Trim() = "Содержание" OrElse
+                                       p.Trim() = "Оглавление") Then
             score += 0.1
         End If
 
@@ -634,10 +674,19 @@ Public Class DocumentAnalyzer
             score += 0.25
         End If
 
-        ' 条款式结构：第X条
+        ' 俄文合同双方同时出现（Заказчик / Исполнитель）
+        If (fullText.IndexOf("Заказчик", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+            fullText.IndexOf("Исполнитель", StringComparison.OrdinalIgnoreCase) >= 0) OrElse
+           (fullText.IndexOf("Продавец", StringComparison.OrdinalIgnoreCase) >= 0 AndAlso
+            fullText.IndexOf("Покупатель", StringComparison.OrdinalIgnoreCase) >= 0) Then
+            score += 0.25
+        End If
+
+        ' 条款式结构：第X条 / 俄文 пункт N
         Dim clauseCount = 0
         For Each p In paragraphs
-            If Regex.IsMatch(p.Trim(), "^第[一二三四五六七八九十百千]+条") Then
+            If Regex.IsMatch(p.Trim(), "^第[一二三四五六七八九十百千]+条") OrElse
+               Regex.IsMatch(p.Trim(), "^\d+[.)]\s", RegexOptions.IgnoreCase) Then
                 clauseCount += 1
             End If
         Next
@@ -648,7 +697,9 @@ Public Class DocumentAnalyzer
         ' 签署区域特征
         If paragraphs.Any(Function(p) p.Trim().Contains("盖章") OrElse
                                        p.Trim().Contains("签字") OrElse
-                                       p.Trim().Contains("签署")) Then
+                                       p.Trim().Contains("签署") OrElse
+                                       p.Trim().IndexOf("подпис", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                                       p.Trim().IndexOf("печать", StringComparison.OrdinalIgnoreCase) >= 0) Then
             score += 0.1
         End If
 
@@ -812,11 +863,17 @@ Public Class DocumentAnalyzer
         If Regex.IsMatch(trimmed, "^第[一二三四五六七八九十百千]+[章节篇]") Then
             Return 1
         End If
+        If Regex.IsMatch(trimmed, "^(Глава|Раздел|Часть)\s*\d+", RegexOptions.IgnoreCase) Then
+            Return 1
+        End If
         If Regex.IsMatch(trimmed, "^(一|二|三|四|五|六|七|八|九|十)[、.．]") AndAlso
            Not Regex.IsMatch(trimmed, "^[一二三四五六七八九十]+[、.．].*[的得地]") Then
             Return 1
         End If
         If Regex.IsMatch(trimmed, "^(前言|引言|绪论|摘要|Abstract|参考文献|附录|致谢|后记|目录)") Then
+            Return 1
+        End If
+        If Regex.IsMatch(trimmed, "^(Введение|Заключение|Аннотация|Литература|Приложение|Благодарности|Содержание|Оглавление|Реферат)", RegexOptions.IgnoreCase) Then
             Return 1
         End If
 
@@ -912,7 +969,9 @@ Public Class DocumentAnalyzer
                                        p.Trim() = "目　录" OrElse
                                        p.Trim() = "CONTENTS" OrElse
                                        p.Trim() = "目次" OrElse
-                                       p.Trim() = "TOC") Then
+                                       p.Trim() = "TOC" OrElse
+                                       p.Trim() = "Содержание" OrElse
+                                       p.Trim() = "Оглавление") Then
             Return True
         End If
 
@@ -953,11 +1012,11 @@ Public Class DocumentAnalyzer
                 ' 检查编号标题前面是否有空行
                 If i > 0 AndAlso Not String.IsNullOrWhiteSpace(paragraphs(i - 1)) Then
                     problems.Add(New FormattingProblem With {
-                        .Description = $"标题「{paragraphs(i).Trim()}」前缺少空行，标题应前后留白",
+                        .Description = $"Перед заголовком «{paragraphs(i).Trim()}» отсутствует пустая строка; заголовок должен иметь отступы сверху и снизу",
                         .Severity = ProblemSeverity.Suggestion,
                         .ParagraphIndex = i,
                         .Category = "spacing",
-                        .SuggestedFix = "在标题前插入空行"
+                        .SuggestedFix = "Вставьте пустую строку перед заголовком"
                     })
                 End If
             End If
@@ -973,11 +1032,11 @@ Public Class DocumentAnalyzer
                 Dim spaceCount = text.TakeWhile(Function(c) c = " "c).Count()
                 If spaceCount > 0 AndAlso spaceCount Mod 2 <> 0 Then
                     problems.Add(New FormattingProblem With {
-                        .Description = $"段落含有不规范缩进（{spaceCount}个半角空格），建议使用首行缩进2字符",
+                        .Description = $"Абзац содержит нестандартный отступ ({spaceCount} пробелов), рекомендуется использовать отступ первой строки 2 символа",
                         .Severity = ProblemSeverity.Warning,
                         .ParagraphIndex = i,
                         .Category = "spacing",
-                        .SuggestedFix = "删除行首空格，设置段落首行缩进2字符"
+                        .SuggestedFix = "Удалите пробелы в начале строки и установите отступ первой строки 2 символа"
                     })
                     Continue For
                 End If
@@ -992,11 +1051,11 @@ Public Class DocumentAnalyzer
             ' 中文后接英文字母/数字但无空格
             If Regex.IsMatch(text, "[一-鿿][a-zA-Z0-9]") Then
                 problems.Add(New FormattingProblem With {
-                    .Description = "中英文之间缺少空格，影响阅读体验",
+                    .Description = "Между китайским и английским текстом отсутствует пробел, что затрудняет чтение",
                     .Severity = ProblemSeverity.Suggestion,
                     .ParagraphIndex = i,
                     .Category = "spacing",
-                    .SuggestedFix = "在中英文之间添加半角空格"
+                    .SuggestedFix = "Добавьте пробел между китайским и английским текстом"
                 })
             End If
         Next
@@ -1010,11 +1069,11 @@ Public Class DocumentAnalyzer
             If Regex.IsMatch(text, "[！-～]") AndAlso
                Regex.IsMatch(text, "[a-zA-Z]{3,}") Then
                 problems.Add(New FormattingProblem With {
-                    .Description = "检测到全角符号与英文混用，建议统一为半角符号",
+                    .Description = "Обнаружено смешение полноширинных символов с английским текстом; рекомендуется привести все символы к полуширинному виду",
                     .Severity = ProblemSeverity.Warning,
                     .ParagraphIndex = i,
                     .Category = "style",
-                    .SuggestedFix = "将全角英文字母和数字转换为半角"
+                    .SuggestedFix = "Преобразуйте полноширинные латинские буквы и цифры в полуширинные"
                 })
                 Exit For
             End If
@@ -1024,11 +1083,11 @@ Public Class DocumentAnalyzer
         For i = 0 To paragraphs.Count - 1
             If paragraphs(i).Length > 500 Then
                 problems.Add(New FormattingProblem With {
-                    .Description = $"第{i + 1}段过长（{paragraphs(i).Length}字符），建议适当分段",
+                    .Description = $"Абзац {i + 1} слишком длинный ({paragraphs(i).Length} символов), рекомендуется разбить его на части",
                     .Severity = ProblemSeverity.Suggestion,
                     .ParagraphIndex = i,
                     .Category = "structure",
-                    .SuggestedFix = "在适当位置断句分段"
+                    .SuggestedFix = "Разбейте текст на абзацы в подходящих местах"
                 })
             End If
         Next
@@ -1045,11 +1104,11 @@ Public Class DocumentAnalyzer
             Else
                 If consecutiveShortCount >= 3 Then
                     problems.Add(New FormattingProblem With {
-                        .Description = $"检测到连续{consecutiveShortCount}个短段落，可能应为列表格式",
+                        .Description = $"Обнаружено {consecutiveShortCount} коротких абзацев подряд; возможно, это должен быть список",
                         .Severity = ProblemSeverity.Suggestion,
                         .ParagraphIndex = i - consecutiveShortCount,
                         .Category = "structure",
-                        .SuggestedFix = "考虑转换为项目符号列表"
+                        .SuggestedFix = "Рассмотрите преобразование в маркированный список"
                     })
                 End If
                 consecutiveShortCount = 0

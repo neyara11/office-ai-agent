@@ -37,7 +37,10 @@ Public Class LegacyTemplateConverter
         EnsureBasicTags(mapping)
 
         ' 公文场景：添加公文特有的语义标签
-        If template.Category = "公文" OrElse template.Name.Contains("公文") Then
+        If template.Category = "公文" OrElse template.Name.Contains("公文") OrElse
+           template.Name.IndexOf("приказ", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+           template.Name.IndexOf("официальн", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+           template.Name.IndexOf("официальный документ", StringComparison.OrdinalIgnoreCase) >= 0 Then
             AddOfficialDocumentTags(mapping)
         End If
 
@@ -71,35 +74,40 @@ Public Class LegacyTemplateConverter
         Dim name = If(rule.RuleName, "").ToLower()
 
         Select Case True
-            Case name.Contains("一级") OrElse name.Contains("大标题") OrElse name.Contains("章标题")
+            Case name.Contains("一级") OrElse name.Contains("大标题") OrElse name.Contains("章标题") OrElse
+                 name.Contains("заголовок 1") OrElse name.Contains("глава") OrElse name.Contains("уровень 1")
                 tagId = SemanticTagRegistry.TAG_TITLE_1
                 parentId = SemanticTagRegistry.TAG_TITLE
 
-            Case name.Contains("二级") OrElse name.Contains("节标题")
+            Case name.Contains("二级") OrElse name.Contains("节标题") OrElse
+                 name.Contains("заголовок 2") OrElse name.Contains("раздел") OrElse name.Contains("уровень 2")
                 tagId = SemanticTagRegistry.TAG_TITLE_2
                 parentId = SemanticTagRegistry.TAG_TITLE
 
-            Case name.Contains("三级") OrElse name.Contains("小标题")
+            Case name.Contains("三级") OrElse name.Contains("小标题") OrElse
+                 name.Contains("заголовок 3") OrElse name.Contains("подзаголовок") OrElse name.Contains("уровень 3")
                 tagId = SemanticTagRegistry.TAG_TITLE_3
                 parentId = SemanticTagRegistry.TAG_TITLE
 
-            Case name.Contains("正文") OrElse name.Contains("body")
+            Case name.Contains("正文") OrElse name.Contains("body") OrElse
+                 name.Contains("основной текст") OrElse name.Contains("обычный") OrElse name.Contains("текст")
                 tagId = SemanticTagRegistry.TAG_BODY_NORMAL
                 parentId = SemanticTagRegistry.TAG_BODY
 
-            Case name.Contains("强调") OrElse name.Contains("emphasis")
+            Case name.Contains("强调") OrElse name.Contains("emphasis") OrElse name.Contains("акцент")
                 tagId = SemanticTagRegistry.TAG_BODY_EMPHASIS
                 parentId = SemanticTagRegistry.TAG_BODY
 
-            Case name.Contains("列表") OrElse name.Contains("list")
+            Case name.Contains("列表") OrElse name.Contains("list") OrElse name.Contains("список")
                 tagId = SemanticTagRegistry.TAG_LIST_ORDERED
                 parentId = SemanticTagRegistry.TAG_LIST
 
-            Case name.Contains("引用") OrElse name.Contains("quote")
+            Case name.Contains("引用") OrElse name.Contains("quote") OrElse name.Contains("цитата")
                 tagId = SemanticTagRegistry.TAG_QUOTE
                 parentId = ""
 
-            Case name.Contains("题注") OrElse name.Contains("caption")
+            Case name.Contains("题注") OrElse name.Contains("caption") OrElse
+                 name.Contains("название") OrElse name.Contains("подпись")
                 tagId = SemanticTagRegistry.TAG_CAPTION
                 parentId = ""
 
@@ -107,7 +115,7 @@ Public Class LegacyTemplateConverter
                 ' 无法识别的规则作为正文处理
                 tagId = SemanticTagRegistry.TAG_BODY_NORMAL
                 parentId = SemanticTagRegistry.TAG_BODY
-                matchHint = $"来自旧规则: {rule.RuleName}"
+                matchHint = $"Из старого правила: {rule.RuleName}"
         End Select
 
         ' 避免重复
@@ -131,14 +139,14 @@ Public Class LegacyTemplateConverter
     Private Shared Sub EnsureBasicTags(mapping As SemanticStyleMapping)
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = SemanticTagRegistry.TAG_BODY_NORMAL) Then
             mapping.SemanticTags.Add(New SemanticTag(
-                SemanticTagRegistry.TAG_BODY_NORMAL, "正文",
-                SemanticTagRegistry.TAG_BODY, 2, "普通正文段落"))
+                SemanticTagRegistry.TAG_BODY_NORMAL, "Основной текст",
+                SemanticTagRegistry.TAG_BODY, 2, "Обычный абзац основного текста"))
         End If
 
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = SemanticTagRegistry.TAG_TITLE_1) Then
             mapping.SemanticTags.Add(New SemanticTag(
-                SemanticTagRegistry.TAG_TITLE_1, "一级标题",
-                SemanticTagRegistry.TAG_TITLE, 2, "主要章节标题"))
+                SemanticTagRegistry.TAG_TITLE_1, "Заголовок 1",
+                SemanticTagRegistry.TAG_TITLE, 2, "Заголовок основного раздела"))
         End If
     End Sub
 
@@ -146,8 +154,8 @@ Public Class LegacyTemplateConverter
     Private Shared Sub AddOfficialDocumentTags(mapping As SemanticStyleMapping)
         ' 发文机关标志（红色大字）
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "header.org") Then
-            Dim tag = New SemanticTag("header.org", "发文机关标志", "header", 2,
-                "发文机关全称+文件字样，如'XX市人民政府文件'，通常居中红色大号字体")
+            Dim tag = New SemanticTag("header.org", "Бланк органа власти", "header", 2,
+                "Полное наименование органа и слово 'документ', например 'Правительство РФ', обычно по центру красным крупным шрифтом")
             tag.Font = New FontConfig("方正小标宋简体", "Arial", 22, True)
             tag.Paragraph = New ParagraphConfig("center", 0, 1.5) With {.SpaceBefore = 2}
             tag.Color = New ColorConfig("#C00000")
@@ -156,8 +164,8 @@ Public Class LegacyTemplateConverter
 
         ' 发文字号
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "header.refno") Then
-            Dim tag = New SemanticTag("header.refno", "发文字号", "header", 2,
-                "公文发文字号，格式如'×政发〔2024〕15号'，通常位于红色分隔线下方")
+            Dim tag = New SemanticTag("header.refno", "Номер исходящего документа", "header", 2,
+                "Регистрационный номер документа, например '№ 15 от 2024 г.', обычно под красной разделительной линией")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 16)
             tag.Paragraph = New ParagraphConfig("center", 0, 1.0)
             mapping.SemanticTags.Add(tag)
@@ -165,8 +173,8 @@ Public Class LegacyTemplateConverter
 
         ' 签发人（上行文）
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "header.signer") Then
-            Dim tag = New SemanticTag("header.signer", "签发人", "header", 2,
-                "上行文才有的签发人信息，格式'签发人：×××'，通常右对齐")
+            Dim tag = New SemanticTag("header.signer", "Подписывающий", "header", 2,
+                "Сведения о подписывающем лице, только для исходящих документов, формат 'Подписал: ...', обычно по правому краю")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 16)
             tag.Paragraph = New ParagraphConfig("right", 0, 1.0) With {.SpaceBefore = 0.5}
             mapping.SemanticTags.Add(tag)
@@ -174,8 +182,8 @@ Public Class LegacyTemplateConverter
 
         ' 文件标题
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "title.main") Then
-            Dim tag = New SemanticTag("title.main", "文件标题", "title", 2,
-                "公文的主标题，如'关于加强安全生产工作的通知'，通常居中")
+            Dim tag = New SemanticTag("title.main", "Заголовок документа", "title", 2,
+                "Основной заголовок документа, например 'О мерах по обеспечению безопасности', обычно по центру")
             tag.Font = New FontConfig("方正小标宋简体", "Arial", 22, True)
             tag.Paragraph = New ParagraphConfig("center", 0, 1.5) With {.SpaceBefore = 1.5, .SpaceAfter = 1.5}
             mapping.SemanticTags.Add(tag)
@@ -183,8 +191,8 @@ Public Class LegacyTemplateConverter
 
         ' 主送机关
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "title.recipient") Then
-            Dim tag = New SemanticTag("title.recipient", "主送机关", "title", 2,
-                "公文的主送机关，如'各区县人民政府：'，通常顶格左对齐")
+            Dim tag = New SemanticTag("title.recipient", "Адресат", "title", 2,
+                "Основной адресат документа, например 'Руководителям региональных органов:', обычно без отступа, по левому краю")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 16)
             tag.Paragraph = New ParagraphConfig("left", 0, 1.0)
             mapping.SemanticTags.Add(tag)
@@ -192,8 +200,8 @@ Public Class LegacyTemplateConverter
 
         ' 附件说明
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "body.attachment") Then
-            Dim tag = New SemanticTag("body.attachment", "附件说明", "body", 2,
-                "附件说明段落，格式'附件：1. ××××'，通常首行缩进")
+            Dim tag = New SemanticTag("body.attachment", "Отметка о приложении", "body", 2,
+                "Абзац с перечнем приложений, формат 'Приложение: 1. ...', обычно с отступом первой строки")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 16)
             tag.Paragraph = New ParagraphConfig("left", 2, 1.875) With {.SpaceBefore = 1}
             mapping.SemanticTags.Add(tag)
@@ -201,8 +209,8 @@ Public Class LegacyTemplateConverter
 
         ' 发文机关署名
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "footer.signature") Then
-            Dim tag = New SemanticTag("footer.signature", "发文机关署名", "footer", 2,
-                "公文末尾的发文机关署名，如'XX市人民政府'，通常右对齐")
+            Dim tag = New SemanticTag("footer.signature", "Подпись органа", "footer", 2,
+                "Наименование органа в конце документа, например 'Правительство РФ', обычно по правому краю")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 16)
             tag.Paragraph = New ParagraphConfig("right", 2, 1.0) With {.SpaceBefore = 2}
             mapping.SemanticTags.Add(tag)
@@ -210,8 +218,8 @@ Public Class LegacyTemplateConverter
 
         ' 成文日期
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "footer.date") Then
-            Dim tag = New SemanticTag("footer.date", "成文日期", "footer", 2,
-                "公文成文日期，格式'2024年1月15日'，通常右对齐")
+            Dim tag = New SemanticTag("footer.date", "Дата документа", "footer", 2,
+                "Дата подписания документа, формат '15.01.2024', обычно по правому краю")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 16)
             tag.Paragraph = New ParagraphConfig("right", 0, 1.0)
             mapping.SemanticTags.Add(tag)
@@ -219,8 +227,8 @@ Public Class LegacyTemplateConverter
 
         ' 抄送
         If Not mapping.SemanticTags.Any(Function(t) t.TagId = "footer.cc") Then
-            Dim tag = New SemanticTag("footer.cc", "抄送机关", "footer", 2,
-                "版记中的抄送信息，格式'抄送：×××，×××。'")
+            Dim tag = New SemanticTag("footer.cc", "Копия (рассылка)", "footer", 2,
+                "Сведения о рассылке копий, формат 'Копия: ...'")
             tag.Font = New FontConfig("仿宋_GB2312", "Times New Roman", 14)
             tag.Paragraph = New ParagraphConfig("left", 2, 1.0)
             mapping.SemanticTags.Add(tag)

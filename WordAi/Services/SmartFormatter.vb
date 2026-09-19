@@ -56,72 +56,81 @@ Namespace Services
                 Dim actionLower As String = action.ToLower().Trim()
 
                 ' 字号调整
-                If actionLower.Contains("调大") OrElse actionLower.Contains("增大") OrElse actionLower.Contains("变大") Then
+                If actionLower.Contains("调大") OrElse actionLower.Contains("增大") OrElse actionLower.Contains("变大") OrElse
+                   actionLower.Contains("увелич") OrElse actionLower.Contains("крупнее") OrElse
+                   actionLower.Contains("больше") Then
                     Return IncreaseFontSize(sel)
                 End If
 
-                If actionLower.Contains("调小") OrElse actionLower.Contains("缩小") OrElse actionLower.Contains("变小") Then
+                If actionLower.Contains("调小") OrElse actionLower.Contains("缩小") OrElse actionLower.Contains("变小") OrElse
+                   actionLower.Contains("уменьш") OrElse actionLower.Contains("мельче") OrElse
+                   actionLower.Contains("меньше") Then
                     Return DecreaseFontSize(sel)
                 End If
 
                 ' 加粗/斜体/下划线
-                If actionLower.Contains("加粗") OrElse actionLower.Contains("粗体") Then
+                If actionLower.Contains("加粗") OrElse actionLower.Contains("粗体") OrElse
+                   actionLower.Contains("жирн") Then
                     sel.Font.Bold = -1
                     Debug.WriteLine("[SmartFormatter] 设置加粗")
                     Return True
                 End If
 
-                If actionLower.Contains("取消加粗") OrElse actionLower.Contains("不加粗") Then
+                If actionLower.Contains("取消加粗") OrElse actionLower.Contains("不加粗") OrElse
+                   actionLower.Contains("убрать жирн") OrElse actionLower.Contains("не жирн") Then
                     sel.Font.Bold = 0
                     Debug.WriteLine("[SmartFormatter] 取消加粗")
                     Return True
                 End If
 
-                If actionLower.Contains("斜体") Then
+                If actionLower.Contains("斜体") OrElse actionLower.Contains("курсив") Then
                     sel.Font.Italic = -1
                     Debug.WriteLine("[SmartFormatter] 设置斜体")
                     Return True
                 End If
 
-                If actionLower.Contains("下划线") Then
+                If actionLower.Contains("下划线") OrElse actionLower.Contains("подчерк") Then
                     sel.Font.Underline = Word.WdUnderline.wdUnderlineSingle
                     Debug.WriteLine("[SmartFormatter] 设置下划线")
                     Return True
                 End If
 
                 ' 颜色
-                If actionLower.Contains("红色") Then
+                If actionLower.Contains("红色") OrElse actionLower.Contains("красн") Then
                     sel.Font.Color = Word.WdColor.wdColorRed
                     Debug.WriteLine("[SmartFormatter] 设置红色")
                     Return True
                 End If
 
-                If actionLower.Contains("蓝色") Then
+                If actionLower.Contains("蓝色") OrElse actionLower.Contains("син") Then
                     sel.Font.Color = Word.WdColor.wdColorBlue
                     Debug.WriteLine("[SmartFormatter] 设置蓝色")
                     Return True
                 End If
 
-                If actionLower.Contains("黑色") Then
+                If actionLower.Contains("黑色") OrElse actionLower.Contains("черн") Then
                     sel.Font.Color = Word.WdColor.wdColorBlack
                     Debug.WriteLine("[SmartFormatter] 设置黑色")
                     Return True
                 End If
 
                 ' 对齐
-                If actionLower.Contains("居中") Then
+                If actionLower.Contains("居中") OrElse actionLower.Contains("по центру") OrElse
+                   actionLower.Contains("центр") Then
                     sel.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter
                     Debug.WriteLine("[SmartFormatter] 设置居中")
                     Return True
                 End If
 
-                If actionLower.Contains("左对齐") Then
+                If actionLower.Contains("左对齐") OrElse actionLower.Contains("по левому") OrElse
+                   actionLower.Contains("влево") Then
                     sel.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphLeft
                     Debug.WriteLine("[SmartFormatter] 设置左对齐")
                     Return True
                 End If
 
-                If actionLower.Contains("右对齐") Then
+                If actionLower.Contains("右对齐") OrElse actionLower.Contains("по правому") OrElse
+                   actionLower.Contains("вправо") Then
                     sel.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight
                     Debug.WriteLine("[SmartFormatter] 设置右对齐")
                     Return True
@@ -207,7 +216,7 @@ Namespace Services
         Public Function ApplyNaturalLanguageFormatDetailed(command As String) As FormattingExecutionResult
             Dim result As New FormattingExecutionResult()
             If String.IsNullOrWhiteSpace(command) Then
-                result.ErrorMessage = "格式指令为空"
+                result.ErrorMessage = "Команда форматирования пуста"
                 Return result
             End If
 
@@ -215,7 +224,7 @@ Namespace Services
             Dim plan = compiler.Compile(command, HasUsableSelection())
             result.Plan = plan
             If plan Is Nothing OrElse Not plan.HasOperations Then
-                result.ErrorMessage = "未识别到可执行格式操作"
+                result.ErrorMessage = "Не распознано ни одной выполняемой операции форматирования"
                 Return result
             End If
 
@@ -223,7 +232,7 @@ Namespace Services
             Try
                 Try
                     If _app.UndoRecord IsNot Nothing Then
-                        _app.UndoRecord.StartCustomRecord("AI格式调整")
+                        _app.UndoRecord.StartCustomRecord("Настройка формата ИИ")
                         undoStarted = True
                     End If
                 Catch ex As Exception
@@ -272,7 +281,7 @@ Namespace Services
 
             Dim ranges = ResolveTargetRanges(plan.Scope)
             If ranges Is Nothing OrElse ranges.Count = 0 Then
-                result.ErrorMessage = "没有解析到目标范围"
+                result.ErrorMessage = "Не удалось определить целевой диапазон"
                 Return result
             End If
 
@@ -290,7 +299,7 @@ Namespace Services
                 changed = rangeChanged OrElse changed
             Next
             result.Success = changed
-            If Not changed Then result.ErrorMessage = "目标范围存在，但没有操作被成功应用"
+            If Not changed Then result.ErrorMessage = "Целевой диапазон существует, но ни одна операция не была успешно применена"
             Return result
         End Function
 
@@ -327,7 +336,8 @@ Namespace Services
                 If para.OutlineLevel <> Word.WdOutlineLevel.wdOutlineLevelBodyText Then Return True
                 Dim styleName = para.Style?.NameLocal?.ToString()
                 If Not String.IsNullOrWhiteSpace(styleName) AndAlso
-                   (styleName.Contains("标题") OrElse styleName.IndexOf("Heading", StringComparison.OrdinalIgnoreCase) >= 0) Then
+                   (styleName.Contains("标题") OrElse styleName.IndexOf("Heading", StringComparison.OrdinalIgnoreCase) >= 0 OrElse
+                    styleName.IndexOf("Заголовок", StringComparison.OrdinalIgnoreCase) >= 0) Then
                     Return True
                 End If
             Catch ex As Exception
