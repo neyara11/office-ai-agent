@@ -464,9 +464,9 @@ Public Class SkillsService
         Dim displayedSkills = sortedSkills.Take(Math.Max(1, maxItems)).ToList()
 
         Dim sb As New StringBuilder()
-        sb.AppendLine("## 可用的Skills（目录）")
+        sb.AppendLine("## Доступные Skills (каталог)")
         sb.AppendLine()
-        sb.AppendLine($"已安装 {skills.Count} 个 Skills。以下仅提供最多 {displayedSkills.Count} 个元数据摘要；命中后再加载完整 Skill。")
+        sb.AppendLine($"Установлено Skills: {skills.Count}. Ниже — краткие метаданные не более {displayedSkills.Count} навыков; полное содержимое загружается только для выбранного.")
         sb.AppendLine()
 
         ' 分类显示：热门、最近使用、其他
@@ -475,7 +475,7 @@ Public Class SkillsService
         Dim otherSkills = displayedSkills.Where(Function(s) Not hotSkills.Contains(s) AndAlso Not recentSkills.Contains(s)).ToList()
 
         If hotSkills.Count > 0 Then
-            sb.AppendLine("### 🔥 热门技能")
+            sb.AppendLine("### 🔥 Популярные навыки")
             sb.AppendLine()
             For Each skill In hotSkills
                 sb.AppendLine($"- **{skill.Name}**")
@@ -483,15 +483,15 @@ Public Class SkillsService
                     sb.AppendLine($"  {skill.Description}")
                 End If
                 If skill.Tags IsNot Nothing AndAlso skill.Tags.Count > 0 Then
-                    sb.AppendLine($"  *标签：{String.Join(", ", skill.Tags)}*")
+                    sb.AppendLine($"  *теги: {String.Join(", ", skill.Tags)}*")
                 End If
-                sb.AppendLine($"  *使用 {skill.UsageCount} 次*")
+                sb.AppendLine($"  *использований: {skill.UsageCount}*")
                 sb.AppendLine()
             Next
         End If
 
         If recentSkills.Count > 0 Then
-            sb.AppendLine("### ⏰ 最近使用")
+            sb.AppendLine("### ⏰ Недавно использованные")
             sb.AppendLine()
             For Each skill In recentSkills
                 sb.AppendLine($"- **{skill.Name}**")
@@ -503,7 +503,7 @@ Public Class SkillsService
         End If
 
         If otherSkills.Count > 0 Then
-            sb.AppendLine("### 📚 所有技能")
+            sb.AppendLine("### 📚 Все навыки")
             sb.AppendLine()
             For Each skill In otherSkills
                 sb.AppendLine($"- **{skill.Name}**")
@@ -511,19 +511,19 @@ Public Class SkillsService
                     sb.AppendLine($"  {skill.Description}")
                 End If
                 If skill.Tags IsNot Nothing AndAlso skill.Tags.Count > 0 Then
-                    sb.AppendLine($"  *标签：{String.Join(", ", skill.Tags)}*")
+                    sb.AppendLine($"  *теги: {String.Join(", ", skill.Tags)}*")
                 End If
                 sb.AppendLine()
             Next
         End If
 
         sb.AppendLine("---")
-        sb.AppendLine("**使用说明**：")
-        sb.AppendLine("1. 根据用户需求，从上面的Skills中选择最相关的")
-        sb.AppendLine("2. 如果需要某个Skill的详细内容，请明确指出需要哪个Skill")
-        sb.AppendLine("3. 可以同时使用多个Skills")
+        sb.AppendLine("**Как использовать**:")
+        sb.AppendLine("1. По запросу пользователя выбери наиболее подходящий навык из списка выше")
+        sb.AppendLine("2. Если нужно подробное содержимое навыка, явно укажи, какой навык требуется")
+        sb.AppendLine("3. Можно использовать несколько навыков одновременно")
         If skills.Count > displayedSkills.Count Then
-            sb.AppendLine($"4. 还有 {skills.Count - displayedSkills.Count} 个 Skills 未展开，必要时通过索引召回。")
+            sb.AppendLine($"4. Ещё {skills.Count - displayedSkills.Count} Skills не раскрыты; при необходимости вызови их по индексу.")
         End If
 
         Return sb.ToString()
@@ -541,29 +541,29 @@ Public Class SkillsService
         If detailSkill IsNot Nothing Then skill = detailSkill
 
         Dim sb As New StringBuilder()
-        sb.AppendLine($"## Skill：{skill.Name}")
+        sb.AppendLine($"## Skill: {skill.Name}")
         sb.AppendLine()
 
         If Not String.IsNullOrWhiteSpace(skill.Description) Then
-            sb.AppendLine($"**描述**：{skill.Description}")
+            sb.AppendLine($"**Описание**: {skill.Description}")
             sb.AppendLine()
         End If
 
         If skill.Tags IsNot Nothing AndAlso skill.Tags.Count > 0 Then
-            sb.AppendLine($"**标签**：{String.Join(", ", skill.Tags)}")
+            sb.AppendLine($"**Теги**: {String.Join(", ", skill.Tags)}")
             sb.AppendLine()
         End If
 
         If skill.UsageCount > 0 Then
-            sb.AppendLine($"**使用统计**：{skill.UsageCount} 次使用")
+            sb.AppendLine($"**Статистика использования**: {skill.UsageCount}")
             If skill.LastUsedAt.HasValue Then
-                sb.AppendLine($"**最后使用**：{skill.LastUsedAt.Value.ToString("yyyy-MM-dd HH:mm")}")
+                sb.AppendLine($"**Последнее использование**: {skill.LastUsedAt.Value.ToString("yyyy-MM-dd HH:mm")}")
             End If
             sb.AppendLine()
         End If
 
         ' Skill详细内容
-        sb.AppendLine("**Skill内容**：")
+        sb.AppendLine("**Содержимое Skill**:")
         sb.AppendLine("```")
         sb.AppendLine(skill.Content)
         sb.AppendLine("```")
