@@ -214,7 +214,11 @@ Public Class SmartFormattingOrchestrator
             {"GB/T 7714", "GB/T 7714-2015"},
             {"商务", "商务报告通用规范"},
             {"报告", "商务报告通用规范"},
-            {"商业", "商务报告通用规范"}
+            {"商业", "商务报告通用规范"},
+            {"официальный документ", "GB/T 9704-2012"},
+            {"научная статья", "学术论文通用格式"},
+            {"бизнес-отчёт", "商务报告通用规范"},
+            {"бизнес-отчет", "商务报告通用规范"}
         }
 
     ''' <summary>获取当前对话式微调的上下文状态</summary>
@@ -402,13 +406,13 @@ Public Class SmartFormattingOrchestrator
         ' ---- 1. 识别意图类型 ----
 
         ' 克隆意图
-        If ContainsAny(message, {"克隆", "照这个", "范文", "模仿", "参照", "格式克隆"}) Then
+        If ContainsAny(message, {"克隆", "照这个", "范文", "模仿", "参照", "格式克隆", "скопируй формат", "как образец", "по образцу", "скопировать стиль", "повтори оформление", "клонировать", "образец"}) Then
             intent.IntentType = IntentType.StyleClone
             Return intent
         End If
 
         ' 清洗意图
-        If ContainsAny(message, {"清洗", "清理", "清除格式", "去除格式", "格式清理"}) Then
+        If ContainsAny(message, {"清洗", "清理", "清除格式", "去除格式", "格式清理", "очисти формат", "убери формат", "сбрось формат", "убрать форматирование", "очистить форматирование", "сбросить формат"}) Then
             intent.IntentType = IntentType.FormatCleanup
             Return intent
         End If
@@ -426,7 +430,7 @@ Public Class SmartFormattingOrchestrator
         If Not HasTweakIntent(message) Then
             ' 未匹配到其他目的时默认为自动排版
             If intent.IntentType = IntentType.AutoFormat AndAlso
-               ContainsAny(message, {"排版", "格式", "段落", "字体", "行距", "整理"}) Then
+               ContainsAny(message, {"排版", "格式", "段落", "字体", "行距", "整理", "формат", "оформи", "отформатируй", "стиль", "абзац", "шрифт", "интервал", "выравнивание", "оформление", "отформатировать"}) Then
                 intent.IntentType = IntentType.AutoFormat
             End If
         Else
@@ -444,7 +448,7 @@ Public Class SmartFormattingOrchestrator
         End If
 
         ' 颜色
-        Dim colors = {"红色", "蓝色", "黑色", "绿色", "白色"}
+        Dim colors = {"红色", "蓝色", "黑色", "绿色", "白色", "красный", "синий", "чёрный", "черный", "зелёный", "зеленый", "белый", "голубой"}
         For Each color In colors
             If message.Contains(color) Then
                 intent.SpecificRequests.Add($"color_{color}")
@@ -458,23 +462,23 @@ Public Class SmartFormattingOrchestrator
         End If
 
         ' 对齐
-        If ContainsAny(message, {"居中", "居中对齐"}) Then
+        If ContainsAny(message, {"居中", "居中对齐", "по центру", "выровнять по центру"}) Then
             intent.SpecificRequests.Add("align_center")
-        ElseIf ContainsAny(message, {"左对齐", "靠左"}) Then
+        ElseIf ContainsAny(message, {"左对齐", "靠左", "по левому краю", "по левому"}) Then
             intent.SpecificRequests.Add("align_left")
-        ElseIf ContainsAny(message, {"右对齐", "靠右"}) Then
+        ElseIf ContainsAny(message, {"右对齐", "靠右", "по правому краю", "по правому"}) Then
             intent.SpecificRequests.Add("align_right")
-        ElseIf ContainsAny(message, {"两端对齐"}) Then
+        ElseIf ContainsAny(message, {"两端对齐", "по ширине", "выровнять по ширине", "выровнять"}) Then
             intent.SpecificRequests.Add("align_justify")
         End If
 
         ' 加粗
-        If ContainsAny(message, {"加粗", "粗体", "粗一点"}) Then
+        If ContainsAny(message, {"加粗", "粗体", "粗一点", "жирный", "полужирный", "жирнее", "жирным"}) Then
             intent.SpecificRequests.Add("bold")
         End If
 
         ' 缩进
-        If message.Contains("缩进") Then
+        If ContainsAny(message, {"缩进", "отступ", "отступ первой строки", "красная строка"}) Then
             Dim indentMatch = Regex.Match(message, "缩进.{0,4}([\d.]+)")
             If indentMatch.Success Then
                 intent.SpecificRequests.Add($"indent_{indentMatch.Groups(1).Value}")
@@ -485,15 +489,15 @@ Public Class SmartFormattingOrchestrator
 
         ' ---- 3. 识别目标文档类型 ----
 
-        If ContainsAny(message, {"公文", "通知", "决定", "批复", "请示", "函"}) Then
+        If ContainsAny(message, {"公文", "通知", "决定", "批复", "请示", "函", "официальный", "приказ", "распоряжение", "уведомление", "письмо"}) Then
             intent.TargetDocumentType = DocumentType.OfficialDocument
-        ElseIf ContainsAny(message, {"论文", "学术", "期刊", "学报"}) Then
+        ElseIf ContainsAny(message, {"论文", "学术", "期刊", "学报", "научная", "научный", "статья", "диссертация"}) Then
             intent.TargetDocumentType = DocumentType.AcademicPaper
-        ElseIf ContainsAny(message, {"报告", "商务", "商业", "汇报", "总结"}) Then
+        ElseIf ContainsAny(message, {"报告", "商务", "商业", "汇报", "总结", "отчёт", "отчет", "доклад", "бизнес"}) Then
             intent.TargetDocumentType = DocumentType.BusinessReport
-        ElseIf ContainsAny(message, {"合同", "协议", "合约"}) Then
+        ElseIf ContainsAny(message, {"合同", "协议", "合约", "договор", "контракт"}) Then
             intent.TargetDocumentType = DocumentType.Contract
-        ElseIf ContainsAny(message, {"简历", "履历"}) Then
+        ElseIf ContainsAny(message, {"简历", "履历", "резюме"}) Then
             intent.TargetDocumentType = DocumentType.[Resume]
         Else
             ' 从标准名称反推文档类型
@@ -760,13 +764,13 @@ Public Class SmartFormattingOrchestrator
     ''' <summary>获取文档类型的中文名称</summary>
     Private Function GetDocumentTypeName(docType As DocumentType) As String
         Select Case docType
-            Case DocumentType.OfficialDocument : Return "行政公文"
-            Case DocumentType.AcademicPaper : Return "学术论文"
-            Case DocumentType.BusinessReport : Return "商业报告"
-            Case DocumentType.Contract : Return "合同协议"
-            Case DocumentType.[Resume] : Return "个人简历"
-            Case DocumentType.GeneralDocument : Return "通用文档"
-            Case Else : Return "未知"
+            Case DocumentType.OfficialDocument : Return "Официальный документ"
+            Case DocumentType.AcademicPaper : Return "Научная статья"
+            Case DocumentType.BusinessReport : Return "Бизнес-отчёт"
+            Case DocumentType.Contract : Return "Договор/соглашение"
+            Case DocumentType.[Resume] : Return "Резюме"
+            Case DocumentType.GeneralDocument : Return "Обычный документ"
+            Case Else : Return "Неизвестно"
         End Select
     End Function
 
@@ -816,7 +820,8 @@ Public Class SmartFormattingOrchestrator
         If paraIndex >= totalParagraphs - 4 Then
             If trimmed.Length <= 30 Then
                 ' 匹配日期格式：2024年1月15日
-                If System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\d{4}年\d{1,2}月\d{1,2}日") Then
+                If System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\d{4}年\d{1,2}月\d{1,2}日") OrElse
+                   System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\d{2}\.\d{2}\.\d{4}") Then
                     If mapping.FindTag("footer.date") IsNot Nothing Then Return "footer.date"
                 End If
                 ' 匹配机构署名：以"政府""办公室""局""部""厅""委员会"结尾
@@ -824,7 +829,7 @@ Public Class SmartFormattingOrchestrator
                     If mapping.FindTag("footer.signature") IsNot Nothing Then Return "footer.signature"
                 End If
                 ' 抄送
-                If trimmed.StartsWith("抄送") Then
+                If trimmed.StartsWith("抄送") OrElse trimmed.StartsWith("Копия") Then
                     If mapping.FindTag("footer.cc") IsNot Nothing Then Return "footer.cc"
                 End If
             End If
@@ -846,7 +851,7 @@ Public Class SmartFormattingOrchestrator
         End If
 
         ' 附件说明
-        If trimmed.StartsWith("附件") Then
+        If trimmed.StartsWith("附件") OrElse trimmed.StartsWith("Приложение") Then
             If mapping.FindTag("body.attachment") IsNot Nothing Then Return "body.attachment"
         End If
 
@@ -858,7 +863,8 @@ Public Class SmartFormattingOrchestrator
                System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\([一二三四五六七八九十]+\)") Then
                 If mapping.FindTag("title.2") IsNot Nothing Then Return "title.2"
             End If
-            If System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\d+[\.．、]") Then
+            If System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\d+[\.．、]") OrElse
+               System.Text.RegularExpressions.Regex.IsMatch(trimmed, "^\d+[.)]") Then
                 If mapping.FindTag("title.3") IsNot Nothing Then Return "title.3"
             End If
             If trimmed.StartsWith("附注") OrElse
@@ -1013,6 +1019,9 @@ Public Class SmartFormattingOrchestrator
         If Regex.IsMatch(trimmed, "^\d+[.．、]\s*\S+") Then
             Return If(IsOfficialDocumentStandard(standard), 3, 1)
         End If
+        If Regex.IsMatch(trimmed, "^\d+[.)]\s*\S+") Then
+            Return If(IsOfficialDocumentStandard(standard), 3, 1)
+        End If
 
         Return 0
     End Function
@@ -1084,9 +1093,9 @@ Public Class SmartFormattingOrchestrator
         Dim tags As New List(Of SemanticTag)()
         If mapping Is Nothing Then Return tags
 
-        Dim hasHeading = ContainsAny(command, {"标题", "题目", "章", "节"})
-        Dim hasBody = ContainsAny(command, {"正文", "内容", "段落", "文字"})
-        Dim hasAll = ContainsAny(command, {"全部", "所有", "整体", "全局"})
+        Dim hasHeading = ContainsAny(command, {"标题", "题目", "章", "节", "заголовок", "заголовки", "название", "глава", "раздел"})
+        Dim hasBody = ContainsAny(command, {"正文", "内容", "段落", "文字", "текст", "содержание", "абзац", "основной текст"})
+        Dim hasAll = ContainsAny(command, {"全部", "所有", "整体", "全局", "все", "весь", "всё", "целиком", "полностью"})
 
         If hasAll OrElse (Not hasHeading AndAlso Not hasBody) Then
             tags.AddRange(mapping.SemanticTags)
@@ -1113,7 +1122,7 @@ Public Class SmartFormattingOrchestrator
         If String.IsNullOrWhiteSpace(command) OrElse targetTags Is Nothing Then Return
 
         ' 判断是否为重复操作（"再大一点" → 沿用上一次操作）
-        Dim isRepeat = ContainsAny(command, {"再", "更", "还", "继续", "进一步"})
+        Dim isRepeat = ContainsAny(command, {"再", "更", "还", "继续", "进一步", "ещё", "еще", "больше", "продолжай", "дальше"})
 
         For Each tag In targetTags
             ' ---- 字号 ----
@@ -1136,32 +1145,32 @@ Public Class SmartFormattingOrchestrator
             End If
 
             ' ---- 颜色 ----
-            If command.Contains("红色") Then
+            If ContainsAny(command, {"红色", "красный"}) Then
                 tag.Color.FontColor = "#C00000"
-            ElseIf command.Contains("蓝色") Then
+            ElseIf ContainsAny(command, {"蓝色", "синий", "голубой"}) Then
                 tag.Color.FontColor = "#2E5090"
-            ElseIf command.Contains("黑色") Then
+            ElseIf ContainsAny(command, {"黑色", "чёрный", "черный"}) Then
                 tag.Color.FontColor = "#000000"
-            ElseIf command.Contains("绿色") Then
+            ElseIf ContainsAny(command, {"绿色", "зелёный", "зеленый"}) Then
                 tag.Color.FontColor = "#008000"
             End If
 
             ' ---- 加粗 ----
-            If ContainsAny(command, {"加粗", "粗体", "粗一点"}) Then
+            If ContainsAny(command, {"加粗", "粗体", "粗一点", "жирный", "полужирный", "жирнее", "жирным"}) Then
                 tag.Font.Bold = True
             End If
-            If ContainsAny(command, {"取消加粗", "不加粗", "细体"}) Then
+            If ContainsAny(command, {"取消加粗", "不加粗", "细体", "нежирный", "снять жирный", "убрать жирный", "обычный шрифт"}) Then
                 tag.Font.Bold = False
             End If
 
             ' ---- 对齐 ----
-            If ContainsAny(command, {"居中", "居中对齐"}) Then
+            If ContainsAny(command, {"居中", "居中对齐", "по центру", "выровнять по центру"}) Then
                 tag.Paragraph.Alignment = "center"
-            ElseIf ContainsAny(command, {"左对齐", "靠左"}) Then
+            ElseIf ContainsAny(command, {"左对齐", "靠左", "по левому краю", "по левому"}) Then
                 tag.Paragraph.Alignment = "left"
-            ElseIf ContainsAny(command, {"右对齐", "靠右"}) Then
+            ElseIf ContainsAny(command, {"右对齐", "靠右", "по правому краю", "по правому"}) Then
                 tag.Paragraph.Alignment = "right"
-            ElseIf ContainsAny(command, {"两端对齐"}) Then
+            ElseIf ContainsAny(command, {"两端对齐", "по ширине", "выровнять по ширине", "выровнять"}) Then
                 tag.Paragraph.Alignment = "justify"
             End If
 
@@ -1175,7 +1184,7 @@ Public Class SmartFormattingOrchestrator
             End If
 
             ' ---- 缩进 ----
-            If command.Contains("缩进") Then
+            If ContainsAny(command, {"缩进", "отступ", "отступ первой строки", "красная строка"}) Then
                 Dim indentMatch = Regex.Match(command, "缩进.{0,4}([\d.]+)")
                 If indentMatch.Success Then
                     Dim newIndent As Double
@@ -1297,8 +1306,8 @@ Public Class SmartFormattingOrchestrator
     Private Shared Function IsHeadingNumberingRequest(message As String) As Boolean
         If String.IsNullOrWhiteSpace(message) Then Return False
 
-        Dim hasStructureVerb = ContainsAny(message, {"重构", "整理", "规范", "优化", "调整", "梳理", "统一"})
-        Dim hasStructureTarget = ContainsAny(message, {"序号", "编号", "标题", "层级", "章节"})
+        Dim hasStructureVerb = ContainsAny(message, {"重构", "整理", "规范", "优化", "调整", "梳理", "统一", "перестрой", "переструктурировать", "упорядочить", "нормализовать", "оптимизировать"})
+        Dim hasStructureTarget = ContainsAny(message, {"序号", "编号", "标题", "层级", "章节", "нумерация", "нумерацию", "заголовки", "уровни", "разделы", "номера"})
 
         Return hasStructureVerb AndAlso hasStructureTarget
     End Function
@@ -1328,7 +1337,8 @@ Public Class SmartFormattingOrchestrator
     Private Shared Function HasTweakIntent(message As String) As Boolean
         Return Regex.IsMatch(message, "(再|更|调|改|设|换).{0,4}(大|小|颜色|字体|行距|对齐|加粗|缩进)") OrElse
                Regex.IsMatch(message, "(大|小|加大|增大|减小|缩小|颜色|字体|字号|行距|对齐|加粗|缩进).{0,6}(号|磅|pt|点|一些|一点)") OrElse
-               ContainsAny(message, {"红色", "蓝色", "黑色", "居中", "加粗"})
+               ContainsAny(message, {"红色", "蓝色", "黑色", "居中", "加粗", "красный", "синий", "чёрный", "черный", "зелёный", "зеленый", "белый", "по центру", "по левому краю", "по правому краю", "по ширине", "жирный", "полужирный", "отступ"}) OrElse
+               Regex.IsMatch(message, "(больше|меньше|жирнее|крупнее|мельче).{0,4}(шрифт|текст|заголовок|абзац)")
     End Function
 
 End Class
