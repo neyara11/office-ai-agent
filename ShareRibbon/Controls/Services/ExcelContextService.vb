@@ -85,7 +85,7 @@ Public Class ExcelContextService
     ''' <returns>Markdown格式的表格字符串</returns>
     Public Function FormatAsMarkdownTable(data As Object(,), Optional hasHeader As Boolean = True) As String
         If data Is Nothing OrElse data.Length = 0 Then
-            Return "[无数据]"
+            Return "[Нет данных]"
         End If
 
         Dim sb As New StringBuilder()
@@ -139,7 +139,7 @@ Public Class ExcelContextService
 
         Catch ex As Exception
             Debug.WriteLine($"FormatAsMarkdownTable 出错: {ex.Message}")
-            sb.AppendLine("[格式化数据时出错]")
+            sb.AppendLine("[Ошибка форматирования данных]")
         End Try
 
         Return sb.ToString()
@@ -152,7 +152,7 @@ Public Class ExcelContextService
     ''' <returns>数据摘要字符串</returns>
     Public Function GenerateDataSummary(data As Object(,)) As String
         If data Is Nothing OrElse data.Length = 0 Then
-            Return "[无数据]"
+            Return "[Нет данных]"
         End If
 
         Dim sb As New StringBuilder()
@@ -167,14 +167,14 @@ Public Class ExcelContextService
             Dim totalRows = rowEnd - rowStart + 1
             Dim totalCols = colEnd - colStart + 1
 
-            sb.AppendLine("【数据摘要】")
-            sb.AppendLine($"- 总行数: {totalRows}")
-            sb.AppendLine($"- 总列数: {totalCols}")
-            sb.AppendLine($"- 单元格总数: {totalRows * totalCols}")
+            sb.AppendLine("【Сводка данных】")
+            sb.AppendLine($"- Всего строк: {totalRows}")
+            sb.AppendLine($"- Всего столбцов: {totalCols}")
+            sb.AppendLine($"- Всего ячеек: {totalRows * totalCols}")
 
             ' 分析每列的数据类型和统计信息
             sb.AppendLine()
-            sb.AppendLine("【列信息】")
+            sb.AppendLine("【Информация о столбцах】")
 
             Dim colIndex = 1
             For col = colStart To colEnd
@@ -316,14 +316,14 @@ Public Class ExcelContextService
         Dim sb As New StringBuilder()
 
         Try
-            sb.AppendLine(vbCrLf & "--- 用户选中的Excel数据 ---")
-            sb.AppendLine($"工作簿: {workbookName}")
-            sb.AppendLine($"工作表: {worksheetName}")
-            sb.AppendLine($"范围: {rangeAddress}")
+            sb.AppendLine(vbCrLf & "--- Данные Excel, выбранные пользователем ---")
+            sb.AppendLine($"Книга: {workbookName}")
+            sb.AppendLine($"Лист: {worksheetName}")
+            sb.AppendLine($"Диапазон: {rangeAddress}")
 
             If data Is Nothing OrElse data.Length = 0 Then
-                sb.AppendLine("[无数据]")
-                sb.AppendLine("--- 数据引用结束 ---" & vbCrLf)
+                sb.AppendLine("[Нет данных]")
+                sb.AppendLine("--- Конец ссылки на данные ---" & vbCrLf)
                 Return sb.ToString()
             End If
 
@@ -335,25 +335,25 @@ Public Class ExcelContextService
             If cellCount <= SUMMARY_THRESHOLD Then
                 ' 小数据集：完整Markdown表格
                 sb.AppendLine()
-                sb.AppendLine("【数据内容】")
+                sb.AppendLine("【Содержимое данных】")
                 sb.AppendLine(FormatAsMarkdownTable(data, dataStructure.HasHeader))
             Else
                 ' 大数据集：摘要 + 示例
                 sb.AppendLine()
                 sb.AppendLine(GenerateDataSummary(data))
                 sb.AppendLine()
-                sb.AppendLine("【前5行数据示例】")
+                sb.AppendLine("【Пример первых 5 строк】")
                 Dim topData = GetTopRows(data, 5)
                 If topData IsNot Nothing Then
                     sb.AppendLine(FormatAsMarkdownTable(topData, dataStructure.HasHeader))
                 End If
             End If
 
-            sb.AppendLine("--- 数据引用结束 ---" & vbCrLf)
+            sb.AppendLine("--- Конец ссылки на данные ---" & vbCrLf)
 
         Catch ex As Exception
             Debug.WriteLine($"FormatSelectionAsContext 出错: {ex.Message}")
-            sb.AppendLine($"[读取数据时出错: {ex.Message}]")
+            sb.AppendLine($"[Ошибка чтения данных: {ex.Message}]")
         End Try
 
         Return sb.ToString()

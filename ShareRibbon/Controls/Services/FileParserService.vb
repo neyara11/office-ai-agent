@@ -69,13 +69,13 @@ Public Class FileParserService
                     Dim columns As String() = rows(0).Split(delimiter)
 
                     ' 添加表头
-                    formattedContent.AppendLine("表头:")
+                    formattedContent.AppendLine("Заголовки:")
                     formattedContent.AppendLine(FormatCsvRow(rows(0), delimiter))
                     formattedContent.AppendLine()
 
                     ' 添加数据行
                     Dim maxRows As Integer = Math.Min(rows.Length, 25)
-                    formattedContent.AppendLine("数据:")
+                    formattedContent.AppendLine("Данные:")
 
                     For i As Integer = 1 To maxRows - 1
                         formattedContent.AppendLine(FormatCsvRow(rows(i), delimiter))
@@ -83,10 +83,10 @@ Public Class FileParserService
 
                     If rows.Length > maxRows Then
                         formattedContent.AppendLine("...")
-                        formattedContent.AppendLine($"[文件包含 {rows.Length} 行，仅显示前 {maxRows - 1} 行数据]")
+                        formattedContent.AppendLine($"[Файл содержит {rows.Length} строк; показаны первые {maxRows - 1}]")
                     End If
                 Else
-                    formattedContent.AppendLine("[CSV 文件为空]")
+                    formattedContent.AppendLine("[CSV-файл пуст]")
                 End If
 
                 Return New FileContentResult With {

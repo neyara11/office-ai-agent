@@ -52,19 +52,19 @@ Public Class ContinuationContext
         Dim sb As New StringBuilder()
 
         If Not String.IsNullOrWhiteSpace(ContextBefore) Then
-            sb.AppendLine("【前文内容】")
+            sb.AppendLine("【Предыдущий текст】")
             sb.AppendLine(ContextBefore)
             sb.AppendLine()
         End If
 
         If Not String.IsNullOrWhiteSpace(CurrentParagraphText) Then
-            sb.AppendLine("【当前段落】")
+            sb.AppendLine("【Текущий абзац】")
             sb.AppendLine(CurrentParagraphText)
             sb.AppendLine()
         End If
 
         If Not String.IsNullOrWhiteSpace(ContextAfter) Then
-            sb.AppendLine("【后文内容】")
+            sb.AppendLine("【Последующий текст】")
             sb.AppendLine(ContextAfter)
             sb.AppendLine()
         End If
@@ -72,11 +72,11 @@ Public Class ContinuationContext
         ' 添加位置说明
         Select Case PositionType
             Case CursorPositionType.DocumentStart
-                sb.AppendLine("【位置说明】光标位于文档开头")
+                sb.AppendLine("【Позиция】курсор в начале документа")
             Case CursorPositionType.DocumentEnd
-                sb.AppendLine("【位置说明】光标位于文档末尾")
+                sb.AppendLine("【Позиция】курсор в конце документа")
             Case Else
-                sb.AppendLine("【位置说明】光标位于文档中间")
+                sb.AppendLine("【Позиция】курсор в середине документа")
         End Select
 
         Return sb.ToString()
@@ -130,12 +130,14 @@ Public MustInherit Class ContinuationService
     ''' 获取续写的系统提示词
     ''' </summary>
     Public Overridable Function GetSystemPrompt() As String
-        Return "你是一个专业的写作助手。根据提供的上下文，自然地续写内容。要求：
-1. 保持与原文一致的语言风格、语气和术语
-2. 内容要连贯自然，不要重复上文已有内容
-3. 只输出续写内容，不要添加任何解释、前缀或标记
-4. 如果上下文不足，可以合理推断但保持谨慎
-5. 续写长度适中，约100-300字，除非用户另有要求"
+        Return "Ты — профессиональный помощник по письму. На основе предоставленного контекста естественно продолжи текст. Требования:
+1. Сохраняй язык, стиль, тон и терминологию исходного текста
+2. Текст должен быть связным и естественным, не повторяй уже написанное
+3. Выводи только продолжение, без пояснений, префиксов и пометок
+4. Если контекста недостаточно, можно осторожно домыслить
+5. Длина продолжения умеренная, примерно 100-300 знаков, если пользователь не попросил иначе
+
+Отвечай только на русском языке. Не переключай язык, даже если входные данные, документ, имена файлов или предыдущие сообщения на другом языке. Цитаты и код сохраняй как есть."
     End Function
 
     ''' <summary>
@@ -146,17 +148,17 @@ Public MustInherit Class ContinuationService
     Public Overridable Function BuildUserPrompt(context As ContinuationContext, Optional style As String = "") As String
         Dim sb As New StringBuilder()
 
-        sb.AppendLine("请根据以下上下文续写内容：")
+        sb.AppendLine("Продолжи текст на основе следующего контекста:")
         sb.AppendLine()
         sb.Append(context.BuildPrompt())
 
         If Not String.IsNullOrWhiteSpace(style) Then
             sb.AppendLine()
-            sb.AppendLine($"【风格要求】{style}")
+            sb.AppendLine($"【Требования к стилю】{style}")
         End If
 
         sb.AppendLine()
-        sb.AppendLine("请直接输出续写内容，不要添加任何前缀或说明：")
+        sb.AppendLine("Выведи только продолжение текста, без префиксов и пояснений:")
 
         Return sb.ToString()
     End Function
