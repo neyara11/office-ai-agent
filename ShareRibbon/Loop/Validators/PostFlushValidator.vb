@@ -24,7 +24,7 @@ Public Class PostFlushValidator
 
         ' 检查1: 响应是否为空或过长
         If String.IsNullOrWhiteSpace(aiResponse) Then
-            errors.Add(New InstructionError(ErrorLevel.Critical, "AI响应为空"))
+            errors.Add(New InstructionError(ErrorLevel.Critical, "Ответ AI пуст"))
             Return ValidationResult.Failure(errors)
         End If
 
@@ -32,7 +32,7 @@ Public Class PostFlushValidator
         Dim extractedContent = ExtractInstructionContent(aiResponse, expectedFormat)
         If String.IsNullOrEmpty(extractedContent) Then
             errors.Add(New InstructionError(ErrorLevel.Critical,
-                $"无法从AI响应中提取{expectedFormat}格式内容"))
+                $"Не удалось извлечь содержимое формата {expectedFormat} из ответа AI"))
             Return ValidationResult.Failure(errors, aiResponse)
         End If
 
@@ -123,11 +123,11 @@ Public Class PostFlushValidator
 
             ' 必须有version和instructions
             If json("version") Is Nothing Then
-                Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, "缺少version字段"))
+                Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, "Отсутствует поле version"))
             End If
 
             If json("instructions") Is Nothing OrElse json("instructions").Type <> JTokenType.Array Then
-                Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, "缺少instructions数组"))
+                Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, "Отсутствует массив instructions"))
             End If
 
             Dim instructions As New List(Of Instruction)()
@@ -136,20 +136,20 @@ Public Class PostFlushValidator
             For i = 0 To instructionArray.Count - 1
                 Dim item = instructionArray(i)
                 If item.Type <> JTokenType.Object Then
-                    Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, $"instructions[{i}]必须是对象"))
+                    Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, $"instructions[{i}] должен быть объектом"))
                 End If
 
                 Dim itemObj = CType(item, JObject)
 
                 If itemObj("op") Is Nothing Then
-                    Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, $"instructions[{i}]缺少op字段"))
+                    Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, $"instructions[{i}] отсутствует поле op"))
                 End If
 
                 Dim op = itemObj("op").ToString()
 
                 ' 校验操作类型是否注册
                 If Not InstructionRegistry.IsValidOperation(op) Then
-                    Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, $"未知操作类型: {op}"))
+                    Return ParseResult.Failure(New InstructionError(ErrorLevel.Error, $"Неизвестный тип операции: {op}"))
                 End If
 
                 ' 校验参数Schema
@@ -158,7 +158,7 @@ Public Class PostFlushValidator
                     Dim paramCheck = InstructionRegistry.ValidateParameters(op, params)
                     If Not paramCheck.IsValid Then
                         Return ParseResult.Failure(New InstructionError(ErrorLevel.Error,
-                            $"instructions[{i}]参数校验失败: {paramCheck.ErrorMessage}"))
+                            $"instructions[{i}] ошибка проверки параметров: {paramCheck.ErrorMessage}"))
                     End If
                 End If
 
@@ -182,7 +182,7 @@ Public Class PostFlushValidator
             Return ParseResult.Success(instructions)
 
         Catch ex As JsonException
-            Return ParseResult.Failure(New InstructionError(ErrorLevel.Critical, $"JSON解析失败: {ex.Message}"))
+            Return ParseResult.Failure(New InstructionError(ErrorLevel.Critical, $"Ошибка разбора JSON: {ex.Message}"))
         End Try
     End Function
 
@@ -307,7 +307,7 @@ Public Class PostFlushValidator
                 Dim originalPreview = If(issue.Original.Length > 20, issue.Original.Substring(0, 20) & "...", issue.Original)
                 Dim suggestionPreview = If(issue.Suggestion.Length > 20, issue.Suggestion.Substring(0, 20) & "...", issue.Suggestion)
                 instruction.Expected = New JObject From {
-                    {"description", $"建议将'{originalPreview}'修正为'{suggestionPreview}'"}
+                    {"description", $"Рекомендуется исправить '{originalPreview}' на '{suggestionPreview}'"}
                 }
 
                 instructions.Add(instruction)
@@ -317,7 +317,7 @@ Public Class PostFlushValidator
 
         Catch ex As Exception
             Return ParseResult.Failure(New InstructionError(
-                ErrorLevel.Critical, $"校对处理失败: {ex.Message}"))
+                ErrorLevel.Critical, $"Ошибка обработки вычитки: {ex.Message}"))
         End Try
     End Function
 
@@ -352,7 +352,7 @@ Public Class PostFlushValidator
             Return ParseResult.Success(instructions)
 
         Catch ex As JsonException
-            Return ParseResult.Failure(New InstructionError(ErrorLevel.Critical, $"旧版JSON命令解析失败: {ex.Message}"))
+            Return ParseResult.Failure(New InstructionError(ErrorLevel.Critical, $"Ошибка разбора устаревшей JSON-команды: {ex.Message}"))
         End Try
     End Function
 
@@ -404,7 +404,7 @@ Public Class PostFlushValidator
             ' 检查破坏性操作
             If def.IsDestructive AndAlso context.OfficeContent IsNot Nothing AndAlso context.OfficeContent.IsReadOnly Then
                 errors.Add(New InstructionError(ErrorLevel.Critical,
-                    $"指令 {inst.Id} ({inst.Operation}) 为破坏性操作但文档为只读",
+                    $"Инструкция {inst.Id} ({inst.Operation}) является разрушительной операцией, но документ доступен только для чтения",
                     inst.Id))
                 isSafe = False
             End If
@@ -413,7 +413,7 @@ Public Class PostFlushValidator
             If def.RequiresConfirmation Then
                 ' 记录但不一定阻止
                 errors.Add(New InstructionError(ErrorLevel.Warning,
-                    $"指令 {inst.Id} ({inst.Operation}) 需要用户确认",
+                    $"Инструкция {inst.Id} ({inst.Operation}) требует подтверждения пользователя",
                     inst.Id))
             End If
         Next
@@ -436,8 +436,8 @@ Public Class PostFlushValidator
                 If Not String.IsNullOrEmpty(selector) Then
                     If styleTargets.ContainsKey(selector) Then
                         errors.Add(New InstructionError(ErrorLevel.Warning,
-                            $"指令 {inst.Id} 与指令 {styleTargets(selector)} 可能冲突（目标相同）",
-                            inst.Id, True, "合并为一个指令或调整目标范围"))
+                            $"Инструкция {inst.Id} и инструкция {styleTargets(selector)} могут конфликтовать (одинаковая цель)",
+                            inst.Id, True, "Объедините в одну инструкцию или скорректируйте диапазон цели"))
                     Else
                         styleTargets(selector) = inst.Id
                     End If
