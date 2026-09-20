@@ -14,16 +14,23 @@ Public Class WebDataCapturePane
     Public Sub New()
         ' 此调用是设计师所必需的。
         InitializeComponent()
-        ' 创建 ChatControl 实例
         ' 订阅AI聊天请求事件
         AddHandler AiChatRequested, AddressOf HandleAiChatRequest
-        ' 直接调用异步初始化方法
-        InitializeWebViewAsync()
+        ' WebView2 здесь не создаём: VSTO CustomTaskPane сразу после конструктора перевешивает
+        ' контрол в своё окно-хост, и созданный заранее WebView2 теряет связь визуальной
+        ' поверхности с областью ввода — страница рисуется, но не кликается, не подсвечивается
+        ' и не прокручивается. Как и BaseChatControl (MainForm_Load), инициализация идёт на Load,
+        ' когда хэндл контрола уже создан в окне задачи.
+    End Sub
+
+    ''' <summary>Инициализация WebView2 после создания хэндла контрола.</summary>
+    Private Async Sub WebDataCapturePane_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Await InitializeWebViewAsync()
     End Sub
 
     ' 新增：异步初始化方法
     ' 异步初始化方法
-    Private Async Sub InitializeWebViewAsync()
+    Private Async Function InitializeWebViewAsync() As System.Threading.Tasks.Task
         Try
             Debug.WriteLine("Starting WebView initialization from WebDataCapturePane")
             ' 调用基类的初始化方法
@@ -32,7 +39,7 @@ Public Class WebDataCapturePane
             MessageBox.Show($"Не удалось инициализировать веб-представление: {ex.Message}", "Ошибка",
                           MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
-    End Sub
+    End Function
 
 
     Private Sub HandleAiChatRequest(sender As Object, content As String)
@@ -105,12 +112,94 @@ Public Class WebDataCapturePane
                     ' 确保内容完全插入
                     Debug.WriteLine($"实际插入内容长度: {content.Length}")
 
+                    ' Текст содержит только пометки [Изображение: ...]; сами картинки
+                    ' вставляем следом, иначе захват страницы остаётся текстовым.
+                    InsertCapturedMediaAsync()
                 End If
             End If
         Catch ex As Exception
             MessageBox.Show($"Ошибка при обработке извлечённого содержимого: {ex.Message}", "Ошибка",
                       MessageBoxButtons.OK, MessageBoxIcon.Error)
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' Загружает и вставляет найденные при захвате страницы изображения по порядку,
+    ''' с подписью из alt. В конце показывает итог, чтобы «ничего не произошло» было видно.
+    ''' </summary>
+    Private Async Sub InsertCapturedMediaAsync()
+        If lastCapturedMedia Is Nothing OrElse lastCapturedMedia.Count = 0 Then Return
+
+        Dim doc = Globals.ThisAddIn.Application.ActiveDocument
+        If doc Is Nothing Then Return
+
+        Dim inserted As Integer = 0
+        Dim failed As Integer = 0
+        Dim firstError As String = ""
+
+        For Each captured In lastCapturedMedia
+            Try
+                Dim bytes = Await ImageAcquisitionService.DownloadBytesAsync(captured.Url, TimeSpan.FromSeconds(30))
+                If bytes Is Nothing OrElse bytes.Length = 0 Then
+                    failed += 1
+                    If String.IsNullOrEmpty(firstError) Then firstError = $"не удалось скачать {captured.Url}"
+                    Continue For
+                End If
+
+                Dim extension = ImageAcquisitionService.DetectImageExtension(bytes)
+                If String.IsNullOrEmpty(extension) Then
+                    failed += 1
+                    If String.IsNullOrEmpty(firstError) Then firstError = $"формат не поддерживается: {captured.Url}"
+                    Continue For
+                End If
+
+                Dim alt = captured.Alt
+                Dim insertedNow As Boolean = False
+                Me.Invoke(Sub()
+                              Dim tempPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") & extension)
+                              Try
+                                  File.WriteAllBytes(tempPath, bytes)
+
+                                  Dim selection = doc.Application.Selection
+                                  Dim shape = selection.InlineShapes.AddPicture(tempPath, False, True)
+                                  shape.AlternativeText = If(alt, "")
+                                  If shape.Width > 400 Then shape.Width = 400
+
+                                  selection.MoveRight()
+                                  selection.TypeText(vbCrLf)
+                                  If Not String.IsNullOrWhiteSpace(alt) Then
+                                      selection.Font.Italic = True
+                                      selection.Font.Size = 9
+                                      selection.TypeText($"Подпись к изображению: {alt}")
+                                      selection.Font.Italic = False
+                                      selection.Font.Size = 11
+                                      selection.TypeText(vbCrLf)
+                                  End If
+
+                                  insertedNow = True
+                              Finally
+                                  Try
+                                      If File.Exists(tempPath) Then File.Delete(tempPath)
+                                  Catch
+                                  End Try
+                              End Try
+                          End Sub)
+
+                If insertedNow Then inserted += 1 Else failed += 1
+            Catch ex As Exception
+                failed += 1
+                If String.IsNullOrEmpty(firstError) Then firstError = ex.Message
+            End Try
+        Next
+
+        Dim summary = $"Захвачено изображений: {inserted}."
+        If failed > 0 Then
+            summary &= $" Не удалось: {failed}."
+            If Not String.IsNullOrWhiteSpace(firstError) Then summary &= " " & firstError
+        End If
+
+        MessageBox.Show(summary, "Захват изображений", MessageBoxButtons.OK,
+                        If(failed = 0, MessageBoxIcon.Information, MessageBoxIcon.Warning))
     End Sub
 
     ' 新增：分块插入大内容的方法
@@ -201,14 +290,25 @@ Public Class WebDataCapturePane
                     Try
                         Dim imageData = Await DownloadBytesAsync(imageUrl, TimeSpan.FromSeconds(30))
 
-                            ' 创建临时文件
-                            Dim tempPath = Path.GetTempFileName()
-                            Dim extension = Path.GetExtension(New Uri(imageUrl).LocalPath)
-                            If String.IsNullOrEmpty(extension) Then
-                                extension = ".jpg" ' 默认扩展名
+                            If imageData Is Nothing OrElse imageData.Length = 0 Then
+                                Me.Invoke(Sub()
+                                              MessageBox.Show($"Не удалось скачать изображение: {imageUrl}", "Ошибка")
+                                          End Sub)
+                                Exit Try
                             End If
 
-                            Dim imagePath = Path.ChangeExtension(tempPath, extension)
+                            ' Формат определяем по сигнатуре файла: у ссылок с query-строкой
+                            ' (например, Special:FilePath?width=1600) расширения может не быть,
+                            ' а жёсткий .jpg ломает вставку PNG.
+                            Dim extension = ImageAcquisitionService.DetectImageExtension(imageData)
+                            If String.IsNullOrEmpty(extension) Then
+                                Me.Invoke(Sub()
+                                              MessageBox.Show("Формат изображения не поддерживается Word (нужны jpeg, png, gif, bmp или tiff).", "Ошибка")
+                                          End Sub)
+                                Exit Try
+                            End If
+
+                            Dim imagePath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") & extension)
                             File.WriteAllBytes(imagePath, imageData)
 
                             ' 在UI线程中插入图片

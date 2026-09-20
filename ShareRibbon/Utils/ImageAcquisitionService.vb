@@ -266,8 +266,12 @@ Public NotInheritable Class ImageAcquisitionService
         End Using
     End Function
 
-    ''' <summary>Определяет формат по сигнатуре файла, а не по Content-Type.</summary>
-    Private Shared Function DetectImageExtension(bytes As Byte()) As String
+    ''' <summary>
+    ''' Определяет формат по сигнатуре файла, а не по Content-Type.
+    ''' Public: хостам нужен корректный суффикс, чтобы записать байты во временный файл
+    ''' для вставки в документ.
+    ''' </summary>
+    Public Shared Function DetectImageExtension(bytes As Byte()) As String
         If bytes Is Nothing OrElse bytes.Length < 12 Then Return Nothing
 
         If bytes(0) = &HFF AndAlso bytes(1) = &HD8 Then Return ".jpg"

@@ -34,6 +34,19 @@ Public MustInherit Class BaseDataCapturePane
 
     Private selectedDomPath As String = ""
 
+    ''' <summary>
+    ''' Изображение, найденное при захвате страницы или элемента.
+    ''' Текстовая пометка «[Изображение: alt - src]» не заменяет вставку самой картинки,
+    ''' поэтому хост получает список ссылок и вставляет изображения в документ.
+    ''' </summary>
+    Protected Class CapturedMedia
+        Public Property Url As String
+        Public Property Alt As String
+    End Class
+
+    ''' <summary>Результат последнего захвата: прямые ссылки на изображения в порядке появления.</summary>
+    Protected ReadOnly lastCapturedMedia As New List(Of CapturedMedia)()
+
     Private isInitialized As Boolean = False
     Private isWebViewInitialized As Boolean = False
     Private pendingUrl As String = Nothing
@@ -108,6 +121,12 @@ Public MustInherit Class BaseDataCapturePane
 
                 isWebViewInitialized = True
                 Debug.WriteLine("WebView2 initialization completed successfully")
+
+                ' URL, введённый до готовности WebView2, раньше молча терялся:
+                ' pendingUrl сохранялся, но никем не читался.
+                Dim queuedUrl = pendingUrl
+                pendingUrl = Nothing
+                If Not String.IsNullOrWhiteSpace(queuedUrl) Then NavigateToUrl(queuedUrl)
 
             Else
                 Throw New Exception("CoreWebView2 initialization failed")
@@ -411,6 +430,10 @@ Public MustInherit Class BaseDataCapturePane
                 Dim pageInfo = Await GetPageMetaInfo()
                 Dim finalContent = pageInfo & vbCrLf & vbCrLf & cleanContent
 
+                ' Сначала собираем реальные изображения, затем отдаём текст хосту:
+                ' иначе захват приносит только пометки [Изображение: ...].
+                Await CollectCapturedMediaAsync()
+
                 HandleExtractedContent(finalContent)
 
                 Debug.WriteLine($"成功抓取文本内容，长度: {finalContent.Length} 字符")
@@ -426,6 +449,74 @@ Public MustInherit Class BaseDataCapturePane
             isCapturing = False
             CaptureButton.Text = "Захватить"
             CaptureButton.Enabled = True
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Собирает прямые http(s)-ссылки на изображения внутри выбранного элемента
+    ''' (или всей страницы, если элемент не выбран). Вызывается до HandleExtractedContent,
+    ''' чтобы хост мог вставить сами картинки, а не только текстовые пометки.
+    ''' </summary>
+    Protected Async Function CollectCapturedMediaAsync() As Task
+        lastCapturedMedia.Clear()
+
+        Try
+            If ChatBrowser?.CoreWebView2 Is Nothing Then Return
+
+            ' selectedDomPath подставляется как JSON-строка, поэтому кавычки и спецсимволы
+            ' в пути не ломают скрипт.
+            Dim selectorLiteral = JsonConvert.SerializeObject(If(selectedDomPath, ""))
+            Dim rootExpression As String
+            If String.IsNullOrWhiteSpace(selectedDomPath) Then
+                rootExpression = "document"
+            Else
+                rootExpression = $"document.querySelector({selectorLiteral}) || document"
+            End If
+
+            ' Ограничиваем выборку: 12 картинок достаточно для документа, а страницы
+            ' с сотнями изображений не должны заваливать Word.
+            Dim script As String =
+                "(function() {" &
+                "  try {" &
+                "    var root = " & rootExpression & ";" &
+                "    if (!root || !root.querySelectorAll) return '[]';" &
+                "    var result = [];" &
+                "    var seen = {};" &
+                "    var images = root.querySelectorAll('img');" &
+                "    for (var i = 0; i < images.length; i++) {" &
+                "      var img = images[i];" &
+                "      var src = img.currentSrc || img.src || '';" &
+                "      if (!/^https?:/i.test(src)) continue;" &
+                "      if (seen[src]) continue;" &
+                "      seen[src] = true;" &
+                "      result.push({ url: src, alt: img.getAttribute('alt') || '' });" &
+                "      if (result.length >= 12) break;" &
+                "    }" &
+                "    return JSON.stringify(result);" &
+                "  } catch (e) { return '[]'; }" &
+                "})();"
+
+            Dim raw = Await ChatBrowser.CoreWebView2.ExecuteScriptAsync(script)
+            If String.IsNullOrWhiteSpace(raw) OrElse raw = "null" Then Return
+
+            Dim json = JsonConvert.DeserializeObject(Of String)(raw)
+            If String.IsNullOrWhiteSpace(json) Then Return
+
+            Dim items = JArray.Parse(json)
+            For Each item In items.OfType(Of JObject)()
+                Dim url = item("url")?.ToString()
+                If String.IsNullOrWhiteSpace(url) Then Continue For
+
+                lastCapturedMedia.Add(New CapturedMedia With {
+                    .Url = url,
+                    .Alt = If(item("alt")?.ToString(), "")
+                })
+            Next
+
+            AppLogger.Info("DataCapturePane", $"Захвачено изображений: {lastCapturedMedia.Count}")
+        Catch ex As Exception
+            ' Сбор картинок не должен ломать захват текста.
+            Debug.WriteLine($"Сбор изображений страницы не удался: {ex.Message}")
         End Try
     End Function
 
@@ -809,6 +900,10 @@ Public MustInherit Class BaseDataCapturePane
     ' 修改抓取HTML代码方法 - 支持大文件处理
     Private Async Function CaptureHtmlContent() As Task
         Try
+            ' HTML-захват остаётся текстовым: картинки в документ не переносятся,
+            ' поэтому сбрасываем список, чтобы не вставить изображения прошлого захвата.
+            lastCapturedMedia.Clear()
+
             isCapturing = True
             CaptureButton.Text = "Захват HTML..."
             CaptureButton.Enabled = False
@@ -1288,6 +1383,14 @@ Public MustInherit Class BaseDataCapturePane
     ' 选择DOM元素按钮点击事件处理程序
     Private Async Sub SelectDomButton_Click(sender As Object, e As EventArgs)
         Try
+            ' Без инициализированного WebView2 инжекция невозможна: раньше это давало
+            ' невнятный NullReferenceException, а подсказка на странице не появлялась.
+            If ChatBrowser?.CoreWebView2 Is Nothing Then
+                MessageBox.Show("Веб-страница ещё не готова: откройте сайт и повторите выбор элемента.",
+                                "Подсказка", MessageBoxButtons.OK, MessageBoxIcon.Information)
+                Return
+            End If
+
             Dim selectScript As String = "
         (function() {
             // 移除旧的选择器
@@ -2065,6 +2168,9 @@ Public MustInherit Class BaseDataCapturePane
         })();
         "
             Await ChatBrowser.CoreWebView2.ExecuteScriptAsync(selectScript)
+            ' Журнал нужен для диагностики: если нажатие не приводит к диалогу,
+            ' по логу видно, включился ли режим выбора в самой странице.
+            AppLogger.Info("DataCapturePane", "Режим выбора элемента включён")
 
         Catch ex As Exception
             Debug.WriteLine($"DOM选择器错误: {ex.Message}")
@@ -2079,6 +2185,8 @@ Public MustInherit Class BaseDataCapturePane
 
             Dim message = JsonConvert.DeserializeObject(Of JObject)(e.WebMessageAsJson)
             If message("type")?.ToString() = "elementSelected" Then
+            AppLogger.Info("DataCapturePane",
+                           $"Получен выбор элемента: tag={message("tag")?.ToString()} type={message("elementType")?.ToString()}")
             ' 获取完整信息
             selectedDomPath = message("path").ToString()
             Dim html = message("html").ToString()
