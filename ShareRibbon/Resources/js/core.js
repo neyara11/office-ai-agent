@@ -196,5 +196,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // MCP connection check interval (every 3 seconds)
 setInterval(function () {
+    // Пока открыт диалог настроек MCP, не опрашиваем сервер: ответ перерисовывает
+    // список и сбрасывает ещё не сохранённые переключатели пользователя.
+    const mcpDialog = document.getElementById('mcp-dialog');
+    if (mcpDialog && mcpDialog.style.display === 'block') return;
+
     requestMcpConnections();
 }, 3000);

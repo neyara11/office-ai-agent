@@ -39,6 +39,11 @@ function renderMcpConnections(connections, enabledList, supported) {
     const mcpList = document.getElementById('mcp-list');
     if (!mcpList) return;
 
+    // Пока диалог открыт, не перерисовываем список: фоновый опрос раз в 3 секунды
+    // иначе сбрасывает ещё не сохранённые переключатели пользователя.
+    const mcpDialog = document.getElementById('mcp-dialog');
+    if (mcpDialog && mcpDialog.style.display === 'block' && mcpList.children.length > 0) return;
+
     mcpList.innerHTML = '';
 
     // Show warning if model doesn't support MCP
@@ -52,6 +57,15 @@ function renderMcpConnections(connections, enabledList, supported) {
         mcpList.innerHTML = '<div class="mcp-warning">Нет доступных подключений MCP. Сначала настройте подключение MCP.</div>';
         return;
     }
+
+    // Повторно импортированный сервер может лежать в файле дважды под одним именем.
+    // Показываем его один раз, иначе в запрос уйдут два одинаковых набора инструментов.
+    const seenNames = new Set();
+    connections = connections.filter(connection => {
+        if (seenNames.has(connection.name)) return false;
+        seenNames.add(connection.name);
+        return true;
+    });
 
     // Create item for each connection
     connections.forEach(connection => {
@@ -116,10 +130,14 @@ function renderMcpConnections(connections, enabledList, supported) {
 // Save MCP settings
 function saveMcpSettings() {
     const enabledMcps = [];
+    const seenNames = new Set();
 
-    // Get all enabled MCPs
+    // Get all enabled MCPs (без дублей имён)
     document.querySelectorAll('#mcp-list input[type="checkbox"]:checked').forEach(checkbox => {
-        enabledMcps.push(checkbox.getAttribute('data-mcp-name'));
+        const name = checkbox.getAttribute('data-mcp-name');
+        if (seenNames.has(name)) return;
+        seenNames.add(name);
+        enabledMcps.push(name);
     });
 
     // Send to backend

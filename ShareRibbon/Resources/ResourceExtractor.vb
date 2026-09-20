@@ -7,7 +7,7 @@ Public Class ResourceExtractor
     ''' <summary>
     ''' 资源版本号 — 更新此值可强制刷新所有前端资源文件
     ''' </summary>
-    Private Shared _resourceVersion As String = "2026.09.19.3"
+    Private Shared _resourceVersion As String = "2026.09.20.1"
 
     ''' <summary>
     ''' 获取最后一次错误信息
