@@ -27,7 +27,7 @@
     <AssemblyName>PowerPointAi</AssemblyName>
     <LoadBehavior>3</LoadBehavior>
     <GenerateManifests>true</GenerateManifests>
-    <ApplicationVersion>2.8.24.0</ApplicationVersion>
+    <ApplicationVersion>2.8.26.0</ApplicationVersion>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <DefineConstants>VSTO40,UseOfficeInterop</DefineConstants>
     <StartupObject>
