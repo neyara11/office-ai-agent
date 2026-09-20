@@ -417,6 +417,7 @@
     <Compile Include="Utils\ComObjectHelper.vb" />
     <Compile Include="Utils\HttpClientFactory.vb" />
     <Compile Include="Utils\HttpClientPool.vb" />
+    <Compile Include="Utils\ImageAcquisitionService.vb" />
     <Compile Include="Services\Proofread\ProofreadModels.vb" />
     <Compile Include="Services\Proofread\ProofreadPromptBuilder.vb" />
     <Compile Include="Services\Proofread\ProofreadJsonParser.vb" />

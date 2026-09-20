@@ -7,7 +7,13 @@ Public Class ResourceExtractor
     ''' <summary>
     ''' 资源版本号 — 更新此值可强制刷新所有前端资源文件
     ''' </summary>
-    Private Shared _resourceVersion As String = "2026.09.20.1"
+    Private Shared _resourceVersion As String = "2026.09.20.2"
+
+    ''' <summary>
+    ''' Манифест извлечённых файлов (имя|размер). Позволяет подхватывать правки JS/CSS
+    ''' без ручного поднятия _resourceVersion: если размер файла разошёлся — ресурсы переизвлекаются.
+    ''' </summary>
+    Private Const ManifestFileName As String = ".manifest"
 
     ''' <summary>
     ''' 获取最后一次错误信息
@@ -35,10 +41,11 @@ Public Class ResourceExtractor
 
             ' 检查版本标记文件，匹配则跳过提取
             Dim versionFile = Path.Combine(appDataPath, ".version")
-            If File.Exists(versionFile) Then
+            Dim manifestFile = Path.Combine(appDataPath, ManifestFileName)
+            If File.Exists(versionFile) AndAlso File.Exists(manifestFile) Then
                 Try
                     Dim savedVersion = File.ReadAllText(versionFile).Trim()
-                    If savedVersion = _resourceVersion Then
+                    If savedVersion = _resourceVersion AndAlso ManifestMatches(appDataPath, manifestFile) Then
                         Debug.WriteLine("[ResourceExtractor] 资源版本匹配，跳过提取")
                         Return appDataPath
                     End If
@@ -141,6 +148,7 @@ Public Class ResourceExtractor
             Try
                 Directory.CreateDirectory(appDataPath)
                 File.WriteAllText(Path.Combine(appDataPath, ".version"), _resourceVersion)
+                WriteManifest(appDataPath, manifestFile)
             Catch
                 ' 写入失败不影响功能
             End Try
@@ -152,6 +160,55 @@ Public Class ResourceExtractor
             Return String.Empty
         End Try
     End Function
+
+    ''' <summary>
+    ''' Проверяет, что все файлы из манифеста на месте и их размеры не изменились.
+    ''' </summary>
+    Private Shared Function ManifestMatches(appDataPath As String, manifestPath As String) As Boolean
+        Try
+            For Each line In File.ReadAllLines(manifestPath)
+                If String.IsNullOrWhiteSpace(line) Then Continue For
+
+                Dim parts = line.Split("|"c)
+                If parts.Length <> 2 Then Return False
+
+                Dim target = Path.Combine(appDataPath, parts(0))
+                If Not File.Exists(target) Then Return False
+
+                Dim expected As Long = 0
+                If Not Long.TryParse(parts(1), expected) Then Return False
+                If New FileInfo(target).Length <> expected Then Return False
+            Next
+
+            Return True
+        Catch
+            Return False
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Пишет манифест извлечённых файлов (относительный путь|размер).
+    ''' </summary>
+    Private Shared Sub WriteManifest(appDataPath As String, manifestPath As String)
+        Try
+            Dim files = Directory.GetFiles(appDataPath, "*.*", SearchOption.AllDirectories)
+            Array.Sort(files, StringComparer.OrdinalIgnoreCase)
+
+            Dim sb As New System.Text.StringBuilder()
+            For Each file In files
+                Dim name = Path.GetFileName(file)
+                If name = ".version" OrElse name = ManifestFileName Then Continue For
+
+                Dim relative = file.Substring(appDataPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                sb.Append(relative).Append("|"c).Append(New FileInfo(file).Length).AppendLine()
+            Next
+
+            File.WriteAllText(manifestPath, sb.ToString())
+        Catch ex As Exception
+            ' Манифест не критичен: без него ресурсы просто переизвлекутся
+            Debug.WriteLine($"Не удалось записать манифест ресурсов: {ex.Message}")
+        End Try
+    End Sub
 
     Private Shared Function ExtractResourceToFileFromManager(resourceName As String, targetFileName As String, targetDir As String, rm As Resources.ResourceManager) As String
         Try

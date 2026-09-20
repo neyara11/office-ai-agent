@@ -2,6 +2,8 @@
 #
 # Updates, in one pass:
 #   - AssemblyFileVersion / AssemblyInformationalVersion in the four AssemblyInfo.vb files
+#   - ApplicationVersion in the three VSTO host .vbproj files (ClickOnce manifest version
+#     packaged into the MSI; AuditVersion.ps1 fails if it drifts from the assemblies)
 #   - ProductVersion in OfficeAgent.vdproj
 #   - ProductCode / PackageCode (new GUIDs so the MSI is a proper upgrade)
 #
@@ -42,6 +44,31 @@ foreach ($relative in $assemblyInfoFiles) {
     $text = [regex]::Replace($text, 'AssemblyInformationalVersion\("[^"]*"\)', "AssemblyInformationalVersion(`"$Version`")")
     [System.IO.File]::WriteAllBytes($path, $latin1.GetBytes($text))
     Write-Host "Updated $relative -> file $fileVersion / informational $Version"
+}
+
+# VSTO host projects: ApplicationVersion feeds the ClickOnce manifest that ends up in the MSI.
+$applicationProjectFiles = @(
+    "WordAi\WordAi.vbproj",
+    "ExcelAi\ExcelAi.vbproj",
+    "PowerPointAi\PowerPointAi.vbproj"
+)
+
+foreach ($relative in $applicationProjectFiles) {
+    $path = Join-Path $repoRoot $relative
+    if (-not (Test-Path -LiteralPath $path)) {
+        Write-Host "Skipped optional missing file $relative"
+        continue
+    }
+
+    $text = $latin1.GetString([System.IO.File]::ReadAllBytes($path))
+    $updated = [regex]::Replace($text, '<ApplicationVersion>[^<]*</ApplicationVersion>', "<ApplicationVersion>$fileVersion</ApplicationVersion>")
+    if ($updated -eq $text) {
+        Write-Host "Unchanged $relative (no ApplicationVersion)"
+        continue
+    }
+
+    [System.IO.File]::WriteAllBytes($path, $latin1.GetBytes($updated))
+    Write-Host "Updated $relative -> ApplicationVersion $fileVersion"
 }
 
 $vdproj = Join-Path $repoRoot "OfficeAgent\OfficeAgent.vdproj"

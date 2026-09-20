@@ -11,7 +11,7 @@
       "name": "designSystem",
       "type": "string",
       "required": false,
-      "description": "Дизайн-система: modern-tech, executive-light, executive-dark, editorial-warm. По умолчанию executive-light; для технологичной темы можно явно выбрать modern-tech.",
+      "description": "Дизайн-система задаётся именем строкой: modern-tech, executive-light, executive-dark, editorial-warm. По умолчанию executive-light; для технологичной темы можно явно выбрать modern-tech. Не передавай объект внутрь designSystem — бренд-переопределения идут отдельным параметром designTokens.",
       "defaultValue": "executive-light"
     },
     {
@@ -24,7 +24,7 @@
       "name": "slides",
       "type": "array",
       "required": true,
-      "description": "Массив Scene страниц, не более 50. Каждый элемент поддерживает slideType, title, subtitle, eyebrow, keyMessage, body, items, metrics, imagePath, chart, table, notes, source, cta, variant, columnHeaders, xAxisLabel, yAxisLabel. items поддерживает title/body/value/emphasis/features; metrics поддерживает value/label/delta/description/source. Страницы content могут содержать chart:{chartType:column|line,title,categories,series:[{name,values,color}],valueSuffix,source} или table:{title,headers,rows,highlightColumn,source} и использовать 1-4 items для изложения выводов; из imagePath, chart и table можно выбрать только один основной визуальный элемент. Для таблицы comparison следует передавать columnHeaders:[измерение,левый вариант,правый вариант]; для matrix обязательно передавать xAxisLabel/yAxisLabel; нельзя придумывать пункты или данные без источника. Старый формат ввода title/content/layout по-прежнему поддерживается."
+      "description": "Массив Scene страниц, не более 50. Тип страницы задаётся полем slideType — только одно из: cover, section, statement, content, two-column, comparison, kpi, process, architecture, matrix, quote, closing. Не используй archetype/type/slide_type: поле называется slideType, и неизвестное значение отклоняется. Каждый элемент поддерживает slideType, title, subtitle, eyebrow, keyMessage, body, items, metrics, imagePath, chart, table, notes, source, cta, variant, columnHeaders, xAxisLabel, yAxisLabel. items поддерживает title/body/value/emphasis/features; metrics поддерживает value/label/delta/description/source. Страницы content могут содержать chart:{chartType:column|line,title,categories,series:[{name,values,color}],valueSuffix,source} или table:{title,headers,rows,highlightColumn,source} и использовать 1-4 items для изложения выводов; из imagePath, chart и table можно выбрать только один основной визуальный элемент. Для таблицы comparison следует передавать columnHeaders:[измерение,левый вариант,правый вариант]; для matrix обязательно передавать xAxisLabel/yAxisLabel; нельзя придумывать пункты или данные без источника. Старый формат ввода title/content/layout по-прежнему поддерживается. imagePath принимает локальный путь к файлу или абсолютную http(s)-ссылку (в том числе на внутренний сайт): удалённая картинка скачивается перед вставкой, поэтому не выдумывай пути к локальным файлам без источника. Вызов CreateSlides обязан быть единственной командой в конверте: переходы, темы, заметки, форматирование и вставка изображений выполняются отдельными вызовами после него. Конверт, где CreateSlides стоит рядом с другими командами (в том числе ExecuteVBA), отклоняется без создания слайдов."
     }
   ]
 }

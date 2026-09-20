@@ -314,7 +314,7 @@ Namespace Agent
                             If String.IsNullOrWhiteSpace(imagePath) Then
                                 Return "В плане с изображением отсутствует imagePath; частичные изменения не начинаются."
                             End If
-                            If Not IO.File.Exists(imagePath) Then
+                            If Not IsResolvableImageSource(imagePath) Then
                                 Return $"Файл изображения недоступен: {imagePath}. Чтобы не создавать только текстовые слайды, задача не выполнялась."
                             End If
                         ElseIf String.Equals(commandName, "CreateSlides", StringComparison.OrdinalIgnoreCase) Then
@@ -323,7 +323,7 @@ Namespace Agent
                             If slides Is Nothing Then Continue For
                             For Each slide In slides.OfType(Of JObject)()
                                 Dim imagePath = slide("imagePath")?.ToString()
-                                If Not String.IsNullOrWhiteSpace(imagePath) AndAlso Not IO.File.Exists(imagePath) Then
+                                If Not String.IsNullOrWhiteSpace(imagePath) AndAlso Not IsResolvableImageSource(imagePath) Then
                                     Return $"Файл изображения недоступен: {imagePath}. Чтобы не создавать только текстовые слайды, задача не выполнялась."
                                 End If
                             Next
@@ -334,6 +334,18 @@ Namespace Agent
                 End Try
             Next
             Return ""
+        End Function
+
+        ''' <summary>
+        ''' Плановый источник изображения считается пригодным, если это существующий локальный файл
+        ''' или абсолютная http(s)-ссылка: удалённую картинку скачивает Executor перед вставкой,
+        ''' и недоступность ссылки превращается в recoverable-ошибку до создания слайдов.
+        ''' Здесь не ходим в сеть: проверка плана не должна блокироваться сетевым таймаутом.
+        ''' </summary>
+        Private Shared Function IsResolvableImageSource(imagePath As String) As Boolean
+            If String.IsNullOrWhiteSpace(imagePath) Then Return False
+            If IO.File.Exists(imagePath) Then Return True
+            Return ShareRibbon.ImageAcquisitionService.IsRemoteUrl(imagePath)
         End Function
 
         Private Function PlanContainsCreateSlidesImage(plan As ExecutionPlan) As Boolean

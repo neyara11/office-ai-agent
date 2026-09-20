@@ -1219,24 +1219,29 @@ Public Class ChatControl
                 Return True ' 返回True表示"成功处理"，避免显示错误
             End If
 
-            ' 修复 AI 可能产生的双重转义（\\\" → \"，即字面反斜杠+引号 → 只保留引号）
-            ' 原因：AI 有时对 code 字段内的引号进行两次转义，导致执行器解析失败
-            If jsonCode.Contains("\""") Then
-                jsonCode = jsonCode.Replace("\""", """")
-                Debug.WriteLine("[PPTChatControl] 已修复双重转义引号")
-            End If
-
-            ' 使用严格的结构验证
+            ' Модель иногда присылает лишний слой экранирования кавычек внутри code/params.
+            ' Снимать его заранее нельзя: в валидном JSON \" — это экранированная кавычка
+            ' (VBA-код со строковыми литералами, URL в кавычках), и слепая замена ломает документ.
+            ' Поэтому сначала пробуем разобрать как есть и откатываемся только при ошибке.
+            Dim rawJson As String = jsonCode
+            Dim escapedQuote = ChrW(92) & ChrW(34)
             Dim errorMessage As String = ""
             Dim normalizedJson As JToken = Nothing
-            
-            If Not PowerPointJsonCommandSchema.ValidateJsonStructure(jsonCode, errorMessage, normalizedJson) Then
-                ' 格式验证失败
-                Debug.WriteLine($"PPT JSON格式验证失败: {errorMessage}")
-                Debug.WriteLine($"原始JSON: {jsonCode.Substring(0, Math.Min(200, jsonCode.Length))}...")
-                
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"Формат JSON не соответствует спецификации: {errorMessage}")
-                Return False
+
+            If Not PowerPointJsonCommandSchema.ValidateJsonStructure(rawJson, errorMessage, normalizedJson) Then
+                Dim unescaped = rawJson.Replace(escapedQuote, ChrW(34))
+                If unescaped <> rawJson AndAlso
+                   PowerPointJsonCommandSchema.ValidateJsonStructure(unescaped, errorMessage, normalizedJson) Then
+                    Debug.WriteLine("[PPTChatControl] JSON распознан после снятия лишнего экранирования")
+                    rawJson = unescaped
+                Else
+                    ' 格式验证失败
+                    Debug.WriteLine($"PPT JSON格式验证失败: {errorMessage}")
+                    Debug.WriteLine($"原始JSON: {rawJson.Substring(0, Math.Min(200, rawJson.Length))}...")
+
+                    ShareRibbon.GlobalStatusStrip.ShowWarning($"Формат JSON не соответствует спецификации: {errorMessage}")
+                    Return False
+                End If
             End If
             
             ' 验证通过，根据类型执行
@@ -1245,11 +1250,11 @@ Public Class ChatControl
                 
                 ' 命令数组格式
                 If jsonObj("commands") IsNot Nothing Then
-                    Return ExecutePPTCommandsArray(jsonObj("commands"), jsonCode, preview)
+                    Return ExecutePPTCommandsArray(jsonObj("commands"), rawJson, preview)
                 End If
                 
                 ' 单命令格式
-                Return ExecutePPTSingleCommand(jsonObj, jsonCode, preview)
+                Return ExecutePPTSingleCommand(jsonObj, rawJson, preview)
             End If
             
             ShareRibbon.GlobalStatusStrip.ShowWarning("Недопустимый формат JSON")
@@ -1328,10 +1333,25 @@ Public Class ChatControl
 
     Private Shared Function ParsePowerPointCommandEnvelope(jsonCode As String) As JObject
         If String.IsNullOrWhiteSpace(jsonCode) Then Return Nothing
-        Dim normalized = jsonCode
-        Dim escapedQuote = ChrW(92) & ChrW(34)
-        If normalized.Contains(escapedQuote) Then normalized = normalized.Replace(escapedQuote, ChrW(34))
-        Return TryCast(JToken.Parse(normalized), JObject)
+
+        ' Сначала как есть: \" внутри JSON-строки — корректное экранирование,
+        ' и его нельзя снимать вслепую (иначе ломается code с кавычками).
+        Try
+            Return TryCast(JToken.Parse(jsonCode), JObject)
+        Catch ex As Newtonsoft.Json.JsonException
+            Dim escapedQuote = ChrW(92) & ChrW(34)
+            If Not jsonCode.Contains(escapedQuote) Then Throw
+
+            ' Лишний слой экранирования: пробуем снять один раз как fallback.
+            Dim normalized = jsonCode.Replace(escapedQuote, ChrW(34))
+            If normalized = jsonCode Then Throw
+
+            Try
+                Return TryCast(JToken.Parse(normalized), JObject)
+            Catch
+                Throw ex
+            End Try
+        End Try
     End Function
 
     Private Shared Function GetPowerPointEnvelopeToolId(envelope As JObject) As String

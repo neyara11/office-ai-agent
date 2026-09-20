@@ -44,6 +44,33 @@ Namespace Design
             End Try
         End Function
 
+        ''' <summary>
+        ''' Разрешает http(s)-ссылки в imagePath в локальные файлы (скачивает в локальный кэш).
+        ''' Возвращает Nothing при успехе либо готовый failed ToolResult, чтобы Loop мог заменить картинку.
+        ''' </summary>
+        Private Shared Function ResolveSlideImages(spec As DeckDesignSpec) As ToolResult
+            Const toolId As String = "CreateSlides"
+
+            For index = 0 To spec.Slides.Count - 1
+                Dim slideSpec = spec.Slides(index)
+                If String.IsNullOrWhiteSpace(slideSpec.ImagePath) Then Continue For
+                If Not ImageAcquisitionService.IsRemoteUrl(slideSpec.ImagePath) Then Continue For
+
+                Dim download = ImageAcquisitionService.DownloadAsync(slideSpec.ImagePath).GetAwaiter().GetResult()
+                If Not download.Success Then
+                    Return ToolResult.Failed(toolId,
+                                             $"Slide {index + 1}: cannot download image '{slideSpec.ImagePath}': {download.ErrorMessage}",
+                                             errorCode:="IMAGE_FETCH_FAILED",
+                                             userMessage:=$"Не удалось получить изображение для слайда {index + 1} по ссылке {slideSpec.ImagePath}: {download.ErrorMessage}",
+                                             recoverable:=True)
+                End If
+
+                slideSpec.ImagePath = download.LocalPath
+            Next
+
+            Return Nothing
+        End Function
+
         Private Shared Function ExecuteInternal(params As JObject,
                                                 presentation As PowerPoint.Presentation,
                                                 preview As Boolean) As ToolResult
@@ -74,6 +101,11 @@ Namespace Design
                                              recoverable:=True)
                 End If
             Next
+
+            ' imagePath может быть http(s)-ссылкой (в том числе на внутренний сайт).
+            ' Скачиваем до компиляции плана: рендер умеет только локальные файлы.
+            Dim imageResolveError = ResolveSlideImages(spec)
+            If imageResolveError IsNot Nothing Then Return imageResolveError
 
             If Not DesignSystemCatalog.IsSupported(spec.DesignSystem) AndAlso spec.DesignTokens Is Nothing Then
                 Return ToolResult.Failed(toolId,

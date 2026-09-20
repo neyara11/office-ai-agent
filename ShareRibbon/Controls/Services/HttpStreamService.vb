@@ -31,7 +31,55 @@ Public Class HttpStreamService
     Private Const MAX_TOOL_CALL_ITERATIONS As Integer = 5
     Private Const STREAM_FLUSH_MIN_CHARS As Integer = 96
     Private Shared ReadOnly STREAM_FLUSH_INTERVAL As TimeSpan = TimeSpan.FromMilliseconds(80)
+
+    ' Если провайдер перестал присылать данные, прерываем запрос: HTTP-клиент настроен
+    ' на бесконечный таймаут, и без сторожа чтение потока ждёт вечно.
+    Private Shared ReadOnly STREAM_IDLE_TIMEOUT As TimeSpan = TimeSpan.FromSeconds(90)
+    Private Shared ReadOnly TOOL_ROUND_TIMEOUT As TimeSpan = TimeSpan.FromMinutes(5)
     Private _originalRequestMessages As JArray = Nothing
+
+    ''' <summary>
+    ''' Сторож простоя потока. Сбрасывается на каждой полученной строке; если данных нет
+    ''' дольше таймаута, отменяет запрос (это разрывает чтение ответа).
+    ''' </summary>
+    Private NotInheritable Class StreamIdleWatchdog
+        Implements IDisposable
+
+        Private ReadOnly _timeout As TimeSpan
+        Private ReadOnly _timer As System.Threading.Timer
+        Private _timedOut As Integer
+
+        Public Sub New(timeout As TimeSpan, cancel As Action)
+            _timeout = timeout
+            _timer = New System.Threading.Timer(
+                Sub()
+                    System.Threading.Interlocked.Exchange(_timedOut, 1)
+                    Try
+                        cancel()
+                    Catch
+                    End Try
+                End Sub, Nothing, timeout, System.Threading.Timeout.InfiniteTimeSpan)
+        End Sub
+
+        Public ReadOnly Property TimedOut As Boolean
+            Get
+                Return System.Threading.Interlocked.CompareExchange(_timedOut, 0, 0) = 1
+            End Get
+        End Property
+
+        Public Sub Reset()
+            If _timer Is Nothing Then Return
+
+            Try
+                _timer.Change(_timeout, System.Threading.Timeout.InfiniteTimeSpan)
+            Catch
+            End Try
+        End Sub
+
+        Public Sub Dispose() Implements IDisposable.Dispose
+            If _timer IsNot Nothing Then _timer.Dispose()
+        End Sub
+    End Class
 
     ' 流处理状态
     Private _mainStreamCompleted As Boolean = False
@@ -463,11 +511,15 @@ Public Class HttpStreamService
         ' 检测是否是 Anthropic API
         Dim isAnthropic As Boolean = apiUrl.Contains("anthropic.com")
         Dim requestCts As System.Threading.CancellationTokenSource = Nothing
+        Dim idleWatchdog As StreamIdleWatchdog = Nothing
+        Dim idleNotified As Boolean = False
+        Dim idleFlushPending As Boolean = False
 
         Try
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
             requestCts = RegisterRequestCancellation(requestUuid)
-
+            requestCts.CancelAfter(TimeSpan.FromMinutes(5))
+            idleWatchdog = New StreamIdleWatchdog(STREAM_IDLE_TIMEOUT, Sub() requestCts.Cancel())
             Dim client = HttpClientPool.GetClient(apiUrl)
 
             Using request As New HttpRequestMessage(HttpMethod.Post, apiUrl)
@@ -528,6 +580,7 @@ Public Class HttpStreamService
 
                                 Dim line As String = Await reader.ReadLineAsync()
                                 If line Is Nothing Then Exit Do
+                                If idleWatchdog IsNot Nothing Then idleWatchdog.Reset()
 
                                 line = line.Trim()
 
@@ -565,6 +618,10 @@ Public Class HttpStreamService
                                     End If
                                 End If
                             Loop
+                            If idleWatchdog IsNot Nothing AndAlso idleWatchdog.TimedOut Then
+                                idleNotified = True
+                                _currentMarkdownBuffer.Append($"<br/>**Ответ модели не поступал более {CInt(STREAM_IDLE_TIMEOUT.TotalSeconds)} секунд — запрос прерван.**<br/>")
+                            End If
                             Await FlushBufferAsync("content", responseUuid, True)
                         End Using
                         End Using
@@ -573,14 +630,32 @@ Public Class HttpStreamService
             End Using
         Catch ex As OperationCanceledException
             Debug.WriteLine($"[HttpStream] 请求已取消: {requestUuid}")
+            If Not idleNotified AndAlso idleWatchdog IsNot Nothing AndAlso idleWatchdog.TimedOut Then
+                idleNotified = True
+                idleFlushPending = True
+                _currentMarkdownBuffer.Append($"<br/>**Ответ модели не поступал более {CInt(STREAM_IDLE_TIMEOUT.TotalSeconds)} секунд — запрос прерван.**<br/>")
+            End If
             StopStream = True
         Catch ex As Exception
-            Throw
+            If Not idleNotified AndAlso idleWatchdog IsNot Nothing AndAlso idleWatchdog.TimedOut Then
+                Debug.WriteLine($"[HttpStream] Поток прерван по простою: {ex.Message}")
+                idleNotified = True
+                idleFlushPending = True
+                _currentMarkdownBuffer.Append($"<br/>**Ответ модели не поступал более {CInt(STREAM_IDLE_TIMEOUT.TotalSeconds)} секунд — запрос прерван.**<br/>")
+            Else
+                Throw
+            End If
         Finally
             UnregisterRequestCancellation(requestUuid, requestCts)
+            If idleWatchdog IsNot Nothing Then idleWatchdog.Dispose()
             _mainStreamCompleted = True
             FinalizeStream(addHistory, originQuestion)
         End Try
+
+        ' Await в Catch/Finally недопустим, поэтому досылаем сообщение о простое после Try.
+        If idleFlushPending Then
+            Await FlushBufferAsync("content", responseUuid, True)
+        End If
     End Function
 
     ''' <summary>
@@ -1169,8 +1244,12 @@ Public Class HttpStreamService
         End If
 
         Dim requestCts As System.Threading.CancellationTokenSource = Nothing
+        Dim idleWatchdog As StreamIdleWatchdog = Nothing
+        Dim idleNotified As Boolean = False
         Try
             requestCts = RegisterRequestCancellation(reactRequestUuid)
+            requestCts.CancelAfter(TOOL_ROUND_TIMEOUT)
+            idleWatchdog = New StreamIdleWatchdog(STREAM_IDLE_TIMEOUT, Sub() requestCts.Cancel())
             ' 构建回注消息：原始消息 + assistant的tool_calls + tool结果
             Dim messagesArray As JArray
 
@@ -1273,6 +1352,7 @@ Public Class HttpStreamService
 
                                 Dim line As String = Await reader.ReadLineAsync()
                                 If line Is Nothing Then Exit Do
+                                If idleWatchdog IsNot Nothing Then idleWatchdog.Reset()
                                 line = line.Trim()
 
                                 If String.IsNullOrEmpty(line) OrElse line.StartsWith(":") Then Continue Do
@@ -1301,6 +1381,10 @@ Public Class HttpStreamService
                                     End If
                                 End If
                             Loop
+                            If idleWatchdog IsNot Nothing AndAlso idleWatchdog.TimedOut Then
+                                idleNotified = True
+                                _currentMarkdownBuffer.Append($"<br/>**Ответ модели не поступал более {CInt(STREAM_IDLE_TIMEOUT.TotalSeconds)} секунд — раунд прерван.**<br/>")
+                            End If
                             Await FlushBufferAsync("content", uuid, True)
                         End Using
                         End Using
@@ -1310,13 +1394,24 @@ Public Class HttpStreamService
             Debug.WriteLine($"[ReAct] 第 {_toolCallIterations} 轮完成")
         Catch ex As OperationCanceledException
             Debug.WriteLine($"[ReAct] 请求已取消: {reactRequestUuid}")
+            If Not idleNotified AndAlso idleWatchdog IsNot Nothing AndAlso idleWatchdog.TimedOut Then
+                idleNotified = True
+                _currentMarkdownBuffer.Append($"<br/>**Ответ модели не поступал более {CInt(STREAM_IDLE_TIMEOUT.TotalSeconds)} секунд — раунд прерван.**<br/>")
+                ' Ниже, после Try, буфер отправится в чат: Await внутри Catch недопустим.
+                _catchException = ex
+            End If
             StopStream = True
         Catch ex As Exception
             Debug.WriteLine($"[ReAct] 工具结果回注失败: {ex.Message}")
-            _currentMarkdownBuffer.Append($"<br/>**Не удалось вернуть результаты инструментов: {ex.Message}**<br/>")
+            If idleWatchdog IsNot Nothing AndAlso idleWatchdog.TimedOut Then
+                _currentMarkdownBuffer.Append($"<br/>**Ответ модели не поступал более {CInt(STREAM_IDLE_TIMEOUT.TotalSeconds)} секунд — раунд прерван.**<br/>")
+            Else
+                _currentMarkdownBuffer.Append($"<br/>**Не удалось вернуть результаты инструментов: {ex.Message}**<br/>")
+            End If
             _catchException = ex
         Finally
             UnregisterRequestCancellation(reactRequestUuid, requestCts)
+            If idleWatchdog IsNot Nothing Then idleWatchdog.Dispose()
         End Try
 
         If _catchException IsNot Nothing Then

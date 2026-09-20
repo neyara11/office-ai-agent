@@ -497,12 +497,12 @@ Public MustInherit Class BaseChatControl
                 Dim mimeType As String = GetMimeType(filePath)
                 Dim fileBytes As Byte() = File.ReadAllBytes(filePath)
                 
-                Dim response = ChatBrowser.CoreWebView2.Environment.CreateWebResourceResponse(
-                    New MemoryStream(fileBytes),
-                    200,
-                    "OK",
-                    $"Content-Type: {mimeType}{Environment.NewLine}Access-Control-Allow-Origin: *"
-                )
+                        Dim response = ChatBrowser.CoreWebView2.Environment.CreateWebResourceResponse(
+                            New MemoryStream(fileBytes),
+                            200,
+                            "OK",
+                            $"Content-Type: {mimeType}{Environment.NewLine}Cache-Control: no-store, no-cache, must-revalidate{Environment.NewLine}Access-Control-Allow-Origin: *"
+                        )
                 e.Response = response
                 Debug.WriteLine($"[WebView2] 资源加载成功: {localPath}")
             Else
@@ -2514,8 +2514,25 @@ Public MustInherit Class BaseChatControl
         Dim result = CodeExecutionService.ExecuteCodeWithToolResult(code, language, preview)
         If result IsNot Nothing AndAlso Not result.Success Then
             GlobalStatusStrip.ShowWarning(If(result.UserMessage, result.Message))
+        ElseIf IsPreviewOnlyResult(result) Then
+            GlobalStatusStrip.ShowInfo("Предпросмотр: изменения в документ не внесены. Чтобы применить план, снимите галочку «Предпросмотр выполнения кода» в настройках чата и запустите выполнение ещё раз.")
         End If
     End Sub
+
+    ''' <summary>
+    ''' Результат, который только проверил план и ничего не изменил (например, CreateSlides в режиме предпросмотра).
+    ''' Иначе кнопка «Выполнено» вводит в заблуждение: слайды не создаются.
+    ''' </summary>
+    Private Shared Function IsPreviewOnlyResult(result As Agent.ToolResult) As Boolean
+        If result Is Nothing Then Return False
+
+        Dim data = TryCast(result.Data, Newtonsoft.Json.Linq.JObject)
+        If data Is Nothing Then Return False
+
+        Dim isPreview = data("preview") IsNot Nothing AndAlso data("preview").ToObject(Of Boolean)()
+        Dim isRendered = data("rendered") IsNot Nothing AndAlso data("rendered").ToObject(Of Boolean)()
+        Return isPreview AndAlso Not isRendered
+    End Function
 
     ' ExecuteJavaScript 已委托给 CodeExecutionService
     ' 添加清除特定 sheetName 的方法

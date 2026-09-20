@@ -1643,7 +1643,17 @@ function executePlanFromRenderer(uuid, button) {
         if (!codeElement) return;
 
         const code = codeElement.textContent;
-        const preview = document.getElementById('settings-executecode-preview')?.checked || false;
+
+        // Пустой план — это не «ничего не произошло»: сообщаем явно.
+        if (!code || !code.trim()) {
+            alert('В плане нет кода команды — перезагрузите панель чата и повторите запрос.');
+            return;
+        }
+
+        // Кнопка «Выполнить план» — это явное действие пользователя: план уже показан,
+        // а код доступен по «Показать код». Флаг предпросмотра отправляем выключенным,
+        // иначе CreateSlides только проверяет Scene и ничего не создаёт.
+        const preview = false;
 
         // 发送执行请求
         const payload = {

@@ -745,15 +745,9 @@ Public Class WebDataCapturePane
     End Sub
 
     Private Shared Async Function DownloadBytesAsync(url As String, timeout As TimeSpan) As System.Threading.Tasks.Task(Of Byte())
-        Dim client = HttpClientPool.GetClient(url)
-        Using request As New HttpRequestMessage(HttpMethod.Get, url)
-            Using timeoutCts As New CancellationTokenSource(timeout)
-                Using response = Await client.SendAsync(request, timeoutCts.Token).ConfigureAwait(False)
-                    response.EnsureSuccessStatusCode()
-                    Return Await response.Content.ReadAsByteArrayAsync().ConfigureAwait(False)
-                End Using
-            End Using
-        End Using
+        ' Общий загрузчик: единая политика TLS (в т.ч. внутренние хосты), лимит размера
+        ' и проверка сигнатуры изображения вместо простого чтения байтов.
+        Return Await ImageAcquisitionService.DownloadBytesAsync(url, timeout)
     End Function
 
     ' 添加视图销毁处理

@@ -172,15 +172,15 @@ Namespace Design
                 BuildKpiHeroLeft(plan, spec, metrics, t, w, h)
                 Return
             End If
-            Dim margin As Single = 58, gap As Single = 14, top As Single = 178, cardH As Single = 185
+            Dim margin As Single = 58, gap As Single = 14, top As Single = 178, cardH As Single = 198
             Dim cardW = (w - margin * 2 - gap * Math.Max(0, metrics.Count - 1)) / Math.Max(1, metrics.Count)
             For index = 0 To metrics.Count - 1
                 Dim x = margin + index * (cardW + gap)
                 AddRect(plan, $"metric-card-{index + 1}", x, top, cardW, cardH, t.Surface, t.Divider)
                 AddText(plan, $"metric-value-{index + 1}", metrics(index).Value, x + 20, top + 28, cardW - 40, 58, t.DisplaySize - 2, If(index = 0, t.Primary, t.TextPrimary), True)
                 AddText(plan, $"metric-label-{index + 1}", metrics(index).Label, x + 20, top + 94, cardW - 40, 30, t.BodySize, t.TextPrimary, True)
-                AddText(plan, $"metric-desc-{index + 1}", FirstNonEmpty(metrics(index).Delta, metrics(index).Description), x + 20, top + 132, cardW - 40, 36, t.CaptionSize, t.TextSecondary, False)
-                AddText(plan, $"metric-source-{index + 1}", metrics(index).Source, x + 20, top + 164, cardW - 40, 14, 9.5F, t.TextSecondary, False)
+                AddText(plan, $"metric-desc-{index + 1}", FirstNonEmpty(metrics(index).Delta, metrics(index).Description), x + 20, top + 132, cardW - 40, 38, t.CaptionSize, t.TextSecondary, False)
+                AddText(plan, $"metric-source-{index + 1}", metrics(index).Source, x + 20, top + 178, cardW - 40, 14, 9.5F, t.TextSecondary, False)
             Next
             AddText(plan, "kpi-insight", spec.Body, 60, 395, w - 120, 66, t.BodySize + 1, t.TextSecondary, False, "center")
         End Sub

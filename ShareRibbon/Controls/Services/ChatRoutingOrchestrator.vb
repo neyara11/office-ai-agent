@@ -171,10 +171,22 @@ Public Class ChatRoutingOrchestrator
                 (aiNativeResult.TaskSpec.ExpectedSlideCount > 0 OrElse
                  (aiNativeResult.TaskSpec.ExpectedOutputs IsNot Nothing AndAlso
                   aiNativeResult.TaskSpec.ExpectedOutputs.Count > 0))
-            Dim shouldUsePlainChat = interactionMode = "answer" OrElse interactionMode = "clarify" OrElse
-                (String.IsNullOrWhiteSpace(interactionMode) AndAlso
-                 intent.OfficeIntent = OfficeIntentType.GENERAL_QUERY AndAlso
-                 Not taskSpecRequiresExecution)
+
+            ' Создание колоды — основной продуктовый сценарий PowerPoint. Если из запроса или
+            ' контекста уже известно, что нужны слайды/изображения, ход нельзя понижать до
+            ' обычного чата: там нет инструмента CreateSlides, модель печатает JSON текстом
+            ' и получается карточка «План выполнения», которая ничего не выполняет.
+            ' Берём только SLIDE_CREATE: SLIDE_LAYOUT часто оказывается вопросом о макете,
+            ' на который правильнее ответить чатом.
+            Dim deckCreationIntent As Boolean =
+                String.Equals(appType, "PowerPoint", StringComparison.OrdinalIgnoreCase) AndAlso
+                intent.OfficeIntent = OfficeIntentType.SLIDE_CREATE
+            Dim executionRequired = taskSpecRequiresExecution OrElse deckCreationIntent
+
+            Dim shouldUsePlainChat = Not executionRequired AndAlso
+                (interactionMode = "answer" OrElse interactionMode = "clarify" OrElse
+                 (String.IsNullOrWhiteSpace(interactionMode) AndAlso
+                  intent.OfficeIntent = OfficeIntentType.GENERAL_QUERY))
             If shouldUsePlainChat Then
                 Debug.WriteLine($"[ChatRoutingOrchestrator] interactionMode={If(interactionMode, "compat-general")} → plain chat")
                 _host.SendChatMessageWithIntent(finalMessageToLLM, intent)

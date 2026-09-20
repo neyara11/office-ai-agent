@@ -151,11 +151,19 @@ Namespace Agent
 
             ' 确定性输出门只用于验收，不参与意图路由。
             Dim inputLower = input.ToLowerInvariant()
-            If inputLower.Contains("图片") OrElse inputLower.Contains("配图") OrElse inputLower.Contains("image") OrElse inputLower.Contains("picture") Then
+            Dim mentionsImages = inputLower.Contains("图片") OrElse inputLower.Contains("配图") OrElse
+                                 inputLower.Contains("image") OrElse inputLower.Contains("picture") OrElse
+                                 inputLower.Contains("картинк") OrElse inputLower.Contains("изображен") OrElse
+                                 inputLower.Contains("иллюстрац") OrElse inputLower.Contains("фото")
+            If mentionsImages Then
                 AddExpectedOutput(spec, "images")
             End If
             If NormalizeAppType(appType) = "powerpoint" Then
                 Dim slideMatch = System.Text.RegularExpressions.Regex.Match(inputLower, "(\d+)\s*(页|张)")
+                If Not slideMatch.Success Then
+                    ' Русские формулировки: «8 слайдов», «на 5 слайдах», «10 страниц».
+                    slideMatch = System.Text.RegularExpressions.Regex.Match(inputLower, "(\d+)\s*(слайд|страниц)")
+                End If
                 If slideMatch.Success Then
                     Dim parsedSlideCount As Integer
                     If Integer.TryParse(slideMatch.Groups(1).Value, parsedSlideCount) Then spec.ExpectedSlideCount = parsedSlideCount
