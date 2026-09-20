@@ -40,6 +40,7 @@ Public Class ConfigApiForm
     Private cloudChatModelCheckedListBox As CheckedListBox
     Private cloudReasoningModeComboBox As ComboBox
     Private cloudReasoningTipLabel As Label
+    Private cloudMcpCheckBox As CheckBox
     Private cloudRefreshModelsButton As Button
     Private cloudAddModelButton As Button
     Private cloudTranslateCheckBox As CheckBox
@@ -56,6 +57,7 @@ Public Class ConfigApiForm
     Private localChatModelCheckedListBox As CheckedListBox
     Private localReasoningModeComboBox As ComboBox
     Private localReasoningTipLabel As Label
+    Private localMcpCheckBox As CheckBox
     Private localRefreshModelsButton As Button
     Private localAddModelButton As Button
     Private localTranslateCheckBox As CheckBox
@@ -80,6 +82,7 @@ Public Class ConfigApiForm
     Private currentCloudConfig As ConfigItem
     Private currentLocalConfig As ConfigItem
     Private _updatingReasoningControls As Boolean = False
+    Private _updatingMcpControls As Boolean = False
     Private _lastApiError As String = String.Empty
 
     Public Sub New()
@@ -255,6 +258,14 @@ Public Class ConfigApiForm
         cloudReasoningTipLabel.Font = New Font(Me.Font.FontFamily, 8)
         cloudTab.Controls.Add(cloudReasoningTipLabel)
 
+        ' MCP 支持（模型级）：决定聊天中是否可用 MCP 工具
+        cloudMcpCheckBox = New CheckBox()
+        cloudMcpCheckBox.Text = "Поддерживает MCP (вызов инструментов)"
+        cloudMcpCheckBox.Location = New Point(rightX + 310, 298)
+        cloudMcpCheckBox.AutoSize = True
+        AddHandler cloudMcpCheckBox.CheckedChanged, AddressOf CloudMcpCheckBox_CheckedChanged
+        cloudTab.Controls.Add(cloudMcpCheckBox)
+
         ' 刷新模型按钮（对话模型标题右侧，与标题同行）
         cloudRefreshModelsButton = New Button()
         cloudRefreshModelsButton.Text = "Обновить список"
@@ -423,6 +434,14 @@ Public Class ConfigApiForm
         localReasoningTipLabel.ForeColor = Color.Gray
         localReasoningTipLabel.Font = New Font(Me.Font.FontFamily, 8)
         localTab.Controls.Add(localReasoningTipLabel)
+
+        ' MCP 支持（模型级）：决定聊天中是否可用 MCP 工具
+        localMcpCheckBox = New CheckBox()
+        localMcpCheckBox.Text = "Поддерживает MCP (вызов инструментов)"
+        localMcpCheckBox.Location = New Point(rightX + 310, 340)
+        localMcpCheckBox.AutoSize = True
+        AddHandler localMcpCheckBox.CheckedChanged, AddressOf LocalMcpCheckBox_CheckedChanged
+        localTab.Controls.Add(localMcpCheckBox)
 
         ' 刷新模型按钮（对话模型标题右侧，与标题同行）
         localRefreshModelsButton = New Button()
@@ -1886,10 +1905,42 @@ Public Class ConfigApiForm
 
     Private Sub UpdateCloudReasoningControls()
         UpdateReasoningControls(cloudChatModelCheckedListBox, cloudReasoningModeComboBox, cloudReasoningTipLabel)
+        UpdateMcpControl(cloudChatModelCheckedListBox, cloudMcpCheckBox)
     End Sub
 
     Private Sub UpdateLocalReasoningControls()
         UpdateReasoningControls(localChatModelCheckedListBox, localReasoningModeComboBox, localReasoningTipLabel)
+        UpdateMcpControl(localChatModelCheckedListBox, localMcpCheckBox)
+    End Sub
+
+    ''' <summary>
+    ''' 同步所选模型的 MCP 支持标记。没有该标记时聊天里会隐藏 MCP 按钮，工具不会传给模型。
+    ''' </summary>
+    Private Sub UpdateMcpControl(list As CheckedListBox, checkBox As CheckBox)
+        If checkBox Is Nothing Then Return
+
+        Dim model = If(list Is Nothing, Nothing, TryCast(list.SelectedItem, ConfigItemModel))
+        _updatingMcpControls = True
+        Try
+            checkBox.Enabled = (model IsNot Nothing)
+            checkBox.Checked = (model IsNot Nothing AndAlso model.mcpable)
+        Finally
+            _updatingMcpControls = False
+        End Try
+    End Sub
+
+    Private Sub CloudMcpCheckBox_CheckedChanged(sender As Object, e As EventArgs)
+        If _updatingMcpControls Then Return
+        Dim model = TryCast(cloudChatModelCheckedListBox.SelectedItem, ConfigItemModel)
+        If model Is Nothing Then Return
+        model.mcpable = cloudMcpCheckBox.Checked
+    End Sub
+
+    Private Sub LocalMcpCheckBox_CheckedChanged(sender As Object, e As EventArgs)
+        If _updatingMcpControls Then Return
+        Dim model = TryCast(localChatModelCheckedListBox.SelectedItem, ConfigItemModel)
+        If model Is Nothing Then Return
+        model.mcpable = localMcpCheckBox.Checked
     End Sub
 
     Private Sub UpdateReasoningControls(list As CheckedListBox, combo As ComboBox, tipLabel As Label)

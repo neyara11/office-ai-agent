@@ -1,3 +1,4 @@
+Imports System.Net
 Imports System.Net.Http
 Imports System.Threading
 
@@ -116,6 +117,11 @@ Public NotInheritable Class HttpClientFactory
     ''' нужен переход на .NET Framework 4.8.1 или TLS-терминация reverse-proxy на 1.2.
     ''' </summary>
     Public Shared Function CreateHandler(apiUrl As String) As HttpClientHandler
+        ' В процессе Office сторонний код может выставить legacy-протоколы (Ssl3/Tls);
+        ' тогда HTTPS-запросы падают с «Произошла ошибка при отправке запроса».
+        ' Фиксируем TLS 1.2 для всех клиентов фабрики (включая MCP).
+        ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12
+
         Dim handler As New HttpClientHandler()
 
         If IsInsecureTlsAllowed(apiUrl) Then

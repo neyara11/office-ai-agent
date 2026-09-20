@@ -24,6 +24,7 @@ Public Class StreamJsonRpcMCPClient
     Private _serverCapabilities As MCPServerCapabilities
     Private _transportType As MCPTransportType
     Private _stdioProcess As Process
+    Private _sessionId As String
 
     Public Sub New()
     End Sub
@@ -309,6 +310,8 @@ Public Class StreamJsonRpcMCPClient
         _httpClient.DefaultRequestHeaders.Add("Cache-Control", "no-cache")
         _httpClient.DefaultRequestHeaders.Add("User-Agent", "VSTO-MCP-Client/1.0")
 
+        _sessionId = Nothing
+
         ' 检查 URL 中是否已包含 API 密钥
         Dim hasApiKeyInUrl = _serverUrl.Contains("api_key=") OrElse
                              _serverUrl.Contains("apikey=") OrElse
@@ -321,6 +324,46 @@ Public Class StreamJsonRpcMCPClient
         ' 只有当显式提供 API Key 且 URL 中不包含密钥时，才添加 Authorization 头
         If Not String.IsNullOrEmpty(_apiKey) AndAlso Not hasApiKeyInUrl Then
             _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}")
+        End If
+    End Sub
+
+    ' Streamable HTTP MCP может вернуть SSE-кадр (event: message / data: {...}).
+    ' Достаём первый data:-блок, иначе возвращаем тело как есть.
+    Private Shared Function ExtractJsonPayload(responseContent As String) As String
+        If String.IsNullOrWhiteSpace(responseContent) Then Return responseContent
+
+        Dim trimmed = responseContent.TrimStart()
+        If Not (trimmed.StartsWith("event:") OrElse trimmed.StartsWith("data:") OrElse
+                trimmed.StartsWith("id:") OrElse trimmed.StartsWith(":")) Then
+            Return responseContent
+        End If
+
+        For Each line In responseContent.Split(New String() {vbCrLf, vbLf, vbCr}, StringSplitOptions.None)
+            Dim current = line.Trim()
+            If current.StartsWith("data:") Then
+                Return current.Substring("data:".Length).Trim()
+            End If
+        Next
+
+        Return responseContent
+    End Function
+
+    ' Запоминаем Mcp-Session-Id из ответа initialize и передаём его в последующих запросах.
+    Private Sub CaptureSessionId(response As HttpResponseMessage)
+        If response Is Nothing OrElse response.Headers Is Nothing Then Return
+
+        Dim values As System.Collections.Generic.IEnumerable(Of String) = Nothing
+        If response.Headers.TryGetValues("Mcp-Session-Id", values) Then
+            For Each value In values
+                _sessionId = value
+                Exit For
+            Next
+
+            If Not String.IsNullOrEmpty(_sessionId) Then
+                _httpClient.DefaultRequestHeaders.Remove("Mcp-Session-Id")
+                _httpClient.DefaultRequestHeaders.Add("Mcp-Session-Id", _sessionId)
+                Debug.WriteLine($"MCP session id: {_sessionId}")
+            End If
         End If
     End Sub
 
@@ -384,13 +427,14 @@ Public Class StreamJsonRpcMCPClient
 
             ' 发送POST请求初始化
             Dim response = Await _httpClient.PostAsync(requestUrl, content)
+            CaptureSessionId(response)
 
             If response.IsSuccessStatusCode Then
                 Dim responseContent = Await response.Content.ReadAsStringAsync()
                 Debug.WriteLine($"初始化响应: {responseContent}")
 
-                ' 解析JSON-RPC响应
-                Dim jsonResponse = JObject.Parse(responseContent)
+                ' 解析JSON-RPC响应（兼容 SSE-кадр: event: message / data: {...}）
+                Dim jsonResponse = JObject.Parse(ExtractJsonPayload(responseContent))
 
                 ' 检查是否有错误
                 If jsonResponse("error") IsNot Nothing Then
@@ -449,10 +493,10 @@ Public Class StreamJsonRpcMCPClient
                 }
             End If
         Catch ex As Exception
-            Debug.WriteLine($"SSE初始化错误: {ex.Message}")
+            Debug.WriteLine($"SSE初始化错误: {HttpClientFactory.DescribeError(ex)}")
             Return New MCPInitResponse() With {
                 .Success = False,
-                .ErrorMessage = $"SSE initialization failed: {ex.Message}"
+                .ErrorMessage = $"SSE initialization failed: {HttpClientFactory.DescribeError(ex)}"
             }
         End Try
     End Function
@@ -508,6 +552,7 @@ Public Class StreamJsonRpcMCPClient
 
             ' 发送请求
             Dim response = Await _httpClient.PostAsync(_serverUrl, content)
+            CaptureSessionId(response)
 
             If Not response.IsSuccessStatusCode Then
                 Debug.WriteLine($"HTTP 错误: {response.StatusCode} - {response.ReasonPhrase}")
@@ -517,9 +562,9 @@ Public Class StreamJsonRpcMCPClient
             Dim responseContent = Await response.Content.ReadAsStringAsync()
             Debug.WriteLine($"响应内容: {responseContent}")
 
-            ' 解析 JSON-RPC 响应
+            ' 解析 JSON-RPC 响应（兼容 SSE-кадр: event: message / data: {...}）
             Try
-                Dim jsonResponse = JObject.Parse(responseContent)
+                Dim jsonResponse = JObject.Parse(ExtractJsonPayload(responseContent))
 
                 ' 检查是否有错误
                 If jsonResponse("error") IsNot Nothing Then
