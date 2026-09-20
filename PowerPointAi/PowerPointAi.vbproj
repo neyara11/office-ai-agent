@@ -27,7 +27,7 @@
     <AssemblyName>PowerPointAi</AssemblyName>
     <LoadBehavior>3</LoadBehavior>
     <GenerateManifests>true</GenerateManifests>
-    <ApplicationVersion>2.8.38.0</ApplicationVersion>
+    <ApplicationVersion>2.8.39.0</ApplicationVersion>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <DefineConstants>VSTO40,UseOfficeInterop</DefineConstants>
     <StartupObject>
@@ -357,7 +357,7 @@
     <ManifestKeyFile>PowerPointAi_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>CC712E3EB9808F685FF35D0636DEA656DFE44F7F</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>AF85634FE1448660D5B15AF36B4B91A98F155C1F</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!-- PostBuild: copy unsigned Markdig.dll to output (avoids VSTO manifest signing error MSB3178) -->
   <Target Name="CopyUnsignedDllsAfterBuild" AfterTargets="Build">

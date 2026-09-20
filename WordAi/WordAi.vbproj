@@ -30,7 +30,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.8.38.0</ApplicationVersion>
+    <ApplicationVersion>2.8.39.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -414,7 +414,7 @@
     <ManifestKeyFile>WordAi_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>D8233E3F77CB5CC5022B1ED279AA27F17869478A</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>56B9C23367549E419FBF4AE176AAE09738A02373</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!-- PostBuild: copy unsigned Markdig.dll to output (avoids VSTO manifest signing error MSB3178) -->
   <Target Name="CopyUnsignedDllsAfterBuild" AfterTargets="Build">

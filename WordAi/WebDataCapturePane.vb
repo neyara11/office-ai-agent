@@ -11,6 +11,7 @@ Public Class WebDataCapturePane
     Inherits BaseDataCapturePane
 
     Private isViewInitialized As Boolean = False
+    Private _webViewInitRequested As Boolean = False
     Public Sub New()
         ' 此调用是设计师所必需的。
         InitializeComponent()
@@ -23,8 +24,25 @@ Public Class WebDataCapturePane
         ' когда хэндл контрола уже создан в окне задачи.
     End Sub
 
-    ''' <summary>Инициализация WebView2 после создания хэндла контрола.</summary>
-    Private Async Sub WebDataCapturePane_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+    ''' <summary>
+    ''' Инициализирует WebView2 при первом показе панели задачи. Вызывается из ThisAddIn
+    ''' по VisibleChanged панели: к этому моменту Office уже перевесил контрол в окно
+    ''' задачи, и окно ввода WebView2 создаётся сразу в правильном родителе. Если создать
+    ''' WebView2 раньше (в конструкторе или на Load, пока панель скрыта), страница
+    ''' рисуется и исполняет скрипты, но не получает кликов, наведения и прокрутки.
+    ''' </summary>
+    Public Sub EnsureWebViewInitialized()
+        If _webViewInitRequested Then Return
+        _webViewInitRequested = True
+
+        ' Один проход цикла сообщений после показа панели, чтобы Office успел завершить
+        ' перевешивание окна.
+        If Me.IsHandleCreated Then
+            BeginInvoke(New System.Action(AddressOf InitializeWebViewDeferred))
+        End If
+    End Sub
+
+    Private Async Sub InitializeWebViewDeferred()
         Await InitializeWebViewAsync()
     End Sub
 

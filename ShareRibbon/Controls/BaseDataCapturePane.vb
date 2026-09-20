@@ -47,6 +47,9 @@ Public MustInherit Class BaseDataCapturePane
     ''' <summary>Результат последнего захвата: прямые ссылки на изображения в порядке появления.</summary>
     Protected ReadOnly lastCapturedMedia As New List(Of CapturedMedia)()
 
+    ''' <summary>Виды проб ввода, о которых уже написали в журнал (чтобы не спамить).</summary>
+    Private ReadOnly inputProbeKinds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+
     Private isInitialized As Boolean = False
     Private isWebViewInitialized As Boolean = False
     Private pendingUrl As String = Nothing
@@ -121,6 +124,34 @@ Public MustInherit Class BaseDataCapturePane
 
                 isWebViewInitialized = True
                 Debug.WriteLine("WebView2 initialization completed successfully")
+
+                ' Контрол мог оказаться не на переднем плане относительно соседей (как в
+                ' BaseChatControl, где BringToFront вызывается явно). Без этого WebView2
+                ' рисуется, но не получает мышь.
+                Try
+                    ChatBrowser.BringToFront()
+                Catch ex As Exception
+                    Debug.WriteLine($"BringToFront не удался: {ex.Message}")
+                End Try
+
+                AppLogger.Info("DataCapturePane",
+                              $"WebView2 готов: bounds={ChatBrowser.Bounds}, dpi={ChatBrowser.DeviceDpi}, " &
+                              $"visible={ChatBrowser.Visible}, enabled={ChatBrowser.Enabled}")
+
+                ' Принудительное изменение размера заставляет WebView2 пересчитать поверхность
+                ' ввода. Это лечит известный случай, когда после показа панели страница
+                ' рисуется, но не реагирует на мышь до ручного ресайза окна.
+                Try
+                    Dim currentBounds = ChatBrowser.Bounds
+                    If currentBounds.Height > 1 Then
+                        ChatBrowser.Bounds = New Rectangle(currentBounds.X, currentBounds.Y,
+                                                           currentBounds.Width, currentBounds.Height - 1)
+                        ChatBrowser.Bounds = currentBounds
+                        AppLogger.Info("DataCapturePane", "Поверхность ввода WebView2 пересчитана")
+                    End If
+                Catch ex As Exception
+                    Debug.WriteLine($"Пересчёт поверхности ввода не удался: {ex.Message}")
+                End Try
 
                 ' URL, введённый до готовности WebView2, раньше молча терялся:
                 ' pendingUrl сохранялся, но никем не читался.
@@ -223,7 +254,7 @@ Public MustInherit Class BaseDataCapturePane
         SetNavigationState(True)   ' 禁用导航按钮并启动超时计时器
     End Sub
 
-    Private Sub OnNavigationCompleted(s As Object, args As CoreWebView2NavigationCompletedEventArgs)
+    Private Async Sub OnNavigationCompleted(s As Object, args As CoreWebView2NavigationCompletedEventArgs)
         Debug.WriteLine($"Navigation completed: {args.IsSuccess}")
         SetNavigationState(False)  ' 停止计时器并恢复按钮状态
         If Not args.IsSuccess Then
@@ -231,8 +262,47 @@ Public MustInherit Class BaseDataCapturePane
             GlobalStatusStrip.ShowWarning("Не удалось загрузить страницу. Проверьте подключение к сети или URL")
         Else
             Debug.WriteLine("页面加载成功")
+            ' Диагностика ввода: страница сообщает о первых событиях мыши, если они до неё
+            ' доходят. Если в журнале нет ни одной записи «Проба ввода», мышь не доходит
+            ' до WebView2 и причину надо искать в хостинге окна, а не в скрипте выбора.
+            Await InstallInputProbeAsync()
         End If
     End Sub
+
+    ''' <summary>
+    ''' Ставит в страницу лёгкую пробу мыши (первые события каждого вида) и пишет их в журнал.
+    ''' Ставится один раз на документ и ничего не меняет в поведении страницы.
+    ''' </summary>
+    Private Async Function InstallInputProbeAsync() As Task
+        Try
+            If ChatBrowser?.CoreWebView2 Is Nothing Then Return
+
+            Dim script As String =
+                "(function() {" &
+                "  if (window.__officeAiInputProbe) return 'already';" &
+                "  window.__officeAiInputProbe = true;" &
+                "  var sent = {};" &
+                "  function report(kind, e) {" &
+                "    if (sent[kind]) return;" &
+                "    sent[kind] = true;" &
+                "    try {" &
+                "      window.chrome.webview.postMessage({" &
+                "        type: 'inputProbe', kind: kind," &
+                "        x: Math.round(e.clientX || 0), y: Math.round(e.clientY || 0)" &
+                "      });" &
+                "    } catch (err) {}" &
+                "  }" &
+                "  window.addEventListener('mousemove', function(e) { report('move', e); }, true);" &
+                "  window.addEventListener('mousedown', function(e) { report('down', e); }, true);" &
+                "  window.addEventListener('wheel', function(e) { report('wheel', e); }, true);" &
+                "  return 'installed';" &
+                "})();"
+
+            Await ChatBrowser.CoreWebView2.ExecuteScriptAsync(script)
+        Catch ex As Exception
+            Debug.WriteLine($"Проба ввода не установлена: {ex.Message}")
+        End Try
+    End Function
 
     ''' <summary>
     ''' 拦截新窗口请求，在当前面板内导航而非打开外部浏览器。
@@ -2184,6 +2254,18 @@ Public MustInherit Class BaseDataCapturePane
             Debug.WriteLine($"收到消息: {e.WebMessageAsJson}")
 
             Dim message = JsonConvert.DeserializeObject(Of JObject)(e.WebMessageAsJson)
+            Dim messageType = message("type")?.ToString()
+
+            ' Диагностическая проба ввода: пишем по одному разу на каждый вид события.
+            If String.Equals(messageType, "inputProbe", StringComparison.OrdinalIgnoreCase) Then
+                Dim kind = If(message("kind")?.ToString(), "unknown")
+                If inputProbeKinds.Add(kind) Then
+                    AppLogger.Info("DataCapturePane",
+                                   $"Проба ввода: страница получила {kind} в ({message("x")}, {message("y")})")
+                End If
+                Return
+            End If
+
             If message("type")?.ToString() = "elementSelected" Then
             AppLogger.Info("DataCapturePane",
                            $"Получен выбор элемента: tag={message("tag")?.ToString()} type={message("elementType")?.ToString()}")

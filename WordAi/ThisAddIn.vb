@@ -193,9 +193,22 @@ Public Class ThisAddIn
             captureTaskPane.DockPosition = MsoCTPDockPosition.msoCTPDockPositionRight
             captureTaskPane.Width = 420
             captureTaskPane.Visible = False
+            ' WebView2 краулера создаём при первом показе панели: если создать его раньше,
+            ' пока Office ещё не перевесил контрол в окно задачи, страница рисуется,
+            ' но не получает мышь (клики, наведение, прокрутка).
+            AddHandler captureTaskPane.VisibleChanged, AddressOf CaptureTaskPane_VisibleChanged
         Catch ex As Exception
             MessageBox.Show($"Не удалось инициализировать панель задач краулера Word: {ex.Message}")
         End Try
+    End Sub
+
+    ''' <summary>
+    ''' Первый показ панели краулера — момент, когда можно безопасно создать WebView2.
+    ''' </summary>
+    Private Sub CaptureTaskPane_VisibleChanged(sender As Object, e As EventArgs)
+        Dim taskPane = TryCast(sender, Microsoft.Office.Tools.CustomTaskPane)
+        If taskPane Is Nothing OrElse Not taskPane.Visible Then Return
+        dataCapturePane?.EnsureWebViewInitialized()
     End Sub
 
     ' 解决WPS中无法显示正常宽度的问题

@@ -37,7 +37,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.8.38.0</ApplicationVersion>
+    <ApplicationVersion>2.8.39.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -381,7 +381,7 @@
     <ManifestKeyFile>ExcelAi_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>253F597F6214F29DEDFC7F2C1AE2FA7D2726F6B7</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>BF8A5C6CA5C1577924755D324805B1C3AF295078</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!-- PostBuild: copy unsigned Markdig.dll to output (avoids VSTO manifest signing error MSB3178) -->
   <Target Name="CopyUnsignedDllsAfterBuild" AfterTargets="Build">
