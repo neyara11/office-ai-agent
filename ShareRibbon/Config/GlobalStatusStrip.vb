@@ -42,7 +42,7 @@ Public Module GlobalStatusStrip
     End Sub
     Private Sub ShowWarningInternal(message As String)
         If StatusStrip.IsDisposed Then Return
-        ToolStripStatusLabel.Text = "警告：" & message
+        ToolStripStatusLabel.Text = "Внимание: " & message
         ToolStripStatusLabel.ForeColor = Color.Red
         StatusStrip.Visible = True
         Timer.Start()
@@ -64,7 +64,7 @@ Public Module GlobalStatusStrip
 
     Private Sub ShowInfoInternal(message As String)
         If StatusStrip.IsDisposed Then Return
-        ToolStripStatusLabel.Text = "提示：" & message
+        ToolStripStatusLabel.Text = "Инфо: " & message
         ToolStripStatusLabel.ForeColor = Color.Black
         StatusStrip.Visible = True
         Timer.Start()

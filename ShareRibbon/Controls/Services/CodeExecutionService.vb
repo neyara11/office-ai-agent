@@ -36,98 +36,6 @@ Public Class CodeExecutionService
             _evaluateFormula = evaluateFormula
         End Sub
 
-#Region "辅助方法 - JSON修复"
-
-        ''' <summary>
-        ''' 智能修复 JSON 格式
-        ''' </summary>
-        Private Function FixJsonFormat(jsonStr As String) As String
-            Try
-                Dim fixedJson As String = jsonStr
-
-                ' 1. 修复未加引号的属性名（在 { 或 , 后面）
-                fixedJson = Regex.Replace(fixedJson, "([{,])\s*(\w+)\s*:", "$1""$2"":")
-
-                ' 2. 修复转义引号问题
-                fixedJson = fixedJson.Replace("\""", """")
-
-                ' 3. 修复常见的格式问题
-                fixedJson = FixMissingQuotes(fixedJson)
-
-                ' 4. 尝试平衡大括号
-                fixedJson = BalanceBraces(fixedJson)
-
-                Return fixedJson
-            Catch ex As Exception
-                Debug.WriteLine($"FixJsonFormat 出错: {ex.Message}")
-                Return jsonStr
-            End Try
-        End Function
-
-        ''' <summary>
-        ''' 修复缺失的引号
-        ''' </summary>
-        Private Function FixMissingQuotes(jsonStr As String) As String
-            Dim result As New Text.StringBuilder()
-            Dim inString As Boolean = False
-            Dim escapeNext As Boolean = False
-            Dim i As Integer = 0
-
-            While i < jsonStr.Length
-                Dim c As Char = jsonStr(i)
-
-                If escapeNext Then
-                    result.Append(c)
-                    escapeNext = False
-                ElseIf c = "\""" Then
-                    inString = Not inString
-                    result.Append(c)
-                ElseIf c = "\" AndAlso inString Then
-                    result.Append(c)
-                    escapeNext = True
-                ElseIf (c = "," OrElse c = "}") AndAlso Not inString Then
-                    Dim lastQuoteIndex As Integer = result.ToString().LastIndexOf(""""c)
-                    If lastQuoteIndex >= 0 Then
-                        Dim betweenQuotesAndCurrent As String = result.ToString().Substring(lastQuoteIndex + 1)
-                        If Not betweenQuotesAndCurrent.Contains(""""c) AndAlso betweenQuotesAndCurrent.Contains(":") Then
-                            result.Append(""""c)
-                        End If
-                    End If
-                    result.Append(c)
-                Else
-                    result.Append(c)
-                End If
-
-                i += 1
-            End While
-
-            Return result.ToString()
-        End Function
-
-        ''' <summary>
-        ''' 平衡大括号
-        ''' </summary>
-        Private Function BalanceBraces(jsonStr As String) As String
-            Dim openBraces As Integer = 0
-            Dim closeBraces As Integer = 0
-
-            For Each c As Char In jsonStr
-                If c = "{" Then openBraces += 1
-                If c = "}" Then closeBraces += 1
-            Next
-
-            Dim result As String = jsonStr.Trim()
-
-            While openBraces > closeBraces
-                result &= "}"
-                closeBraces += 1
-            End While
-
-            Return result
-        End Function
-
-#End Region
-
 #Region "代码执行入口"
 
         ''' <summary>
@@ -212,35 +120,26 @@ Public Class CodeExecutionService
             
             If JsonCommandExecutorWithResult IsNot Nothing Then
                 Try
-                    Dim currentJsonCode As String = jsonCode
-                    Dim parseSuccess As Boolean = False
-
-                    ' 首先尝试验证JSON是否有效
+                    Dim parseError As String = ""
                     Try
-                        Newtonsoft.Json.Linq.JObject.Parse(currentJsonCode)
-                        parseSuccess = True
-                    Catch
-                        parseSuccess = False
+                        Newtonsoft.Json.Linq.JObject.Parse(jsonCode)
+                    Catch ex As Exception
+                        parseError = ex.Message
                     End Try
 
-                    ' 如果无效，尝试智能修复
-                    If Not parseSuccess Then
-                        Debug.WriteLine("[CodeExecutionService] JSON格式无效，尝试智能修复")
-                        currentJsonCode = FixJsonFormat(jsonCode)
-                        Debug.WriteLine($"[CodeExecutionService] 格式修正提示已生成，长度: {currentJsonCode.Length}")
-
-                        ' 再次验证
-                        Try
-                            Newtonsoft.Json.Linq.JObject.Parse(currentJsonCode)
-                            parseSuccess = True
-                            Debug.WriteLine("[CodeExecutionService] JSON智能修复成功")
-                        Catch
-                            parseSuccess = False
-                            Debug.WriteLine("[CodeExecutionService] JSON智能修复后仍然无效")
-                        End Try
+                    ' Never mutate the model output: silent JSON "repair" corrupted escaped
+                    ' quotes and turned recoverable schema mistakes into wrong Office actions.
+                    If Not String.IsNullOrWhiteSpace(parseError) Then
+                        AppLogger.Warn("CodeExecutionService", "Rejected malformed JSON command: " & AppLogger.Redact(parseError))
+                        Return Agent.ToolResult.Failed("",
+                                                       "Некорректный JSON команды: " & parseError,
+                                                       errorCode:=ExceptionClassifier.CodeOperationSchemaInvalid,
+                                                       userMessage:="Команда не является корректным JSON. Исправьте структуру и повторите.",
+                                                       debugDetail:=parseError,
+                                                       recoverable:=True)
                     End If
 
-                    Dim result = JsonCommandExecutorWithResult.Invoke(currentJsonCode, preview)
+                    Dim result = JsonCommandExecutorWithResult.Invoke(jsonCode, preview)
                     Debug.WriteLine($"[CodeExecutionService] JSON命令执行结果: {If(result Is Nothing, "null", result.ToObserveSummary())}")
                     If result Is Nothing Then Return Agent.ToolResult.Failed("", "Исполнитель JSON-команд не вернул результат")
                     Return result

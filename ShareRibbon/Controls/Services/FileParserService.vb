@@ -47,46 +47,42 @@ Public Class FileParserService
 #Region "CSV 文件解析"
 
         ''' <summary>
-        ''' 解析 CSV 文件
+        ''' Разбирает CSV по RFC 4180: кавычки, удвоенные кавычки и переносы строк внутри полей.
         ''' </summary>
         Public Function ParseCsvFile(filePath As String) As FileContentResult
             Try
-                ' 检测文件编码
                 Dim encoding As Encoding = DetectFileEncoding(filePath)
                 Dim csvContent As String = File.ReadAllText(filePath, encoding)
 
-                ' 创建一个格式化的 CSV 内容
                 Dim formattedContent As New StringBuilder()
                 formattedContent.AppendLine($"CSV-файл: {Path.GetFileName(filePath)} (кодировка: {encoding.EncodingName})")
                 formattedContent.AppendLine()
 
-                ' 分析 CSV 数据结构
-                Dim rows As String() = csvContent.Split({vbCr, vbLf}, StringSplitOptions.RemoveEmptyEntries)
+                Dim delimiter As Char = DetectCsvDelimiterByRecords(csvContent)
+                Dim records = ParseCsvRecords(csvContent, delimiter)
 
-                If rows.Length > 0 Then
-                    ' 检测分隔符
-                    Dim delimiter As Char = DetectCsvDelimiter(rows(0))
-                    Dim columns As String() = rows(0).Split(delimiter)
-
-                    ' 添加表头
-                    formattedContent.AppendLine("Заголовки:")
-                    formattedContent.AppendLine(FormatCsvRow(rows(0), delimiter))
+                If records.Count = 0 Then
+                    formattedContent.AppendLine("[CSV-файл пуст]")
+                Else
+                    Dim headers = records(0)
+                    formattedContent.AppendLine($"Заголовки ({headers.Count} колонок, разделитель '{delimiter}'):")
+                    formattedContent.AppendLine(FormatCsvRecord(headers))
                     formattedContent.AppendLine()
+                    formattedContent.AppendLine($"Данные (всего записей: {records.Count - 1}):")
 
-                    ' 添加数据行
-                    Dim maxRows As Integer = Math.Min(rows.Length, 25)
-                    formattedContent.AppendLine("Данные:")
-
-                    For i As Integer = 1 To maxRows - 1
-                        formattedContent.AppendLine(FormatCsvRow(rows(i), delimiter))
+                    Dim budget As Integer = 12000
+                    Dim shown As Integer = 0
+                    For i = 1 To records.Count - 1
+                        Dim line = FormatCsvRecord(records(i))
+                        If formattedContent.Length + line.Length > budget Then Exit For
+                        formattedContent.AppendLine(line)
+                        shown += 1
                     Next
 
-                    If rows.Length > maxRows Then
+                    If shown < records.Count - 1 Then
                         formattedContent.AppendLine("...")
-                        formattedContent.AppendLine($"[Файл содержит {rows.Length} строк; показаны первые {maxRows - 1}]")
+                        formattedContent.AppendLine($"[Показано {shown} из {records.Count - 1} строк из-за лимита контекста]")
                     End If
-                Else
-                    formattedContent.AppendLine("[CSV-файл пуст]")
                 End If
 
                 Return New FileContentResult With {
@@ -104,27 +100,126 @@ Public Class FileParserService
             End Try
         End Function
 
-        ''' <summary>
-        ''' 格式化 CSV 行
-        ''' </summary>
-        Private Function FormatCsvRow(row As String, delimiter As Char) As String
-            Dim fields As String() = row.Split(delimiter)
-            Dim formattedRow As New StringBuilder()
-
-            For i As Integer = 0 To fields.Length - 1
-                Dim field As String = fields(i).Trim(""""c)
-                If i < fields.Length - 1 Then
-                    formattedRow.Append($"{field} | ")
-                Else
-                    formattedRow.Append(field)
-                End If
-            Next
-
-            Return formattedRow.ToString()
+        Private Shared Function FormatCsvRecord(record As List(Of String)) As String
+            Return String.Join(" | ", record)
         End Function
 
         ''' <summary>
-        ''' 检测 CSV 分隔符
+        ''' Потоковый разбор CSV с поддержкой кавычек и многострочных полей.
+        ''' </summary>
+        Private Shared Function ParseCsvRecords(text As String, delimiter As Char) As List(Of List(Of String))
+            Dim records As New List(Of List(Of String))()
+            If String.IsNullOrEmpty(text) Then Return records
+
+            Dim record As New List(Of String)()
+            Dim field As New StringBuilder()
+            Dim inQuotes As Boolean = False
+            Dim i As Integer = 0
+
+            While i < text.Length
+                Dim c = text(i)
+                If inQuotes Then
+                    If c = """"c Then
+                        If i + 1 < text.Length AndAlso text(i + 1) = """"c Then
+                            field.Append(""""c)
+                            i += 2
+                        Else
+                            inQuotes = False
+                            i += 1
+                        End If
+                    Else
+                        field.Append(c)
+                        i += 1
+                    End If
+                    Continue While
+                End If
+
+                If c = """"c AndAlso field.Length = 0 Then
+                    inQuotes = True
+                    i += 1
+                ElseIf c = delimiter Then
+                    record.Add(field.ToString())
+                    field.Clear()
+                    i += 1
+                ElseIf c = vbCr OrElse c = vbLf Then
+                    record.Add(field.ToString())
+                    field.Clear()
+                    AddCsvRecord(records, record)
+                    record = New List(Of String)()
+                    If c = vbCr AndAlso i + 1 < text.Length AndAlso text(i + 1) = vbLf Then i += 1
+                    i += 1
+                Else
+                    field.Append(c)
+                    i += 1
+                End If
+            End While
+
+            If field.Length > 0 OrElse record.Count > 0 Then
+                record.Add(field.ToString())
+                AddCsvRecord(records, record)
+            End If
+            Return records
+        End Function
+
+        Private Shared Sub AddCsvRecord(records As List(Of List(Of String)), record As List(Of String))
+            If record Is Nothing OrElse record.Count = 0 Then Return
+            If record.Count = 1 AndAlso String.IsNullOrWhiteSpace(record(0)) Then Return
+            records.Add(record)
+        End Sub
+
+        ''' <summary>
+        ''' Выбирает разделитель по устойчивости числа колонок в первых записях.
+        ''' </summary>
+        Private Shared Function DetectCsvDelimiterByRecords(text As String) As Char
+            Dim candidates As Char() = {","c, ";"c, vbTab, "|"c}
+            Dim best As Char = ","c
+            Dim bestScore As Double = -1
+
+            Dim lines = text.Split(New String() {vbCrLf, vbLf, vbCr}, StringSplitOptions.RemoveEmptyEntries)
+            Dim sampleLines As New List(Of String)()
+            For i = 0 To Math.Min(lines.Length, 10) - 1
+                If Not String.IsNullOrWhiteSpace(lines(i)) Then sampleLines.Add(lines(i))
+            Next
+            Dim sample = String.Join(vbLf, sampleLines)
+
+            For Each delimiter In candidates
+                Dim records = ParseCsvRecords(sample, delimiter)
+                If records.Count = 0 Then Continue For
+
+                Dim widthCounts As New Dictionary(Of Integer, Integer)()
+                For Each record In records
+                    Dim width = record.Count
+                    If width < 2 Then Continue For
+                    If widthCounts.ContainsKey(width) Then
+                        widthCounts(width) += 1
+                    Else
+                        widthCounts(width) = 1
+                    End If
+                Next
+
+                If widthCounts.Count = 0 Then Continue For
+
+                Dim bestWidth = 0
+                Dim bestFrequency = 0
+                For Each pair In widthCounts
+                    If pair.Value > bestFrequency Then
+                        bestFrequency = pair.Value
+                        bestWidth = pair.Key
+                    End If
+                Next
+
+                Dim score = bestWidth * (bestFrequency / Math.Max(1, records.Count))
+                If score > bestScore Then
+                    bestScore = score
+                    best = delimiter
+                End If
+            Next
+
+            Return best
+        End Function
+
+        ''' <summary>
+        ''' Совместимый helper: определяет разделитель по одной строке.
         ''' </summary>
         Public Function DetectCsvDelimiter(sampleLine As String) As Char
             Dim possibleDelimiters As Char() = {","c, ";"c, vbTab, "|"c}
@@ -181,16 +276,8 @@ Public Class FileParserService
                     End If
                 End Using
 
-                ' 针对 CSV 文件优先尝试 GB18030/GBK 编码
-                Dim fileExtension As String = Path.GetExtension(filePath).ToLower()
-                If fileExtension = ".csv" Then
-                    Dim gbkResult = TryGbkEncoding(filePath)
-                    If gbkResult IsNot Nothing Then
-                        Return gbkResult
-                    End If
-                End If
-
-                ' 尝试其他编码
+                ' Кодировка определяется по содержимому: UTF-8 проверяется первым,
+                ' GB18030 рассматривается только если байты не являются валидным UTF-8.
                 Return DetectEncodingByContent(filePath)
 
             Catch ex As Exception
@@ -199,71 +286,84 @@ Public Class FileParserService
         End Function
 
         ''' <summary>
-        ''' 尝试 GBK 编码
+        ''' Выбирает кодировку по содержимому: сначала строгая проверка UTF-8, затем GB18030.
+        ''' Русский UTF-8 CSV без BOM больше не определяется как GBK.
         ''' </summary>
-        Private Function TryGbkEncoding(filePath As String) As Encoding
+        Private Function DetectEncodingByContent(filePath As String) As Encoding
+            Dim sampleBytes = ReadSampleBytes(filePath, 65536)
+            If sampleBytes.Length = 0 Then Return Encoding.Default
+
+            If IsValidUtf8(sampleBytes) Then Return New UTF8Encoding(False)
+
             Try
-                Dim csvSampleBytes As Byte() = New Byte(4095) {}
-                Using fs As New FileStream(filePath, FileMode.Open, FileAccess.Read)
-                    fs.Read(csvSampleBytes, 0, csvSampleBytes.Length)
-                End Using
-
-                Dim gbkEncoding As Encoding = Encoding.GetEncoding("GB18030")
-                Dim gbkText As String = gbkEncoding.GetString(csvSampleBytes)
-
-                If gbkText.Contains(",") AndAlso (gbkText.Contains(vbCr) OrElse gbkText.Contains(vbLf)) Then
-                    Dim unicodeReplacementChar As Char = ChrW(&HFFFD)
-                    Dim invalidCharCount As Integer = gbkText.Count(Function(c) c = "?"c Or c = unicodeReplacementChar)
-                    Dim totalCharCount As Integer = gbkText.Length
-
-                    If invalidCharCount <= totalCharCount * 0.05 Then
-                        Return gbkEncoding
-                    End If
-                End If
+                Dim strictGbk = Encoding.GetEncoding("GB18030",
+                                                    EncoderFallback.ExceptionFallback,
+                                                    DecoderFallback.ExceptionFallback)
+                Dim text = strictGbk.GetString(TrimIncompleteTail(sampleBytes))
+                If Not String.IsNullOrEmpty(text) Then Return Encoding.GetEncoding("GB18030")
             Catch
-                ' 忽略错误
             End Try
-            Return Nothing
+
+            Return Encoding.Default
+        End Function
+
+        Private Shared Function ReadSampleBytes(filePath As String, maxBytes As Integer) As Byte()
+            Using fs As New FileStream(filePath, FileMode.Open, FileAccess.Read)
+                Dim length = CInt(Math.Min(fs.Length, maxBytes))
+                If length <= 0 Then Return New Byte() {}
+                Dim buffer(length - 1) As Byte
+                Dim read = 0
+                While read < length
+                    Dim chunk = fs.Read(buffer, read, length - read)
+                    If chunk <= 0 Then Exit While
+                    read += chunk
+                End While
+                If read = length Then Return buffer
+                Dim result(read - 1) As Byte
+                Array.Copy(buffer, result, read)
+                Return result
+            End Using
+        End Function
+
+        Private Shared Function IsValidUtf8(bytes As Byte()) As Boolean
+            Try
+                Dim strictUtf8 As New UTF8Encoding(False, True)
+                strictUtf8.GetString(TrimIncompleteTail(bytes))
+                Return True
+            Catch
+                Return False
+            End Try
         End Function
 
         ''' <summary>
-        ''' 通过内容检测编码
+        ''' Отбрасывает до 3 последних байт, чтобы обрезанный на границе сэмпла
+        ''' многобайтовый символ не делал валидный UTF-8 невалидным.
         ''' </summary>
-        Private Function DetectEncodingByContent(filePath As String) As Encoding
-            Dim encodingsToTry As Encoding() = {
-                New UTF8Encoding(False),
-                Encoding.GetEncoding("GB18030"),
-                Encoding.Default
-            }
-
-            Dim sampleBytes As Byte() = New Byte(4095) {}
-            Using fs As New FileStream(filePath, FileMode.Open, FileAccess.Read)
-                fs.Read(sampleBytes, 0, sampleBytes.Length)
-            End Using
-
-            Dim bestEncoding As Encoding = encodingsToTry(0)
-            Dim leastInvalidCharCount As Integer = Integer.MaxValue
-            Dim unicodeReplacementChar As Char = ChrW(&HFFFD)
-
-            For Each enc In encodingsToTry
-                Try
-                    Dim sample As String = enc.GetString(sampleBytes)
-                    Dim invalidCharCount As Integer = sample.Count(Function(c) c = "?"c Or c = unicodeReplacementChar)
-
-                    If invalidCharCount < leastInvalidCharCount Then
-                        leastInvalidCharCount = invalidCharCount
-                        bestEncoding = enc
-
-                        If invalidCharCount = 0 Then
-                            Exit For
-                        End If
-                    End If
-                Catch
-                    Continue For
-                End Try
-            Next
-
-            Return bestEncoding
+        Private Shared Function TrimIncompleteTail(bytes As Byte()) As Byte()
+            If bytes Is Nothing OrElse bytes.Length <= 4 Then Return bytes
+            Dim length = bytes.Length
+            Dim i = length - 1
+            Dim walked = 0
+            While i >= 0 AndAlso walked < 4 AndAlso (bytes(i) And &HC0) = &H80
+                walked += 1
+                i -= 1
+            End While
+            If i < 0 Then Return bytes
+            Dim lead = bytes(i)
+            Dim expected As Integer = 1
+            If (lead And &HE0) = &HC0 Then
+                expected = 2
+            ElseIf (lead And &HF0) = &HE0 Then
+                expected = 3
+            ElseIf (lead And &HF8) = &HF0 Then
+                expected = 4
+            End If
+            If expected > 1 AndAlso (length - i) < expected Then
+                Dim result(i - 1) As Byte
+                Array.Copy(bytes, result, i)
+                Return result
+            End If
+            Return bytes
         End Function
 
 #End Region

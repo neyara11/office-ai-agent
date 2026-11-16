@@ -286,6 +286,8 @@
     <Compile Include="Agent\Harness\RunTraceStore.vb" />
     <Compile Include="Agent\Harness\HostCapabilityRunRecorder.vb" />
     <Compile Include="Agent\ToolRegistry.vb" />
+    <Compile Include="Agent\ToolParameterValidator.vb" />
+    <Compile Include="Agent\AgentRunJournal.vb" />
     <Compile Include="Agent\PromptManager.vb" />
     <Compile Include="Agent\PromptProfileService.vb" />
     <Compile Include="Agent\Context\IContextProvider.vb" />

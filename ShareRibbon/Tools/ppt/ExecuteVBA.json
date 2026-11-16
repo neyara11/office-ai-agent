@@ -1,7 +1,7 @@
 {
   "id": "ExecuteVBA",
   "name": "Выполнить VBA",
-  "description": "Выполнить код VBA как запасной вариант",
+  "description": "Выполнить код VBA как запасной вариант. Не использовать, если задачу решают DuplicateSlide (копия слайда), ReplaceSlideText (замена текста на слайде), InsertSlide, CreateSlides, InsertTable или OfficeObjectOperation. Требует включённого доверия к объектной модели проектов VBA; иначе вызов отклоняется.",
   "appType": "ppt",
   "category": "Дополнительные функции",
   "riskLevel": "risky",

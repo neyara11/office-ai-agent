@@ -30,6 +30,9 @@ Public Class ChatControl
     Private _reformatShapes As List(Of Object) = Nothing
     Private _reformatTypes As List(Of String) = Nothing
 
+    ' Последняя подробная ошибка хостового PPT-инструмента для ToolResult/repair.
+    Private _lastPptCommandError As String = ""
+
     ' 排版撤销快照（PPT不支持UndoRecord，使用自定义快照）
     Private _reformatUndoSnapshots As List(Of ShapeFormatSnapshot) = Nothing
 
@@ -347,12 +350,12 @@ Public Class ChatControl
             If Not String.IsNullOrEmpty(content) Then
                 ' 添加到选中内容列表
                 AddSelectedContentItem(
-                "PowerPoint幻灯片",  ' 使用文档名称作为标识
+                "PowerPoint",  ' 使用文档名称作为标识
                 content.Substring(0, Math.Min(content.Length, 50)) & If(content.Length > 50, "...", "")
             )
             Else
                 ' 选中没有内容，清除相同 sheetName 的引用
-                ClearSelectedContentBySheetName("PowerPoint幻灯片")
+                ClearSelectedContentBySheetName("PowerPoint")
             End If
 
         Catch ex As Exception
@@ -377,6 +380,33 @@ Public Class ChatControl
             Return Nothing
         End Try
     End Function
+
+    ''' <summary>
+    ''' Проверка доступа к VBA без обращения к Application.VBE: обращение к VBE
+    ''' само по себе вызывает модальный диалог Центра управления безопасностью.
+    ''' </summary>
+    Private Function IsVbaAllowed() As Boolean
+        Try
+            If Globals.ThisAddIn.Application.AutomationSecurity = Microsoft.Office.Core.MsoAutomationSecurity.msoAutomationSecurityForceDisable Then
+                Return False
+            End If
+        Catch
+        End Try
+
+        Try
+            Dim officeVersion = Globals.ThisAddIn.Application.Version
+            Using key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey($"Software\Microsoft\Office\{officeVersion}\PowerPoint\Security")
+                If key IsNot Nothing Then
+                    Dim value = key.GetValue("AccessVBOM")
+                    If value IsNot Nothing Then Return Convert.ToInt32(value) = 1
+                End If
+            End Using
+        Catch
+        End Try
+
+        Return False
+    End Function
+
 
     Protected Overrides Function RunCode(code As String) As Object
         Try
@@ -431,6 +461,16 @@ Public Class ChatControl
             SendChatMessage(message)
         End If
     End Sub
+
+    Protected Overrides Function GetCurrentOfficeContent() As String
+        Try
+            Dim deck = Context.PowerPointDeckReader.GetDeckText(Globals.ThisAddIn.Application, 12000)
+            If Not String.IsNullOrWhiteSpace(deck) Then Return deck
+        Catch ex As Exception
+            Debug.WriteLine("GetCurrentOfficeContent(PowerPoint) failed: " & ex.Message)
+        End Try
+        Return MyBase.GetCurrentOfficeContent()
+    End Function
 
     Protected Overrides Function ParseFile(filePath As String) As FileContentResult
         Try
@@ -1037,7 +1077,7 @@ Public Class ChatControl
     End Sub
 
     ''' <summary>
-    ''' 应用续写结果到PowerPoint幻灯片
+    ''' 应用续写结果到PowerPoint
     ''' </summary>
     Protected Overrides Sub HandleApplyContinuation(jsonDoc As JObject)
         Try
@@ -1083,7 +1123,7 @@ Public Class ChatControl
     End Sub
 
     ''' <summary>
-    ''' 应用模板渲染结果到PowerPoint幻灯片
+    ''' 应用模板渲染结果到PowerPoint
     ''' </summary>
     Protected Overrides Sub HandleApplyTemplateContent(jsonDoc As JObject)
         Try
@@ -1312,6 +1352,8 @@ Public Class ChatControl
             Dim afterSnapshot = CapturePowerPointCommandSnapshot(envelope)
             Dim observation = BuildPowerPointCommandObservation(toolId, success, beforeSnapshot, afterSnapshot)
             Dim summary = If(observation?("summary")?.ToString(), $"{toolId}: выполнение завершено")
+            Dim failureDetail = _lastPptCommandError
+            _lastPptCommandError = ""
 
             If success Then
                 Return Agent.ToolResult.Succeed(toolId,
@@ -1320,10 +1362,17 @@ Public Class ChatControl
                                                 observation:=observation)
             End If
 
+            If Not String.IsNullOrWhiteSpace(failureDetail) Then
+                Dim warnings = TryCast(observation("warnings"), JArray)
+                If warnings IsNot Nothing Then warnings.Add(failureDetail)
+            End If
+            Dim failureMessage = If(String.IsNullOrWhiteSpace(failureDetail), summary, failureDetail)
+
             Return Agent.ToolResult.Failed(toolId,
-                                           summary,
+                                           failureMessage,
                                            errorCode:=ExceptionClassifier.CodeUnknown,
-                                           userMessage:=summary,
+                                           userMessage:=failureMessage,
+                                           debugDetail:=failureDetail,
                                            recoverable:=True,
                                            observation:=observation)
         Catch ex As Exception
@@ -1423,7 +1472,18 @@ Public Class ChatControl
         End If
         Dim rawIndex = command?("params")?("slideIndex")?.Value(Of Integer)()
         If rawIndex.HasValue Then
-            ' 现有 PPT 命令参数大多按 0-based 解释，快照转换为 Office 1-based。
+            Dim commandName = If(command?("command")?.ToString(), "")
+            Dim oneBased = String.Equals(commandName, "DuplicateSlide", StringComparison.OrdinalIgnoreCase) OrElse
+                           String.Equals(commandName, "ReplaceSlideText", StringComparison.OrdinalIgnoreCase) OrElse
+                           String.Equals(commandName, "UpdateChartData", StringComparison.OrdinalIgnoreCase)
+
+            If oneBased Then
+                If rawIndex.Value <= 0 Then Return 0
+                Return Math.Max(1, Math.Min(slideCount, rawIndex.Value))
+            End If
+
+            If rawIndex.Value < 0 Then Return 0
+            ' Остальные PPT-команды исторически 0-based; Office-снимок 1-based.
             Return Math.Max(1, Math.Min(slideCount, rawIndex.Value + 1))
         End If
         Return 0
@@ -1687,7 +1747,15 @@ Public Class ChatControl
                         GlobalStatusStrip.ShowWarning("ExecuteVBA: отсутствует параметр code")
                         Return False
                     End If
+                    If Not IsVbaAllowed() Then
+                        GlobalStatusStrip.ShowWarning("VBA недоступен: включите «Доверие доступом к объектной модели проектов VBA» или используйте DuplicateSlide и ReplaceSlideText.")
+                        Return False
+                    End If
                     Return CodeExecutionService.ExecuteVBACode(vbaCode, False)
+                Case "replaceslidetext"
+                    Return ExecuteReplaceText(params, pres)
+                Case "updatechartdata"
+                    Return ExecuteUpdateChartData(params, pres)
                 Case Else
                     Debug.WriteLine($"不支持的PPT命令: {command}")
                     GlobalStatusStrip.ShowWarning($"Неподдерживаемая команда PPT: {command}")
@@ -1700,11 +1768,290 @@ Public Class ChatControl
         End Try
     End Function
 
+    Private Function ExecuteReplaceText(params As JToken, pres As Object) As Boolean
+        _lastPptCommandError = ""
+        Try
+            Dim slideIndex = If(params("slideIndex")?.Value(Of Integer)(), -1)
+            Dim matchCase = If(params("matchCase")?.Value(Of Boolean)(), False)
+            Dim replacements = TryCast(params("replacements"), JArray)
+            If replacements Is Nothing OrElse replacements.Count = 0 Then Return False
+
+            Dim slide As Object
+            If slideIndex <= 0 Then
+                slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide
+            Else
+                If slideIndex > pres.Slides.Count Then Return False
+                slide = pres.Slides(slideIndex)
+            End If
+
+            Dim compare As CompareMethod = If(matchCase, CompareMethod.Binary, CompareMethod.Text)
+            Dim stats As New ReplaceTextStats()
+            Dim replacedCount = ReplaceTextInShapes(slide.Shapes, replacements, compare, stats)
+
+            If replacedCount = 0 Then
+                Dim sample = String.Join(" || ", stats.Texts)
+                If sample.Length > 500 Then sample = sample.Substring(0, 500) & "..."
+                _lastPptCommandError = $"ReplaceSlideText: замен не найдено (slide={slideIndex}, shapes={stats.TotalShapes}, textShapes={stats.TextShapes}, groups={stats.Groups}, writeErrors={stats.WriteErrors}). Тексты: '{sample}'"
+                AppLogger.Warn("PPT.ReplaceSlideText", _lastPptCommandError)
+                GlobalStatusStrip.ShowWarning("ReplaceSlideText: текст не найден на слайде. Проверьте find.")
+                Return False
+            End If
+
+            GlobalStatusStrip.ShowInfo($"Заменено текстовых блоков: {replacedCount}")
+            Return True
+        Catch ex As Exception
+            _lastPptCommandError = "ReplaceSlideText: " & ex.Message
+            Debug.WriteLine($"ExecuteReplaceText ошибка: {ex.Message}")
+            Return False
+        End Try
+    End Function
+
+    Private Class ReplaceTextStats
+        Public Property TotalShapes As Integer
+        Public Property TextShapes As Integer
+        Public Property Groups As Integer
+        Public Property WriteErrors As Integer
+        Public Property Sample As String = ""
+        Public Property Texts As New List(Of String)()
+    End Class
+
+    ''' <summary>
+    ''' Рекурсивно обходит фигуры, включая группы, и использует TextFrame2
+    ''' (надёжнее TextFrame для шаблонных и сгруппированных текстов).
+    ''' </summary>
+    Private Function ReplaceTextInShapes(shapes As Object,
+                                         replacements As JArray,
+                                         compare As CompareMethod,
+                                         stats As ReplaceTextStats) As Integer
+        Dim replacedCount As Integer = 0
+        If shapes Is Nothing Then Return replacedCount
+
+        For Each shape As Object In shapes
+            stats.TotalShapes += 1
+            Try
+                If shape.Type = Microsoft.Office.Core.MsoShapeType.msoGroup Then
+                    stats.Groups += 1
+                    replacedCount += ReplaceTextInShapes(shape.GroupItems, replacements, compare, stats)
+                    Continue For
+                End If
+
+                If shape.HasTable = Microsoft.Office.Core.MsoTriState.msoTrue Then
+                    Dim table As Object = shape.Table
+                    Try
+                        For rowIndex = 1 To table.Rows.Count
+                            For colIndex = 1 To table.Columns.Count
+                                Dim cell As Object = Nothing
+                                Dim cellShape As Object = Nothing
+                                Try
+                                    cell = table.Cell(rowIndex, colIndex)
+                                    cellShape = cell.Shape
+                                    replacedCount += ReplaceTextInSingleShape(cellShape, replacements, compare, stats)
+                                Catch
+                                Finally
+                                    If cellShape IsNot Nothing Then ComObjectHelper.ReleaseComObject(cellShape)
+                                    If cell IsNot Nothing Then ComObjectHelper.ReleaseComObject(cell)
+                                End Try
+                            Next
+                        Next
+                    Finally
+                        ComObjectHelper.ReleaseComObject(table)
+                    End Try
+                    Continue For
+                End If
+
+                replacedCount += ReplaceTextInSingleShape(shape, replacements, compare, stats)
+            Catch shapeEx As Exception
+                Debug.WriteLine($"ReplaceSlideText shape skipped: {shapeEx.Message}")
+            End Try
+        Next
+
+        Return replacedCount
+    End Function
+
+    ''' <summary>
+    ''' Заменяет текст в одной фигуре или ячейке таблицы.
+    ''' </summary>
+    Private Function ReplaceTextInSingleShape(shape As Object,
+                                              replacements As JArray,
+                                              compare As CompareMethod,
+                                              stats As ReplaceTextStats) As Integer
+        If shape Is Nothing Then Return 0
+
+        Dim original As String = ""
+        Dim hasText As Boolean = False
+
+        Try
+            Dim textFrame2 = shape.TextFrame2
+            If textFrame2 IsNot Nothing Then
+                original = If(textFrame2.TextRange.Text, "")
+                hasText = True
+            End If
+        Catch
+        End Try
+
+        If Not hasText Then
+            Try
+                If shape.HasTextFrame = Microsoft.Office.Core.MsoTriState.msoTrue AndAlso
+                   shape.TextFrame.HasText = Microsoft.Office.Core.MsoTriState.msoTrue Then
+                    original = If(shape.TextFrame.TextRange.Text, "")
+                    hasText = True
+                End If
+            Catch
+            End Try
+        End If
+
+        If Not hasText OrElse String.IsNullOrEmpty(original) Then Return 0
+
+        stats.TextShapes += 1
+        If String.IsNullOrEmpty(stats.Sample) Then stats.Sample = original
+        If stats.Texts.Count < 3 Then stats.Texts.Add(EscapeWhitespace(original))
+
+        Dim updated = ApplyReplacements(original, replacements, compare)
+        If String.Equals(original, updated, StringComparison.Ordinal) Then Return 0
+
+        Return If(ApplyShapeText(shape, updated, stats), 1, 0)
+    End Function
+
+    Private Shared Function ApplyReplacements(text As String, replacements As JArray, compare As CompareMethod) As String
+        Dim updated As String = text
+        For Each item As JObject In replacements.OfType(Of JObject)()
+            Dim findText = item("find")?.ToString()
+            Dim replaceWith = If(item("replaceWith")?.ToString(), "")
+            If String.IsNullOrEmpty(findText) Then Continue For
+            updated = ReplaceTextFlexible(updated, findText, replaceWith, compare)
+        Next
+        Return updated
+    End Function
+
+    Private Shared Function ApplyShapeText(shape As Object, updated As String, stats As ReplaceTextStats) As Boolean
+        Try
+            shape.TextFrame2.TextRange.Text = updated
+            Return True
+        Catch
+        End Try
+
+        Try
+            shape.TextFrame.TextRange.Text = updated
+            Return True
+        Catch ex As Exception
+            stats.WriteErrors += 1
+            If stats.WriteErrors <= 3 Then
+                AppLogger.Warn("PPT.ReplaceSlideText", "Не удалось записать текст фигуры: " & AppLogger.Redact(ex.Message))
+            End If
+        End Try
+        Return False
+    End Function
+
+    Private Shared Function EscapeWhitespace(value As String) As String
+        If String.IsNullOrEmpty(value) Then Return ""
+        Return value.Replace(vbCr, "\r").Replace(vbLf, "\n").Replace(ChrW(11), "\v").Replace(ChrW(160), "[NBSP]").Replace(vbTab, "\t")
+    End Function
+
+    ''' <summary>
+    ''' Сначала точная замена, затем замена с игнорированием переносов строк и
+    ''' повторных пробелов (PowerPoint хранит абзацы с \r, поэтому точный find
+    ''' из модели часто не совпадает).
+    ''' </summary>
+    Private Shared Function ReplaceTextFlexible(text As String,
+                                                findText As String,
+                                                replaceWith As String,
+                                                compare As CompareMethod) As String
+        If String.IsNullOrEmpty(text) OrElse String.IsNullOrEmpty(findText) Then Return text
+
+        Dim direct = Strings.Replace(text, findText, replaceWith, 1, -1, compare)
+        If Not String.Equals(direct, text, StringComparison.Ordinal) Then Return direct
+
+        Dim words = findText.Split(New Char() {" "c, ControlChars.Tab, ControlChars.Cr, ControlChars.Lf},
+                                   StringSplitOptions.RemoveEmptyEntries)
+        If words.Length < 2 Then Return text
+
+        Try
+            Dim pattern = String.Join("\s+", words.Select(Function(word) System.Text.RegularExpressions.Regex.Escape(word)))
+            Dim options = System.Text.RegularExpressions.RegexOptions.Singleline Or
+                          System.Text.RegularExpressions.RegexOptions.CultureInvariant
+            If compare = CompareMethod.Text Then options = options Or System.Text.RegularExpressions.RegexOptions.IgnoreCase
+            Dim safeReplacement = replaceWith.Replace("$", "$$")
+            Return System.Text.RegularExpressions.Regex.Replace(text, pattern, safeReplacement, options)
+        Catch
+            Return text
+        End Try
+    End Function
+
+    Private Function ExecuteUpdateChartData(params As JToken, pres As Object) As Boolean
+        _lastPptCommandError = ""
+        Try
+            Dim slideIndex = If(params("slideIndex")?.Value(Of Integer)(), 0)
+            Dim chartIndex = If(params("chartIndex")?.Value(Of Integer)(), 1)
+            Dim categories = TryCast(params("categories"), JArray)
+            Dim values = TryCast(params("values"), JArray)
+
+            If categories Is Nothing OrElse values Is Nothing OrElse
+               categories.Count = 0 OrElse categories.Count <> values.Count Then
+                _lastPptCommandError = "UpdateChartData: categories и values обязательны и должны совпадать по длине"
+                Return False
+            End If
+
+            Dim slide As Object
+            If slideIndex <= 0 Then
+                slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide
+            Else
+                If slideIndex > pres.Slides.Count Then Return False
+                slide = pres.Slides(slideIndex)
+            End If
+
+            Dim chartShape As Object = Nothing
+            Dim foundCharts As Integer = 0
+            For Each shape As Object In slide.Shapes
+                Try
+                    If shape.HasChart = Microsoft.Office.Core.MsoTriState.msoTrue Then
+                        foundCharts += 1
+                        If foundCharts = chartIndex Then
+                            chartShape = shape
+                            Exit For
+                        End If
+                    End If
+                Catch
+                End Try
+            Next
+
+            If chartShape Is Nothing Then
+                _lastPptCommandError = $"UpdateChartData: на слайде нет диаграммы #{chartIndex}"
+                Return False
+            End If
+
+            Dim chart As Object = chartShape.Chart
+            Dim series As Object = chart.SeriesCollection
+            If series.Count = 0 Then
+                _lastPptCommandError = "UpdateChartData: у диаграммы нет рядов"
+                Return False
+            End If
+
+            Dim categoryArray = categories.OfType(Of JValue)().
+                Select(Function(item) CObj(If(item.Value?.ToString(), ""))).ToArray()
+            Dim valueArray = values.OfType(Of JValue)().
+                Select(Function(item) CObj(item.Value(Of Double)())).ToArray()
+
+            series(1).XValues = categoryArray
+            series(1).Values = valueArray
+
+            Dim seriesName = params("seriesName")?.ToString()
+            If Not String.IsNullOrWhiteSpace(seriesName) Then series(1).Name = seriesName
+
+            GlobalStatusStrip.ShowInfo($"Данные диаграммы обновлены: {categories.Count} категорий")
+            Return True
+        Catch ex As Exception
+            _lastPptCommandError = "UpdateChartData: " & ex.Message
+            Debug.WriteLine($"ExecuteUpdateChartData ошибка: {ex.Message}")
+            Return False
+        End Try
+    End Function
+
     Private Function ExecuteInsertSlide(params As JToken, pres As Object) As Boolean
         Try
             Dim position = If(params("position")?.ToString(), "end")
             Dim title = If(params("title")?.ToString(), "")
             Dim content = If(params("content")?.ToString(), "")
+            Dim layout = If(params("layout")?.ToString(), "titleAndContent")
 
             Dim slideIndex As Integer
             If position.ToLower() = "end" Then
@@ -1715,16 +2062,24 @@ Public Class ChatControl
                 slideIndex = pres.Slides.Count + 1
             End If
 
-            ' 添加幻灯片 (使用标题和内容布局 ppLayoutTitleOnly = 11)
+            Dim layoutType As Integer = GetLayoutType(layout)
             Dim slide As Microsoft.Office.Interop.PowerPoint.Slide = Nothing
             Try
-                slide = pres.Slides.Add(slideIndex, 11)
+                slide = pres.Slides.Add(slideIndex, layoutType)
 
                 TrySetPlaceholderText(slide, title, Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderTitle)
 
-                ' 如果有内容，添加文本框
                 If Not String.IsNullOrEmpty(content) Then
-                    AddTextBoxToSlide(slide, content, 50, 150, 600, 300)
+                    Dim contentFilled = TrySetPlaceholderText(
+                        slide,
+                        content,
+                        Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderBody,
+                        Microsoft.Office.Interop.PowerPoint.PpPlaceholderType.ppPlaceholderSubtitle)
+
+                    ' Если у макета нет текстового placeholder, добавляем текстовое поле.
+                    If Not contentFilled Then
+                        AddTextBoxToSlide(slide, content, 50, 150, 620, 350, 18)
+                    End If
                 End If
             Finally
                 ComObjectHelper.ReleaseComObject(slide)
@@ -1748,7 +2103,7 @@ Public Class ChatControl
             If slideIndex < 0 Then
                 slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide
             Else
-                slide = pres.Slides(Math.Min(slideIndex + 1, pres.Slides.Count))
+                slide = pres.Slides(slideIndex + 1)
             End If
 
             Dim textBox = slide.Shapes.AddTextbox(
@@ -1802,7 +2157,7 @@ Public Class ChatControl
             If slideIndex < 0 Then
                 slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide
             Else
-                slide = pres.Slides(Math.Min(slideIndex + 1, pres.Slides.Count))
+                slide = pres.Slides(slideIndex + 1)
             End If
 
             ' 设置背景
@@ -1837,7 +2192,7 @@ Public Class ChatControl
             If slideIndex < 0 Then
                 slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide
             Else
-                slide = pres.Slides(Math.Min(slideIndex + 1, pres.Slides.Count))
+                slide = pres.Slides(slideIndex + 1)
             End If
 
             Dim table = slide.Shapes.AddTable(rows, cols, 50, 150, 600, 300)
@@ -2029,7 +2384,7 @@ Public Class ChatControl
                 If slideIndex < 0 Then
                     slide = Globals.ThisAddIn.Application.ActiveWindow.View.Slide
                 Else
-                    slide = pres.Slides(Math.Min(slideIndex + 1, pres.Slides.Count))
+                    slide = pres.Slides(slideIndex + 1)
                 End If
 
                 timeline = slide.TimeLine
@@ -2364,12 +2719,23 @@ Public Class ChatControl
                 slideIndex = Globals.ThisAddIn.Application.ActiveWindow.View.Slide.SlideIndex
             End If
             If slideIndex < 1 OrElse slideIndex > pres.Slides.Count Then Return False
+
+            Dim position = If(params("position")?.ToString(), "after")
             pres.Slides(slideIndex).Copy()
-            pres.Slides.Paste(slideIndex + 1)
+            If String.Equals(position.Trim(), "end", StringComparison.OrdinalIgnoreCase) Then
+                Try
+                    pres.Slides.Paste(pres.Slides.Count + 1)
+                Catch
+                    pres.Slides.Paste()
+                End Try
+            Else
+                pres.Slides.Paste(slideIndex + 1)
+            End If
+
             GlobalStatusStrip.ShowInfo($"Скопирован слайд {slideIndex}")
             Return True
         Catch ex As Exception
-            Debug.WriteLine($"ExecuteDuplicateSlide 出错: {ex.Message}")
+            Debug.WriteLine($"ExecuteDuplicateSlide ошибка: {ex.Message}")
             Return False
         End Try
     End Function

@@ -120,6 +120,15 @@ function showAgentPlanCard(planData) {
             </div>
         `).join('') : '';
 
+        // Agent-контур всегда выполняет план сразу; кнопки запуска не показываем,
+        // иначе пользователь видит «Начать выполнение» у уже идущей задачи.
+        const backendRunning = true;
+        const actionsHtml = `<div class="agent-actions" id="agent-actions-${uuid}">
+                    <button class="agent-btn agent-btn-abort" onclick="abortAgent('${uuid}')">✖ Остановить</button>
+               </div>`;
+        const statusText = 'Выполняется…';
+        const statusIcon = '▶';
+
         chatContainer.innerHTML = `
             <div class="message-header">
                 <div class="avatar-ai">AI</div>
@@ -144,19 +153,11 @@ function showAgentPlanCard(planData) {
                 <div class="agent-summary">
                     <strong>🎯 Ожидаемый результат:</strong>${escapeHtml(planData.summary || '')}
                 </div>
-                <div class="agent-actions" id="agent-actions-${uuid}">
-                    <button class="agent-btn agent-btn-execute" onclick="confirmAgentExecution('${uuid}')">
-                        ▶ Начать выполнение
-                    </button>
-                    <button class="agent-btn agent-btn-refine" onclick="refineAgentPlan('${uuid}')">🔄 Изменить план</button>
-                    <button class="agent-btn agent-btn-abort" onclick="abortAgent('${uuid}')">
-                        ✖ Отмена
-                    </button>
-                </div>
+                ${actionsHtml}
             </div>
             <div class="agent-status-bar" id="agent-status-${uuid}">
-                <span class="status-icon">⏸</span>
-                <span class="status-text">Ожидание подтверждения</span>
+                <span class="status-icon">${statusIcon}</span>
+                <span class="status-text">${statusText}</span>
             </div>
         `;
 
@@ -171,11 +172,6 @@ function showAgentPlanCard(planData) {
         chatContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
         window.agentCardState.session.uuid = uuid;
-
-        // Если задача простая (авто-выполнение), нажать выполнение автоматически
-        if (planData.autoExecute) {
-            setTimeout(() => confirmAgentExecution(uuid), 500);
-        }
     } catch (err) {
         console.error('showAgentPlanCard error:', err);
         unlockChatInput();
@@ -266,9 +262,57 @@ function updateAgentIteration(sessionId, iteration) {
 /**
  * 构建迭代 HTML
  */
+/**
+ * Оставляет от ответа модели только человекочитаемый thought,
+ * убирая JSON-обёртку и служебное поле action.
+ */
+function extractThoughtText(raw) {
+    if (!raw) return '';
+    let text = String(raw).trim();
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/```$/i, '').trim();
+
+    const tryParse = (candidate) => {
+        try {
+            const obj = JSON.parse(candidate);
+            if (obj && typeof obj.thought === 'string' && obj.thought.trim().length > 0) {
+                return obj.thought.trim();
+            }
+        } catch (e) { }
+        return null;
+    };
+
+    let parsed = tryParse(text);
+    if (parsed !== null) return parsed;
+
+    const start = text.indexOf('{');
+    const end = text.lastIndexOf('}');
+    if (start >= 0 && end > start) {
+        parsed = tryParse(text.substring(start, end + 1));
+        if (parsed !== null) return parsed;
+    }
+
+    if (/^[\[{]/.test(text)) return 'Выполняю шаг…';
+    return text;
+}
+
+function cleanActionLabel(raw) {
+    if (!raw) return '';
+    const text = String(raw).trim();
+    if (!/^[\[{]/.test(text)) return text;
+
+    try {
+        const start = text.indexOf('{');
+        const end = text.lastIndexOf('}');
+        const obj = JSON.parse(text.substring(start, end + 1));
+        return (obj.action && (obj.action.tool || obj.action.toolId)) || obj.tool || obj.toolId || 'инструмент';
+    } catch (e) {
+        return 'инструмент';
+    }
+}
+
 function buildIterationHtml(iteration) {
-    const thought = escapeHtml(iteration.thought || '');
-    const action = escapeHtml(iteration.action || '');
+    const thought = escapeHtml(extractThoughtText(iteration.thought || ''));
+    const action = escapeHtml(cleanActionLabel(iteration.action || ''));
     const observation = escapeHtml(iteration.observation || '');
     const explanation = iteration.explanation || null;
     const explanationText = explanation ? escapeHtml(explanation.ExplanationText || explanation.explanationText || '') : '';

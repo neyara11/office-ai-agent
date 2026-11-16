@@ -1,7 +1,7 @@
 {
   "id": "DuplicateSlide",
   "name": "Дублировать слайд",
-  "description": "Скопировать указанный слайд",
+  "description": "Скопировать существующий слайд со всем оформлением, изображениями, фигурами, диаграммами и заметками. Для «такой же слайд / на основе этого»: DuplicateSlide, затем UpdateChartData и ReplaceSlideText. position=end — вставить копию последней, position=after — сразу после исходного. Не заменяй дублирование на InsertSlide.",
   "appType": "ppt",
   "category": "Работа со слайдами",
   "riskLevel": "safe",
@@ -10,8 +10,17 @@
     {
       "name": "slideIndex",
       "type": "integer",
-      "required": true,
-      "description": "Индекс копируемого слайда"
+      "required": false,
+      "description": "Номер копируемого слайда, нумерация с 1 (1 — первый слайд). 0 или -1 — текущий слайд.",
+      "defaultValue": 0
+    },
+    {
+      "name": "position",
+      "type": "string",
+      "required": false,
+      "description": "after — сразу после исходного (по умолчанию), end — в конец презентации.",
+      "defaultValue": "after",
+      "enum": ["after", "end"]
     }
   ]
 }

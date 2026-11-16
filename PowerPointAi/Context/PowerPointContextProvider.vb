@@ -69,8 +69,8 @@ Namespace Context
                                             ' 文本内容预览
                                             Dim textContent As String = textRange.Text
                                             If Not String.IsNullOrEmpty(textContent) Then
-                                                If textContent.Length > 50 Then
-                                                    textContent = textContent.Substring(0, 50) & "..."
+                                                If textContent.Length > 1200 Then
+                                                    textContent = textContent.Substring(0, 1200) & "..."
                                                 End If
                                                 formatDesc &= $"{vbCrLf}Содержимое: {textContent}"
                                             End If

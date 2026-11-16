@@ -1,7 +1,7 @@
 {
   "id": "InsertSlide",
   "name": "Вставить слайд",
-  "description": "Вставить новый слайд в указанную позицию",
+  "description": "Создать новый пустой слайд по макету в указанной позиции. Если нужно скопировать существующий слайд с оформлением и изображениями — используй DuplicateSlide, а не InsertSlide.",
   "appType": "ppt",
   "category": "Работа со слайдами",
   "riskLevel": "safe",
@@ -11,14 +11,15 @@
       "name": "position",
       "type": "string",
       "required": false,
-      "description": "Позиция вставки: current/end",
+      "description": "Позиция вставки: current или end. По умолчанию end.",
       "defaultValue": "end"
     },
     {
       "name": "layout",
       "type": "string",
       "required": false,
-      "description": "Макет слайда"
+      "description": "Макет: title, titleAndContent, twoContent, blank, sectionHeader. По умолчанию titleAndContent.",
+      "defaultValue": "titleAndContent"
     },
     {
       "name": "title",
@@ -30,7 +31,7 @@
       "name": "content",
       "type": "string",
       "required": false,
-      "description": "Содержимое слайда"
+      "description": "Текст основного заполнителя. Если в макете нет placeholder, текст добавляется отдельным полем."
     }
   ]
 }

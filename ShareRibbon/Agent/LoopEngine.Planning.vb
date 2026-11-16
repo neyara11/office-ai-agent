@@ -271,7 +271,31 @@ Namespace Agent
                 Return Nothing
             End If
             _lastPlanFailureReason = ""
+
+            Dim unavailableTools = GetUnavailablePlannedToolIds(session.AppType, plan)
+            If unavailableTools.Count > 0 Then
+                Dim unavailableText = String.Join(", ", unavailableTools)
+                AppLogger.Warn("LoopEngine", $"План использует недоступные инструменты: {unavailableText}")
+                If attempt = 0 Then
+                    Dim correctedPrompt = systemPrompt & vbCrLf &
+                        "【Исправление плана】Предыдущий план использовал недоступные инструменты: " & unavailableText &
+                        ". Используй только инструменты из раздела зарегистрированных. Для копии слайда — DuplicateSlide, для замены текста на слайде — ReplaceSlideText, для новых слайдов — CreateSlides. Верни строгий JSON и не используй ExecuteVBA без явной просьбы."
+                    Return Await GeneratePlanAsync(session, correctedPrompt, skill, attempt + 1)
+                End If
+                _lastPlanFailureReason = "План использует недоступные инструменты: " & unavailableText
+                Return Nothing
+            End If
+
             Return plan
+        End Function
+
+        Private Function GetUnavailablePlannedToolIds(appType As String, plan As ExecutionPlan) As List(Of String)
+            If plan Is Nothing Then Return New List(Of String)()
+            Dim availableIds As New HashSet(Of String)(StringComparer.OrdinalIgnoreCase)
+            For Each toolItem In _toolRegistry.GetAvailableTools(appType)
+                availableIds.Add(toolItem.Id)
+            Next
+            Return GetPlannedToolIds(plan).Where(Function(toolId) Not availableIds.Contains(toolId)).ToList()
         End Function
 
         Private Function ValidatePlanCoverage(spec As AgentTaskSpec, plan As ExecutionPlan) As String
@@ -302,15 +326,17 @@ Namespace Agent
                 Try
                     Dim envelope = JObject.Parse(If(stepItem.Code, ""))
                     Dim commands As New List(Of JObject)()
-                    If envelope("command") IsNot Nothing Then commands.Add(envelope)
+                    commands.Add(envelope)
                     Dim commandArray = TryCast(envelope("commands"), JArray)
                     If commandArray IsNot Nothing Then commands.AddRange(commandArray.OfType(Of JObject)())
 
                     For Each commandObj In commands
-                        Dim commandName = commandObj("command")?.ToString()
+                        Dim commandName As String = ""
+                        Dim commandParams As JObject = Nothing
+                        If Not TryExtractToolInvocation(commandObj, commandName, commandParams) Then Continue For
+
                         If String.Equals(commandName, "InsertImage", StringComparison.OrdinalIgnoreCase) Then
-                            Dim params = TryCast(commandObj("params"), JObject)
-                            Dim imagePath = params?("imagePath")?.ToString()
+                            Dim imagePath = commandParams?("imagePath")?.ToString()
                             If String.IsNullOrWhiteSpace(imagePath) Then
                                 Return "В плане с изображением отсутствует imagePath; частичные изменения не начинаются."
                             End If
@@ -318,8 +344,7 @@ Namespace Agent
                                 Return $"Файл изображения недоступен: {imagePath}. Чтобы не создавать только текстовые слайды, задача не выполнялась."
                             End If
                         ElseIf String.Equals(commandName, "CreateSlides", StringComparison.OrdinalIgnoreCase) Then
-                            Dim params = TryCast(commandObj("params"), JObject)
-                            Dim slides = TryCast(params?("slides"), JArray)
+                            Dim slides = TryCast(commandParams?("slides"), JArray)
                             If slides Is Nothing Then Continue For
                             For Each slide In slides.OfType(Of JObject)()
                                 Dim imagePath = slide("imagePath")?.ToString()
@@ -355,13 +380,16 @@ Namespace Agent
                 Try
                     Dim envelope = JObject.Parse(If(stepItem.Code, ""))
                     Dim commands As New List(Of JObject)()
-                    If envelope("command") IsNot Nothing Then commands.Add(envelope)
+                    commands.Add(envelope)
                     Dim commandArray = TryCast(envelope("commands"), JArray)
                     If commandArray IsNot Nothing Then commands.AddRange(commandArray.OfType(Of JObject)())
 
                     For Each commandObj In commands
-                        If String.Equals(commandObj("command")?.ToString(), "CreateSlides", StringComparison.OrdinalIgnoreCase) AndAlso
-                           CreateSlidesParametersContainImage(TryCast(commandObj("params"), JObject)) Then
+                        Dim commandName As String = ""
+                        Dim commandParams As JObject = Nothing
+                        If Not TryExtractToolInvocation(commandObj, commandName, commandParams) Then Continue For
+                        If String.Equals(commandName, "CreateSlides", StringComparison.OrdinalIgnoreCase) AndAlso
+                           CreateSlidesParametersContainImage(commandParams) Then
                             Return True
                         End If
                     Next
@@ -421,13 +449,16 @@ Namespace Agent
             For Each stepItem In plan.Steps
                 Try
                     Dim obj = JObject.Parse(If(stepItem.Code, ""))
-                    Dim command = obj("command")?.ToString()
-                    If Not String.IsNullOrWhiteSpace(command) Then result.Add(command)
+                    Dim toolId As String = ""
+                    Dim toolParams As JObject = Nothing
+                    If TryExtractToolInvocation(obj, toolId, toolParams) Then result.Add(toolId)
+
                     Dim commands = TryCast(obj("commands"), JArray)
                     If commands Is Nothing Then Continue For
                     For Each item In commands.OfType(Of JObject)()
-                        command = item("command")?.ToString()
-                        If Not String.IsNullOrWhiteSpace(command) Then result.Add(command)
+                        toolId = ""
+                        toolParams = Nothing
+                        If TryExtractToolInvocation(item, toolId, toolParams) Then result.Add(toolId)
                     Next
                 Catch
                     ' Invalid plan JSON is handled by the normal tool-call parsing path.
@@ -443,7 +474,7 @@ Namespace Agent
                                            planStep As PlanStep,
                                            systemPrompt As String) As Task(Of String)
             Dim lastObservation = _memory.GetWorkingString("lastObservation")
-            Dim prompt = _promptManager.BuildReactPrompt(planStep, _memory, lastObservation)
+            Dim prompt = _promptManager.BuildReactPrompt(planStep, _memory, lastObservation, session.CurrentContent)
             Dim history = _memory.GetRecentMessages(10)
             Return Await SendAIRequest(prompt, systemPrompt, history)
         End Function
@@ -492,13 +523,9 @@ Namespace Agent
                 If String.IsNullOrEmpty(jsonStr) Then Return Nothing
 
                 Dim obj = JObject.Parse(jsonStr)
-                Dim action = obj("action")
-                If action Is Nothing Then Return Nothing
-
-                Dim toolId = action("tool")?.ToString()
-                Dim params = TryCast(action("params"), JObject)
-                If String.IsNullOrEmpty(toolId) Then Return Nothing
-                If params Is Nothing Then params = New JObject()
+                Dim toolId As String = ""
+                Dim params As JObject = Nothing
+                If Not TryExtractToolInvocation(obj, toolId, params) Then Return Nothing
 
                 Return New ToolCall With {
                     .ToolId = toolId,
@@ -510,26 +537,87 @@ Namespace Agent
             End Try
         End Function
 
-        Private Function ParseFixedToolCall(fixedObj As JObject, fallback As ToolCall) As ToolCall
-            If fixedObj Is Nothing Then Return fallback
+        ''' <summary>
+        ''' Accepts every tool-call envelope the planner, ReAct prompt and repair prompt may
+        ''' produce: {"action":{"tool":...}}, {"tool":...}, {"toolId":...,"parameters":...}
+        ''' and the legacy {"command":...,"params":...} form. Without this, a valid command
+        ''' copied from the plan was rejected as "unparseable".
+        ''' </summary>
+        Private Shared Function TryExtractToolInvocation(obj As JObject,
+                                                         ByRef toolId As String,
+                                                         ByRef params As JObject) As Boolean
+            toolId = ""
+            params = Nothing
+            If obj Is Nothing Then Return False
 
-            Dim toolId = fixedObj("toolId")?.ToString()
-            Dim params = TryCast(fixedObj("parameters"), JObject)
+            Dim actionObject = TryCast(obj("action"), JObject)
+            If actionObject IsNot Nothing Then
+                toolId = FirstNonEmptyText(actionObject("tool"),
+                                           actionObject("toolId"),
+                                           actionObject("command"),
+                                           actionObject("name"))
+                params = TryCast(actionObject("params"), JObject)
+                If params Is Nothing Then params = TryCast(actionObject("parameters"), JObject)
+                If params Is Nothing Then params = TryCast(actionObject("arguments"), JObject)
+            End If
 
             If String.IsNullOrWhiteSpace(toolId) Then
-                Dim action = TryCast(fixedObj("action"), JObject)
-                If action IsNot Nothing Then
-                    toolId = action("tool")?.ToString()
-                    If params Is Nothing Then params = TryCast(action("params"), JObject)
+                toolId = FirstNonEmptyText(obj("tool"),
+                                           obj("toolId"),
+                                           obj("command"),
+                                           obj("name"))
+                params = TryCast(obj("params"), JObject)
+                If params Is Nothing Then params = TryCast(obj("parameters"), JObject)
+                If params Is Nothing Then params = TryCast(obj("arguments"), JObject)
+            End If
+
+            ' Also accept {"action":"InsertTable","params":{...}}.
+            Dim actionValue = obj("action")
+            If String.IsNullOrWhiteSpace(toolId) AndAlso actionValue IsNot Nothing AndAlso actionValue.Type = JTokenType.String Then
+                toolId = actionValue.ToString()
+            End If
+
+            If params Is Nothing Then
+                Dim rawParams = obj("params")
+                If rawParams IsNot Nothing AndAlso rawParams.Type = JTokenType.String Then
+                    Try
+                        params = JObject.Parse(rawParams.ToString())
+                    Catch
+                        params = Nothing
+                    End Try
                 End If
             End If
 
-            If String.IsNullOrWhiteSpace(toolId) Then toolId = fallback.ToolId
-            If params Is Nothing Then params = If(fallback.Parameters, New JObject())
+            If String.IsNullOrWhiteSpace(toolId) Then Return False
+            If params Is Nothing Then params = New JObject()
+            Return True
+        End Function
+
+        Private Shared Function FirstNonEmptyText(ParamArray values As JToken()) As String
+            If values Is Nothing Then Return ""
+            For Each value In values
+                If value Is Nothing OrElse value.Type = JTokenType.Null Then Continue For
+                Dim text = value.ToString()
+                If Not String.IsNullOrWhiteSpace(text) Then Return text.Trim()
+            Next
+            Return ""
+        End Function
+
+        Private Function ParseFixedToolCall(fixedObj As JObject, fallback As ToolCall) As ToolCall
+            If fixedObj Is Nothing Then Return fallback
+
+            Dim toolId As String = ""
+            Dim params As JObject = Nothing
+            If TryExtractToolInvocation(fixedObj, toolId, params) Then
+                Return New ToolCall With {
+                    .ToolId = toolId,
+                    .Parameters = params
+                }
+            End If
 
             Return New ToolCall With {
-                .ToolId = toolId,
-                .Parameters = params
+                .ToolId = If(fallback?.ToolId, ""),
+                .Parameters = If(fallback?.Parameters, New JObject())
             }
         End Function
 

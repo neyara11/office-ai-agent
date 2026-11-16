@@ -191,6 +191,15 @@ Namespace Agent
             End If
 
             sb.AppendLine()
+            sb.AppendLine("【Правила выбора инструментов】")
+            sb.AppendLine("- Дублирование/копирование слайда выполняй только через DuplicateSlide (нумерация slideIndex с 1; 0 — текущий). Не заменяй его на InsertSlide и не утверждай, что копирование слайдов с графикой недоступно.")
+            sb.AppendLine("- Перевод текста существующего слайда: DuplicateSlide (если нужна копия), затем ReplaceSlideText с массивом replacements [{find, replaceWith}].")
+            sb.AppendLine("- Если просят «такой же слайд / на основе этого слайда / сохрани дизайн» — DuplicateSlide, затем UpdateChartData для данных диаграммы и ReplaceSlideText для подписей. CreateSlides в этом случае не используй: он создаёт новый дизайн и не совпадёт с колодой.")
+            sb.AppendLine("- Если копию просят добавить последней — DuplicateSlide с position=end; затем правь копию через slideIndex=-1 (она станет активной).")
+            sb.AppendLine("- Новый слайд с нуля — InsertSlide; профессиональная колода — CreateSlides; таблица — InsertTable.")
+            sb.AppendLine("- Не используй ExecuteVBA для дублирования и замены текста: для этого есть нативные инструменты.")
+
+            sb.AppendLine()
             sb.AppendLine("【Запрос пользователя】")
             sb.AppendLine(session.UserRequest)
 
@@ -215,8 +224,9 @@ Namespace Agent
                 sb.AppendLine()
                 sb.AppendLine("【Краткое содержание текущего документа】")
                 Dim content = session.CurrentContent
-                If content.Length > 500 Then
-                    content = content.Substring(0, 500) & "..."
+                Dim contentBudget As Integer = 8000
+                If content.Length > contentBudget Then
+                    content = content.Substring(0, contentBudget) & vbCrLf & "... (содержимое обрезано по лимиту контекста)"
                 End If
                 sb.AppendLine(content)
             End If
@@ -268,7 +278,8 @@ Namespace Agent
         ''' </summary>
         Public Function BuildReactPrompt(planStep As PlanStep,
                                           memory As AgentMemory,
-                                          Optional previousObservation As String = "") As String
+                                          Optional previousObservation As String = "",
+                                          Optional currentContent As String = Nothing) As String
             Dim sb As New StringBuilder()
             Dim reactPrompt = GetPrompt("react-strategy")
             If reactPrompt IsNot Nothing Then
@@ -295,7 +306,20 @@ Namespace Agent
                 sb.AppendLine()
             End If
 
+            If Not String.IsNullOrWhiteSpace(currentContent) Then
+                sb.AppendLine("【Контекст документа (для точных параметров шага)】")
+                Dim excerpt = currentContent
+                If excerpt.Length > 3500 Then
+                    excerpt = excerpt.Substring(0, 3500) & vbCrLf & "... (контекст обрезан)"
+                End If
+                sb.AppendLine(excerpt)
+                sb.AppendLine()
+            End If
+
             sb.AppendLine("Выведи один вызов инструмента. Выбирай только зарегистрированные инструменты из системного промпта; ID инструмента копируй дословно, запрещены самодельные snake_case/верблюжьи псевдонимы.")
+            sb.AppendLine("Формат вызова: action.tool и action.params. Не используй command/params на этапе выполнения, не добавляй поля вне схемы инструмента и не передавай объект туда, где схема ожидает строку.")
+            sb.AppendLine("Предпочитай нативные инструменты: DuplicateSlide — копия слайда, ReplaceSlideText — замена текста на слайде (slideIndex с 1), UpdateChartData — данные диаграммы, CreateSlides — новые слайды, InsertTable — таблица. ExecuteVBA используй только если пользователь явно просит макрос или нативного аналога нет.")
+            sb.AppendLine("Для запросов «сделай такой же слайд / на основе этого слайда» используй DuplicateSlide + UpdateChartData/ReplaceSlideText, а не CreateSlides: нужно сохранить дизайн исходной колоды.")
             sb.AppendLine("```json")
             sb.AppendLine("{")
             sb.AppendLine("  ""thought"": ""процесс рассуждения"",")

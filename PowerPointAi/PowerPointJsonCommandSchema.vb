@@ -34,7 +34,8 @@ Public Class PowerPointJsonCommandSchema
         "SetSlideLayout",
         "AddSpeakerNotes",
         "ApplyTheme",
-        "ExecuteVBA"
+        "ReplaceSlideText",
+        "UpdateChartData"
     }
 
     ''' <summary>
@@ -71,12 +72,12 @@ Public Class PowerPointJsonCommandSchema
 - запрещено {""command"": ""xxx"", ""title"": ""...""} (отсутствует обёртка params)
 - запрещено {""operations"": [...]}
 
-【16 команд, поддерживаемых PowerPoint】
+【17 команд, поддерживаемых PowerPoint】
 
 === Операции со слайдами (5) ===
 1. InsertSlide — вставить слайд {position:current/end, layout:title/titleAndContent/blank, title:необязательно, content:необязательно}
 2. DeleteSlide — удалить слайд {slideIndex:обязательно, -1 означает текущий}
-3. DuplicateSlide — дублировать слайд {slideIndex:обязательно, insertAfter:необязательно}
+3. DuplicateSlide — дублировать слайд {slideIndex: с 1; 0 или -1 — текущий, position:after/end}
 4. MoveSlide — переместить слайд {fromIndex:обязательно, toIndex:обязательно}
 5. CreateSlides — пакетное создание {slides:массив, каждый содержит title/content/layout}
 
@@ -98,20 +99,22 @@ Public Class PowerPointJsonCommandSchema
 === Тема (1) ===
 15. ApplyTheme — применить тему {themeName:необязательное имя встроенной темы, themeFile:необязательный путь к файлу темы}
 
-=== Резервный VBA (1) ===
-16. ExecuteVBA — выполнить код VBA {code:обязательно, полный код Sub или Function}
-    Когда перечисленных команд недостаточно, сгенерируй код VBA как резервный вариант
+=== Перевод и замена текста (2) ===
+16. ReplaceSlideText — заменить текст на слайде {slideIndex: с 1, 0/-1 текущий; replacements:[{find:обязательно, replaceWith:обязательно}], matchCase:необязательно}
+    Для перевода: сначала DuplicateSlide, затем один ReplaceSlideText со списком пар.
+17. UpdateChartData — обновить данные существующей диаграммы {slideIndex: с 1, 0/-1 текущий; chartIndex:с 1; categories:массив строк; values:массив чисел; seriesName:необязательно}
+    Для запроса «такой же слайд, но с другими данными»: DuplicateSlide, затем UpdateChartData. Оформление диаграммы сохраняется.
 
 【Пояснение slideIndex】
-- -1 или пропуск означает текущий слайд
-- 0 означает первый слайд
-- положительное число означает конкретный индекс слайда
+- Для большинства команд: -1 или пропуск означает текущий слайд, 0 — первый слайд.
+- Для ReplaceSlideText: 1 — первый слайд, 0 или -1 — текущий.
 
 【Приоритет решений】
 1. В первую очередь используй перечисленные выше 16 команд
-2. Для сложных задач, которые нельзя решить командой, используй ExecuteVBA для генерации кода VBA
-3. Для перевода сообщи пользователю использовать кнопку ""Перевод"" на панели инструментов
-4. Если запрос неоднозначен, задай вопрос напрямую"
+2. Для дублирования слайда используй DuplicateSlide, а не InsertSlide
+3. Для перевода: DuplicateSlide, затем ReplaceSlideText со списком замен
+4. ExecuteVBA запрещён: всегда собирай задачу из нативных команд
+5. Если запрос неоднозначен, задай вопрос напрямую"
     End Function
 
     ''' <summary>
@@ -320,9 +323,11 @@ Public Class PowerPointJsonCommandSchema
                 ' === 母版和主题 ===
                 Case "applytheme"
                     Return ValidateApplyTheme(params, errorMessage)
-                ' === VBA回退 ===
-                Case "executevba"
-                    Return ValidateExecuteVBA(params, errorMessage)
+                ' === Замена текста ===
+                Case "replaceslidetext"
+                    Return ValidateReplaceSlideText(params, errorMessage)
+                Case "updatechartdata"
+                    Return ValidateUpdateChartData(params, errorMessage)
                 Case Else
                     Return True
             End Select
@@ -496,6 +501,51 @@ Public Class PowerPointJsonCommandSchema
         ' 至少需要themeName或themeFile之一
         If params("themeName") Is Nothing AndAlso params("themeFile") Is Nothing Then
             errorMessage = "ApplyTheme: требуется параметр themeName или themeFile"
+            Return False
+        End If
+        Return True
+    End Function
+
+    Private Shared Function ValidateReplaceSlideText(params As JToken, ByRef errorMessage As String) As Boolean
+        Dim replacements = params("replacements")
+        If replacements Is Nothing OrElse replacements.Type <> JTokenType.Array Then
+            errorMessage = "ReplaceSlideText: отсутствует массив replacements"
+            Return False
+        End If
+        If CType(replacements, JArray).Count = 0 Then
+            errorMessage = "ReplaceSlideText: массив replacements пуст"
+            Return False
+        End If
+        For Each item In CType(replacements, JArray)
+            If item.Type <> JTokenType.Object Then
+                errorMessage = "ReplaceSlideText: каждый элемент replacements должен быть объектом {find, replaceWith}"
+                Return False
+            End If
+            If String.IsNullOrWhiteSpace(item("find")?.ToString()) Then
+                errorMessage = "ReplaceSlideText: поле find обязательно"
+                Return False
+            End If
+        Next
+        Return True
+    End Function
+
+    Private Shared Function ValidateUpdateChartData(params As JToken, ByRef errorMessage As String) As Boolean
+        Dim categories = params("categories")
+        Dim values = params("values")
+        If categories Is Nothing OrElse categories.Type <> JTokenType.Array Then
+            errorMessage = "UpdateChartData: отсутствует массив categories"
+            Return False
+        End If
+        If values Is Nothing OrElse values.Type <> JTokenType.Array Then
+            errorMessage = "UpdateChartData: отсутствует массив values"
+            Return False
+        End If
+        If CType(categories, JArray).Count = 0 Then
+            errorMessage = "UpdateChartData: categories не может быть пустым"
+            Return False
+        End If
+        If CType(categories, JArray).Count <> CType(values, JArray).Count Then
+            errorMessage = "UpdateChartData: длины categories и values должны совпадать"
             Return False
         End If
         Return True

@@ -1,0 +1,60 @@
+{
+  "id": "UpdateChartData",
+  "name": "Обновить данные диаграммы",
+  "description": "Заменить категории и значения существующей диаграммы на слайде без потери оформления. Используй после DuplicateSlide, когда нужно «сделать такой же слайд, но с другими данными/на русском»: дизайн, цвета и тип диаграммы сохраняются. slideIndex нумеруется с 1; 0 или -1 — текущий.",
+  "appType": "ppt",
+  "category": "Работа с содержимым",
+  "riskLevel": "safe",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "slideIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Слайд с диаграммой, нумерация с 1. 0 или -1 — текущий слайд.",
+      "defaultValue": 0
+    },
+    {
+      "name": "chartIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Порядковый номер диаграммы на слайде, с 1. По умолчанию первая.",
+      "defaultValue": 1
+    },
+    {
+      "name": "categories",
+      "type": "array",
+      "required": true,
+      "description": "Новые подписи категорий по порядку. Длина должна совпадать с values.",
+      "schema": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    {
+      "name": "values",
+      "type": "array",
+      "required": true,
+      "description": "Новые числовые значения первого ряда. Длина должна совпадать с categories.",
+      "schema": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "name": "seriesName",
+      "type": "string",
+      "required": false,
+      "description": "Необязательное новое имя ряда, например «Доля бюджета, %»."
+    }
+  ]
+}

@@ -309,7 +309,7 @@ Public Class AgentKernelService
             Next
             stepsJson.Append("]")
 
-            Dim planJson = $"{{""sessionId"":""{CurrentAgentSessionId}"",""understanding"":""{_escapeJs(If(plan.Understanding, ""))}"",""steps"":{stepsJson.ToString()},""summary"":""{_escapeJs(If(plan.Summary, ""))}"",""replaceThinkingUuid"":""{AgentThinkingUuid}""}}"
+            Dim planJson = $"{{""sessionId"":""{CurrentAgentSessionId}"",""understanding"":""{_escapeJs(If(plan.Understanding, ""))}"",""steps"":{stepsJson.ToString()},""summary"":""{_escapeJs(If(plan.Summary, ""))}"",""replaceThinkingUuid"":""{AgentThinkingUuid}"",""backendRunning"":true}}"
 
             _executeScript($"showAgentPlanCard({planJson})")
             Dim planTrace As New ChatContextTrace With {

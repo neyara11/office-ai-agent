@@ -1,7 +1,7 @@
 {
   "id": "InsertTable",
   "name": "Вставить таблицу",
-  "description": "Вставить таблицу на слайд",
+  "description": "Вставить таблицу на слайд PowerPoint. slideIndex нумеруется с нуля: чтобы попасть на слайд 10 в интерфейсе PowerPoint, передай slideIndex=9; -1 или отсутствие — текущий слайд. data должен содержать не больше rows строк и cols столбцов.",
   "appType": "ppt",
   "category": "Работа с содержимым",
   "riskLevel": "safe",
@@ -11,19 +11,51 @@
       "name": "rows",
       "type": "integer",
       "required": true,
-      "description": "Число строк"
+      "description": "Число строк таблицы (1-100)",
+      "schema": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
     },
     {
       "name": "cols",
       "type": "integer",
       "required": true,
-      "description": "Число столбцов"
+      "description": "Число столбцов таблицы (1-100)",
+      "schema": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
+    },
+    {
+      "name": "slideIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Целевой слайд, нумерация с нуля (0 — первый слайд). -1 или отсутствие — текущий слайд. Не путай с номером слайда из интерфейса: слайд 10 → slideIndex 9.",
+      "schema": {
+        "type": "integer",
+        "minimum": -1,
+        "maximum": 1000
+      }
     },
     {
       "name": "data",
       "type": "array",
       "required": false,
-      "description": "Данные таблицы"
+      "description": "Двумерный массив ячеек: data[row][col]. Каждая ячейка — строка, число или boolean. Количество строк и столбцов не должно превышать rows и cols; первая строка обычно заголовки.",
+      "schema": {
+        "type": "array",
+        "maxItems": 100,
+        "items": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": ["string", "number", "boolean"]
+          }
+        }
+      }
     }
   ]
 }

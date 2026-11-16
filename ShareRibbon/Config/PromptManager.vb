@@ -1,4 +1,4 @@
-﻿' ShareRibbon\Config\PromptManager.vb
+' ShareRibbon\Config\PromptManager.vb
 ' 统一提示词管理中心
 
 Imports System.IO
@@ -272,7 +272,9 @@ Public Class PromptManager
             Case "word"
                 Return constraint.Contains("【Word支持的22个命令】")
             Case "powerpoint", "ppt"
-                Return constraint.Contains("【PowerPoint支持的22个命令】")
+                Return constraint.Contains("【PowerPoint支持的22个命令】") OrElse
+                       constraint.Contains("【PowerPoint支持的16个命令】") OrElse
+                       constraint.Contains("ExecuteVBA")
             Case Else
                 Return False
         End Select
@@ -455,12 +457,12 @@ Public Class PromptManager
 {""commands"": [{""command"": ""CreateSlides"", ""params"": {""slides"": [{""title"": ""Первый слайд""}]}}, {""command"": ""AddAnimation"", ""params"": {""effect"": ""fadeIn"", ""scope"": ""all""}}]}
 ```
 
-【16 команд, поддерживаемых PowerPoint】
+【17 команд, поддерживаемых PowerPoint】
 
 === Операции со слайдами (5) ===
 1. InsertSlide - вставить слайд {position:current/end, layout, title, content}
 2. DeleteSlide - удалить слайд {slideIndex:обязательно,-1 текущий}
-3. DuplicateSlide - дублировать слайд {slideIndex:обязательно}
+3. DuplicateSlide - дублировать слайд {slideIndex: с 1; 0 или -1 — текущий, position:after/end}
 4. MoveSlide - переместить слайд {fromIndex:обязательно, toIndex:обязательно}
 5. CreateSlides - пакетное создание {slides:массив с title/content/layout}
 
@@ -482,18 +484,19 @@ Public Class PromptManager
 === Тема (1) ===
 15. ApplyTheme - применить тему {themeName или themeFile}
 
-=== Резервный VBA (1) ===
-16. ExecuteVBA - код VBA {code:обязательно, полный Sub/Function}
+=== Замена текста (1) ===
+16. ReplaceSlideText - заменить текст на слайде {slideIndex: с 1 (0 или -1 — текущий), replacements:[{find, replaceWith}], matchCase:необязательно}
 
 【Категорически запрещено】
 - Запрещено использовать массивы actions/operations
 - Запрещено опускать обёртку params
 - Запрещено использовать команды, специфичные для Excel/Word
+- Запрещено использовать ExecuteVBA: для всех задач есть нативные команды
 
 【Приоритет решений】
 1. В первую очередь используй перечисленные выше 16 команд
-2. Для сложных задач используй ExecuteVBA
-3. Для перевода используй кнопку на панели
+2. Для дублирования слайда используй DuplicateSlide, а не InsertSlide
+3. Для перевода: DuplicateSlide, затем ReplaceSlideText со списком пар find/replaceWith
 4. Если запрос неоднозначен, задай уточняющий вопрос на русском языке"
     End Function
     

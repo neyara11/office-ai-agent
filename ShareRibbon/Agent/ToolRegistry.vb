@@ -31,6 +31,12 @@ Namespace Agent
         Public Property Required As Boolean = False
         Public Property Description As String
         Public Property DefaultValue As Object = Nothing
+        ''' <summary>Allowed values for enum-like parameters (JSON field "enum").</summary>
+        <JsonProperty("enum")>
+        Public Property EnumValues As List(Of String) = Nothing
+        ''' <summary>Optional nested JSON Schema subset for objects/arrays (JSON field "schema").</summary>
+        <JsonProperty("schema")>
+        Public Property Schema As JObject = Nothing
     End Class
 
     ''' <summary>
@@ -745,6 +751,27 @@ Namespace Agent
                                          recoverable:=True)
             End If
 
+            ' Native tools must satisfy their declared schema before any COM call.
+            ' Batch envelopes (legacy "commands") are validated by the host parser.
+            Dim schemaErrors = ValidateNativeToolSchema(toolId, tool, params)
+            If schemaErrors IsNot Nothing AndAlso schemaErrors.Count > 0 Then
+                sw.Stop()
+                Dim detail = String.Join("; ", schemaErrors.Take(5).Select(Function(item) item.ToString()))
+                AppLogger.Warn("ToolRegistry", $"Schema rejected toolId={toolId}: {detail}")
+                Return ToolResult.Failed(tool.Id,
+                                         "Параметры вызова не соответствуют схеме инструмента: " & detail,
+                                         New With {
+                                             .schemaErrors = schemaErrors.Take(20).
+                                                 Select(Function(item) New With {.path = item.Path, .message = item.Message}).
+                                                 ToArray(),
+                                             .toolId = tool.Id
+                                         },
+                                         ExceptionClassifier.CodeOperationSchemaInvalid,
+                                         "Команда не соответствует схеме инструмента. Исправь указанные поля и повтори.",
+                                         detail,
+                                         recoverable:=True)
+            End If
+
             If safetyDecision IsNot Nothing AndAlso
                safetyDecision.Action = Execution.SafetyAction.RequireApproval AndAlso
                executionContext IsNot Nothing AndAlso
@@ -888,6 +915,21 @@ Namespace Agent
                                     errorCode:=ExceptionClassifier.CodeNotFound,
                                     userMessage:="Нераспознанный тип инструмента",
                                     recoverable:=False)
+        End Function
+
+        Private Shared Function ValidateNativeToolSchema(toolId As String,
+                                                         tool As ToolDescriptor,
+                                                         params As JObject) As List(Of ToolSchemaError)
+            If tool Is Nothing OrElse tool.Parameters Is Nothing OrElse tool.Parameters.Count = 0 Then Return Nothing
+            If String.IsNullOrWhiteSpace(toolId) Then Return Nothing
+            If toolId.StartsWith("mcp.", StringComparison.OrdinalIgnoreCase) OrElse
+               toolId.StartsWith("memory.", StringComparison.OrdinalIgnoreCase) OrElse
+               toolId.StartsWith("skill_script.", StringComparison.OrdinalIgnoreCase) Then
+                Return Nothing
+            End If
+            ' Legacy batch envelopes carry their own per-command validation in the host.
+            If params IsNot Nothing AndAlso params("commands") IsNot Nothing Then Return Nothing
+            Return ToolParameterValidator.Validate(tool, If(params, New JObject()))
         End Function
 
         Private Shared Function BuildSafetyFailure(tool As ToolDescriptor,

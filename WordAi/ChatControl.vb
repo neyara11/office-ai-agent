@@ -136,7 +136,7 @@ Public Class ChatControl
     End Sub
 
     ''' <summary>
-    ''' 将模板应用到Word文档（预览用）
+    ''' 将模板应用到Word（预览用）
     ''' </summary>
     Private Sub ApplyTemplateToDocument(doc As Microsoft.Office.Interop.Word.Document, template As ReformatTemplate)
         Try
@@ -1618,7 +1618,7 @@ Public Class ChatControl
     End Sub
 
     ''' <summary>
-    ''' 将修正应用到Word文档（限定在选区内搜索替换）
+    ''' 将修正应用到Word（限定在选区内搜索替换）
     ''' </summary>
     Private Async Function ApplyCorrectionToWord(original As String, corrected As String) As Task(Of Boolean)
         Return Await Task.Run(Function()
@@ -1897,7 +1897,7 @@ Public Class ChatControl
             ' 检查是否有实际选中内容（通过比较Start和End位置）
             If selection.Start = selection.End Then
                 ' 光标在单一位置，没有选中内容，清除之前的选中显示
-                ClearSelectedContentBySheetName("Word文档")
+                ClearSelectedContentBySheetName("Word")
                 Return
             End If
 
@@ -1931,13 +1931,13 @@ Public Class ChatControl
             If Not String.IsNullOrEmpty(content) Then
                 ' 添加到选中内容列表
                 AddSelectedContentItem(
-                "Word文档",  ' 使用文档名称作为标识
+                "Word",  ' 使用文档名称作为标识
                 If(selection.Tables.Count > 0,
                    "[Содержимое таблицы]",
                    content.Substring(0, Math.Min(content.Length, 50)) & If(content.Length > 50, "...", ""))
             )
             Else
-                ClearSelectedContentBySheetName("Word文档")
+                ClearSelectedContentBySheetName("Word")
             End If
 
         Catch ex As Exception
@@ -3455,7 +3455,7 @@ Public Class ChatControl
     End Sub
 
     ''' <summary>
-    ''' 应用续写结果到Word文档
+    ''' 应用续写结果到Word
     ''' </summary>
     Protected Overrides Sub HandleApplyContinuation(jsonDoc As JObject)
         Try
@@ -3501,7 +3501,7 @@ Public Class ChatControl
     End Sub
 
     ''' <summary>
-    ''' 应用模板渲染结果到Word文档
+    ''' 应用模板渲染结果到Word
     ''' </summary>
     Protected Overrides Sub HandleApplyTemplateContent(jsonDoc As JObject)
         Try

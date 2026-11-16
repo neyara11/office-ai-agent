@@ -49,6 +49,13 @@ Namespace Agent
             Dim noProgressCount As Integer = 0
             Dim replanAttempts As Integer = 0
             _multimodalRepairDisabledForRun = False
+            AgentRunJournal.Record(session.Id, "run_start", New With {
+                .appType = session.AppType,
+                .userRequest = session.UserRequest,
+                .systemPromptLength = If(systemPrompt, "").Length,
+                .systemPromptHash = AgentRunJournal.HashText(systemPrompt),
+                .historyCount = If(_memory.GetRecentMessages(10), New List(Of HistoryMessage)()).Count
+            })
 
             Try
                 ' Phase 1: 生成 Spec
@@ -80,6 +87,17 @@ Namespace Agent
 
                 ' 通知计划已生成
                 OnPlanGenerated?.Invoke(session.Plan)
+                AgentRunJournal.Record(session.Id, "plan", New With {
+                    .understanding = session.Plan.Understanding,
+                    .summary = session.Plan.Summary,
+                    .capabilityGap = session.Plan.CapabilityGap,
+                    .steps = session.Plan.Steps.Select(
+                        Function(item) New With {
+                            .step = item.StepNumber,
+                            .description = item.Description,
+                            .code = item.Code
+                        }).ToArray()
+                })
 
                 session.Status = AgentStatus.Executing
                 OnStatusChanged?.Invoke($"План готов (шагов: {session.Plan.Steps.Count}), переход к выполнению...")
@@ -95,10 +113,19 @@ Namespace Agent
                     session.Status = AgentStatus.Thinking
                     OnStatusChanged?.Invoke($"Шаг {stepIndex + 1}/{session.Plan.Steps.Count}: {planStep.Description}")
                     Dim thought = Await ThinkAsync(session, planStep, systemPrompt)
+                    AgentRunJournal.Record(session.Id, "thought", New With {
+                        .step = stepIndex + 1,
+                        .description = planStep.Description,
+                        .rawResponse = thought
+                    })
 
                     ' --- PARSE ACTION ---
                     Dim toolCall = ParseToolCall(thought)
                     If toolCall Is Nothing Then
+                        AgentRunJournal.Record(session.Id, "parse_failed", New With {
+                            .step = stepIndex + 1,
+                            .rawResponse = thought
+                        })
                         noProgressCount += 1
                         planStep.Status = StepStatus.Failed
                         planStep.ErrorMessage = "Не удалось разобрать вызов инструмента"
@@ -123,6 +150,12 @@ Namespace Agent
                     If Not String.IsNullOrWhiteSpace(normalizeMessage) Then
                         Debug.WriteLine($"[LoopEngine] {normalizeMessage}")
                     End If
+
+                    AgentRunJournal.Record(session.Id, "tool_call", New With {
+                        .step = stepIndex + 1,
+                        .toolId = toolCall.ToolId,
+                        .parameters = toolCall.Parameters
+                    })
 
                     ' --- RISK NOTICE (autonomous mode) ---
                     Dim tool = _toolRegistry.GetTool(toolCall.ToolId)
@@ -169,6 +202,19 @@ Namespace Agent
                                 Await _toolRegistry.ExecuteToolAsync(executionContext, toolCall.ToolId, toolCall.Parameters),
                                 session.AppType)
                         End If
+
+                        AgentRunJournal.Record(session.Id, "tool_result", New With {
+                            .step = stepIndex + 1,
+                            .attempt = fixAttempt + 1,
+                            .toolId = If(toolCall.ToolId, ""),
+                            .success = toolResult IsNot Nothing AndAlso toolResult.Success,
+                            .errorCode = If(toolResult?.ErrorCode, ""),
+                            .message = If(toolResult?.Message, ""),
+                            .userMessage = If(toolResult?.UserMessage, ""),
+                            .debugDetail = If(toolResult?.DebugDetail, ""),
+                            .observation = toolResult?.Observation,
+                            .elapsedMs = If(toolResult?.ElapsedMs, 0L)
+                        })
 
                         If Not toolResult.Success AndAlso
                            String.Equals(toolResult.ErrorCode, ExceptionClassifier.CodeSafetyNeedsApproval, StringComparison.OrdinalIgnoreCase) AndAlso
@@ -228,7 +274,7 @@ Namespace Agent
 Доступные инструменты для {If(session.AppType, "Office")} (используй точные ID инструментов, не придумывай snake_case и незарегистрированные команды):
 {BuildAvailableToolHint(session.AppType, executionContext)}
 
-Проанализируй причину ошибки и верни исправленный вызов инструмента. Верни только JSON в формате:
+Проанализируй причину ошибки и верни исправленный вызов инструмента. Если код ошибки CodeOperationSchemaInvalid, измени только перечисленные в деталях поля и сохрани корректные параметры без изменений. Верни только JSON в формате:
 ```json
 {{
   ""toolId"": ""..."",
@@ -238,8 +284,17 @@ Namespace Agent
 
                             Try
                                 ' 请求 AI 修复
+                                AgentRunJournal.Record(session.Id, "repair_prompt", New With {
+                                    .attempt = fixAttempt,
+                                    .prompt = fixPrompt
+                                })
                                 Dim fixedResponse = Await SendRepairRequestAsync(fixPrompt, systemPrompt, toolResult)
                                 Dim fixedJson = ExtractJson(fixedResponse)
+                                AgentRunJournal.Record(session.Id, "repair_response", New With {
+                                    .attempt = fixAttempt,
+                                    .rawResponse = fixedResponse,
+                                    .extractedJson = fixedJson
+                                })
 
                                 If Not String.IsNullOrEmpty(fixedJson) Then
                                     Dim fixedObj = JObject.Parse(fixedJson)
@@ -376,6 +431,11 @@ Namespace Agent
                 Dim finalMsg = $"Задача выполнена, итераций: {session.CurrentIteration}"
                 OnStatusChanged?.Invoke(finalMsg)
                 AppLogger.Info("LoopEngine", finalMsg)
+                AgentRunJournal.Record(session.Id, "run_end", New With {
+                    .status = "completed",
+                    .message = finalMsg,
+                    .iterations = session.CurrentIteration
+                })
                 Return AgentResult.SuccessResult(session.Id, finalMsg)
 
             Catch ex As Exception
@@ -383,6 +443,12 @@ Namespace Agent
                 Dim classified = ExceptionClassifier.Classify(ex)
                 OnStatusChanged?.Invoke($"Ошибка выполнения: {classified.UserMessage}")
                 AppLogger.Error("LoopEngine", "RunAsync unhandled exception", ex)
+                AgentRunJournal.Record(session.Id, "run_end", New With {
+                    .status = "exception",
+                    .errorCode = classified.ErrorCode,
+                    .message = classified.UserMessage,
+                    .detail = ex.Message
+                })
                 Return AgentResult.Failed(session.Id, $"Исключение при выполнении: [{classified.ErrorCode}] {classified.UserMessage}")
             End Try
         End Function

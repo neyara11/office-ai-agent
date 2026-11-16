@@ -7,7 +7,7 @@ Public Class ResourceExtractor
     ''' <summary>
     ''' 资源版本号 — 更新此值可强制刷新所有前端资源文件
     ''' </summary>
-    Private Shared _resourceVersion As String = "2026.09.20.2"
+    Private Shared _resourceVersion As String = "2026.11.16.1"
 
     ''' <summary>
     ''' Манифест извлечённых файлов (имя|размер). Позволяет подхватывать правки JS/CSS
