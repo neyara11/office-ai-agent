@@ -8,7 +8,7 @@
 - Уже реализованы и работают нативные PPT-инструменты:
   - `DuplicateSlide` — `slideIndex` с 1, `position: after|end`, сохраняет оформление/картинки/таблицы/диаграммы;
   - `ReplaceSlideText` — `slideIndex` с 1, `replacements:[{find,replaceWith}]`, обходит фигуры, группы, **ячейки таблиц**, гибко матчит переносы/пробелы;
-  - `UpdateChartData` — `slideIndex` с 1, `chartIndex`, `categories`, `values`, `seriesName`; меняет данные первого ряда, сохраняя тип/оформление;
+  - `UpdateChartData` — `slideIndex` с 1, `chartIndex`, `values`, необязательный `categories`, `seriesName`; без `categories` сохраняются текущие подписи; для процентных диаграмм значения передаются долями (25% = 0.25), а если значений больше категорий — лишние отбрасываются с предупреждением; меняет данные первого ряда, сохраняя тип/оформление;
   - `InsertSlide` — `layout` + placeholder-заполнение;
   - `CreateSlides` — Scene/дизайн-система, **не наследует дизайн текущей колоды**.
 - `ExecuteVBA` отключён: не в `GetAvailableTools`, не в legacy `SupportedCommands`, хост проверяет `AccessVBOM` до COM. Не возвращать VBA в типовые сценарии.
@@ -46,15 +46,16 @@
 ### 5. Семантика slideIndex разная
 
 - Большинство legacy-команд: 0-based, `-1` текущий.
-- `DuplicateSlide`, `ReplaceSlideText`, `UpdateChartData`: **1-based**, `0/-1` текущий.
+- `DuplicateSlide`, `ReplaceSlideText`, `UpdateChartData`: **1-based**, `0/-1` текущий. `DuplicateSlide` переключает активный слайд на копию, поэтому последующие команды конверта с `slideIndex=-1` правят копию, а не оригинал.
+- `PowerPointDeckReader` и `AppendCurrentSelectedContent` отдают модели категории/значения диаграмм (`PowerPointChartSummary.vb`); не убирать это при рефакторинге контекста.
 - Наблюдение (`ResolvePowerPointTargetSlideIndex`) учитывает это; при добавлении команд поддерживать консистентность и обновлять резолвер.
 
 ### 6. Legacy и Agent — два контура
 
 - Agent: `ShareRibbon/Agent/PromptManager.vb` + `LoopEngine.Planning.vb` + `ToolRegistry`.
 - Legacy: `ShareRibbon/Config/PromptManager.vb` + `PowerPointAi/PowerPointJsonCommandSchema.vb` + карточка «Выполнить план» из `code-handler.js`.
-- Пользователь может иметь **сохранённый кастомный prompt**; `IsLegacyBuiltInJsonSchemaConstraint` признаёт старым только 22/16-командные/VBA-варианты. При изменении поведения обновлять оба контура и критерии устаревания.
-- Последняя незавершённая правка: блок «Типовые задачи → команды» в промпты **не добавился** (replace не совпал из-за CRLF). Его нужно добавить в оба контура.
+- Пользователь может иметь **сохранённый кастомный prompt**; `IsLegacyBuiltInJsonSchemaConstraint` для PPT считает старым 22/16-командные/VBA-варианты, а также любой prompt без `DuplicateSlide`. При изменении поведения обновлять оба контура и критерии устаревания.
+- P0 выполнен: блок «Типовые задачи → команды» добавлен в agent planning/react и в оба legacy-промпта; seeded-конфиг PPT (`CreatePowerPointConfig`) теперь ссылается на `GetPowerPointJsonSchemaConstraintDefault`, чтобы не было второго расходящегося списка команд.
 
 ### 7. Наблюдаемость
 

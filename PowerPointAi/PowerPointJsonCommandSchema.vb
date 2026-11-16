@@ -16,7 +16,8 @@ Public Class PowerPointJsonCommandSchema
     ''' 样式和动画: FormatSlide, AddAnimation, ApplyTransition, BeautifySlides, SetSlideLayout
     ''' 高级功能: AddSpeakerNotes
     ''' 主题: ApplyTheme
-    ''' VBA回退: ExecuteVBA
+    ''' 文本/图表: ReplaceSlideText, UpdateChartData
+    ''' ExecuteVBA 已停用：不进入 SupportedCommands 和 Agent 工具集。
     ''' </summary>
     Public Shared ReadOnly SupportedCommands As String() = {
         "InsertSlide",
@@ -102,15 +103,27 @@ Public Class PowerPointJsonCommandSchema
 === Перевод и замена текста (2) ===
 16. ReplaceSlideText — заменить текст на слайде {slideIndex: с 1, 0/-1 текущий; replacements:[{find:обязательно, replaceWith:обязательно}], matchCase:необязательно}
     Для перевода: сначала DuplicateSlide, затем один ReplaceSlideText со списком пар.
-17. UpdateChartData — обновить данные существующей диаграммы {slideIndex: с 1, 0/-1 текущий; chartIndex:с 1; categories:массив строк; values:массив чисел; seriesName:необязательно}
-    Для запроса «такой же слайд, но с другими данными»: DuplicateSlide, затем UpdateChartData. Оформление диаграммы сохраняется.
+17. UpdateChartData — обновить данные существующей диаграммы {slideIndex: с 1, 0/-1 текущий; chartIndex:с 1; values:массив чисел; categories:необязательный массив строк; seriesName:необязательно}
+    Без categories сохраняются текущие подписи. Для запроса «такой же слайд, но с другими данными»: DuplicateSlide, затем UpdateChartData. Оформление диаграммы сохраняется.
 
 【Пояснение slideIndex】
 - Для большинства команд: -1 или пропуск означает текущий слайд, 0 — первый слайд.
 - Для ReplaceSlideText: 1 — первый слайд, 0 или -1 — текущий.
 
+【Типовые задачи → команды】
+- «копия/такой же слайд, но на русском / с другими данными» → DuplicateSlide (position: after|end), затем ReplaceSlideText и/или UpdateChartData; CreateSlides не использовать.
+- «добавь последним» → DuplicateSlide position=end, затем правки копии через slideIndex=-1.
+- «переведи таблицу/текст» → ReplaceSlideText: он обходит фигуры, группы и ячейки таблиц.
+- «новая колода с нуля» → CreateSlides; «вставить таблицу» → InsertTable; «удалить/переместить» → DeleteSlide/MoveSlide.
+- DuplicateSlide/ReplaceSlideText/UpdateChartData нумеруют слайды с 1: номер из интерфейса («Слайд 16 из 35») передавай как есть, не вычитай 1.
+- UpdateChartData: если подписи категорий не меняются, передавай только values; не спрашивай у пользователя категории, которые уже есть на слайде.
+- Если на диаграмме проценты, значения хранятся долями (25% = 0.25): смотри реальные значения в контексте и не передавай 30 вместо 0.30.
+- Если подписи категорий вынесены в отдельные текстовые фигуры, UpdateChartData меняет только доли/значения, а текст подписей — через ReplaceSlideText.
+- После DuplicateSlide не угадывай индекс копии: в результате инструмента приходит новый slideIndex; используй его или slideIndex=-1 (копия активна).
+- ExecuteVBA запрещён: всегда собирай задачу из нативных команд.
+
 【Приоритет решений】
-1. В первую очередь используй перечисленные выше 16 команд
+1. В первую очередь используй перечисленные выше 17 команд
 2. Для дублирования слайда используй DuplicateSlide, а не InsertSlide
 3. Для перевода: DuplicateSlide, затем ReplaceSlideText со списком замен
 4. ExecuteVBA запрещён: всегда собирай задачу из нативных команд
@@ -532,21 +545,28 @@ Public Class PowerPointJsonCommandSchema
     Private Shared Function ValidateUpdateChartData(params As JToken, ByRef errorMessage As String) As Boolean
         Dim categories = params("categories")
         Dim values = params("values")
-        If categories Is Nothing OrElse categories.Type <> JTokenType.Array Then
-            errorMessage = "UpdateChartData: отсутствует массив categories"
-            Return False
-        End If
         If values Is Nothing OrElse values.Type <> JTokenType.Array Then
             errorMessage = "UpdateChartData: отсутствует массив values"
             Return False
         End If
-        If CType(categories, JArray).Count = 0 Then
-            errorMessage = "UpdateChartData: categories не может быть пустым"
+        If CType(values, JArray).Count = 0 Then
+            errorMessage = "UpdateChartData: values не может быть пустым"
             Return False
         End If
-        If CType(categories, JArray).Count <> CType(values, JArray).Count Then
-            errorMessage = "UpdateChartData: длины categories и values должны совпадать"
-            Return False
+        ' categories необязательны: если подписи не меняются, обновляются только значения.
+        If categories IsNot Nothing AndAlso categories.Type <> JTokenType.Null Then
+            If categories.Type <> JTokenType.Array Then
+                errorMessage = "UpdateChartData: categories должен быть массивом строк"
+                Return False
+            End If
+            If CType(categories, JArray).Count = 0 Then
+                errorMessage = "UpdateChartData: categories не может быть пустым; не передавай поле, чтобы сохранить текущие подписи"
+                Return False
+            End If
+            If CType(categories, JArray).Count <> CType(values, JArray).Count Then
+                errorMessage = "UpdateChartData: длины categories и values должны совпадать"
+                Return False
+            End If
         End If
         Return True
     End Function

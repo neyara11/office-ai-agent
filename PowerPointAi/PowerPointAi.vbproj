@@ -256,6 +256,7 @@
     </Compile>
     <Compile Include="Context\PowerPointContextProvider.vb" />
     <Compile Include="Context\PowerPointDeckReader.vb" />
+    <Compile Include="PowerPointChartSummary.vb" />
     <Compile Include="Handlers\PptGenerationHandler.vb" />
     <Compile Include="Extensions\PptGenerationHandlerExtension.vb" />
     <Compile Include="DeepseekControl.vb">

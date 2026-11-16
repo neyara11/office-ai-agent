@@ -53,6 +53,16 @@ Namespace Context
                                     Dim shape = sel.ShapeRange(1)
                                     selectionInfo = $"Слайд {currentSlideIndex}/{slideCount}, выбрано объектов: {selectedShapeCount}"
 
+                                    ' Если выбран график, показываем его данные: модель не должна
+                                    ' запрашивать категории, которые уже есть на слайде.
+                                    If shape.HasChart = Microsoft.Office.Core.MsoTriState.msoTrue Then
+                                        Try
+                                            formatDesc = PowerPointChartSummary.DescribeChart(shape.Chart, 1)
+                                        Catch chartEx As Exception
+                                            Debug.WriteLine("获取图表信息失败: " & chartEx.Message)
+                                        End Try
+                                    End If
+
                                     ' 如果是文本框，获取格式信息
                                     If shape.HasTextFrame Then
                                         Try
@@ -95,7 +105,7 @@ Namespace Context
 
                     ' 文档结构信息
                     ctx.DocStructure = New DocumentStructure With {
-                        .Summary = $"Презентация PowerPoint, слайдов: {slideCount}, текущий: {currentSlideIndex}"
+                        .Summary = $"Презентация PowerPoint, слайдов: {slideCount}, текущий: {currentSlideIndex} (нумерация слайдов с 1)"
                     }
                 End If
 

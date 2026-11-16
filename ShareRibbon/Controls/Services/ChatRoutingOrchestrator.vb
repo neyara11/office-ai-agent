@@ -80,12 +80,10 @@ Public Class ChatRoutingOrchestrator
                 Debug.WriteLine($"[ChatRoutingOrchestrator] follow-up check: isFollowUp={isFollowUp}")
             End If
 
-            ' Short follow-ups stay on plain chat to avoid re-planning every clarification turn.
-            If isFollowUp Then
-                Debug.WriteLine("[ChatRoutingOrchestrator] follow-up → plain chat (not a parallel product path)")
-                _host.SendChatMessage(finalMessageToLLM)
-                Return ChatRouteDecision.FollowUpChat
-            End If
+            ' Follow-up больше не уходит в обычный чат автоматически: там модель печатает JSON
+            ' текстом и появляется карточка «Выполнить» вместо реального выполнения. Действие
+            ' из follow-up должно попасть в AgentKernel; чисто уточняющие вопросы останутся
+            ' в чате ниже через shouldUsePlainChat/intent.
 
             Dim contextSnapshot = _host.GetContextSnapshot()
             If contextSnapshot Is Nothing Then contextSnapshot = New JObject()
@@ -187,6 +185,18 @@ Public Class ChatRoutingOrchestrator
                 (interactionMode = "answer" OrElse interactionMode = "clarify" OrElse
                  (String.IsNullOrWhiteSpace(interactionMode) AndAlso
                   intent.OfficeIntent = OfficeIntentType.GENERAL_QUERY))
+
+            ' Предохранитель: явная просьба переделать текущую презентацию не должна
+            ' уходить в обычный чат, где модель печатает JSON и появляется карточка
+            ' «Выполнить» вместо реального выполнения.
+            Dim isPowerPointEditRequest =
+                String.Equals(appType, "PowerPoint", StringComparison.OrdinalIgnoreCase) AndAlso
+                LooksLikePowerPointEditRequest(originalQuestion)
+            If isPowerPointEditRequest Then shouldUsePlainChat = False
+
+            AppLogger.Info("ChatRouting",
+                $"app={appType} intent={intent.OfficeIntent} mode={interactionMode} refs={hasReferences} followUp={isFollowUp} execRequired={executionRequired} pptEdit={isPowerPointEditRequest} plainChat={shouldUsePlainChat}")
+
             If shouldUsePlainChat Then
                 Debug.WriteLine($"[ChatRoutingOrchestrator] interactionMode={If(interactionMode, "compat-general")} → plain chat")
                 _host.SendChatMessageWithIntent(finalMessageToLLM, intent)
@@ -194,7 +204,7 @@ Public Class ChatRoutingOrchestrator
             End If
 
             ' Primary product path always uses AgentKernel.
-            Debug.WriteLine($"[ChatRoutingOrchestrator] primary path AgentKernel intent={intent.OfficeIntent}, confidence={intent.Confidence:F2}")
+            Debug.WriteLine($"[ChatRoutingOrchestrator] primary path AgentKernel intent={intent.OfficeIntent}, confidence={intent.Confidence:F2}, followUp={isFollowUp}")
             _host.ShowIdentifyingStatus()
             _host.StartAgentPlanningFlow(finalMessageToLLM, intent, aiNativeResult)
             Return ChatRouteDecision.AgentKernel
@@ -206,5 +216,23 @@ Public Class ChatRoutingOrchestrator
             End If
             Return ChatRouteDecision.FallbackChat
         End Try
+    End Function
+
+    ''' <summary>
+    ''' Узкий предохранитель для PowerPoint: короткая реплика-продолжение с глаголом
+    ''' действия («переведи», «замени», «обнови»…) — это выполнение, а не ответ в чате.
+    ''' Не заменяет intent-анализ, а только не даёт ему понизить действие до чата.
+    ''' </summary>
+    Private Shared Function LooksLikePowerPointEditRequest(question As String) As Boolean
+        If String.IsNullOrWhiteSpace(question) Then Return False
+        Dim text = question.Trim()
+        If text.EndsWith("?") Then Return False
+        Dim lower = text.ToLowerInvariant()
+        Dim markers = {
+            "сделай", "переведи", "перевести", "замени", "обнови", "добавь", "вставь",
+            "удали", "перемести", "скопируй", "дублир", "измени", "оформи", "примени",
+            "создай", "поставь", "убери", "подпиши", "раскрась", "выровняй", "объедини"
+        }
+        Return markers.Any(Function(marker) lower.Contains(marker))
     End Function
 End Class

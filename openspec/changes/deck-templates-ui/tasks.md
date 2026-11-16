@@ -1,15 +1,15 @@
 ## 1. P0 — сначала починить маршрутизацию типовых задач
 
-- [ ] 1.1 В `ShareRibbon/Agent/PromptManager.vb` (planning + react) и в `ShareRibbon/Config/PromptManager.vb` (PPT default) добавить блок «Типовые задачи → команды»:
+- [x] 1.1 В `ShareRibbon/Agent/PromptManager.vb` (planning + react) и в `ShareRibbon/Config/PromptManager.vb` (PPT default) добавить блок «Типовые задачи → команды»:
   - «копия/такой же слайд, но на русском / с другими данными» → `DuplicateSlide` (`position: after|end`), затем `ReplaceSlideText` и/или `UpdateChartData`; `CreateSlides` не использовать;
   - «добавь последним» → `DuplicateSlide position=end`, правки копии через `slideIndex=-1`;
   - «переведи таблицу/текст» → `ReplaceSlideText` (обходит таблицы);
   - «новая колода с нуля» → `CreateSlides`; «вставить таблицу» → `InsertTable`; «удалить/переместить» → `DeleteSlide`/`MoveSlide`;
   - `ExecuteVBA` запрещён.
-- [ ] 1.2 То же добавить в `PowerPointAi/PowerPointJsonCommandSchema.vb` (legacy prompt) и в `SupportedCommands`/валидации, если появились новые команды.
-- [ ] 1.3 Усилить устаревание сохранённого legacy-промпта: для PPT считать legacy, если строка содержит `ExecuteVBA` **или** не содержит `DuplicateSlide`; проверить `IsLegacyBuiltInJsonSchemaConstraint`.
-- [ ] 1.4 Проверка: запрос «сделай копию этого слайда, только на русском» и «добавь график на основе слайда 16 последним слайдом» не приводят к `CreateSlides`/`ExecuteVBA`; план — `DuplicateSlide` + правки.
-- [ ] 1.5 При изменении JS/CSS поднять `_resourceVersion` в `ResourceExtractor.vb`.
+- [x] 1.2 То же добавить в `PowerPointAi/PowerPointJsonCommandSchema.vb` (legacy prompt) и в `SupportedCommands`/валидации, если появились новые команды.
+- [x] 1.3 Усилить устаревание сохранённого legacy-промпта: для PPT считать legacy, если строка содержит `ExecuteVBA` **или** не содержит `DuplicateSlide`; проверить `IsLegacyBuiltInJsonSchemaConstraint`.
+- [ ] 1.4 Проверка: запрос «сделай копию этого слайда, только на русском» и «добавь график на основе слайда 16 последним слайдом» не приводят к `CreateSlides`/`ExecuteVBA`; план — `DuplicateSlide` + правки. (Требует ручного прогона в PowerPoint + JSONL.)
+- [x] 1.5 При изменении JS/CSS поднять `_resourceVersion` в `ResourceExtractor.vb`. (P0 JS/CSS не менял.)
 
 ## 2. P1 — контракт макета и каталог
 

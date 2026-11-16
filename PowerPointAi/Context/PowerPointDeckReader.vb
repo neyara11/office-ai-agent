@@ -131,6 +131,8 @@ Namespace Context
             Dim title As String = ""
             Dim body As New List(Of String)()
             Dim tables As New List(Of String)()
+            Dim charts As New List(Of String)()
+            Dim chartCount As Integer = 0
 
             Try
                 shapes = slide.Shapes
@@ -138,8 +140,16 @@ Namespace Context
                     Dim shape As PowerPoint.Shape = Nothing
                     Dim textRange As PowerPoint.TextRange = Nothing
                     Dim table As PowerPoint.Table = Nothing
+                    Dim chart As PowerPoint.Chart = Nothing
                     Try
                         shape = shapes(shapeIndex)
+                        If shape.HasChart = MsoTriState.msoTrue Then
+                            chart = shape.Chart
+                            chartCount += 1
+                            charts.Add("  " & PowerPointChartSummary.DescribeChart(chart, chartCount).Replace(vbLf, vbLf & "  ").TrimEnd())
+                            Continue For
+                        End If
+
                         If shape.HasTable = MsoTriState.msoTrue Then
                             table = shape.Table
                             tables.Add(ReadTable(table, full))
@@ -161,6 +171,7 @@ Namespace Context
                     Catch shapeEx As Exception
                         Debug.WriteLine($"PowerPointDeckReader shape skipped: {shapeEx.Message}")
                     Finally
+                        If chart IsNot Nothing Then ComObjectHelper.ReleaseComObject(chart)
                         If table IsNot Nothing Then ComObjectHelper.ReleaseComObject(table)
                         If textRange IsNot Nothing Then ComObjectHelper.ReleaseComObject(textRange)
                         If shape IsNot Nothing Then ComObjectHelper.ReleaseComObject(shape)
@@ -186,6 +197,9 @@ Namespace Context
                 For Each tableText In tables
                     sb.AppendLine(tableText)
                 Next
+                For Each chartText In charts
+                    sb.AppendLine(chartText)
+                Next
                 AppendNotes(sb, slide, full:=True)
             Else
                 If body.Count > 0 Then
@@ -194,6 +208,9 @@ Namespace Context
                 End If
                 For Each tableText In tables
                     sb.AppendLine("  " & FirstLine(tableText))
+                Next
+                For Each chartText In charts
+                    sb.AppendLine("  " & FirstLine(chartText))
                 Next
                 AppendNotes(sb, slide, full:=False)
             End If

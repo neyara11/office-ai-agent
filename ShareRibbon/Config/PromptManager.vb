@@ -274,7 +274,8 @@ Public Class PromptManager
             Case "powerpoint", "ppt"
                 Return constraint.Contains("【PowerPoint支持的22个命令】") OrElse
                        constraint.Contains("【PowerPoint支持的16个命令】") OrElse
-                       constraint.Contains("ExecuteVBA")
+                       constraint.Contains("ExecuteVBA") OrElse
+                       Not constraint.Contains("DuplicateSlide")
             Case Else
                 Return False
         End Select
@@ -484,8 +485,9 @@ Public Class PromptManager
 === Тема (1) ===
 15. ApplyTheme - применить тему {themeName или themeFile}
 
-=== Замена текста (1) ===
+=== Перевод, замена текста и данные (2) ===
 16. ReplaceSlideText - заменить текст на слайде {slideIndex: с 1 (0 или -1 — текущий), replacements:[{find, replaceWith}], matchCase:необязательно}
+17. UpdateChartData - обновить данные существующей диаграммы {slideIndex: с 1 (0 или -1 — текущий), chartIndex:с 1, values:массив чисел, categories:необязательный массив строк, seriesName:необязательно}. Без categories сохраняются текущие подписи
 
 【Категорически запрещено】
 - Запрещено использовать массивы actions/operations
@@ -493,8 +495,20 @@ Public Class PromptManager
 - Запрещено использовать команды, специфичные для Excel/Word
 - Запрещено использовать ExecuteVBA: для всех задач есть нативные команды
 
+【Типовые задачи → команды】
+- «копия/такой же слайд, но на русском / с другими данными» → DuplicateSlide (position: after|end), затем ReplaceSlideText и/или UpdateChartData; CreateSlides не использовать
+- «добавь последним» → DuplicateSlide position=end, затем правки копии через slideIndex=-1
+- «переведи таблицу/текст» → ReplaceSlideText: он обходит фигуры, группы и ячейки таблиц
+- «новая колода с нуля» → CreateSlides; «вставить таблицу» → InsertTable; «удалить/переместить» → DeleteSlide/MoveSlide
+- DuplicateSlide/ReplaceSlideText/UpdateChartData нумеруют слайды с 1: номер из интерфейса («Слайд 16 из 35») передавай как есть, не вычитай 1
+- UpdateChartData: если подписи категорий не меняются, передавай только values; не спрашивай у пользователя категории, которые уже есть на слайде
+- Если на диаграмме проценты, значения хранятся долями (25% = 0.25): смотри реальные значения в контексте и не передавай 30 вместо 0.30
+- Если подписи категорий вынесены в отдельные текстовые фигуры (частый шаблон), UpdateChartData меняет только доли/значения, а сам текст подписей — через ReplaceSlideText
+- После DuplicateSlide не угадывай индекс копии: в результате инструмента приходит новый slideIndex; используй его или slideIndex=-1 (копия активна)
+- ExecuteVBA запрещён
+
 【Приоритет решений】
-1. В первую очередь используй перечисленные выше 16 команд
+1. В первую очередь используй перечисленные выше 17 команд
 2. Для дублирования слайда используй DuplicateSlide, а не InsertSlide
 3. Для перевода: DuplicateSlide, затем ReplaceSlideText со списком пар find/replaceWith
 4. Если запрос неоднозначен, задай уточняющий вопрос на русском языке"
@@ -832,48 +846,8 @@ Public Class PromptManager
 3. Содержание должно подходить для показа, избегай длинных абзацев"
         })
 
-        ' JSON Schema约束
-        pptApp.JsonSchemaConstraint = "
-【Формат вывода PowerPoint JSON — соблюдать строго】
-
-【Важно】JSON должен возвращаться в формате блока кода Markdown, например:
-```json
-{""command"": ""InsertSlide"", ""params"": {...}}
-```
-Возвращать «голый» JSON без блока кода запрещено!
-
-Ты должен и можешь вернуть только один из двух форматов:
-
-Формат одного JSON-кода:
-```json
-{""command"": ""InsertSlide"", ""params"": {""title"": ""Заголовок"", ""content"": ""Содержимое""}}
-```
-
-Формат нескольких JSON-кодов:
-```json
-{""commands"": [{""command"": ""CreateSlides"", ""params"": {...}}, {...}]}
-```
-
-【Типы PowerPoint command】
-1. InsertSlide - вставить один слайд (title, content, layout)
-2. CreateSlides - пакетно создать несколько слайдов (массив slides, каждый с title/content/layout) 【рекомендуется для нескольких слайдов】
-3. InsertText - вставить текст (content, slideIndex)
-4. InsertShape - вставить фигуру (shapeType, text)
-5. FormatSlide - форматировать слайд (slideIndex, background, theme)
-6. InsertTable - вставить таблицу (rows, cols, data)
-7. AddAnimation - добавить анимацию (effect: fadeIn/flyIn/zoom/wipe, targetShapes: all/title)
-8. ApplyTransition - применить переход (transitionType: fade/push/wipe/split, scope: all/current)
-9. BeautifySlides - оформить слайды (theme, colorScheme)
-
-【Пояснение slideIndex】
-- -1 или пусто означает текущий слайд
-- 0 означает первый слайд
-
-【Категорически запрещено】
-- Запрещено использовать команды Excel (WriteData, ApplyFormula и т. п.)
-- Запрещено использовать команды Word (Word-версию InsertText, GenerateTOC и т. п.)
-- Запрещено возвращать типы command, не указанные выше
-- Возвращать «голый» JSON без блока кода запрещено"
+        ' JSON Schema约束：与 GetPowerPointJsonSchemaConstraintDefault 保持单一来源
+        pptApp.JsonSchemaConstraint = GetPowerPointJsonSchemaConstraintDefault()
 
         Return pptApp
     End Function

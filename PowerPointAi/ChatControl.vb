@@ -33,6 +33,15 @@ Public Class ChatControl
     ' Последняя подробная ошибка хостового PPT-инструмента для ToolResult/repair.
     Private _lastPptCommandError As String = ""
 
+    ' Последнее некритичное предупреждение выполненной команды (например, обрезан список значений).
+    Private _lastPptCommandWarning As String = ""
+
+    ' Дополнительная информация об успешной команде (например, индекс созданной копии).
+    Private _lastPptCommandInfo As String = ""
+
+    ' Индекс слайда, на который реально повлияла последняя команда (копия после DuplicateSlide).
+    Private _lastPptCommandTargetIndex As Integer = 0
+
     ' 排版撤销快照（PPT不支持UndoRecord，使用自定义快照）
     Private _reformatUndoSnapshots As List(Of ShapeFormatSnapshot) = Nothing
 
@@ -634,6 +643,7 @@ Public Class ChatControl
             If activePresentation IsNot Nothing Then
                 contentBuilder.AppendLine($"Презентация: {Path.GetFileName(activePresentation.FullName)}")
                 contentBuilder.AppendLine($"Текущий слайд: {Globals.ThisAddIn.Application.ActiveWindow.View.Slide.SlideIndex}")
+                contentBuilder.AppendLine("Нумерация слайдов — с 1, как в интерфейсе. В DuplicateSlide/ReplaceSlideText/UpdateChartData передавай этот номер без вычитания 1.")
             End If
 
             ' 根据选择类型处理内容
@@ -646,8 +656,11 @@ Public Class ChatControl
                     For i = 1 To shapeRange.Count
                         contentBuilder.AppendLine($"Фигура {i}:")
 
-                        ' 检查是否是表格
-                        If shapeRange(i).HasTable = Microsoft.Office.Core.MsoTriState.msoTrue Then
+                        ' 检查是否是图表：модель должна видеть категории и значения,
+                        ' иначе она просит у пользователя данные, которые уже есть на слайде.
+                        If shapeRange(i).HasChart = Microsoft.Office.Core.MsoTriState.msoTrue Then
+                            contentBuilder.AppendLine("  " & PowerPointChartSummary.DescribeChart(shapeRange(i).Chart, i))
+                        ElseIf shapeRange(i).HasTable = Microsoft.Office.Core.MsoTriState.msoTrue Then
                             Dim table = shapeRange(i).Table
                             contentBuilder.AppendLine($"  Таблица: {table.Rows.Count} строк × {table.Columns.Count} столбцов")
 
@@ -883,7 +896,9 @@ Public Class ChatControl
         Try
             Dim contentBuilder As New StringBuilder()
             Dim processedTextShapes As Integer = 0
-            Dim maxTextShapes As Integer = 5 ' 限制每张幻灯片处理的文本形状数量
+            Dim textLimitNoted As Boolean = False
+            Dim chartCount As Integer = 0
+            Dim maxTextShapes As Integer = 12 ' 限制每张幻灯片处理的文本形状数量
 
             ' 处理幻灯片上的形状
             Dim shapes As Microsoft.Office.Interop.PowerPoint.Shapes = Nothing
@@ -892,6 +907,7 @@ Public Class ChatControl
                 For i = 1 To shapes.Count
                     Dim shape As Microsoft.Office.Interop.PowerPoint.Shape = Nothing
                     Dim textRange As Microsoft.Office.Interop.PowerPoint.TextRange = Nothing
+                    Dim chart As Microsoft.Office.Interop.PowerPoint.Chart = Nothing
                     Try
                         shape = shapes(i)
                         ' 跳过标题形状，因为已经单独处理过了
@@ -905,8 +921,12 @@ Public Class ChatControl
                        shape.TextFrame.HasText = Microsoft.Office.Core.MsoTriState.msoTrue Then
 
                             If processedTextShapes >= maxTextShapes Then
-                                contentBuilder.AppendLine("  [Дополнительное текстовое содержимое не показано...]")
-                                Exit For
+                                If Not textLimitNoted Then
+                                    contentBuilder.AppendLine("  [Дополнительное текстовое содержимое не показано...]")
+                                    textLimitNoted = True
+                                End If
+                                ' Не выходим из цикла: иначе диаграммы и таблицы после текста теряются.
+                                Continue For
                             End If
 
                             textRange = shape.TextFrame.TextRange
@@ -931,12 +951,16 @@ Public Class ChatControl
                             End If
                             ' 处理图表形状
                         ElseIf shape.Type = Microsoft.Office.Core.MsoShapeType.msoChart Then
-                            contentBuilder.AppendLine("  [Содержит диаграмму]")
+                            chartCount += 1
+                            chart = shape.Chart
+                            contentBuilder.Append(PowerPointChartSummary.DescribeChart(chart, chartCount).
+                                Replace(vbLf, vbLf & "  ") & vbCrLf)
                             ' 处理SmartArt形状
                         ElseIf shape.Type = Microsoft.Office.Core.MsoShapeType.msoSmartArt Then
                             contentBuilder.AppendLine("  [Содержит графику SmartArt]")
                         End If
                     Finally
+                        ComObjectHelper.ReleaseComObject(chart)
                         ComObjectHelper.ReleaseComObject(textRange)
                         ComObjectHelper.ReleaseComObject(shape)
                     End Try
@@ -1355,7 +1379,20 @@ Public Class ChatControl
             Dim failureDetail = _lastPptCommandError
             _lastPptCommandError = ""
 
+            Dim commandWarning = _lastPptCommandWarning
+            _lastPptCommandWarning = ""
+            Dim commandInfo = _lastPptCommandInfo
+            _lastPptCommandInfo = ""
+
             If success Then
+                If Not String.IsNullOrWhiteSpace(commandInfo) Then
+                    summary = summary & " (" & commandInfo & ")"
+                End If
+                If Not String.IsNullOrWhiteSpace(commandWarning) Then
+                    Dim warnings = TryCast(observation("warnings"), JArray)
+                    If warnings IsNot Nothing Then warnings.Add(commandWarning)
+                    summary = summary & " (" & commandWarning & ")"
+                End If
                 Return Agent.ToolResult.Succeed(toolId,
                                                 summary,
                                                 data:=New With {.targetRefs = observation("targetRefs")},
@@ -1464,7 +1501,11 @@ Public Class ChatControl
         Return snapshot
     End Function
 
-    Private Shared Function ResolvePowerPointTargetSlideIndex(envelope As JObject, slideCount As Integer) As Integer
+    Private Function ResolvePowerPointTargetSlideIndex(envelope As JObject, slideCount As Integer) As Integer
+        ' После DuplicateSlide снимок «после» должен смотреть на копию, а не на источник.
+        If _lastPptCommandTargetIndex > 0 Then
+            Return Math.Max(1, Math.Min(slideCount, _lastPptCommandTargetIndex))
+        End If
         If envelope Is Nothing Then Return 0
         Dim command = envelope
         If envelope("commands") IsNot Nothing AndAlso envelope("commands").Type = JTokenType.Array Then
@@ -1612,6 +1653,25 @@ Public Class ChatControl
         Return String.Join("|", parts)
     End Function
 
+    ''' <summary>
+    ''' Показывает ли диаграмма доли в процентах (PowerPoint хранит их как 0.25 для 25%).
+    ''' </summary>
+    Private Shared Function HasPercentageDataLabels(series As Object) As Boolean
+        Try
+            If Not CBool(series.HasDataLabels) Then Return False
+            Dim points = series.Points
+            Dim count As Integer = Math.Min(CInt(points.Count), 3)
+            For index = 1 To count
+                Try
+                    If CInt(points(index).DataLabel.ShowPercentage) = -1 Then Return True
+                Catch
+                End Try
+            Next
+        Catch
+        End Try
+        Return False
+    End Function
+
     Private Shared Function TruncatePowerPointObservationText(value As String, maxLength As Integer) As String
         Dim text = If(value, "").Replace(vbCr, " ").Replace(vbLf, " ").Trim()
         If text.Length <= maxLength Then Return text
@@ -1648,6 +1708,11 @@ Public Class ChatControl
                         successCount += 1
                     Else
                         failCount += 1
+                        If Not String.IsNullOrWhiteSpace(_lastPptCommandError) Then
+                            Dim detail = _lastPptCommandError
+                            AppLogger.Warn("PPT.Commands", detail)
+                            ShareRibbon.GlobalStatusStrip.ShowWarning(detail)
+                        End If
                     End If
                 End If
             Next
@@ -1688,7 +1753,13 @@ Public Class ChatControl
             If success Then
                 ShareRibbon.GlobalStatusStrip.ShowInfo($"Команда '{command}' выполнена успешно")
             Else
-                ShareRibbon.GlobalStatusStrip.ShowWarning($"Команда '{command}' выполнена с ошибкой")
+                Dim detail = _lastPptCommandError
+                If String.IsNullOrWhiteSpace(detail) Then
+                    ShareRibbon.GlobalStatusStrip.ShowWarning($"Команда '{command}' выполнена с ошибкой")
+                Else
+                    AppLogger.Warn("PPT.Commands", detail)
+                    ShareRibbon.GlobalStatusStrip.ShowWarning(detail)
+                End If
             End If
 
             Return success
@@ -1703,6 +1774,10 @@ Public Class ChatControl
     ''' 执行具体的PPT命令
     ''' </summary>
     Private Function ExecutePPTCommand(commandJson As JObject, Optional preview As Boolean = False) As Boolean
+        _lastPptCommandError = ""
+        _lastPptCommandWarning = ""
+        _lastPptCommandInfo = ""
+        _lastPptCommandTargetIndex = 0
         Try
             Dim command = commandJson("command")?.ToString()
             Dim params = commandJson("params")
@@ -1774,7 +1849,10 @@ Public Class ChatControl
             Dim slideIndex = If(params("slideIndex")?.Value(Of Integer)(), -1)
             Dim matchCase = If(params("matchCase")?.Value(Of Boolean)(), False)
             Dim replacements = TryCast(params("replacements"), JArray)
-            If replacements Is Nothing OrElse replacements.Count = 0 Then Return False
+            If replacements Is Nothing OrElse replacements.Count = 0 Then
+                _lastPptCommandError = "ReplaceSlideText: не передан массив replacements"
+                Return False
+            End If
 
             Dim slide As Object
             If slideIndex <= 0 Then
@@ -1790,11 +1868,13 @@ Public Class ChatControl
 
             If replacedCount = 0 Then
                 Dim sample = String.Join(" || ", stats.Texts)
-                If sample.Length > 500 Then sample = sample.Substring(0, 500) & "..."
-                _lastPptCommandError = $"ReplaceSlideText: замен не найдено (slide={slideIndex}, shapes={stats.TotalShapes}, textShapes={stats.TextShapes}, groups={stats.Groups}, writeErrors={stats.WriteErrors}). Тексты: '{sample}'"
-                AppLogger.Warn("PPT.ReplaceSlideText", _lastPptCommandError)
-                GlobalStatusStrip.ShowWarning("ReplaceSlideText: текст не найден на слайде. Проверьте find.")
-                Return False
+                If sample.Length > 200 Then sample = sample.Substring(0, 200) & "..."
+                ' Идемпотентность: повторный перевод уже переведённого слайда — не сбой,
+                ' иначе agent-repair зацикливается на шаге, который уже выполнен.
+                _lastPptCommandWarning = $"ReplaceSlideText: совпадений не найдено (возможно, уже заменено; slide={slideIndex}, shapes={stats.TotalShapes}, textShapes={stats.TextShapes}). Тексты: '{sample}'"
+                AppLogger.Info("PPT.ReplaceSlideText", _lastPptCommandWarning)
+                GlobalStatusStrip.ShowInfo("ReplaceSlideText: совпадений не найдено — возможно, текст уже заменён.")
+                Return True
             End If
 
             GlobalStatusStrip.ShowInfo($"Заменено текстовых блоков: {replacedCount}")
@@ -1979,15 +2059,19 @@ Public Class ChatControl
 
     Private Function ExecuteUpdateChartData(params As JToken, pres As Object) As Boolean
         _lastPptCommandError = ""
+        _lastPptCommandWarning = ""
         Try
             Dim slideIndex = If(params("slideIndex")?.Value(Of Integer)(), 0)
             Dim chartIndex = If(params("chartIndex")?.Value(Of Integer)(), 1)
             Dim categories = TryCast(params("categories"), JArray)
             Dim values = TryCast(params("values"), JArray)
 
-            If categories Is Nothing OrElse values Is Nothing OrElse
-               categories.Count = 0 OrElse categories.Count <> values.Count Then
-                _lastPptCommandError = "UpdateChartData: categories и values обязательны и должны совпадать по длине"
+            If values Is Nothing OrElse values.Count = 0 Then
+                _lastPptCommandError = "UpdateChartData: values обязателен и не может быть пустым"
+                Return False
+            End If
+            If categories IsNot Nothing AndAlso categories.Count > 0 AndAlso categories.Count <> values.Count Then
+                _lastPptCommandError = $"UpdateChartData: передано {categories.Count} категорий и {values.Count} значений — длины должны совпадать"
                 Return False
             End If
 
@@ -2026,18 +2110,52 @@ Public Class ChatControl
                 Return False
             End If
 
-            Dim categoryArray = categories.OfType(Of JValue)().
-                Select(Function(item) CObj(If(item.Value?.ToString(), ""))).ToArray()
-            Dim valueArray = values.OfType(Of JValue)().
-                Select(Function(item) CObj(item.Value(Of Double)())).ToArray()
+            Dim numericValues = values.OfType(Of JValue)().
+                Select(Function(item) item.Value(Of Double)()).ToList()
 
-            series(1).XValues = categoryArray
-            series(1).Values = valueArray
+            Dim keepsCategories = categories Is Nothing OrElse categories.Count = 0
+            Dim existingCount As Integer = 0
+            Try
+                Dim existingCategories = TryCast(series(1).XValues, Array)
+                If existingCategories IsNot Nothing Then existingCount = existingCategories.Length
+            Catch
+            End Try
+
+            ' Число сегментов задаёт диаграмма. Если оно не совпадает, НЕ применяем
+            ' часть значений: иначе можно молча испортить чужой слайд/диаграмму.
+            If keepsCategories AndAlso existingCount > 0 AndAlso existingCount <> numericValues.Count Then
+                _lastPptCommandError = $"UpdateChartData: передано {numericValues.Count} значений, а у диаграммы на слайде {If(slideIndex <= 0, "текущем", slideIndex.ToString())} {existingCount} категорий. Передай ровно {existingCount} значений или явные categories."
+                Return False
+            End If
+
+            ' Для процентных диаграмм PowerPoint хранит доли (25% = 0.25).
+            ' Если модель передала 30 вместо 0.30, диаграмма показала бы 3000%.
+            Dim isPercentChart = HasPercentageDataLabels(series)
+            If isPercentChart AndAlso numericValues.Any(Function(value) Math.Abs(value) > 1) Then
+                numericValues = numericValues.Select(Function(value) value / 100.0).ToList()
+            End If
+
+            If Not keepsCategories AndAlso categories.Count <> numericValues.Count Then
+                _lastPptCommandError = $"UpdateChartData: передано {categories.Count} категорий и {numericValues.Count} значений — длины должны совпадать"
+                Return False
+            End If
+
+            If keepsCategories Then
+                ' Подписи не меняются: обновляем только значения, чтобы модель не требовала
+                ' у пользователя категории, которые уже есть на слайде.
+                series(1).Values = numericValues.ToArray()
+                GlobalStatusStrip.ShowInfo($"Данные диаграммы обновлены: {numericValues.Count} значений, подписи сохранены")
+            Else
+                Dim categoryArray = categories.OfType(Of JValue)().
+                    Select(Function(item) CObj(If(item.Value?.ToString(), ""))).ToArray()
+                series(1).XValues = categoryArray
+                series(1).Values = numericValues.ToArray()
+                GlobalStatusStrip.ShowInfo($"Данные диаграммы обновлены: {categories.Count} категорий")
+            End If
 
             Dim seriesName = params("seriesName")?.ToString()
             If Not String.IsNullOrWhiteSpace(seriesName) Then series(1).Name = seriesName
 
-            GlobalStatusStrip.ShowInfo($"Данные диаграммы обновлены: {categories.Count} категорий")
             Return True
         Catch ex As Exception
             _lastPptCommandError = "UpdateChartData: " & ex.Message
@@ -2718,21 +2836,38 @@ Public Class ChatControl
             If slideIndex = -1 OrElse slideIndex = 0 Then
                 slideIndex = Globals.ThisAddIn.Application.ActiveWindow.View.Slide.SlideIndex
             End If
-            If slideIndex < 1 OrElse slideIndex > pres.Slides.Count Then Return False
+            If slideIndex < 1 OrElse slideIndex > pres.Slides.Count Then
+                _lastPptCommandError = $"DuplicateSlide: слайд {slideIndex} вне диапазона 1..{pres.Slides.Count}"
+                Return False
+            End If
 
             Dim position = If(params("position")?.ToString(), "after")
             pres.Slides(slideIndex).Copy()
+            Dim newIndex As Integer
             If String.Equals(position.Trim(), "end", StringComparison.OrdinalIgnoreCase) Then
                 Try
                     pres.Slides.Paste(pres.Slides.Count + 1)
                 Catch
                     pres.Slides.Paste()
                 End Try
+                newIndex = pres.Slides.Count
             Else
                 pres.Slides.Paste(slideIndex + 1)
+                newIndex = slideIndex + 1
             End If
 
-            GlobalStatusStrip.ShowInfo($"Скопирован слайд {slideIndex}")
+            ' Копия становится активной, иначе последующие команды в том же конверте
+            ' с slideIndex=-1 правят оригинал, а не новую копию.
+            Try
+                Globals.ThisAddIn.Application.ActiveWindow.View.GotoSlide(newIndex)
+            Catch ex As Exception
+                Debug.WriteLine($"DuplicateSlide: не удалось переключиться на копию: {ex.Message}")
+            End Try
+
+            _lastPptCommandTargetIndex = newIndex
+            _lastPptCommandInfo = $"новый слайд {newIndex} (копия слайда {slideIndex}), активен; далее используй slideIndex=-1 или {newIndex}"
+
+            GlobalStatusStrip.ShowInfo($"Скопирован слайд {slideIndex} → позиция {newIndex}")
             Return True
         Catch ex As Exception
             Debug.WriteLine($"ExecuteDuplicateSlide ошибка: {ex.Message}")
