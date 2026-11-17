@@ -757,6 +757,83 @@ Public MustInherit Class BaseChatControl
         router.Register("switchReformatTemplate", Sub(jsonDoc) HandleSwitchReformatTemplate(jsonDoc))
         router.Register("previewReformatCompare", Sub(jsonDoc) HandlePreviewReformatCompare(jsonDoc))
         router.Register("proofread", Sub(jsonDoc) HandleProofreadFocusMode(jsonDoc))
+        router.Register("templates:list", Sub(jsonDoc) HandleTemplatesList(jsonDoc))
+        router.Register("templates:delete", Sub(jsonDoc) HandleTemplateDelete(jsonDoc))
+        router.Register("templates:open", Sub(jsonDoc) HandleTemplateOpen(jsonDoc))
+        router.Register("templates:saveFromSlide", Sub(jsonDoc) HandleTemplatesSaveFromSlide(jsonDoc))
+        router.Register("templates:saveDeck", Sub(jsonDoc) HandleTemplatesSaveDeck(jsonDoc))
+        router.Register("templates:insert", Sub(jsonDoc) HandleTemplatesInsert(jsonDoc))
+        router.Register("templates:preview", Sub(jsonDoc) HandleTemplatesPreview(jsonDoc))
+    End Sub
+
+    ''' <summary>Каталог макетов общий для всех хостов; COM-операции переопределяются в PowerPoint.</summary>
+    Private Sub HandleTemplatesList(jsonDoc As JObject)
+        Try
+            Dim summaries = Agent.DeckTemplates.TemplateCatalog.ListSummaries(100)
+            RespondTemplates("list", True, $"Макетов: {summaries.Count}", summaries)
+        Catch ex As Exception
+            RespondTemplates("list", False, "Каталог макетов: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub HandleTemplateDelete(jsonDoc As JObject)
+        Try
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            If String.IsNullOrWhiteSpace(templateId) Then
+                RespondTemplates("delete", False, "Не указан templateId")
+                Return
+            End If
+            Dim removed = Agent.DeckTemplates.TemplateStorage.Delete(templateId)
+            RespondTemplates("delete", removed, If(removed, "Макет удалён", "Макет не найден"))
+        Catch ex As Exception
+            RespondTemplates("delete", False, "Удаление макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub HandleTemplateOpen(jsonDoc As JObject)
+        Try
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            Dim manifest = Agent.DeckTemplates.TemplateCatalog.FindById(templateId)
+            If manifest Is Nothing OrElse Not File.Exists(manifest.TemplateFullPath) Then
+                RespondTemplates("open", False, "Файл макета не найден")
+                Return
+            End If
+            Process.Start(New ProcessStartInfo(manifest.TemplateFullPath) With {.UseShellExecute = True})
+            RespondTemplates("open", True, "Макет открыт в PowerPoint")
+        Catch ex As Exception
+            RespondTemplates("open", False, "Открытие макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Protected Overridable Sub HandleTemplatesSaveFromSlide(jsonDoc As JObject)
+        RespondTemplates("saveFromSlide", False, "Сохранение макетов поддерживается только в PowerPoint")
+    End Sub
+
+    Protected Overridable Sub HandleTemplatesSaveDeck(jsonDoc As JObject)
+        RespondTemplates("saveDeck", False, "Сохранение макетов поддерживается только в PowerPoint")
+    End Sub
+
+    Protected Overridable Sub HandleTemplatesInsert(jsonDoc As JObject)
+        RespondTemplates("insert", False, "Вставка макетов поддерживается только в PowerPoint")
+    End Sub
+
+    Protected Overridable Sub HandleTemplatesPreview(jsonDoc As JObject)
+        RespondTemplates("preview", False, "Предпросмотр макетов поддерживается только в PowerPoint")
+    End Sub
+
+    Protected Sub RespondTemplates(action As String, success As Boolean, message As String, Optional data As Object = Nothing)
+        Try
+            Dim payload As New JObject From {
+                {"action", action},
+                {"success", success},
+                {"message", message}
+            }
+            If data IsNot Nothing Then payload("data") = JToken.FromObject(data)
+            Dim json = payload.ToString(Formatting.None)
+            ExecuteJavaScriptAsyncJS($"window.TemplatesView && window.TemplatesView.onHostResponse({json});")
+        Catch ex As Exception
+            Debug.WriteLine($"[TemplatesBridge] {ex.Message}")
+        End Try
     End Sub
 
     Private Sub HandleStopMessage(jsonDoc As JObject)

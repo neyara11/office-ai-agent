@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="http://officeai.local/css/github.min.css">
     <!-- Custom styles -->
     <link rel="stylesheet" href="http://officeai.local/css/styles.css">
+    <link rel="stylesheet" href="http://officeai.local/css/templates.css">
 </head>
 <body>
     <div id="case-container">
@@ -185,6 +186,14 @@
                 <textarea id="chat-input" style="display:none;" placeholder="Введите ваш вопрос..." rows="2"></textarea>
                 <div id="chat-input-actions">
 
+                    <button id="templates-button" title="Макеты" style="padding: 4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="12" rx="2"></rect>
+                            <line x1="8" y1="20" x2="16" y2="20"></line>
+                            <line x1="12" y1="16" x2="12" y2="20"></line>
+                        </svg>
+                    </button>
+
                     <button id="settings-button" title="Настройки" onclick="settingsButton()">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="3"></circle>
@@ -287,6 +296,41 @@
     <div id="sidebar-overlay" class="overlay-hidden"></div>
 
     <!-- Диалог добавления настроек -->
+    <div class="templates-overlay" id="templates-overlay"></div>
+    <aside class="templates-drawer" id="templates-drawer" aria-label="Макеты слайдов">
+        <div class="templates-header">
+            <h2>Макеты</h2>
+            <button class="templates-close" id="templates-close" title="Закрыть">×</button>
+        </div>
+        <div class="templates-toolbar">
+            <input id="templates-search" type="search" placeholder="Поиск по имени и тегам">
+            <select id="templates-archetype">
+                <option value="">Все архетипы</option>
+                <option value="cover">Титул</option>
+                <option value="section">Раздел</option>
+                <option value="bullets">Тезисы</option>
+                <option value="two-column">Две колонки</option>
+                <option value="chart">Диаграмма</option>
+                <option value="table">Таблица</option>
+                <option value="kpi">KPI</option>
+                <option value="image-text">Изображение + текст</option>
+                <option value="quote">Цитата</option>
+                <option value="closing">Финальный</option>
+            </select>
+            <button class="templates-btn" id="templates-refresh">Обновить</button>
+        </div>
+        <div class="templates-actions">
+            <button class="templates-btn" id="templates-save-slide">Сохранить слайд</button>
+            <button class="templates-btn" id="templates-save-deck">Сохранить колоду</button>
+        </div>
+        <div class="templates-body">
+            <div class="templates-form" id="template-form" style="display: none;"></div>
+            <div class="templates-grid" id="templates-grid"></div>
+            <div class="templates-empty" id="templates-empty">Загружаю макеты…</div>
+        </div>
+    </aside>
+    <div class="templates-toast" id="templates-toast"></div>
+
     <div class="overlay" id="settings-overlay"></div>
     <div class="settings-dialog" id="settings-dialog">
         <div class="settings-title">Настройки AI-диалога</div>
@@ -412,6 +456,8 @@
     <script src="http://officeai.local/js/reformat-template.js"></script>
     <script src="http://officeai.local/js/reformat-chat.js"></script>
     <script src="http://officeai.local/js/proofread-ui.js"></script>
+    <script src="http://officeai.local/js/templates-view.js"></script>
+    <script src="http://officeai.local/js/template-editor.js"></script>
 
     <!-- 工具函数 -->
     <script>

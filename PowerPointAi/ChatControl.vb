@@ -1983,6 +1983,161 @@ Public Class ChatControl
         Next
     End Sub
 
+    ' ===== Каталог макетов: обработчики WebView2 (COM остаётся на UI-потоке) =====
+
+    Protected Overrides Sub HandleTemplatesSaveFromSlide(jsonDoc As JObject)
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim slideIndex = If(jsonDoc?("slideIndex")?.Value(Of Integer)(), 0)
+            If slideIndex <= 0 Then
+                Try
+                    slideIndex = CInt(app.ActiveWindow.View.Slide.SlideIndex)
+                Catch
+                    slideIndex = 1
+                End Try
+            End If
+
+            Dim warnings As New List(Of String)()
+            Dim errorMessage As String = ""
+            Dim manifest = Design.DeckTemplate.DeckTemplateExtractor.ExtractFromSlide(
+                app, slideIndex,
+                jsonDoc?("name")?.ToString(),
+                jsonDoc?("setId")?.ToString(),
+                jsonDoc?("archetype")?.ToString(),
+                errorMessage, warnings)
+            If manifest Is Nothing Then
+                RespondTemplates("saveFromSlide", False, errorMessage)
+                Return
+            End If
+            RespondTemplates("saveFromSlide", True, $"Макет сохранён: {manifest.Name}",
+                             New With {
+                                 .templateId = manifest.Id,
+                                 .name = manifest.Name,
+                                 .archetype = manifest.Archetype,
+                                 .slotCount = manifest.Slots.Count,
+                                 .warnings = warnings
+                             })
+        Catch ex As Exception
+            RespondTemplates("saveFromSlide", False, "Сохранение макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Protected Overrides Sub HandleTemplatesSaveDeck(jsonDoc As JObject)
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim warnings As New List(Of String)()
+            Dim errorMessage As String = ""
+            Dim manifests = Design.DeckTemplate.DeckTemplateExtractor.ExtractFromDeck(
+                app,
+                jsonDoc?("setName")?.ToString(),
+                If(jsonDoc?("maxSlides")?.Value(Of Integer)(), 20),
+                If(jsonDoc?("skipEmpty")?.Value(Of Boolean)(), True),
+                errorMessage, warnings)
+            If manifests Is Nothing OrElse manifests.Count = 0 Then
+                RespondTemplates("saveDeck", False, errorMessage)
+                Return
+            End If
+            RespondTemplates("saveDeck", True, $"Сохранён набор макетов: {manifests.Count}",
+                             New With {
+                                 .setId = manifests(0).SetId,
+                                 .count = manifests.Count,
+                                 .warnings = warnings
+                             })
+        Catch ex As Exception
+            RespondTemplates("saveDeck", False, "Сохранение набора: " & ex.Message)
+        End Try
+    End Sub
+
+    Protected Overrides Sub HandleTemplatesInsert(jsonDoc As JObject)
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim target = app.ActivePresentation
+            If target Is Nothing Then
+                RespondTemplates("insert", False, "Нет активной презентации")
+                Return
+            End If
+
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            Dim manifest = Agent.DeckTemplates.TemplateCatalog.FindById(templateId)
+            If manifest Is Nothing Then
+                RespondTemplates("insert", False, $"Макет не найден: {templateId}")
+                Return
+            End If
+
+            Dim specToken = jsonDoc?("spec")
+            Dim spec As Agent.DeckTemplates.SlideSpec
+            If specToken Is Nothing OrElse specToken.Type <> JTokenType.Object Then
+                spec = New Agent.DeckTemplates.SlideSpec()
+            Else
+                spec = specToken.ToObject(Of Agent.DeckTemplates.SlideSpec)()
+                If spec Is Nothing Then spec = New Agent.DeckTemplates.SlideSpec()
+            End If
+            spec.Normalize()
+
+            Dim position = If(jsonDoc?("position")?.ToString(), "after").Trim().ToLowerInvariant()
+            Dim insertAt As Integer
+            If position = "end" Then
+                insertAt = CInt(target.Slides.Count) + 1
+            Else
+                Dim currentIndex = 1
+                Try
+                    currentIndex = CInt(app.ActiveWindow.View.Slide.SlideIndex)
+                Catch
+                End Try
+                insertAt = Math.Min(CInt(target.Slides.Count) + 1, currentIndex + 1)
+            End If
+
+            Dim result = Design.DeckTemplate.DeckTemplateRenderer.InsertFromTemplate(app, target, manifest, spec, insertAt)
+            If result Is Nothing OrElse Not result.Success Then
+                RespondTemplates("insert", False,
+                                 If(result Is Nothing, "Не удалось вставить слайд", result.ErrorMessage))
+                Return
+            End If
+            RespondTemplates("insert", True, $"Вставлен слайд {result.InsertedSlideIndex}",
+                             New With {
+                                 .insertedSlideIndex = result.InsertedSlideIndex,
+                                 .slotsFilled = result.SlotsFilled,
+                                 .warnings = result.Warnings
+                             })
+        Catch ex As Exception
+            RespondTemplates("insert", False, "Вставка макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Protected Overrides Sub HandleTemplatesPreview(jsonDoc As JObject)
+        Try
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            Dim manifest = Agent.DeckTemplates.TemplateCatalog.FindById(templateId)
+            If manifest Is Nothing Then
+                RespondTemplates("preview", False, "Макет не найден")
+                Return
+            End If
+            Dim roles = If(manifest.Slots Is Nothing,
+                           New List(Of String)(),
+                           manifest.Slots.
+                               Where(Function(slot) slot IsNot Nothing).
+                               Select(Function(slot) slot.Role).
+                               Where(Function(role) Not String.IsNullOrWhiteSpace(role)).
+                               Distinct(StringComparer.OrdinalIgnoreCase).
+                               ToList())
+            Dim hasPreview = False
+            Try
+                hasPreview = File.Exists(manifest.PreviewFullPath)
+            Catch
+            End Try
+            RespondTemplates("preview", True, $"Макет: {manifest.Name}",
+                             New With {
+                                 .id = manifest.Id,
+                                 .name = manifest.Name,
+                                 .archetype = manifest.Archetype,
+                                 .slots = roles,
+                                 .hasPreview = hasPreview
+                             })
+        Catch ex As Exception
+            RespondTemplates("preview", False, "Предпросмотр макета: " & ex.Message)
+        End Try
+    End Sub
+
     Private Shared Function ParsePowerPointCommandEnvelope(jsonCode As String) As JObject
         If String.IsNullOrWhiteSpace(jsonCode) Then Return Nothing
 

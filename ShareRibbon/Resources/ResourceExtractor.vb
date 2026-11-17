@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Diagnostics
 
 Public Class ResourceExtractor
@@ -7,7 +7,7 @@ Public Class ResourceExtractor
     ''' <summary>
     ''' 资源版本号 — 更新此值可强制刷新所有前端资源文件
     ''' </summary>
-    Private Shared _resourceVersion As String = "2026.11.16.1"
+    Private Shared _resourceVersion As String = "2026.11.17.1"
 
     ''' <summary>
     ''' Манифест извлечённых файлов (имя|размер). Позволяет подхватывать правки JS/CSS
@@ -81,7 +81,8 @@ Public Class ResourceExtractor
 
             ' 自定义CSS资源文件映射
             Dim cssResources As New Dictionary(Of String, String) From {
-                {"styles", "styles.css"}
+                {"styles", "styles.css"},
+                {"templates", "templates.css"}
             }
 
             ' 释放CSS资源
@@ -111,7 +112,9 @@ Public Class ResourceExtractor
                 {"model_switcher", "model-switcher.js"},
                 {"reformat_template", "reformat-template.js"},
                 {"reformat_chat", "reformat-chat.js"},
-                {"proofread_ui", "proofread-ui.js"}
+                {"proofread_ui", "proofread-ui.js"},
+                {"templates_view", "templates-view.js"},
+                {"template_editor", "template-editor.js"}
             }
 
             ' 释放JS资源
