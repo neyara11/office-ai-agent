@@ -1,6 +1,6 @@
 /**
  * template-editor.js
- * Формы создания и вставки макета. Работает внутри drawer TemplatesView.
+ * Формы создания и вставки макета. Поля вставки зависят от слотов выбранного макета.
  */
 (function (window, document) {
     'use strict';
@@ -188,10 +188,21 @@
         return { values: values, categories: categories };
     }
 
-    function openInsert(templateId) {
+    function openInsert(templateId, slotRoles) {
         var host = formHost();
         if (!host) return;
         host.innerHTML = '';
+
+        var roles = (slotRoles || []).map(function (role) { return String(role).toLowerCase(); });
+        function has(role) { return roles.indexOf(role) >= 0; }
+        var hasTitle = has('title');
+        var hasSubtitle = has('subtitle');
+        var hasBullets = has('bullets');
+        var hasBody = has('body');
+        var hasTable = has('table');
+        var hasChart = has('chart');
+        var hasAnyText = hasTitle || hasSubtitle || hasBody || hasBullets;
+        var hasAnyContent = hasAnyText || hasTable || hasChart;
 
         var form = document.createElement('div');
         form.className = 'templates-form';
@@ -200,25 +211,53 @@
         title.textContent = 'Вставить макет: ' + templateId;
         form.appendChild(title);
 
-        var titleInput = input('text', 'Заголовок слайда', '');
-        form.appendChild(field('Заголовок', titleInput));
+        var rolesHint = document.createElement('div');
+        rolesHint.className = 'templates-hint';
+        rolesHint.textContent = 'Слоты макета: ' + (roles.length ? roles.join(', ') : 'не определены');
+        form.appendChild(rolesHint);
 
-        var subtitleInput = input('text', 'Подзаголовок', '');
-        form.appendChild(field('Подзаголовок', subtitleInput));
+        var titleInput = null;
+        var subtitleInput = null;
+        var textInput = null;
+        var tableInput = null;
+        var chartValuesInput = null;
+        var chartCategoriesInput = null;
 
-        var bulletsInput = textarea('Каждый пункт с новой строки', 3);
-        form.appendChild(field('Тезисы', bulletsInput));
+        if (hasTitle) {
+            titleInput = input('text', 'Заголовок слайда', '');
+            form.appendChild(field('Заголовок', titleInput));
+        }
+        if (hasSubtitle) {
+            subtitleInput = input('text', 'Подзаголовок', '');
+            form.appendChild(field('Подзаголовок', subtitleInput));
+        }
+        if (hasBullets) {
+            textInput = textarea('Каждый пункт с новой строки', 3);
+            form.appendChild(field('Тезисы', textInput));
+        } else if (hasBody) {
+            textInput = textarea('Текст слайда', 3);
+            form.appendChild(field('Текст', textInput));
+        }
+        if (hasTable) {
+            tableInput = textarea('Первая строка — заголовки; столбцы через Tab или |', 3);
+            form.appendChild(field('Таблица', tableInput));
+        }
+        if (hasChart) {
+            var chartRow = document.createElement('div');
+            chartRow.className = 'templates-form-row';
+            chartValuesInput = input('text', '30, 25, 10, 10, 5, 10, 10', '');
+            chartCategoriesInput = input('text', 'категории через запятую', '');
+            chartRow.appendChild(field('Значения диаграммы (доли для процентов)', chartValuesInput));
+            chartRow.appendChild(field('Категории (необязательно)', chartCategoriesInput));
+            form.appendChild(chartRow);
+        }
 
-        var tableInput = textarea('Первая строка — заголовки; столбцы через Tab или |', 3);
-        form.appendChild(field('Таблица (необязательно)', tableInput));
-
-        var chartRow = document.createElement('div');
-        chartRow.className = 'templates-form-row';
-        var chartValuesInput = input('text', '30, 25, 10, 10, 5, 10, 10', '');
-        var chartCategoriesInput = input('text', 'категории через запятую', '');
-        chartRow.appendChild(field('Значения диаграммы (доли для процентов)', chartValuesInput));
-        chartRow.appendChild(field('Категории (необязательно)', chartCategoriesInput));
-        form.appendChild(chartRow);
+        if (!hasAnyContent) {
+            var noSlots = document.createElement('div');
+            noSlots.className = 'templates-hint';
+            noSlots.textContent = 'В этом макете нет текстовых/табличных/графических слотов. Можно вставить копию без изменений.';
+            form.appendChild(noSlots);
+        }
 
         var positionSelect = select([
             { value: 'after', label: 'После текущего слайда' },
@@ -226,32 +265,38 @@
         ]);
         form.appendChild(field('Позиция', positionSelect));
 
-        var hint = document.createElement('div');
-        hint.className = 'templates-hint';
-        hint.textContent = 'Для процентных диаграмм значения — доли: 25% = 0.25. Если подписи не меняются, оставьте категории пустыми.';
-        form.appendChild(hint);
+        if (hasChart) {
+            var chartHint = document.createElement('div');
+            chartHint.className = 'templates-hint';
+            chartHint.textContent = 'Для процентных диаграмм значения — доли: 25% = 0.25. Если подписи не меняются, оставьте категории пустыми.';
+            form.appendChild(chartHint);
+        }
 
         var actions = document.createElement('div');
         actions.className = 'template-card-actions';
         actions.appendChild(button('Вставить', 'primary', function () {
             var spec = {};
-            var titleValue = titleInput.value.trim();
-            var subtitleValue = subtitleInput.value.trim();
-            var bullets = bulletsInput.value.split(/\r?\n/).map(function (line) {
-                return line.trim();
-            }).filter(Boolean);
-            var table = parseTable(tableInput.value);
-            var chart = parseChart(chartValuesInput.value, chartCategoriesInput.value);
+            if (titleInput && titleInput.value.trim()) spec.title = titleInput.value.trim();
+            if (subtitleInput && subtitleInput.value.trim()) spec.subtitle = subtitleInput.value.trim();
 
-            if (titleValue) spec.title = titleValue;
-            if (subtitleValue) spec.subtitle = subtitleValue;
-            if (bullets.length) spec.bullets = bullets;
+            if (textInput && textInput.value.trim()) {
+                if (hasBullets) {
+                    spec.bullets = textInput.value.split(/\r?\n/).map(function (line) {
+                        return line.trim();
+                    }).filter(Boolean);
+                } else {
+                    spec.body = textInput.value.trim();
+                }
+            }
+
+            var table = tableInput ? parseTable(tableInput.value) : null;
             if (table) spec.table = table;
+
+            var chart = chartValuesInput ? parseChart(chartValuesInput.value, chartCategoriesInput.value) : null;
             if (chart) spec.chart = chart;
 
-            if (!Object.keys(spec).length) {
-                toast('Заполните хотя бы одно поле', true);
-                return;
+            if (!hasAnyContent) {
+                spec = {};
             }
 
             post('templates:insert', {
@@ -288,7 +333,7 @@
         var actions = document.createElement('div');
         actions.className = 'template-card-actions';
         actions.appendChild(button('Вставить', 'primary', function () {
-            openInsert(data.id);
+            openInsert(data.id, data.slots || []);
         }));
         actions.appendChild(button('Открыть файл', '', function () {
             post('templates:open', { templateId: data.id });

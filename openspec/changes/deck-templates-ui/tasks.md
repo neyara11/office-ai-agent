@@ -75,21 +75,21 @@
 - [x] 6.4 Вставка: выбор макета → форма контента (title/bullets/table/chart) → «после текущего/в конец» → предпросмотр → применить.
 - [ ] 6.5 Inline-карточка в чате: 2–3 предложенных макета, «Вставить», «Другой макет», «Показать каталог».
 - [x] 6.6 Bridge: сообщения `templates:list`, `templates:saveFromSlide`, `templates:saveDeck`, `templates:insert`, `templates:preview`, `templates:delete`; обработчики в `BaseChatControl`/`ChatControl`; длинные операции — async, COM — на UI-потоке.
-- [x] 6.7 Регистрация ресурсов: ResXFileRef, `ResourceExtractor`, `.vbproj`, `_resourceVersion` (поднят до `2026.11.17.2`; превью отдаются как `officeai.local/templates-preview/<id>.png`).
+- [x] 6.7 Регистрация ресурсов: ResXFileRef, `ResourceExtractor`, `.vbproj`, `_resourceVersion` (поднят до `2026.11.17.3`; превью отдаются как `officeai.local/templates-preview/<id>.png`).
 - [x] 6.8 Acceptance: в узкой панели 360–480 px каталог и создание макета работают без обрезания; вставка из UI даёт тот же результат, что и через чат. Проверено в Playwright на 380 px с mock-мостом: drawer открывается, карточки и формы рендерятся, insert-запрос уходит с title/chart и получает ответ; в PowerPoint нужен финальный прогон после перезапуска.
 
 ## 7. P6 — чистка и защита от регрессий
 
-- [ ] 7.1 Убрать `CreateSlides` из сценариев «на основе существующей колоды» на уровне промптов и (при необходимости) skill-правил.
-- [ ] 7.2 Проверить, что `ExecuteVBA` не появляется ни в одном prompt/плане; legacy `SupportedCommands` без VBA.
-- [ ] 7.3 Убрать дублирующиеся подсказки «выполнить план» в agent-контуре: backend выполняет сразу, карточка — только «Остановить».
-- [ ] 7.4 Добавить smoke-сценарии (ручные/скриптом):
+- [x] 7.1 Убрать `CreateSlides` из сценариев «на основе существующей колоды» на уровне промптов и (при необходимости) skill-правил.
+- [x] 7.2 Проверить, что `ExecuteVBA` не появляется ни в одном prompt/плане; legacy `SupportedCommands` без VBA.
+- [x] 7.3 Убрать дублирующиеся подсказки «выполнить план» в agent-контуре: backend выполняет сразу, карточка — только «Остановить».
+- [x] 7.4 Добавить smoke-сценарии (ручные/скриптом):
   - сохранить макет из слайда 16 → список → вставить с новым текстом;
   - «копия слайда на русском» для таблицы: `DuplicateSlide` + `ReplaceSlideText`, таблица переведена;
   - «график на основе слайда»: `DuplicateSlide` + `UpdateChartData`, тип/цвета сохранены;
   - «другая презентация на основе этой»: `BuildDeckFromTemplateSet`.
-- [ ] 7.5 Проверка логов: нет base64/скриншотов, есть `templateId`/`slotsFilled`/`warnings`.
-- [ ] 7.6 `build-code.bat` зелёный; новые `.vb`/ресурсы в `.vbproj`; `_resourceVersion` поднят.
+- [x] 7.5 Проверка логов: нет base64/скриншотов, есть `templateId`/`slotsFilled`/`warnings`. В `agent-runs-20261117.jsonl` (45 записей) нет `base64`/`data:image`; шаблонные инструменты пишут templateId/slotsFilled.
+- [x] 7.6 `build-code.bat` зелёный; новые `.vb`/ресурсы в `.vbproj`; `_resourceVersion` поднят.
 
 ## Definition of Done
 

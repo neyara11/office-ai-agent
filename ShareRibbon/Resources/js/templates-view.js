@@ -156,7 +156,7 @@
             insert.className = 'templates-btn primary';
             insert.textContent = 'Вставить';
             insert.addEventListener('click', function () {
-                if (window.TemplateEditor) window.TemplateEditor.openInsert(item.id);
+                if (window.TemplateEditor) window.TemplateEditor.openInsert(item.id, item.slotRoles || []);
             });
             actions.appendChild(insert);
 

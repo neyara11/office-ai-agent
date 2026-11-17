@@ -2093,16 +2093,23 @@ Public Class ChatControl
                                  If(result Is Nothing, "Не удалось вставить слайд", result.ErrorMessage))
                 Return
             End If
-            RespondTemplates("insert", True, $"Вставлен слайд {result.InsertedSlideIndex}",
-                             New With {
-                                 .insertedSlideIndex = result.InsertedSlideIndex,
-                                 .slotsFilled = result.SlotsFilled,
-                                 .warnings = result.Warnings
-                             })
+            RespondTemplates("insert", True, BuildInsertMessage(result), New With {
+                .insertedSlideIndex = result.InsertedSlideIndex,
+                .slotsFilled = result.SlotsFilled,
+                .warnings = result.Warnings
+            })
         Catch ex As Exception
             RespondTemplates("insert", False, "Вставка макета: " & ex.Message)
         End Try
     End Sub
+
+    Private Shared Function BuildInsertMessage(result As Design.DeckTemplate.DeckTemplateRenderResult) As String
+        Dim message = $"Вставлен слайд {result.InsertedSlideIndex}"
+        If result.Warnings IsNot Nothing AndAlso result.Warnings.Count > 0 Then
+            message &= " · " & String.Join("; ", result.Warnings.Take(2))
+        End If
+        Return message
+    End Function
 
     Protected Overrides Sub HandleTemplatesPreview(jsonDoc As JObject)
         Try
