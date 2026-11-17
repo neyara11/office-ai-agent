@@ -1,0 +1,31 @@
+{
+  "id": "ExtractTemplateSetFromDeck",
+  "name": "Сохранить колоду как набор макетов",
+  "description": "Сохранить непустые слайды текущей презентации как набор макетов: для каждого слайда создаётся отдельный template.pptx с оформлением, manifest.json и preview.png. Презентация не изменяется. Используй, когда пользователь хочет переиспользовать стиль колоды для будущих слайдов.",
+  "appType": "ppt",
+  "category": "Макеты слайдов",
+  "riskLevel": "safe",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "setName",
+      "type": "string",
+      "required": false,
+      "description": "Имя набора, по умолчанию «Слайд N» для каждого макета"
+    },
+    {
+      "name": "maxSlides",
+      "type": "integer",
+      "required": false,
+      "description": "Максимум слайдов, по умолчанию 20, максимум 40",
+      "defaultValue": 20
+    },
+    {
+      "name": "skipEmpty",
+      "type": "boolean",
+      "required": false,
+      "description": "Пропускать пустые слайды, по умолчанию true",
+      "defaultValue": true
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "BuildDeckFromTemplateSet",
+  "name": "Собрать колоду из макетов",
+  "description": "Собрать новую колоду (или добавить слайды в текущую) по outline: для каждого слайда детерминированно выбирается сохранённый макет или похожий слайд текущей колоды, клонируется и заполняется title/body/bullets/table/chart/kpi. При ошибке вся пачка откатывается. preview=true возвращает только план (какие макеты выбраны) без записи. Не используй CreateSlides для задач «сделай другую презентацию на основе этой».",
+  "appType": "ppt",
+  "category": "Макеты слайдов",
+  "riskLevel": "medium",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "outline",
+      "type": "object",
+      "required": true,
+      "description": "План колоды: {title, subtitle, setId?, slides:[{archetype, title, subtitle, body, bullets[], table:{headers[],rows[][]}, chart:{categories[],values[],seriesName}, kpis:[{label,value}], caption, footer}]}"
+    },
+    {
+      "name": "target",
+      "type": "string",
+      "required": false,
+      "description": "new — создать новую презентацию (по умолчанию), current — добавить слайды в конец текущей",
+      "enum": ["new", "current"]
+    },
+    {
+      "name": "preview",
+      "type": "boolean",
+      "required": false,
+      "description": "true — вернуть план выбранных макетов без записи",
+      "defaultValue": false
+    },
+    {
+      "name": "maxSlides",
+      "type": "integer",
+      "required": false,
+      "description": "Максимум слайдов, по умолчанию 20, максимум 40",
+      "defaultValue": 20
+    }
+  ]
+}

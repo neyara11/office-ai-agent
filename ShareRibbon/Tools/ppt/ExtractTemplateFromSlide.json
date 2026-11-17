@@ -1,0 +1,35 @@
+{
+  "id": "ExtractTemplateFromSlide",
+  "name": "Сохранить слайд как макет",
+  "description": "Сохранить выбранный слайд текущей презентации в каталог макетов как template.pptx + manifest.json + preview.png. Переносит оформление слайда в отдельный файл, не меняет презентацию и не требует CreateSlides. Возвращает templateId, archetype, число слотов и наличие превью.",
+  "appType": "ppt",
+  "category": "Макеты слайдов",
+  "riskLevel": "safe",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "slideIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Номер слайда с 1; 0 или отсутствие — текущий слайд"
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "required": false,
+      "description": "Человеческое имя макета, по умолчанию «Слайд N»"
+    },
+    {
+      "name": "setId",
+      "type": "string",
+      "required": false,
+      "description": "Необязательный id набора; по умолчанию макет сохраняется отдельным набором"
+    },
+    {
+      "name": "archetype",
+      "type": "string",
+      "required": false,
+      "description": "Переопределить архетип: cover, section, bullets, two-column, chart, table, kpi, image-text, quote, closing"
+    }
+  ]
+}

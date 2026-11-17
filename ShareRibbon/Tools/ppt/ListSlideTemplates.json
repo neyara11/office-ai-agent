@@ -1,0 +1,30 @@
+{
+  "id": "ListSlideTemplates",
+  "name": "Список макетов слайдов",
+  "description": "Только чтение: вернуть компактный каталог сохранённых макетов слайдов (id, name, archetype, слоты, теги). Используй перед вставкой слайда по готовому макету или чтобы показать пользователю доступные макеты. Не содержит base64-превью, абсолютных путей и не изменяет документ.",
+  "appType": "ppt",
+  "category": "Макеты слайдов",
+  "riskLevel": "safe",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "archetype",
+      "type": "string",
+      "required": false,
+      "description": "Фильтр по архетипу: cover, section, bullets, two-column, chart, table, kpi, image-text, quote, closing"
+    },
+    {
+      "name": "query",
+      "type": "string",
+      "required": false,
+      "description": "Поиск по имени, id, набору и тегам макета"
+    },
+    {
+      "name": "limit",
+      "type": "integer",
+      "required": false,
+      "description": "Максимум записей, по умолчанию 20, максимум 50",
+      "defaultValue": 20
+    }
+  ]
+}

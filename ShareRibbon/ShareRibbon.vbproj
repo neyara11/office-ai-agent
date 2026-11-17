@@ -49,6 +49,8 @@
     <Reference Include="HtmlAgilityPack, Version=1.11.24.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\Anh.HtmlAgilityPack.zh-CN.1.11.24\lib\netstandard2.0\HtmlAgilityPack.dll</HintPath>
     </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="Markdig, Version=0.41.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Markdig.0.41.1\lib\net462\Markdig.dll</HintPath>
     </Reference>
@@ -293,6 +295,12 @@
     <Compile Include="Agent\Context\IContextProvider.vb" />
     <Compile Include="Agent\Context\OfficeContext.vb" />
     <Compile Include="Agent\Context\ContextPack.vb" />
+    <Compile Include="Agent\DeckTemplates\SlideTemplateManifest.vb" />
+    <Compile Include="Agent\DeckTemplates\SlideSpec.vb" />
+    <Compile Include="Agent\DeckTemplates\TemplateStorage.vb" />
+    <Compile Include="Agent\DeckTemplates\TemplateCatalog.vb" />
+    <Compile Include="Agent\DeckTemplates\SlideTemplateSelector.vb" />
+    <Compile Include="Agent\DeckTemplates\DeckOutline.vb" />
     <Compile Include="Agent\Execution\SafetyGate.vb" />
     <Compile Include="Agent\Execution\SafetyChecker.vb" />
     <Compile Include="Config\WebView2Loader.vb" />

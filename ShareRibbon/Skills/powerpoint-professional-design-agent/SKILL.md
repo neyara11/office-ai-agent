@@ -1,10 +1,10 @@
----
+﻿---
 name: powerpoint-professional-design-agent
 description: Используйте, когда PowerPoint должен создать отполированную деловую, консалтинговую, продуктовую, стратегическую, технологическую, питч- или исполнительную презентацию, а не базовую колоду из заголовков и маркеров.
 application: PowerPoint
 keywords: ppt, 精美, 精致, 好看, 漂亮, 美观, 高级, 高端, 专业设计, 咨询风格, 麦肯锡, 路演, 发布会, polished, beautiful, premium, high-end, презентация, слайды, дизайн, премиум, элитный, консалтинг, питч, защита проекта, красиво, стильно, профессиональный дизайн, дорого
 tags: powerpoint, professional-design, pitch-deck, consulting, executive, architecture, visual-storytelling, premium, 专业, 专业设计, 精美, 精美PPT, 高端, 高端PPT, 复杂, 复杂PPT, 商业汇报, 咨询风格
-allowed-tools: CreateSlides, InsertSlide, DuplicateSlide, ReplaceSlideText, UpdateChartData, InsertText, FormatSlide, InsertTable, ApplyTheme, ApplyTransition, AddSpeakerNotes, BeautifySlides, DeleteSlide, MoveSlide, DiscoverOfficeCapability, OfficeObjectOperation
+allowed-tools: CreateSlides, InsertSlide, DuplicateSlide, ReplaceSlideText, UpdateChartData, InsertText, FormatSlide, InsertTable, ApplyTheme, ApplyTransition, AddSpeakerNotes, BeautifySlides, DeleteSlide, MoveSlide, DiscoverOfficeCapability, OfficeObjectOperation, ListSlideTemplates, ExtractTemplateFromSlide, ExtractTemplateSetFromDeck, AddSlideFromTemplate, AddSlideFromNearestSlide, BuildDeckFromTemplateSet
 intent_types: slide_generation, professional_design, visual_storytelling, pitch_deck, executive_presentation
 ---
 

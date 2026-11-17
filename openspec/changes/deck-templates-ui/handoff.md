@@ -1,4 +1,4 @@
-# Handoff: макеты и UI-панели
+﻿# Handoff: макеты и UI-панели
 
 Документ для агента, который продолжит работу. Сначала прочитать `CLAUDE.md`, `AGENTS.md`, `PowerPointAi/AGENTS.md`, `ShareRibbon/AGENTS.md`, `ShareRibbon/Controls/AGENTS.md`, `ShareRibbon/Config/AGENTS.md`.
 
@@ -8,9 +8,13 @@
 - Уже реализованы и работают нативные PPT-инструменты:
   - `DuplicateSlide` — `slideIndex` с 1, `position: after|end`, сохраняет оформление/картинки/таблицы/диаграммы;
   - `ReplaceSlideText` — `slideIndex` с 1, `replacements:[{find,replaceWith}]`, обходит фигуры, группы, **ячейки таблиц**, гибко матчит переносы/пробелы;
-  - `UpdateChartData` — `slideIndex` с 1, `chartIndex`, `values`, необязательный `categories`, `seriesName`; без `categories` сохраняются текущие подписи; для процентных диаграмм значения передаются долями (25% = 0.25), а если значений больше категорий — лишние отбрасываются с предупреждением; меняет данные первого ряда, сохраняя тип/оформление;
+  - `UpdateChartData` — `slideIndex` с 1, `chartIndex`, `values`, необязательный `categories`, `seriesName`; без `categories` сохраняются текущие подписи; для процентных диаграмм значения передаются долями (25% = 0.25); при несовпадении числа значений и категорий команда возвращает ошибку и ничего не записывает; меняет данные первого ряда, сохраняя тип/оформление;
   - `InsertSlide` — `layout` + placeholder-заполнение;
-  - `CreateSlides` — Scene/дизайн-система, **не наследует дизайн текущей колоды**.
+  - `CreateSlides` — Scene/дизайн-система, **не наследует дизайн текущей колоды**;
+- `ListSlideTemplates` (P1) — read-only каталог макетов из `%LOCALAPPDATA%\OfficeAiAppData\templates`; контракт `ShareRibbon/Agent/DeckTemplates/` (`SlideTemplateManifest`, `TemplateSlot`, `SlideSpec`, `TemplateCatalog`, `TemplateStorage`); без base64 и абсолютных путей.
+- `BuildDeckFromTemplateSet` (P4) — `DeckBuildPlanner` (`SlideSpec` outline → макеты) + `DeckTemplateRenderer.BuildDeck` (последовательный clone-and-fill, rollback всей пачки по `SlideID`); `preview=true` отдаёт план без записи; `target=new` создаёт презентацию с размером слайда исходной и удаляет стартовый пустой слайд. Ядро `BuildDeckFromTemplateSetCore(app, params)` отделено от `Globals` для тестов.
+- `AddSlideFromTemplate` / `AddSlideFromNearestSlide` (P3) — `ShareRibbon/Agent/DeckTemplates/SlideTemplateSelector.vb` (детерминированный score: архетип, слоты, вместимость) + `PowerPointAi/Design/DeckTemplate/DeckTemplateRenderer.vb` (clone-and-fill, заполнение title/subtitle/body/bullets/table/chart/kpi, rollback по `SlideID`). `FindSlot` берёт верхний title/body по `Top`; image-слот пока не заполняется (warning).
+- `ExtractTemplateFromSlide` / `ExtractTemplateSetFromDeck` (P2) — `PowerPointAi/Design/DeckTemplate/DeckTemplateExtractor.vb`: изолирует слайд через `SaveCopyAs` + скрытую копию, строит slots/fingerprint/themeTokens, экспортирует `preview.png`, сохраняет в `TemplateStorage`; документ не меняет. Грабли: `If(str, fallback)` в VB — null-coalescing, а не проверка пустой строки; скрытую `Presentation` нужно явно `Close()`, иначе файл остаётся заблокированным.
 - `ExecuteVBA` отключён: не в `GetAvailableTools`, не в legacy `SupportedCommands`, хост проверяет `AccessVBOM` до COM. Не возвращать VBA в типовые сценарии.
 - Диагностика: `ShareRibbon/Agent/AgentRunJournal.vb` пишет JSONL в `%LOCALAPPDATA%\OfficeAiAppData\logs\agent-runs-YYYYMMDD.jsonl` (фазы run_start/plan/thought/tool_call/tool_result/repair). Отключается `OFFICE_AI_AGENT_DIAGNOSTICS=0`. В логах нет base64/скриншотов.
 - UI-карточка Agent: план показывает только «Остановить», статус «Выполняется…»; JSON из `thought` вырезается. Не возвращать кнопки «Начать/Изменить/Отмена» без реального ожидания подтверждения в backend.

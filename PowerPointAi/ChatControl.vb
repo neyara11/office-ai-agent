@@ -1,4 +1,4 @@
-Imports System.Diagnostics
+﻿Imports System.Diagnostics
 Imports System.Drawing
 Imports System.IO
 Imports System.Linq
@@ -1363,6 +1363,30 @@ Public Class ChatControl
                 Return OfficeRuntime.PowerPointApiCatalogProvider.SearchAsToolResult(
                     GetPowerPointEnvelopeParams(envelope))
             End If
+
+            If String.Equals(toolId, "ListSlideTemplates", StringComparison.OrdinalIgnoreCase) Then
+                Return ListSlideTemplatesAsToolResult(GetPowerPointEnvelopeParams(envelope))
+            End If
+
+            If String.Equals(toolId, "ExtractTemplateFromSlide", StringComparison.OrdinalIgnoreCase) Then
+                Return ExtractTemplateFromSlideAsToolResult(GetPowerPointEnvelopeParams(envelope))
+            End If
+
+            If String.Equals(toolId, "ExtractTemplateSetFromDeck", StringComparison.OrdinalIgnoreCase) Then
+                Return ExtractTemplateSetFromDeckAsToolResult(GetPowerPointEnvelopeParams(envelope))
+            End If
+
+            If String.Equals(toolId, "AddSlideFromTemplate", StringComparison.OrdinalIgnoreCase) Then
+                Return AddSlideFromTemplateAsToolResult(GetPowerPointEnvelopeParams(envelope))
+            End If
+
+            If String.Equals(toolId, "AddSlideFromNearestSlide", StringComparison.OrdinalIgnoreCase) Then
+                Return AddSlideFromNearestSlideAsToolResult(GetPowerPointEnvelopeParams(envelope))
+            End If
+
+            If String.Equals(toolId, "BuildDeckFromTemplateSet", StringComparison.OrdinalIgnoreCase) Then
+                Return BuildDeckFromTemplateSetAsToolResult(GetPowerPointEnvelopeParams(envelope))
+            End If
             If String.Equals(toolId, "CreateSlides", StringComparison.OrdinalIgnoreCase) Then
                 Return Design.ProfessionalDeckExecutor.ExecuteAsToolResult(
                     GetPowerPointEnvelopeParams(envelope), preview)
@@ -1416,6 +1440,548 @@ Public Class ChatControl
             Return Agent.ToolResult.FromException(toolId, ex)
         End Try
     End Function
+
+    ''' <summary>
+    ''' Компактный каталог сохранённых макетов для агента. Только чтение, без COM.
+    ''' </summary>
+    Private Shared Function ListSlideTemplatesAsToolResult(params As JObject) As Agent.ToolResult
+        Try
+            Dim limit As Integer = 20
+            Dim limitToken = params?("limit")
+            If limitToken IsNot Nothing Then
+                Dim parsed As Integer
+                If Integer.TryParse(limitToken.ToString(), parsed) AndAlso parsed > 0 Then limit = parsed
+            End If
+
+            Dim archetype = params?("archetype")?.ToString()
+            Dim query = params?("query")?.ToString()
+            Dim summaries = Agent.DeckTemplates.TemplateCatalog.ListSummaries(limit, archetype, query)
+            Dim items = JArray.FromObject(summaries)
+            Dim summaryText = If(summaries.Count = 0,
+                                 "Сохранённых макетов не найдено",
+                                 $"Найдено макетов: {summaries.Count}")
+            Dim observation = New JObject From {
+                {"kind", "read"},
+                {"summary", summaryText},
+                {"changed", False},
+                {"targetRefs", New JArray()},
+                {"items", items},
+                {"warnings", New JArray()}
+            }
+            Return Agent.ToolResult.Succeed("ListSlideTemplates",
+                                            summaryText,
+                                            data:=New With {.templates = items},
+                                            observation:=observation)
+        Catch ex As Exception
+            Return Agent.ToolResult.Failed("ListSlideTemplates",
+                                           "Не удалось прочитать каталог макетов: " & ex.Message,
+                                           errorCode:=ExceptionClassifier.CodeUnknown,
+                                           userMessage:="Каталог макетов недоступен",
+                                           debugDetail:=ex.Message,
+                                           recoverable:=True)
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Извлечение одного слайда в каталог макетов. Пишет только файлы, документ не меняет.
+    ''' </summary>
+    Private Shared Function ExtractTemplateFromSlideAsToolResult(params As JObject) As Agent.ToolResult
+        Dim warnings As New List(Of String)()
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim slideIndex = If(params?("slideIndex")?.Value(Of Integer)(), 0)
+            If slideIndex <= 0 Then
+                Try
+                    slideIndex = CInt(app.ActiveWindow.View.Slide.SlideIndex)
+                Catch
+                    slideIndex = 1
+                End Try
+            End If
+
+            Dim errorMessage As String = ""
+            Dim manifest = Design.DeckTemplate.DeckTemplateExtractor.ExtractFromSlide(
+                app, slideIndex,
+                params?("name")?.ToString(),
+                params?("setId")?.ToString(),
+                params?("archetype")?.ToString(),
+                errorMessage, warnings)
+
+            If manifest Is Nothing Then
+                Return Agent.ToolResult.Failed("ExtractTemplateFromSlide",
+                                               If(String.IsNullOrWhiteSpace(errorMessage), "Макет не сохранён", errorMessage),
+                                               errorCode:=ExceptionClassifier.CodeUnknown,
+                                               userMessage:=If(String.IsNullOrWhiteSpace(errorMessage), "Не удалось сохранить макет", errorMessage),
+                                               debugDetail:=errorMessage,
+                                               recoverable:=True)
+            End If
+
+            Dim warningsArray = New JArray(warnings)
+            Dim hasPreview = False
+            Try
+                hasPreview = Not String.IsNullOrWhiteSpace(manifest.PreviewFullPath) AndAlso IO.File.Exists(manifest.PreviewFullPath)
+            Catch
+            End Try
+            Dim summary = $"Макет сохранён: {manifest.Name} ({manifest.Archetype}), слотов: {manifest.Slots.Count}"
+            Dim observation = New JObject From {
+                {"kind", "write"},
+                {"summary", summary},
+                {"changed", False},
+                {"targetRefs", New JArray($"PowerPoint:Slide/{manifest.Source.SlideIndex}")},
+                {"warnings", warningsArray}
+            }
+            Return Agent.ToolResult.Succeed("ExtractTemplateFromSlide",
+                                            summary,
+                                            data:=New With {
+                                                .templateId = manifest.Id,
+                                                .setId = manifest.SetId,
+                                                .name = manifest.Name,
+                                                .archetype = manifest.Archetype,
+                                                .slotCount = manifest.Slots.Count,
+                                                .hasPreview = hasPreview
+                                            },
+                                            observation:=observation)
+        Catch ex As Exception
+            Return Agent.ToolResult.Failed("ExtractTemplateFromSlide",
+                                           "Извлечение макета: " & ex.Message,
+                                           errorCode:=ExceptionClassifier.CodeUnknown,
+                                           userMessage:="Не удалось сохранить макет",
+                                           debugDetail:=ex.Message,
+                                           recoverable:=True)
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Извлечение всех непустых слайдов колоды как набора макетов.
+    ''' </summary>
+    Private Shared Function ExtractTemplateSetFromDeckAsToolResult(params As JObject) As Agent.ToolResult
+        Dim warnings As New List(Of String)()
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim maxSlides = If(params?("maxSlides")?.Value(Of Integer)(), 20)
+            Dim skipEmpty = If(params?("skipEmpty")?.Value(Of Boolean)(), True)
+            Dim errorMessage As String = ""
+            Dim manifests = Design.DeckTemplate.DeckTemplateExtractor.ExtractFromDeck(
+                app,
+                params?("setName")?.ToString(),
+                maxSlides,
+                skipEmpty,
+                errorMessage,
+                warnings)
+
+            If manifests Is Nothing OrElse manifests.Count = 0 Then
+                Return Agent.ToolResult.Failed("ExtractTemplateSetFromDeck",
+                                               If(String.IsNullOrWhiteSpace(errorMessage), "Набор макетов не сохранён", errorMessage),
+                                               errorCode:=ExceptionClassifier.CodeUnknown,
+                                               userMessage:=If(String.IsNullOrWhiteSpace(errorMessage), "Не удалось сохранить набор макетов", errorMessage),
+                                               debugDetail:=errorMessage,
+                                               recoverable:=True)
+            End If
+
+            Dim setId = manifests(0).SetId
+            Dim items = New JArray()
+            For Each manifest In manifests
+                items.Add(New JObject From {
+                    {"templateId", manifest.Id},
+                    {"name", manifest.Name},
+                    {"archetype", manifest.Archetype},
+                    {"slotCount", manifest.Slots.Count},
+                    {"sourceSlide", manifest.Source.SlideIndex}
+                })
+            Next
+            Dim warningsArray = New JArray(warnings)
+            Dim summary = $"Сохранён набор макетов {setId}: {manifests.Count}"
+            Dim observation = New JObject From {
+                {"kind", "write"},
+                {"summary", summary},
+                {"changed", False},
+                {"targetRefs", New JArray()},
+                {"warnings", warningsArray}
+            }
+            Return Agent.ToolResult.Succeed("ExtractTemplateSetFromDeck",
+                                            summary,
+                                            data:=New With {
+                                                .setId = setId,
+                                                .count = manifests.Count,
+                                                .templates = items
+                                            },
+                                            observation:=observation)
+        Catch ex As Exception
+            Return Agent.ToolResult.Failed("ExtractTemplateSetFromDeck",
+                                           "Извлечение набора макетов: " & ex.Message,
+                                           errorCode:=ExceptionClassifier.CodeUnknown,
+                                           userMessage:="Не удалось сохранить набор макетов",
+                                           debugDetail:=ex.Message,
+                                           recoverable:=True)
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Вставка сохранённого макета в активную колоду с заполнением слотов.
+    ''' </summary>
+    Private Shared Function AddSlideFromTemplateAsToolResult(params As JObject) As Agent.ToolResult
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim target = app.ActivePresentation
+            If target Is Nothing Then Return InsertToolFailure("AddSlideFromTemplate", "Нет активной презентации")
+
+            Dim templateId = params?("templateId")?.ToString()
+            If String.IsNullOrWhiteSpace(templateId) Then
+                Return InsertToolFailure("AddSlideFromTemplate", "Не указан templateId")
+            End If
+            Dim template = Agent.DeckTemplates.TemplateCatalog.FindById(templateId)
+            If template Is Nothing Then
+                Return InsertToolFailure("AddSlideFromTemplate", $"Макет не найден: {templateId}")
+            End If
+
+            Dim spec = ParseSlideSpecToken(params?("spec"))
+            If spec Is Nothing Then
+                Return InsertToolFailure("AddSlideFromTemplate", "Параметр spec некорректен")
+            End If
+
+            Dim insertAt = ResolveInsertAt(app, target, params)
+            Dim result = Design.DeckTemplate.DeckTemplateRenderer.InsertFromTemplate(app, target, template, spec, insertAt)
+            Return BuildInsertToolResult("AddSlideFromTemplate", result, template.Id, 0, 0, Nothing)
+        Catch ex As Exception
+            Return InsertToolFailure("AddSlideFromTemplate", "Вставка макета: " & ex.Message)
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' Вставка слайда на основе ближайшего макета: явный каталог, иначе текущая колода.
+    ''' </summary>
+    Private Shared Function AddSlideFromNearestSlideAsToolResult(params As JObject) As Agent.ToolResult
+        Try
+            Dim app = Globals.ThisAddIn.Application
+            Dim target = app.ActivePresentation
+            If target Is Nothing Then Return InsertToolFailure("AddSlideFromNearestSlide", "Нет активной презентации")
+
+            Dim spec = ParseSlideSpecToken(params?("spec"))
+            If spec Is Nothing Then
+                Return InsertToolFailure("AddSlideFromNearestSlide", "Параметр spec некорректен")
+            End If
+
+            Dim forcedSource = If(params?("sourceSlideIndex")?.Value(Of Integer)(), 0)
+            If forcedSource > 0 Then
+                If forcedSource > CInt(target.Slides.Count) Then
+                    Return InsertToolFailure("AddSlideFromNearestSlide",
+                                             $"sourceSlideIndex {forcedSource} вне диапазона 1..{target.Slides.Count}")
+                End If
+                Dim forcedAt = ResolveInsertAt(app, target, params)
+                Dim forcedResult = Design.DeckTemplate.DeckTemplateRenderer.InsertFromSlide(app, target, forcedSource, spec, forcedAt)
+                Return BuildInsertToolResult("AddSlideFromNearestSlide", forcedResult, "", forcedSource, 0, Nothing)
+            End If
+
+            Dim catalog = Agent.DeckTemplates.TemplateCatalog.ListAll()
+            Dim deckCandidates As New List(Of Agent.DeckTemplates.SlideTemplateManifest)()
+            Dim limit = Math.Min(40, CInt(target.Slides.Count))
+            For index = 1 To limit
+                Dim manifest = Design.DeckTemplate.DeckTemplateExtractor.DescribeSlideAsManifest(target, index)
+                If manifest IsNot Nothing Then deckCandidates.Add(manifest)
+            Next
+
+            Dim deckBest = Agent.DeckTemplates.SlideTemplateSelector.SelectBest(spec, deckCandidates)
+            Dim catalogBest = Agent.DeckTemplates.SlideTemplateSelector.SelectBest(spec, catalog)
+            Dim match As Agent.DeckTemplates.SlideTemplateMatch
+            If deckBest.Template IsNot Nothing AndAlso
+               (catalogBest.Template Is Nothing OrElse deckBest.Score >= catalogBest.Score - 5) Then
+                match = deckBest
+            Else
+                match = catalogBest
+            End If
+
+            If match Is Nothing OrElse match.Template Is Nothing Then
+                Return InsertToolFailure("AddSlideFromNearestSlide", "Не найдено ни одного подходящего макета")
+            End If
+
+            Dim insertAt = ResolveInsertAt(app, target, params)
+            Dim templateId = ""
+            Dim sourceSlide = 0
+            Dim result As Design.DeckTemplate.DeckTemplateRenderResult
+            If Not String.IsNullOrWhiteSpace(match.Template.StorageFolder) Then
+                templateId = match.Template.Id
+                result = Design.DeckTemplate.DeckTemplateRenderer.InsertFromTemplate(app, target, match.Template, spec, insertAt)
+            Else
+                sourceSlide = match.Template.Source.SlideIndex
+                If sourceSlide <= 0 Then sourceSlide = 1
+                result = Design.DeckTemplate.DeckTemplateRenderer.InsertFromSlide(app, target, sourceSlide, spec, insertAt)
+            End If
+
+            Return BuildInsertToolResult("AddSlideFromNearestSlide", result, templateId, sourceSlide, match.Score, match.MatchedBy)
+        Catch ex As Exception
+            Return InsertToolFailure("AddSlideFromNearestSlide", "Вставка слайда: " & ex.Message)
+        End Try
+    End Function
+
+    Private Shared Function ParseSlideSpecToken(token As JToken) As Agent.DeckTemplates.SlideSpec
+        If token Is Nothing OrElse token.Type <> JTokenType.Object Then Return New Agent.DeckTemplates.SlideSpec()
+        Try
+            Dim spec = token.ToObject(Of Agent.DeckTemplates.SlideSpec)()
+            If spec Is Nothing Then Return New Agent.DeckTemplates.SlideSpec()
+            spec.Normalize()
+            Return spec
+        Catch
+            Return Nothing
+        End Try
+    End Function
+
+    Private Shared Function ResolveInsertAt(app As Microsoft.Office.Interop.PowerPoint.Application,
+                                            target As Microsoft.Office.Interop.PowerPoint.Presentation,
+                                            params As JObject) As Integer
+        Dim position = If(params?("position")?.ToString(), "after").Trim().ToLowerInvariant()
+        If position = "end" Then Return CInt(target.Slides.Count) + 1
+
+        Dim afterIndex = If(params?("afterSlideIndex")?.Value(Of Integer)(), 0)
+        If afterIndex <= 0 Then
+            Try
+                afterIndex = CInt(app.ActiveWindow.View.Slide.SlideIndex)
+            Catch
+                afterIndex = 1
+            End Try
+        End If
+        Return Math.Min(CInt(target.Slides.Count) + 1, afterIndex + 1)
+    End Function
+
+    Private Shared Function BuildInsertToolResult(toolId As String,
+                                                  result As Design.DeckTemplate.DeckTemplateRenderResult,
+                                                  templateId As String,
+                                                  sourceSlide As Integer,
+                                                  matchScore As Integer,
+                                                  matchedBy As List(Of String)) As Agent.ToolResult
+        If result Is Nothing OrElse Not result.Success Then
+            Dim message = If(result Is Nothing, "Не удалось вставить слайд", result.ErrorMessage)
+            If String.IsNullOrWhiteSpace(message) Then message = "Не удалось вставить слайд"
+            Return InsertToolFailure(toolId, message)
+        End If
+
+        Dim warnings = New JArray(result.Warnings)
+        Dim summary = $"Вставлен слайд {result.InsertedSlideIndex}, заполнено слотов: {result.SlotsFilled}"
+        Dim observation = New JObject From {
+            {"kind", "write"},
+            {"summary", summary},
+            {"changed", True},
+            {"targetRefs", New JArray($"PowerPoint:Slide/{result.InsertedSlideIndex}")},
+            {"warnings", warnings}
+        }
+        Return Agent.ToolResult.Succeed(toolId,
+                                        summary,
+                                        data:=New With {
+                                            .insertedSlideIndex = result.InsertedSlideIndex,
+                                            .insertedSlideId = result.InsertedSlideId,
+                                            .slotsFilled = result.SlotsFilled,
+                                            .templateId = If(templateId, ""),
+                                            .sourceSlide = sourceSlide,
+                                            .matchScore = matchScore,
+                                            .matchedBy = If(matchedBy, New List(Of String)())
+                                        },
+                                        observation:=observation)
+    End Function
+
+    Private Shared Function InsertToolFailure(toolId As String, message As String) As Agent.ToolResult
+        Return Agent.ToolResult.Failed(toolId,
+                                       message,
+                                       errorCode:=ExceptionClassifier.CodeUnknown,
+                                       userMessage:=message,
+                                       debugDetail:=message,
+                                       recoverable:=True)
+    End Function
+
+    ''' <summary>
+    ''' Сборка колоды по outline из сохранённого набора макетов или слайдов текущей колоды.
+    ''' preview=true возвращает только план, без записи.
+    ''' </summary>
+    Private Shared Function BuildDeckFromTemplateSetAsToolResult(params As JObject) As Agent.ToolResult
+        Return BuildDeckFromTemplateSetCore(Globals.ThisAddIn.Application, params)
+    End Function
+
+    ''' <summary>Ядро сборки колоды с явным app-контекстом (тестируемость и повторное использование).</summary>
+    Private Shared Function BuildDeckFromTemplateSetCore(app As Microsoft.Office.Interop.PowerPoint.Application,
+                                                        params As JObject) As Agent.ToolResult
+        Try
+            Dim outlineToken = params?("outline")
+            If outlineToken Is Nothing OrElse outlineToken.Type <> JTokenType.Object Then
+                Return InsertToolFailure("BuildDeckFromTemplateSet", "Не передан outline")
+            End If
+            Dim outline As Agent.DeckTemplates.DeckOutline
+            Try
+                outline = outlineToken.ToObject(Of Agent.DeckTemplates.DeckOutline)()
+            Catch ex As Exception
+                Return InsertToolFailure("BuildDeckFromTemplateSet", "outline некорректен: " & ex.Message)
+            End Try
+            If outline Is Nothing Then Return InsertToolFailure("BuildDeckFromTemplateSet", "outline пуст")
+            outline.Normalize()
+            If outline.Slides Is Nothing OrElse outline.Slides.Count = 0 Then
+                Return InsertToolFailure("BuildDeckFromTemplateSet", "outline.slides пуст")
+            End If
+
+            Dim sourcePres = app.ActivePresentation
+            Dim candidates As New List(Of Agent.DeckTemplates.SlideTemplateManifest)()
+            candidates.AddRange(Agent.DeckTemplates.TemplateCatalog.ListAll())
+            If sourcePres IsNot Nothing Then
+                Dim limit = Math.Min(40, CInt(sourcePres.Slides.Count))
+                For index = 1 To limit
+                    Dim manifest = Design.DeckTemplate.DeckTemplateExtractor.DescribeSlideAsManifest(sourcePres, index)
+                    If manifest IsNot Nothing Then candidates.Add(manifest)
+                Next
+            End If
+            If candidates.Count = 0 Then
+                Return InsertToolFailure("BuildDeckFromTemplateSet", "Нет макетов: сохраните слайд или колоду как макет")
+            End If
+
+            Dim maxSlides = If(params?("maxSlides")?.Value(Of Integer)(), 20)
+            Dim plan = Agent.DeckTemplates.DeckBuildPlanner.Plan(outline, candidates, maxSlides)
+            If plan.Count = 0 Then
+                Return InsertToolFailure("BuildDeckFromTemplateSet", "Не удалось построить план колоды")
+            End If
+
+            Dim missing As New List(Of String)()
+            For Each planStep In plan
+                If planStep.Match Is Nothing OrElse planStep.Match.Template Is Nothing Then
+                    missing.Add(planStep.Index.ToString())
+                End If
+            Next
+            If missing.Count > 0 Then
+                Return InsertToolFailure("BuildDeckFromTemplateSet",
+                                         "Нет макетов для слайдов: " & String.Join(", ", missing))
+            End If
+
+            Dim planArray = BuildDeckPlanArray(plan)
+            Dim previewOnly = If(params?("preview")?.Value(Of Boolean)(), False)
+            If previewOnly Then
+                Dim previewSummary = $"План колоды: {plan.Count} слайдов (без записи)"
+                Dim previewObservation = New JObject From {
+                    {"kind", "read"},
+                    {"summary", previewSummary},
+                    {"changed", False},
+                    {"targetRefs", New JArray()},
+                    {"warnings", New JArray()}
+                }
+                Return Agent.ToolResult.Succeed("BuildDeckFromTemplateSet",
+                                                previewSummary,
+                                                data:=New With {
+                                                    .previewOnly = True,
+                                                    .title = outline.Title,
+                                                    .slideCount = plan.Count,
+                                                    .plan = planArray
+                                                },
+                                                observation:=previewObservation)
+            End If
+
+            Dim targetMode = If(params?("target")?.ToString(), "new").Trim().ToLowerInvariant()
+            Dim targetPres As Microsoft.Office.Interop.PowerPoint.Presentation
+            Dim createdNew = False
+            Dim initialSlideId As Integer = 0
+            If targetMode = "new" Then
+                targetPres = app.Presentations.Add()
+                createdNew = True
+                Try
+                    initialSlideId = CInt(targetPres.Slides(1).SlideID)
+                Catch
+                End Try
+                If sourcePres IsNot Nothing Then
+                    Try
+                        targetPres.PageSetup.SlideWidth = sourcePres.PageSetup.SlideWidth
+                        targetPres.PageSetup.SlideHeight = sourcePres.PageSetup.SlideHeight
+                    Catch
+                    End Try
+                End If
+            Else
+                targetPres = sourcePres
+                If targetPres Is Nothing Then
+                    Return InsertToolFailure("BuildDeckFromTemplateSet", "Нет активной презентации")
+                End If
+            End If
+
+            Dim build = Design.DeckTemplate.DeckTemplateRenderer.BuildDeck(app, targetPres, plan)
+            If build Is Nothing OrElse Not build.Success Then
+                If createdNew Then
+                    Try
+                        targetPres.Close()
+                    Catch
+                    End Try
+                End If
+                Return InsertToolFailure("BuildDeckFromTemplateSet",
+                                         If(build Is Nothing, "Сборка колоды не вернула результат", build.ErrorMessage))
+            End If
+
+            If createdNew AndAlso initialSlideId > 0 Then
+                RemoveSlideById(targetPres, initialSlideId)
+                Try
+                    targetPres.Windows(1).Activate()
+                Catch
+                End Try
+            End If
+
+            Dim summary = If(createdNew,
+                             $"Создана колода: {build.InsertedSlideIndexes.Count} слайдов",
+                             $"Добавлено слайдов в текущую колоду: {build.InsertedSlideIndexes.Count}")
+            Dim warnings = New JArray(build.Warnings)
+            Dim observation = New JObject From {
+                {"kind", "write"},
+                {"summary", summary},
+                {"changed", True},
+                {"targetRefs", If(createdNew, New JArray(), New JArray(build.InsertedSlideIndexes.Select(Function(i) $"PowerPoint:Slide/{i}")))},
+                {"warnings", warnings}
+            }
+            Return Agent.ToolResult.Succeed("BuildDeckFromTemplateSet",
+                                            summary,
+                                            data:=New With {
+                                                .previewOnly = False,
+                                                .target = If(createdNew, "new", "current"),
+                                                .title = outline.Title,
+                                                .insertedCount = build.InsertedSlideIndexes.Count,
+                                                .slideIndexes = build.InsertedSlideIndexes,
+                                                .plan = planArray,
+                                                .warnings = build.Warnings
+                                            },
+                                            observation:=observation)
+        Catch ex As Exception
+            AppLogger.Warn("PPT.TemplateDeck", ex.ToString())
+            Return InsertToolFailure("BuildDeckFromTemplateSet", "Сборка колоды: " & ex.Message)
+        End Try
+    End Function
+
+    Private Shared Function BuildDeckPlanArray(plan As List(Of Agent.DeckTemplates.DeckPlanStep)) As JArray
+        Dim array As New JArray()
+        For Each planStep In plan
+            Dim template = If(planStep.Match Is Nothing, Nothing, planStep.Match.Template)
+            Dim templateId = ""
+            Dim sourceSlide = 0
+            If template IsNot Nothing Then
+                If Not String.IsNullOrWhiteSpace(template.StorageFolder) Then
+                    templateId = template.Id
+                ElseIf template.Source IsNot Nothing Then
+                    sourceSlide = template.Source.SlideIndex
+                End If
+            End If
+            array.Add(New JObject From {
+                {"index", planStep.Index},
+                {"archetype", If(template Is Nothing, "", template.Archetype)},
+                {"title", If(planStep.Spec Is Nothing, "", planStep.Spec.Title)},
+                {"templateId", templateId},
+                {"sourceSlide", sourceSlide},
+                {"score", If(planStep.Match Is Nothing, 0, planStep.Match.Score)},
+                {"matchedBy", If(planStep.Match Is Nothing, New JArray(), New JArray(planStep.Match.MatchedBy))}
+            })
+        Next
+        Return array
+    End Function
+
+    Private Shared Sub RemoveSlideById(target As Microsoft.Office.Interop.PowerPoint.Presentation, slideId As Integer)
+        If target Is Nothing OrElse slideId <= 0 Then Return
+        For index = CInt(target.Slides.Count) To 1 Step -1
+            Dim slide As Microsoft.Office.Interop.PowerPoint.Slide = Nothing
+            Try
+                slide = target.Slides(index)
+                If CInt(slide.SlideID) = slideId Then
+                    slide.Delete()
+                    Return
+                End If
+            Catch
+            Finally
+                ShareRibbon.ComObjectHelper.ReleaseComObject(slide)
+            End Try
+        Next
+    End Sub
 
     Private Shared Function ParsePowerPointCommandEnvelope(jsonCode As String) As JObject
         If String.IsNullOrWhiteSpace(jsonCode) Then Return Nothing

@@ -1,4 +1,4 @@
-## 1. P0 — сначала починить маршрутизацию типовых задач
+﻿## 1. P0 — сначала починить маршрутизацию типовых задач
 
 - [x] 1.1 В `ShareRibbon/Agent/PromptManager.vb` (planning + react) и в `ShareRibbon/Config/PromptManager.vb` (PPT default) добавить блок «Типовые задачи → команды»:
   - «копия/такой же слайд, но на русском / с другими данными» → `DuplicateSlide` (`position: after|end`), затем `ReplaceSlideText` и/или `UpdateChartData`; `CreateSlides` не использовать;
@@ -13,59 +13,59 @@
 
 ## 2. P1 — контракт макета и каталог
 
-- [ ] 2.1 Добавить `ShareRibbon/Agent/DeckTemplates/`:
+- [x] 2.1 Добавить `ShareRibbon/Agent/DeckTemplates/`:
   - `SlideTemplateManifest`: `id`, `name`, `setId`, `archetype`, `slots[]`, `fingerprint`, `themeTokens`, `source`, `createdAt`, `previewPath`;
   - `TemplateSlot`: `role` (title/subtitle/body/bullets/table/chart/image/caption/footer), `shapeId`, `capacityChars`, `itemCount`, `contentKind`, `optional`;
   - `SlideSpec`/`SlideBlockSpec`: запрос контента от модели (title, bullets, table, chart, image, kpi);
   - `TemplateCatalog`: list/get/find by archetype/tags, версия схемы.
-- [ ] 2.2 `TemplateStorage`:
+- [x] 2.2 `TemplateStorage`:
   - путь `%LOCALAPPDATA%\OfficeAiAppData\templates\<set>\`
   - `template.pptx` (один слайд-эталон), `manifest.json`, `preview.png` (опционально);
   - операции save/load/delete/import/export; атомарная запись; без секретов;
   - добавить файлы в `.vbproj`.
-- [ ] 2.3 Инструмент `ListSlideTemplates` (read-only): компактный каталог для модели/UI (id, name, archetype, slots summary), без превью в base64.
-- [ ] 2.4 Acceptance: каталог читается/пишется, переживает перезапуск Office, не ломает существующие AppData-пути.
+- [x] 2.3 Инструмент `ListSlideTemplates` (read-only): компактный каталог для модели/UI (id, name, archetype, slots summary), без превью в base64.
+- [x] 2.4 Acceptance: каталог читается/пишется, переживает перезапуск Office, не ломает существующие AppData-пути. Проверено smoke-тестом storage: save → list → export → delete → import → load; служебные папки `.staging/.import/.trash` очищаются.
 
 ## 3. P2 — извлечение макетов (PowerPointAi)
 
-- [ ] 3.1 Создать `PowerPointAi/Design/DeckTemplate/DeckTemplateExtractor.vb`:
+- [x] 3.1 Создать `PowerPointAi/Design/DeckTemplate/DeckTemplateExtractor.vb`:
   - классификация `archetype` по составу фигур/placeholder (`cover`, `section`, `bullets`, `two-column`, `chart`, `table`, `kpi`, `image-text`, `quote`, `closing`);
   - `slots` по placeholder type и ролям фигур; `capacityChars` по геометрии и шрифту; `itemCount` для списков/таблиц;
   - `fingerprint` (типы + относительная геометрия фигур) для поиска похожих;
   - `themeTokens` из `SlideMaster.Theme` (accent/text/fonts) — только как метаданные.
-- [ ] 3.2 `ExtractTemplateFromSlide(slideIndex, name)`:
+- [x] 3.2 `ExtractTemplateFromSlide(slideIndex, name)`:
   - копирует слайд в отдельную презентацию/файл `template.pptx` (сохранить оформление, без связи с исходной колодой);
   - строит manifest; превью через `Slide.Export` во временный PNG, кладёт в хранилище;
   - не переносит заметки/анимации, если они не часть дизайна (решить и задокументировать).
-- [ ] 3.3 `ExtractTemplateSetFromDeck`: все слайды → набор макетов.
-- [ ] 3.4 Инструменты `ExtractTemplateFromSlide`, `ExtractTemplateSetFromDeck`; добавить в оба PPT-skill `allowed-tools`.
-- [ ] 3.5 Верификация: сохранённый `template.pptx` открывается, количество фигур совпадает, превью создано, COM освобождён.
-- [ ] 3.6 Acceptance: сохранить слайд 16 как макет, увидеть его в `ListSlideTemplates`, перезапустить Office — макет на месте.
+- [x] 3.3 `ExtractTemplateSetFromDeck`: все слайды → набор макетов.
+- [x] 3.4 Инструменты `ExtractTemplateFromSlide`, `ExtractTemplateSetFromDeck`; добавить в оба PPT-skill `allowed-tools`.
+- [x] 3.5 Верификация: сохранённый `template.pptx` открывается, количество фигур совпадает, превью создано, COM освобождён.
+- [x] 3.6 Acceptance: сохранить слайд 16 как макет, увидеть его в `ListSlideTemplates`, перезапустить Office — макет на месте. Проверено на реальном слайде 15 (chart): `template.pptx` + `preview.png` созданы, `archetype=chart`, слоты/тема/fingerprint заполнены; набор из 3 слайдов дал `image-text`, `table`, `kpi`; temp/snapshot и служебные папки удаляются.
 
 ## 4. P3 — подбор и заполнение
 
-- [ ] 4.1 `SlideTemplateSelector`:
+- [x] 4.1 `SlideTemplateSelector`:
   - score по покрытию блоков `SlideSpec`, вместимости, числу элементов, архетипу;
   - источники: явный каталог → implicit-каталог текущей колоды → `CreateSlides`/вопрос;
   - детерминированность и объяснимый выбор (`matchedBy`, `score`).
-- [ ] 4.2 `DeckTemplateRenderer` (PowerPointAi):
+- [x] 4.2 `DeckTemplateRenderer` (PowerPointAi):
   - открыть `template.pptx`, скопировать слайд в активную колоду (`position: after|end`), закрыть источник;
   - заполнение: title/body/bullets → `ReplaceSlideText`; таблица → заполнение ячеек; график → `UpdateChartData`; изображение → вставка в picture-placeholder (позже);
   - удалить пустые необязательные слоты/плейсхолдеры, не ломая декор;
   - верификация: текст помещается, число строк/категорий совпало, нет пустых обязательных слотов;
   - rollback клона по маркеру при ошибке.
-- [ ] 4.3 Инструменты `AddSlideFromTemplate`, `AddSlideFromNearestSlide`.
-- [ ] 4.4 Observation: `templateId`, `sourceSlide`, `slotsFilled`, `warnings`, diff слайдов.
-- [ ] 4.5 Acceptance: «добавь слайд про X на основе похожего» клонирует ближайший макет и заполняет без переполнений; при отсутствии каталога — ближайший слайд текущей колоды.
+- [x] 4.3 Инструменты `AddSlideFromTemplate`, `AddSlideFromNearestSlide`.
+- [x] 4.4 Observation: `templateId`, `sourceSlide`, `slotsFilled`, `warnings`, diff слайдов.
+- [x] 4.5 Acceptance: «добавь слайд про X на основе похожего» клонирует ближайший макет и заполняет без переполнений; при отсутствии каталога — ближайший слайд текущей колоды. Проверено через COM: selector выбрал slide-15 (score=23) под chart-spec; `AddSlideFromTemplate` вставил слайд с заголовком и 7 значениями диаграммы; `InsertFromSlide` клонировал слайд 15; при ошибке клон удаляется по SlideID.
 
 ## 5. P4 — сборка колоды
 
-- [ ] 5.1 `BuildDeckFromTemplateSet(outline)`:
+- [x] 5.1 `BuildDeckFromTemplateSet(outline)`:
   - outline (title + blocks) → селектор → клоны → заполнение;
   - порядок, титул, финальный слайд; лимит слайдов.
-- [ ] 5.2 Preview: список выбранных макетов и outline до записи.
-- [ ] 5.3 Rollback всей пачки при ошибке (по маркерам).
-- [ ] 5.4 Acceptance: «сделай другую презентацию на основе этой» даёт колоду в стиле исходной, без `CreateSlides`.
+- [x] 5.2 Preview: список выбранных макетов и outline до записи.
+- [x] 5.3 Rollback всей пачки при ошибке (по маркерам).
+- [x] 5.4 Acceptance: «сделай другую презентацию на основе этой» даёт колоду в стиле исходной, без `CreateSlides`. Проверено через COM: preview вернул план из 2 макетов без записи; `target=current` добавил 2 слайда; `target=new` создал презентацию из 2 слайдов (стартовый пустой удалён); при ошибке шага renderer откатывает всю пачку.
 
 ## 6. P5 — UI-панели (WebView2)
 

@@ -1,0 +1,36 @@
+{
+  "id": "AddSlideFromNearestSlide",
+  "name": "Вставить слайд на основе похожего",
+  "description": "Вставить новый слайд на основе ближайшего по смыслу макета: сначала сохранённый каталог, затем слайды текущей колоды. Клонирует оформление выбранного слайда и заполняет title/body/bullets/table/chart/kpi. Используй для запросов «добавь слайд про X на основе этого/похожего», когда явный templateId не задан. При ошибке заполнения клон откатывается.",
+  "appType": "ppt",
+  "category": "Макеты слайдов",
+  "riskLevel": "medium",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "spec",
+      "type": "object",
+      "required": true,
+      "description": "Контент слайда: {archetype, title, subtitle, body, bullets[], table:{headers[],rows[][]}, chart:{categories[],values[],seriesName}, kpis[{label,value}], caption, footer}"
+    },
+    {
+      "name": "sourceSlideIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Принудительно клонировать указанный слайд (с 1), без автоподбора"
+    },
+    {
+      "name": "position",
+      "type": "string",
+      "required": false,
+      "description": "after — после текущего слайда (по умолчанию), end — в конец колоды",
+      "enum": ["after", "end"]
+    },
+    {
+      "name": "afterSlideIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Номер слайда с 1, после которого вставить; по умолчанию текущий"
+    }
+  ]
+}

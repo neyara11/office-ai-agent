@@ -280,6 +280,8 @@
     <Compile Include="Design\ScenePlanPreviewRenderer.vb" />
     <Compile Include="Design\ProfessionalDeckExecutor.Operations.vb" />
     <Compile Include="Design\ProfessionalDeckExecutor.vb" />
+    <Compile Include="Design\DeckTemplate\DeckTemplateExtractor.vb" />
+    <Compile Include="Design\DeckTemplate\DeckTemplateRenderer.vb" />
     <Compile Include="Runtime\PowerPointApiCatalogProvider.vb" />
     <Compile Include="Runtime\PowerPointObjectResolver.vb" />
     <Compile Include="Runtime\PowerPointOperationObserver.vb" />

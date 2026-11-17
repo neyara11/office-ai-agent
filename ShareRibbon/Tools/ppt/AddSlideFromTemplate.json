@@ -1,0 +1,36 @@
+{
+  "id": "AddSlideFromTemplate",
+  "name": "Вставить слайд из макета",
+  "description": "Вставить сохранённый макет (templateId из ListSlideTemplates) в текущую презентацию и заполнить слоты контентом: title, subtitle, body/bullets, table, chart, kpi. Клонирует оформление макета, поэтому не используй CreateSlides для задач «сделай слайд в стиле этой колоды». При ошибке заполнения вставленный слайд откатывается. position=after — после текущего слайда, position=end — в конец.",
+  "appType": "ppt",
+  "category": "Макеты слайдов",
+  "riskLevel": "medium",
+  "isVbaFallback": false,
+  "parameters": [
+    {
+      "name": "templateId",
+      "type": "string",
+      "required": true,
+      "description": "id макета из ListSlideTemplates"
+    },
+    {
+      "name": "spec",
+      "type": "object",
+      "required": true,
+      "description": "Контент слайда: {title, subtitle, body, bullets[], table:{headers[],rows[][]}, chart:{categories[],values[],seriesName}, kpis[{label,value}], caption, footer}"
+    },
+    {
+      "name": "position",
+      "type": "string",
+      "required": false,
+      "description": "after — после текущего слайда (по умолчанию), end — в конец колоды",
+      "enum": ["after", "end"]
+    },
+    {
+      "name": "afterSlideIndex",
+      "type": "integer",
+      "required": false,
+      "description": "Номер слайда с 1, после которого вставить; по умолчанию текущий"
+    }
+  ]
+}
