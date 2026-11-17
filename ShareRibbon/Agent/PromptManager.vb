@@ -1,4 +1,4 @@
-Imports System.IO
+﻿Imports System.IO
 Imports System.Text
 Imports Newtonsoft.Json
 Imports Newtonsoft.Json.Linq
@@ -205,6 +205,7 @@ Namespace Agent
             sb.AppendLine("- Если на диаграмме проценты, значения хранятся долями (25% = 0.25): смотри реальные значения в контексте и не передавай 30 вместо 0.30.")
             sb.AppendLine("- Если подписи категорий вынесены в отдельные текстовые фигуры, UpdateChartData меняет только доли/значения, а текст подписей — через ReplaceSlideText.")
             sb.AppendLine("- После DuplicateSlide не угадывай индекс копии: в результате инструмента приходит новый slideIndex; используй его или slideIndex=-1 (копия активна).")
+            sb.AppendLine("- Перед вставкой слайда по макету вызови ListSlideTemplates: в чате появится карточка с 2–3 вариантами, затем вставляй AddSlideFromTemplate/AddSlideFromNearestSlide.")
             sb.AppendLine("- ExecuteVBA запрещён: всегда собирай задачу из нативных инструментов.")
 
             sb.AppendLine()

@@ -65,8 +65,15 @@ Public Class AgentKernelService
         _agentKernel.SendAIRequestWithMessages = AddressOf SendAiRequestWithMessagesAsync
 
         ' 绑定代码执行委托：Agent 主路径强制 ToolResult 回执。
+        ' После ListSlideTemplates показываем в чате inline-карточку с вариантами макетов.
         _agentKernel.ExecuteCodeWithToolResult = Function(code, lang, preview)
-                                                     Return _executeCodeWithToolResult(code, lang, preview)
+                                                     Dim result = _executeCodeWithToolResult(code, lang, preview)
+                                                     Try
+                                                         NotifyTemplateSuggestions(code, result)
+                                                     Catch ex As Exception
+                                                         Debug.WriteLine($"[AgentKernelService] template suggestions: {ex.Message}")
+                                                     End Try
+                                                     Return result
                                                  End Function
 
         ' 绑定事件
@@ -261,6 +268,57 @@ Public Class AgentKernelService
     ''' <summary>
     ''' 处理步骤完成事件
     ''' </summary>
+    Private Sub NotifyTemplateSuggestions(code As String, result As Agent.ToolResult)
+        If result Is Nothing OrElse Not result.Success Then Return
+        If Not IsListSlideTemplatesCall(code) Then Return
+
+        Dim items = ExtractTemplateSuggestionItems(result)
+        If items Is Nothing OrElse items.Count = 0 Then Return
+
+        Dim limited As New JArray()
+        For index = 0 To Math.Min(3, items.Count) - 1
+            limited.Add(items(index))
+        Next
+        _executeScript($"window.showTemplateSuggestions && window.showTemplateSuggestions({limited.ToString(Formatting.None)});")
+    End Sub
+
+    Private Shared Function IsListSlideTemplatesCall(code As String) As Boolean
+        Try
+            Dim token = JToken.Parse(code)
+            Dim envelope = TryCast(token, JObject)
+            If envelope Is Nothing Then Return False
+            If String.Equals(envelope("command")?.ToString(), "ListSlideTemplates", StringComparison.OrdinalIgnoreCase) Then
+                Return True
+            End If
+            Dim commands = TryCast(envelope("commands"), JArray)
+            If commands IsNot Nothing Then
+                For Each item In commands
+                    If String.Equals(item?("command")?.ToString(), "ListSlideTemplates", StringComparison.OrdinalIgnoreCase) Then
+                        Return True
+                    End If
+                Next
+            End If
+        Catch
+        End Try
+        Return False
+    End Function
+
+    Private Shared Function ExtractTemplateSuggestionItems(result As Agent.ToolResult) As JArray
+        Dim observation = TryCast(result.Observation, JObject)
+        If observation IsNot Nothing Then
+            Dim items = TryCast(observation("items"), JArray)
+            If items IsNot Nothing Then Return items
+        End If
+        If result.Data IsNot Nothing Then
+            Try
+                Dim data = JObject.FromObject(result.Data)
+                Return TryCast(data("templates"), JArray)
+            Catch
+            End Try
+        End If
+        Return Nothing
+    End Function
+
     Private Sub OnKernelStepCompleted(stepIndex As Integer, success As Boolean, message As String)
         Try
             Dim stepStatus = If(success, "completed", "failed")

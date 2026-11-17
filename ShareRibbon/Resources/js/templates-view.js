@@ -288,13 +288,83 @@
         });
     }
 
+    function showSuggestions(items) {
+        if (!items || !items.length) return;
+        var container = byId('chat-container');
+        if (!container) return;
+
+        var existing = container.querySelector('.template-suggestions');
+        if (existing) existing.parentNode.removeChild(existing);
+
+        var wrap = document.createElement('div');
+        wrap.className = 'template-suggestions';
+
+        var header = document.createElement('div');
+        header.className = 'template-suggestions-header';
+        header.textContent = 'Подходящие макеты';
+        wrap.appendChild(header);
+
+        var list = document.createElement('div');
+        list.className = 'template-suggestions-list';
+        items.slice(0, 3).forEach(function (item) {
+            var card = document.createElement('div');
+            card.className = 'template-suggestion';
+
+            var name = document.createElement('div');
+            name.className = 'template-suggestion-name';
+            name.textContent = item.name || item.id;
+            card.appendChild(name);
+
+            var meta = document.createElement('div');
+            meta.className = 'template-suggestion-meta';
+            meta.textContent = archetypeLabel(item.archetype);
+            card.appendChild(meta);
+
+            var actions = document.createElement('div');
+            actions.className = 'template-suggestion-actions';
+            var insert = document.createElement('button');
+            insert.className = 'templates-btn primary';
+            insert.textContent = 'Вставить';
+            insert.addEventListener('click', function () {
+                if (window.TemplateEditor) window.TemplateEditor.openInsert(item.id, item.slotRoles || []);
+            });
+            actions.appendChild(insert);
+            card.appendChild(actions);
+
+            list.appendChild(card);
+        });
+        wrap.appendChild(list);
+
+        var footer = document.createElement('div');
+        footer.className = 'template-suggestions-actions';
+        var catalog = document.createElement('button');
+        catalog.className = 'templates-btn';
+        catalog.textContent = 'Показать каталог';
+        catalog.addEventListener('click', function () { setOpen(true); });
+        footer.appendChild(catalog);
+        var other = document.createElement('button');
+        other.className = 'templates-btn';
+        other.textContent = 'Другой макет';
+        other.addEventListener('click', function () { setOpen(true); });
+        footer.appendChild(other);
+        wrap.appendChild(footer);
+
+        container.appendChild(wrap);
+        try {
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } catch (e) {
+        }
+    }
+
     window.TemplatesView = {
         open: function () { setOpen(true); },
         close: function () { setOpen(false); },
         refresh: refresh,
         onHostResponse: onHostResponse,
-        showToast: showToast
+        showToast: showToast,
+        showSuggestions: showSuggestions
     };
+    window.showTemplateSuggestions = showSuggestions;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bind);
