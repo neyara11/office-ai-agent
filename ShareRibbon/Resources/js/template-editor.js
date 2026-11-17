@@ -1,4 +1,4 @@
-/**
+﻿/**
  * template-editor.js
  * Формы создания и вставки макета. Поля вставки зависят от слотов выбранного макета.
  */
@@ -311,6 +311,52 @@
         host.appendChild(form);
     }
 
+    function openEdit(item) {
+        var host = formHost();
+        if (!host) return;
+        host.innerHTML = '';
+
+        var form = document.createElement('div');
+        form.className = 'templates-form';
+
+        var title = document.createElement('h3');
+        title.textContent = 'Изменить макет: ' + (item.name || item.id);
+        form.appendChild(title);
+
+        var nameInput = input('text', 'Имя макета', item.name || '');
+        form.appendChild(field('Имя', nameInput));
+
+        var archetypes = ['cover', 'section', 'bullets', 'two-column', 'chart', 'table', 'kpi', 'image-text', 'quote', 'closing', 'custom'];
+        if (item.archetype && archetypes.indexOf(item.archetype) < 0) {
+            archetypes.push(item.archetype);
+        }
+        var archetypeSelect = select(archetypes.map(function (value) {
+            return { value: value, label: value };
+        }));
+        archetypeSelect.value = item.archetype || 'custom';
+        form.appendChild(field('Архетип', archetypeSelect));
+
+        var tagsInput = input('text', 'теги через запятую', (item.tags || []).join(', '));
+        form.appendChild(field('Теги', tagsInput));
+
+        var actions = document.createElement('div');
+        actions.className = 'template-card-actions';
+        actions.appendChild(button('Сохранить', 'primary', function () {
+            var tags = tagsInput.value.split(/[,;\n]+/).map(function (tag) {
+                return tag.trim();
+            }).filter(Boolean);
+            post('templates:update', {
+                templateId: item.id,
+                name: nameInput.value.trim(),
+                archetype: archetypeSelect.value,
+                tags: tags
+            });
+        }));
+        actions.appendChild(button('Отмена', '', close));
+        form.appendChild(actions);
+
+        host.appendChild(form);
+    }
     function showPreview(data) {
         var host = formHost();
         if (!host) return;
@@ -347,6 +393,7 @@
     window.TemplateEditor = {
         openCreate: openCreate,
         openInsert: openInsert,
+        openEdit: openEdit,
         showPreview: showPreview,
         close: close
     };

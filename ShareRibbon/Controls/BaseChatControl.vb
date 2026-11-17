@@ -766,6 +766,8 @@ Public MustInherit Class BaseChatControl
         router.Register("templates:preview", Sub(jsonDoc) HandleTemplatesPreview(jsonDoc))
         router.Register("templates:export", Sub(jsonDoc) HandleTemplateExport(jsonDoc))
         router.Register("templates:import", Sub(jsonDoc) HandleTemplateImport(jsonDoc))
+        router.Register("templates:duplicate", Sub(jsonDoc) HandleTemplateDuplicate(jsonDoc))
+        router.Register("templates:update", Sub(jsonDoc) HandleTemplateUpdate(jsonDoc))
     End Sub
 
     ''' <summary>Каталог макетов общий для всех хостов; COM-операции переопределяются в PowerPoint.</summary>
@@ -860,6 +862,44 @@ Public MustInherit Class BaseChatControl
             End Using
         Catch ex As Exception
             RespondTemplates("import", False, "Импорт макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub HandleTemplateDuplicate(jsonDoc As JObject)
+        Try
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            Dim copy = Agent.DeckTemplates.TemplateStorage.Duplicate(templateId, jsonDoc?("name")?.ToString())
+            If copy Is Nothing Then
+                RespondTemplates("duplicate", False, "Макет не найден")
+                Return
+            End If
+            RespondTemplates("duplicate", True, "Создана копия: " & copy.Name,
+                             New With {.templateId = copy.Id, .name = copy.Name})
+        Catch ex As Exception
+            RespondTemplates("duplicate", False, "Дублирование макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub HandleTemplateUpdate(jsonDoc As JObject)
+        Try
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            Dim tags As List(Of String) = Nothing
+            Dim tagsToken = jsonDoc?("tags")
+            If tagsToken IsNot Nothing AndAlso tagsToken.Type = JTokenType.Array Then
+                tags = tagsToken.ToObject(Of List(Of String))()
+            End If
+            Dim updated = Agent.DeckTemplates.TemplateStorage.UpdateManifest(
+                templateId,
+                jsonDoc?("name")?.ToString(),
+                jsonDoc?("archetype")?.ToString(),
+                tags)
+            If updated Is Nothing Then
+                RespondTemplates("update", False, "Макет не найден")
+                Return
+            End If
+            RespondTemplates("update", True, "Макет обновлён: " & updated.Name)
+        Catch ex As Exception
+            RespondTemplates("update", False, "Обновление макета: " & ex.Message)
         End Try
     End Sub
 

@@ -168,6 +168,22 @@
             });
             actions.appendChild(open);
 
+            var editButton = document.createElement('button');
+            editButton.className = 'templates-btn';
+            editButton.textContent = 'Изменить';
+            editButton.addEventListener('click', function () {
+                if (window.TemplateEditor) window.TemplateEditor.openEdit(item);
+            });
+            actions.appendChild(editButton);
+
+            var duplicateButton = document.createElement('button');
+            duplicateButton.className = 'templates-btn';
+            duplicateButton.textContent = 'Дублировать';
+            duplicateButton.addEventListener('click', function () {
+                post('templates:duplicate', { templateId: item.id });
+            });
+            actions.appendChild(duplicateButton);
+
             var exportButton = document.createElement('button');
             exportButton.className = 'templates-btn';
             exportButton.textContent = 'Экспорт';
@@ -217,7 +233,7 @@
         }
 
         showToast(response.message || 'Готово');
-        if (action === 'delete' || action === 'saveFromSlide' || action === 'saveDeck' || action === 'import') {
+        if (action === 'delete' || action === 'saveFromSlide' || action === 'saveDeck' || action === 'import' || action === 'duplicate' || action === 'update') {
             refresh();
         }
         if (action === 'insert') {

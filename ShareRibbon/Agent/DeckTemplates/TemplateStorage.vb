@@ -86,6 +86,44 @@ Namespace Agent.DeckTemplates
             Return Save(manifest, Nothing, Nothing)
         End Function
 
+        ''' <summary>Создаёт копию макета с новым id и именем, сохраняя файлы и набор.</summary>
+        Public Shared Function Duplicate(id As String, Optional newName As String = "") As SlideTemplateManifest
+            Dim source = Load(id)
+            If source Is Nothing Then Return Nothing
+
+            Dim baseId = TemplateIds.Safe(source.Id)
+            Dim candidate = baseId & "-copy"
+            Dim suffix = 2
+            Do While Load(candidate) IsNot Nothing AndAlso suffix < 100
+                candidate = baseId & "-copy" & suffix.ToString()
+                suffix += 1
+            Loop
+
+            Dim copy = source.Clone()
+            copy.Id = candidate
+            copy.SetId = If(String.Equals(source.SetId, source.Id, StringComparison.OrdinalIgnoreCase), candidate, source.SetId)
+            copy.Name = If(String.IsNullOrWhiteSpace(newName), source.Name & " (копия)", newName.Trim())
+            copy.CreatedAt = DateTime.UtcNow
+            copy.StorageFolder = ""
+            copy.Normalize()
+
+            Dim previewSource = If(File.Exists(source.PreviewFullPath), source.PreviewFullPath, "")
+            Return Save(copy, source.TemplateFullPath, previewSource)
+        End Function
+
+        ''' <summary>Обновляет имя/архетип/теги, не трогая файл макета и превью.</summary>
+        Public Shared Function UpdateManifest(id As String,
+                                              Optional name As String = "",
+                                              Optional archetype As String = "",
+                                              Optional tags As List(Of String) = Nothing) As SlideTemplateManifest
+            Dim manifest = Load(id)
+            If manifest Is Nothing Then Return Nothing
+            If Not String.IsNullOrWhiteSpace(name) Then manifest.Name = name.Trim()
+            If Not String.IsNullOrWhiteSpace(archetype) Then manifest.Archetype = TemplateArchetypes.Normalize(archetype)
+            If tags IsNot Nothing Then manifest.Tags = tags
+            Return SaveManifest(manifest)
+        End Function
+
         Public Shared Function LoadAll() As List(Of SlideTemplateManifest)
             Dim result As New List(Of SlideTemplateManifest)()
             Dim root = RootPath
