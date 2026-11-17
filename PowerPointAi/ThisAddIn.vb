@@ -259,6 +259,29 @@ Public Class ThisAddIn
         End If
     End Sub
 
+    ''' <summary>Открыть чат и сразу drawer макетов (Ribbon «Макеты»).</summary>
+    Public Async Function ShowChatTaskPaneWithTemplatesAsync() As Task
+        EnsureCoreServicesLoaded()
+        Dim entry = EnsureChatPaneEntry()
+        If entry Is Nothing Then Return
+        entry.Pane.Visible = True
+        If Not entry.HtmlLoaded Then
+            entry.HtmlLoaded = True
+            Try
+                Await CType(entry.Control, ChatControl).LoadLocalHtmlFile()
+            Catch ex As Exception
+                entry.HtmlLoaded = False
+                Debug.WriteLine($"[Chat] 加载聊天页面失败: {ex.Message}")
+                Return
+            End Try
+        End If
+        Try
+            CType(entry.Control, ChatControl).OpenTemplatesPanel()
+        Catch ex As Exception
+            Debug.WriteLine($"[Templates] Открытие drawer: {ex.Message}")
+        End Try
+    End Function
+
     Public Sub ShowDeepseekTaskPane()
         EnsureCoreServicesLoaded()
         CreateDeepseekTaskPane()

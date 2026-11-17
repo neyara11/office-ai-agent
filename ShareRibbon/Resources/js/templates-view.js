@@ -1,4 +1,4 @@
-/**
+﻿/**
  * templates-view.js
  * Каталог макетов слайдов: drawer, список, действия. Хост — PowerPoint; для Word/Excel
  * хост вернёт ошибку, и панель покажет понятное сообщение.
@@ -116,6 +116,15 @@
             var card = document.createElement('div');
             card.className = 'template-card';
 
+            if (item.previewUrl) {
+                var preview = document.createElement('img');
+                preview.className = 'template-card-preview';
+                preview.loading = 'lazy';
+                preview.alt = item.name || item.id;
+                preview.src = item.previewUrl;
+                card.appendChild(preview);
+            }
+
             var name = document.createElement('div');
             name.className = 'template-card-name';
             name.textContent = item.name || item.id;
@@ -159,6 +168,14 @@
             });
             actions.appendChild(open);
 
+            var exportButton = document.createElement('button');
+            exportButton.className = 'templates-btn';
+            exportButton.textContent = 'Экспорт';
+            exportButton.addEventListener('click', function () {
+                post('templates:export', { templateId: item.id });
+            });
+            actions.appendChild(exportButton);
+
             var remove = document.createElement('button');
             remove.className = 'templates-btn danger';
             remove.textContent = 'Удалить';
@@ -200,7 +217,7 @@
         }
 
         showToast(response.message || 'Готово');
-        if (action === 'delete' || action === 'saveFromSlide' || action === 'saveDeck') {
+        if (action === 'delete' || action === 'saveFromSlide' || action === 'saveDeck' || action === 'import') {
             refresh();
         }
         if (action === 'insert') {
@@ -241,6 +258,11 @@
 
         var saveDeckBtn = byId('templates-save-deck');
         if (saveDeckBtn) saveDeckBtn.addEventListener('click', saveDeck);
+
+        var importBtn = byId('templates-import');
+        if (importBtn) importBtn.addEventListener('click', function () {
+            post('templates:import', {});
+        });
 
         var openBtn = byId('templates-button');
         if (openBtn) openBtn.addEventListener('click', function () { setOpen(!state.open); });

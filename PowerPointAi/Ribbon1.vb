@@ -14,6 +14,10 @@ Public Class Ribbon1
         Globals.ThisAddIn.ShowChatTaskPane()
     End Sub
 
+    Protected Overrides Async Sub TemplatesButton_Click(sender As Object, e As RibbonControlEventArgs)
+        Await Globals.ThisAddIn.ShowChatTaskPaneWithTemplatesAsync()
+    End Sub
+
     Protected Overrides Async Sub WebCaptureButton_Click(sender As Object, e As RibbonControlEventArgs)
         Await StartAgentFromRibbonAsync("Собери содержимое веб-страницы по контексту текущей презентации; если пользователь дал ссылку или текст, извлеки структурированные тезисы, заголовки и материал для слайдов. Отвечай только на русском языке.")
     End Sub

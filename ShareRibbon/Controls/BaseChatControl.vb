@@ -764,16 +764,117 @@ Public MustInherit Class BaseChatControl
         router.Register("templates:saveDeck", Sub(jsonDoc) HandleTemplatesSaveDeck(jsonDoc))
         router.Register("templates:insert", Sub(jsonDoc) HandleTemplatesInsert(jsonDoc))
         router.Register("templates:preview", Sub(jsonDoc) HandleTemplatesPreview(jsonDoc))
+        router.Register("templates:export", Sub(jsonDoc) HandleTemplateExport(jsonDoc))
+        router.Register("templates:import", Sub(jsonDoc) HandleTemplateImport(jsonDoc))
     End Sub
 
     ''' <summary>Каталог макетов общий для всех хостов; COM-операции переопределяются в PowerPoint.</summary>
     Private Sub HandleTemplatesList(jsonDoc As JObject)
         Try
-            Dim summaries = Agent.DeckTemplates.TemplateCatalog.ListSummaries(100)
-            RespondTemplates("list", True, $"Макетов: {summaries.Count}", summaries)
+            Dim manifests = Agent.DeckTemplates.TemplateCatalog.ListAll()
+            Dim previewFolder = PrepareTemplatePreviewFolder()
+            Dim items As New JArray()
+            For Each manifest In manifests
+                Dim previewUrl = ""
+                Try
+                    If Not String.IsNullOrWhiteSpace(manifest.PreviewFullPath) AndAlso File.Exists(manifest.PreviewFullPath) Then
+                        Dim previewTarget = Path.Combine(previewFolder, manifest.Id & ".png")
+                        File.Copy(manifest.PreviewFullPath, previewTarget, True)
+                        previewUrl = "http://officeai.local/templates-preview/" & manifest.Id & ".png?v=" &
+                                     File.GetLastWriteTimeUtc(previewTarget).Ticks.ToString()
+                    End If
+                Catch
+                End Try
+
+                Dim roles As New JArray()
+                If manifest.Slots IsNot Nothing Then
+                    For Each role In manifest.Slots.
+                        Where(Function(slot) slot IsNot Nothing).
+                        Select(Function(slot) slot.Role).
+                        Where(Function(roleName) Not String.IsNullOrWhiteSpace(roleName)).
+                        Distinct(StringComparer.OrdinalIgnoreCase)
+                        roles.Add(role)
+                    Next
+                End If
+
+                items.Add(New JObject From {
+                    {"id", manifest.Id},
+                    {"name", manifest.Name},
+                    {"setId", manifest.SetId},
+                    {"archetype", manifest.Archetype},
+                    {"slotCount", If(manifest.Slots Is Nothing, 0, manifest.Slots.Count)},
+                    {"slotRoles", roles},
+                    {"hasPreview", previewUrl.Length > 0},
+                    {"previewUrl", previewUrl},
+                    {"tags", New JArray(If(manifest.Tags, New List(Of String)()))},
+                    {"createdAt", manifest.CreatedAt}
+                })
+            Next
+            RespondTemplates("list", True, $"Макетов: {items.Count}", items)
         Catch ex As Exception
             RespondTemplates("list", False, "Каталог макетов: " & ex.Message)
         End Try
+    End Sub
+
+    Private Shared Function PrepareTemplatePreviewFolder() As String
+        Dim folder = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "OfficeAI", "www", "templates-preview")
+        Directory.CreateDirectory(folder)
+        Return folder
+    End Function
+
+    Private Sub HandleTemplateExport(jsonDoc As JObject)
+        Try
+            Dim templateId = jsonDoc?("templateId")?.ToString()
+            Dim manifest = Agent.DeckTemplates.TemplateCatalog.FindById(templateId)
+            If manifest Is Nothing Then
+                RespondTemplates("export", False, "Макет не найден")
+                Return
+            End If
+            Using dialog As New SaveFileDialog()
+                dialog.Filter = "Макет (*.zip)|*.zip"
+                dialog.FileName = MakeSafeFileName(manifest.Name) & ".zip"
+                If dialog.ShowDialog() <> DialogResult.OK Then
+                    RespondTemplates("export", False, "Экспорт отменён")
+                    Return
+                End If
+                Agent.DeckTemplates.TemplateStorage.Export(manifest.Id, dialog.FileName)
+                RespondTemplates("export", True, "Макет экспортирован: " & Path.GetFileName(dialog.FileName))
+            End Using
+        Catch ex As Exception
+            RespondTemplates("export", False, "Экспорт макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Sub HandleTemplateImport(jsonDoc As JObject)
+        Try
+            Using dialog As New OpenFileDialog()
+                dialog.Filter = "Макет (*.zip)|*.zip"
+                If dialog.ShowDialog() <> DialogResult.OK Then
+                    RespondTemplates("import", False, "Импорт отменён")
+                    Return
+                End If
+                Dim imported = Agent.DeckTemplates.TemplateStorage.Import(dialog.FileName)
+                RespondTemplates("import", True, "Макет импортирован: " & imported.Name)
+            End Using
+        Catch ex As Exception
+            RespondTemplates("import", False, "Импорт макета: " & ex.Message)
+        End Try
+    End Sub
+
+    Private Shared Function MakeSafeFileName(value As String) As String
+        Dim name = If(value, "template").Trim()
+        For Each invalid In Path.GetInvalidFileNameChars()
+            name = name.Replace(invalid, "_"c)
+        Next
+        If name.Length = 0 Then name = "template"
+        Return name
+    End Function
+
+    ''' <summary>Открыть drawer макетов после загрузки WebView (безопасно вызывать до готовности JS).</summary>
+    Public Sub OpenTemplatesPanel()
+        ExecuteJavaScriptAsyncJS("(function(){var n=0;var t=setInterval(function(){n++;if(window.TemplatesView){clearInterval(t);window.TemplatesView.open();}else if(n>40){clearInterval(t);}},100);})();")
     End Sub
 
     Private Sub HandleTemplateDelete(jsonDoc As JObject)

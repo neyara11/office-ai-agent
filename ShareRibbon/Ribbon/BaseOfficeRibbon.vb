@@ -16,6 +16,8 @@ Public MustInherit Class BaseOfficeRibbon
     Private Async Sub Ribbon1_Load(ByVal sender As System.Object, ByVal e As RibbonUIEventArgs) Handles MyBase.Load
         ' GetApplication() 涉及 COM 对象访问，必须在 UI 线程（STA）调用，提前捕获
         Dim appInfo = GetApplication()
+        ' Каталог макетов слайдов актуален только для PowerPoint.
+        TemplatesButton.Visible = (appInfo.Type = OfficeApplicationType.PowerPoint)
 
         ' 不在 Ribbon 加载时主动预加载程序集。
         ' AssemblyResolve 已在 ThisAddIn.Startup 注册，缺依赖时会按需解析。
@@ -147,6 +149,10 @@ Public MustInherit Class BaseOfficeRibbon
 
     ' AI聊天实现
     Protected MustOverride Sub ChatButton_Click(sender As Object, e As RibbonControlEventArgs) Handles ChatButton.Click
+
+    Protected Overridable Sub TemplatesButton_Click(sender As Object, e As RibbonControlEventArgs) Handles TemplatesButton.Click
+        GlobalStatusStrip.ShowWarning("Каталог макетов доступен в PowerPoint")
+    End Sub
 
     ' web爬虫实现
     Protected MustOverride Sub WebCaptureButton_Click(sender As Object, e As RibbonControlEventArgs) Handles WebCaptureButton.Click

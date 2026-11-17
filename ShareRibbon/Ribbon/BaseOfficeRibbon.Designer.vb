@@ -70,6 +70,7 @@ Partial Class BaseOfficeRibbon
         Me.WebCaptureButton = Me.Factory.CreateRibbonButton
         Me.SpotlightButton = Me.Factory.CreateRibbonButton
         Me.BatchDataGenButton = Me.Factory.CreateRibbonButton()
+        Me.TemplatesButton = Me.Factory.CreateRibbonButton()
 
         Me.TabAI.SuspendLayout()
         Me.SuspendLayout()
@@ -192,6 +193,7 @@ Partial Class BaseOfficeRibbon
         Me.GroupTools.Items.Add(Me.WebCaptureButton)
         Me.GroupTools.Items.Add(Me.SpotlightButton)
         Me.GroupTools.Items.Add(Me.BatchDataGenButton)
+        Me.GroupTools.Items.Add(Me.TemplatesButton)
         Me.GroupTools.Label = "Инструменты"
         Me.GroupTools.Name = "GroupTools"
 
@@ -216,6 +218,12 @@ Partial Class BaseOfficeRibbon
         Me.BatchDataGenButton.ShowImage = True
         Me.BatchDataGenButton.ScreenTip = "Настройка и генерация пакетных данных"
         Me.BatchDataGenButton.SuperTip = "Настройте поля и связи столбцов и сгенерируйте данные в книгу"
+
+        Me.TemplatesButton.Label = "Макеты"
+        Me.TemplatesButton.Name = "TemplatesButton"
+        Me.TemplatesButton.ShowImage = True
+        Me.TemplatesButton.ScreenTip = "Каталог макетов слайдов"
+        Me.TemplatesButton.SuperTip = "Сохранить слайд или колоду как макет и вставить слайд с новым содержимым"
 
         ' ========== Group 6: MCP连接 ==========
         Me.GroupMCP.Items.Add(Me.MCPButton)
@@ -301,6 +309,7 @@ Partial Class BaseOfficeRibbon
     Protected WithEvents WebCaptureButton As Microsoft.Office.Tools.Ribbon.RibbonButton
     Protected WithEvents SpotlightButton As Microsoft.Office.Tools.Ribbon.RibbonButton
     Protected WithEvents BatchDataGenButton As Microsoft.Office.Tools.Ribbon.RibbonButton
+    Protected WithEvents TemplatesButton As Microsoft.Office.Tools.Ribbon.RibbonButton
 
     ' Group 6: MCP连接
     Protected WithEvents GroupMCP As Microsoft.Office.Tools.Ribbon.RibbonGroup
